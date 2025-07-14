@@ -46,8 +46,6 @@ on:
         value: ${{ jobs.source.outputs.install }}
       k8s:
         value: ${{ jobs.source.outputs.k8s }}
-      amqp:
-        value: ${{ jobs.int_tests.outputs.amqp }}
       appsignal:
         value: ${{ jobs.int_tests.outputs.appsignal }}
       aws:
@@ -208,7 +206,6 @@ jobs:
     timeout-minutes: 5
     if: ${{ inputs.int_tests }}
     outputs:
-      amqp: ${{ steps.filter.outputs.amqp }}
       appsignal: ${{ steps.filter.outputs.appsignal}}
       aws: ${{ steps.filter.outputs.aws }}
       axiom: ${{ steps.filter.outputs.axiom }}
@@ -267,7 +264,6 @@ jobs:
         run: |
           json=$(cat <<EOF
           {
-            "amqp": ${{ steps.filter.outputs.amqp }},
             "appsignal": ${{ steps.filter.outputs.appsignal }},
             "aws": ${{ steps.filter.outputs.aws }},
             "axiom": ${{ steps.filter.outputs.axiom }},

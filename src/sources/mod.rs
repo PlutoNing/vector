@@ -1,8 +1,6 @@
 #![allow(missing_docs)]
 use snafu::Snafu;
 
-#[cfg(feature = "sources-amqp")]
-pub mod amqp;
 #[cfg(feature = "sources-apache_metrics")]
 pub mod apache_metrics;
 #[cfg(feature = "sources-aws_ecs_metrics")]

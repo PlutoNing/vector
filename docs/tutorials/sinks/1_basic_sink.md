@@ -188,7 +188,6 @@ Add it to our list of log sinks:
 
 ```diff
 sinks-logs = [
-  "sinks-amqp",
   "sinks-apex",
   "sinks-aws_cloudwatch_logs",
   "sinks-aws_kinesis_firehose",

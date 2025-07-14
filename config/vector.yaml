@@ -16,30 +16,40 @@
 # data_dir: "/var/lib/vector"
 
 # Random Syslog-formatted logs
+# sources:
+#   dummy_logs:
+#     type: "demo_logs"
+#     format: "syslog"
+#     interval: 1
 sources:
-  dummy_logs:
-    type: "demo_logs"
-    format: "syslog"
-    interval: 1
+  in:
+    type: "stdin"
 
+sinks:
+  out:
+    inputs:
+      - "in"
+    type: "console"
+    encoding:
+      codec: "text"
 # Parse Syslog logs
 # See the Vector Remap Language reference for more info: https://vrl.dev
-transforms:
-  parse_logs:
-    type: "remap"
-    inputs: ["dummy_logs"]
-    source: |
-      . = parse_syslog!(string!(.message))
+# transforms:
+#   parse_logs:
+#     type: "remap"
+#     inputs: ["dummy_logs"]
+#     source: |
+#       . = parse_syslog!(string!(.message))
 
 # Print parsed logs to stdout
-sinks:
-  print:
-    type: "console"
-    inputs: ["parse_logs"]
-    encoding:
-      codec: "json"
-      json:
-        pretty: true
+# sinks:
+#   print:
+#     type: "console"
+#     inputs: ["parse_logs"]
+#     encoding:
+#       codec: "json"
+#       json:
+#         pretty: true
 
 # Vector's GraphQL API (disabled by default)
 # Uncomment to try it out with the `vector top` command or

@@ -71,7 +71,7 @@ jobs:
       matrix:
         # If you modify this list, please also update the `int_tests` job in changes.yml.
         service: [
-          "amqp", "appsignal", "axiom", "aws", "azure", "clickhouse", "databend", "datadog-agent",
+          "appsignal", "axiom", "aws", "azure", "clickhouse", "databend", "datadog-agent",
           "datadog-logs", "datadog-metrics", "datadog-traces", "dnstap", "docker-logs", "elasticsearch",
           "eventstoredb", "fluent", "gcp", "greptimedb", "http-client", "influxdb", "kafka", "logstash",
           "loki", "mongodb", "nats", "nginx", "opentelemetry", "postgres", "prometheus", "pulsar",

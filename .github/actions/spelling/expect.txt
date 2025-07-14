@@ -2,7 +2,6 @@ abcd
 acking
 acp
 aimd
-amqps
 amz
 amzn
 anchore

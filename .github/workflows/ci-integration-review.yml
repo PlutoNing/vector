@@ -89,7 +89,7 @@ jobs:
     strategy:
       matrix:
         service: [
-          "amqp", "appsignal", "aws", "axiom", "azure", "clickhouse", "databend", "datadog-agent",
+          "appsignal", "aws", "axiom", "azure", "clickhouse", "databend", "datadog-agent",
           "datadog-logs", "datadog-metrics", "datadog-traces", "dnstap", "docker-logs", "elasticsearch",
           "eventstoredb", "fluent", "gcp", "greptimedb", "http-client", "influxdb", "kafka", "logstash",
           "loki", "mongodb", "nats", "nginx", "opentelemetry", "postgres", "prometheus", "pulsar",
