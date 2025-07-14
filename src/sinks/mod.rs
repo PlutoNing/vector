@@ -8,19 +8,6 @@ pub mod util;
 
 #[cfg(feature = "sinks-appsignal")]
 pub mod appsignal;
-#[cfg(feature = "sinks-aws_cloudwatch_logs")]
-pub mod aws_cloudwatch_logs;
-#[cfg(feature = "sinks-aws_cloudwatch_metrics")]
-pub mod aws_cloudwatch_metrics;
-#[cfg(any(
-    feature = "sinks-aws_kinesis_streams",
-    feature = "sinks-aws_kinesis_firehose",
-))]
-pub mod aws_kinesis;
-#[cfg(feature = "sinks-aws_s3")]
-pub mod aws_s3;
-#[cfg(feature = "sinks-aws_sqs")]
-pub mod aws_s_s;
 #[cfg(feature = "sinks-axiom")]
 pub mod axiom;
 #[cfg(feature = "sinks-azure_blob")]
@@ -44,8 +31,6 @@ pub mod databend;
     feature = "sinks-datadog_traces"
 ))]
 pub mod datadog;
-#[cfg(feature = "sinks-elasticsearch")]
-pub mod elasticsearch;
 #[cfg(feature = "sinks-file")]
 pub mod file;
 #[cfg(feature = "sinks-gcp")]
@@ -93,10 +78,6 @@ pub mod prometheus;
 pub mod pulsar;
 #[cfg(feature = "sinks-redis")]
 pub mod redis;
-#[cfg(all(feature = "sinks-aws_s3", feature = "aws-core"))]
-pub mod s3_common;
-#[cfg(feature = "sinks-sematext")]
-pub mod sematext;
 #[cfg(feature = "sinks-socket")]
 pub mod socket;
 #[cfg(feature = "sinks-splunk_hec")]

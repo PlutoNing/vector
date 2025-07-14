@@ -26,12 +26,6 @@ mod integration_tests;
 #[cfg(all(test, feature = "sources-prometheus-remote-write"))]
 pub use config::RemoteWriteConfig;
 
-#[cfg(feature = "aws-core")]
-#[derive(Debug, snafu::Snafu)]
-enum Errors {
-    #[snafu(display("aws.region required when AWS authentication is in use"))]
-    AwsRegionRequired,
-}
 
 #[derive(Clone, Eq, Hash, PartialEq)]
 struct PartitionKey {

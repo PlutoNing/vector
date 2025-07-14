@@ -1,9 +1,5 @@
 //! Configuration for the `http` sink.
 
-#[cfg(feature = "aws-core")]
-use aws_config::meta::region::ProvideRegion;
-#[cfg(feature = "aws-core")]
-use aws_types::region::Region;
 use http::{header::AUTHORIZATION, HeaderName, HeaderValue, Method, Request, StatusCode};
 use hyper::Body;
 use indexmap::IndexMap;
@@ -12,17 +8,11 @@ use vector_lib::codecs::{
     encoding::{Framer, Serializer},
     CharacterDelimitedEncoder,
 };
-#[cfg(feature = "aws-core")]
-use vector_lib::config::proxy::ProxyConfig;
 
 use super::{
     encoder::HttpEncoder, request_builder::HttpRequestBuilder, service::HttpSinkRequestBuilder,
     sink::HttpSink,
 };
-#[cfg(feature = "aws-core")]
-use crate::aws::AwsAuthentication;
-#[cfg(feature = "aws-core")]
-use crate::sinks::util::http::SigV4Config;
 use crate::{
     codecs::{EncodingConfigWithFraming, SinkType},
     http::{Auth, HttpClient, MaybeAuth},
@@ -295,32 +285,6 @@ impl SinkConfig for HttpSinkConfig {
         );
 
         let service = match &self.auth {
-            #[cfg(feature = "aws-core")]
-            Some(Auth::Aws { auth, service }) => {
-                let default_region = crate::aws::region_provider(&ProxyConfig::default(), None)?
-                    .region()
-                    .await;
-                let region = (match &auth {
-                    AwsAuthentication::AccessKey { region, .. } => region.clone(),
-                    AwsAuthentication::File { .. } => None,
-                    AwsAuthentication::Role { region, .. } => region.clone(),
-                    AwsAuthentication::Default { region, .. } => region.clone(),
-                })
-                .map_or(default_region, |r| Some(Region::new(r.to_string())))
-                .expect("Region must be specified");
-
-                HttpService::new_with_sig_v4(
-                    client,
-                    http_sink_request_builder,
-                    SigV4Config {
-                        shared_credentials_provider: auth
-                            .credentials_provider(region.clone(), &ProxyConfig::default(), None)
-                            .await?,
-                        region: region.clone(),
-                        service: service.clone(),
-                    },
-                )
-            }
             _ => HttpService::new(client, http_sink_request_builder),
         };
 

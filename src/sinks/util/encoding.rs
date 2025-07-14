@@ -7,7 +7,7 @@ use vector_lib::codecs::encoding::Framer;
 use vector_lib::request_metadata::GroupedCountByteSize;
 use vector_lib::{config::telemetry, EstimatedJsonEncodedSizeOf};
 
-use crate::{codecs::Transformer, event::Event, internal_events::EncoderWriteError};
+use crate::{codecs::Transformer, event::Event, internal_events::codecs::EncoderWriteError};
 
 pub trait Encoder<T> {
     /// Encodes the input into the provided writer.

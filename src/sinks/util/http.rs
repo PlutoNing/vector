@@ -1,7 +1,3 @@
-#[cfg(feature = "aws-core")]
-use aws_credential_types::provider::SharedCredentialsProvider;
-#[cfg(feature = "aws-core")]
-use aws_types::region::Region;
 use bytes::{Buf, Bytes};
 use futures::{future::BoxFuture, Sink};
 use headers::HeaderName;
@@ -34,8 +30,6 @@ use super::{
     TowerRequestSettings,
 };
 
-#[cfg(feature = "aws-core")]
-use crate::aws::sign_request;
 
 use crate::{
     event::Event,
@@ -368,13 +362,7 @@ where
     }
 }
 
-#[cfg(feature = "aws-core")]
-#[derive(Clone)]
-pub struct SigV4Config {
-    pub(crate) shared_credentials_provider: SharedCredentialsProvider,
-    pub(crate) region: Region,
-    pub(crate) service: String,
-}
+
 
 /// @struct HttpBatchService
 ///
@@ -385,8 +373,6 @@ pub struct SigV4Config {
 pub struct HttpBatchService<F, B = Bytes> {
     inner: HttpClient<Body>,
     request_builder: Arc<dyn Fn(B) -> F + Send + Sync>,
-    #[cfg(feature = "aws-core")]
-    sig_v4_config: Option<SigV4Config>,
 }
 
 impl<F, B> HttpBatchService<F, B> {
@@ -397,23 +383,9 @@ impl<F, B> HttpBatchService<F, B> {
         HttpBatchService {
             inner,
             request_builder: Arc::new(Box::new(request_builder)),
-            #[cfg(feature = "aws-core")]
-            sig_v4_config: None,
         }
     }
 
-    #[cfg(feature = "aws-core")]
-    pub fn new_with_sig_v4(
-        inner: HttpClient,
-        request_builder: impl Fn(B) -> F + Send + Sync + 'static,
-        sig_v4_config: SigV4Config,
-    ) -> Self {
-        HttpBatchService {
-            inner,
-            request_builder: Arc::new(Box::new(request_builder)),
-            sig_v4_config: Some(sig_v4_config),
-        }
-    }
 }
 
 impl<F, B> Service<B> for HttpBatchService<F, B>
@@ -431,8 +403,6 @@ where
 
     fn call(&mut self, body: B) -> Self::Future {
         let request_builder = Arc::clone(&self.request_builder);
-        #[cfg(feature = "aws-core")]
-        let sig_v4_config = self.sig_v4_config.clone();
         let http_client = self.inner.clone();
 
         Box::pin(async move {
@@ -440,23 +410,6 @@ where
                 emit!(SinkRequestBuildError { error });
             })?;
 
-            #[cfg(feature = "aws-core")]
-            let request = match sig_v4_config {
-                None => request,
-                Some(sig_v4_config) => {
-                    let mut signed_request = request;
-                    sign_request(
-                        sig_v4_config.service.as_str(),
-                        &mut signed_request,
-                        &sig_v4_config.shared_credentials_provider,
-                        Some(&sig_v4_config.region),
-                        false,
-                    )
-                    .await?;
-
-                    signed_request
-                }
-            };
             let byte_size = request.body().len();
             let request = request.map(Body::from);
             let (protocol, endpoint) = uri::protocol_endpoint(request.uri().clone());
@@ -493,8 +446,6 @@ impl<F, B> Clone for HttpBatchService<F, B> {
         Self {
             inner: self.inner.clone(),
             request_builder: Arc::clone(&self.request_builder),
-            #[cfg(feature = "aws-core")]
-            sig_v4_config: self.sig_v4_config.clone(),
         }
     }
 }
@@ -792,32 +743,6 @@ where
 
             fut
         });
-        Self {
-            batch_service,
-            _phantom: PhantomData,
-        }
-    }
-
-    #[cfg(feature = "aws-core")]
-    pub fn new_with_sig_v4(
-        http_client: HttpClient<Body>,
-        http_request_builder: B,
-        sig_v4_config: SigV4Config,
-    ) -> Self {
-        let http_request_builder = Arc::new(http_request_builder);
-
-        let batch_service = HttpBatchService::new_with_sig_v4(
-            http_client,
-            move |req: HttpRequest<T>| {
-                let request_builder = Arc::clone(&http_request_builder);
-
-                let fut: BoxFuture<'static, Result<http::Request<Bytes>, crate::Error>> =
-                    Box::pin(async move { request_builder.build(req) });
-
-                fut
-            },
-            sig_v4_config,
-        );
         Self {
             batch_service,
             _phantom: PhantomData,

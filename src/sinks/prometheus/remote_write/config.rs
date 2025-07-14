@@ -16,8 +16,6 @@ use super::{
     sink::{PrometheusRemoteWriteDefaultBatchSettings, RemoteWriteSink},
 };
 
-#[cfg(feature = "aws-core")]
-use super::Errors;
 
 /// The batch config for remote write.
 #[configurable_component]
@@ -107,11 +105,6 @@ pub struct RemoteWriteConfig {
     #[configurable(derived)]
     pub auth: Option<PrometheusRemoteWriteAuth>,
 
-    #[cfg(feature = "aws-config")]
-    #[configurable(derived)]
-    #[configurable(metadata(docs::advanced))]
-    pub aws: Option<crate::aws::RegionOrEndpoint>,
-
     #[configurable(derived)]
     #[serde(
         default,
@@ -161,21 +154,6 @@ impl SinkConfig for RemoteWriteConfig {
                 Some(Auth::Basic(crate::http::Auth::Bearer {
                     token: token.clone(),
                 }))
-            }
-            #[cfg(feature = "aws-core")]
-            Some(PrometheusRemoteWriteAuth::Aws(aws_auth)) => {
-                let region = self
-                    .aws
-                    .as_ref()
-                    .map(|config| config.region())
-                    .ok_or(Errors::AwsRegionRequired)?
-                    .ok_or(Errors::AwsRegionRequired)?;
-                Some(Auth::Aws {
-                    credentials_provider: aws_auth
-                        .credentials_provider(region.clone(), cx.proxy(), self.tls.as_ref())
-                        .await?,
-                    region,
-                })
             }
             None => None,
         };

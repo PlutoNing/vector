@@ -1,7 +1,5 @@
 #![deny(warnings)]
 
-#[cfg(feature = "aws_cloudwatch_logs_subscription")]
-pub mod aws_cloudwatch_logs_subscription;
 
 #[cfg(feature = "btreemap")]
 pub mod btreemap;

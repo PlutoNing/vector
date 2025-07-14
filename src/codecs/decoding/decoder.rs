@@ -8,7 +8,7 @@ use vector_lib::config::LogNamespace;
 
 use crate::{
     event::Event,
-    internal_events::{DecoderDeserializeError, DecoderFramingError},
+    internal_events::codecs::{DecoderDeserializeError, DecoderFramingError},
 };
 
 /// A decoder that can decode structured events from a byte stream / byte

@@ -80,31 +80,7 @@ async fn sends_authenticated_request() {
     assert_eq!(req.metadata[0].metric_family_name, "gauge-2");
 }
 
-#[cfg(feature = "aws-config")]
-#[tokio::test]
-async fn sends_authenticated_aws_request() {
-    let outputs = send_request(
-        indoc! {r#"
-                tenant_id = "tenant-%Y"
-                [aws]
-                region = "foo"
-                [auth]
-                strategy = "aws"
-                access_key_id = "foo"
-                secret_access_key = "bar"
-            "#},
-        vec![create_event("gauge-2".into(), 32.0)],
-    )
-    .await;
 
-    assert_eq!(outputs.len(), 1);
-    let (headers, _req) = &outputs[0];
-
-    let auth = headers["authorization"]
-        .to_str()
-        .expect("Missing AWS authorization header");
-    assert!(auth.starts_with("AWS4-HMAC-SHA256"));
-}
 
 #[tokio::test]
 async fn sends_x_scope_orgid_header() {

@@ -7,7 +7,7 @@ use vector_lib::codecs::{
 
 use crate::{
     event::Event,
-    internal_events::{EncoderFramingError, EncoderSerializeError},
+    internal_events::codecs::{EncoderFramingError, EncoderSerializeError},
 };
 
 #[derive(Debug, Clone)]

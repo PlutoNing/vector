@@ -718,7 +718,6 @@ fn source_type_to_service(source_type: &str) -> Option<u32> {
 
         // These are the sources for which metrics truly originated from this Vector instance.
         "apache_metrics" => Some(17),
-        "aws_ecs_metrics" => Some(209),
         "eventstoredb_metrics" => Some(210),
         "host_metrics" => Some(211),
         "internal_metrics" => Some(212),

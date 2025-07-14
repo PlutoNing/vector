@@ -32,7 +32,7 @@ use crate::{
     config::SourceContext,
     event::{BatchNotifier, BatchStatus, Event},
     internal_events::{
-        ConnectionOpen, DecoderFramingError, OpenGauge, SocketBindError, SocketEventsReceived,
+        ConnectionOpen, codecs::DecoderFramingError, OpenGauge, SocketBindError, SocketEventsReceived,
         SocketMode, SocketReceiveError, StreamClosedError, TcpBytesReceived, TcpSendAckError,
         TcpSocketTlsConnectionError,
     },

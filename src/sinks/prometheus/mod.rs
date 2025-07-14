@@ -29,11 +29,7 @@ pub enum PrometheusRemoteWriteAuth {
     Bearer {
         /// The bearer token to send.
         token: SensitiveString,
-    },
-
-    #[cfg(feature = "aws-core")]
-    /// Amazon Prometheus Service-specific authentication.
-    Aws(crate::aws::AwsAuthentication),
+    }
 }
 
 fn default_histogram_buckets() -> Vec<f64> {

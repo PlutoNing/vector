@@ -1,9 +1,5 @@
 use std::task::{Context, Poll};
 
-#[cfg(feature = "aws-core")]
-use aws_credential_types::provider::SharedCredentialsProvider;
-#[cfg(feature = "aws-core")]
-use aws_types::region::Region;
 
 use bytes::Bytes;
 use http::Uri;
@@ -91,14 +87,6 @@ impl Service<RemoteWriteRequest> for RemoteWriteService {
     }
 }
 
-#[cfg(feature = "aws-core")]
-async fn sign_request(
-    request: &mut http::Request<Bytes>,
-    credentials_provider: &SharedCredentialsProvider,
-    region: Option<&Region>,
-) -> crate::Result<()> {
-    crate::aws::sign_request("aps", request, credentials_provider, region, false).await
-}
 
 pub(super) async fn build_request(
     method: http::Method,
@@ -126,12 +114,7 @@ pub(super) async fn build_request(
 
     if let Some(auth) = auth {
         match auth {
-            Auth::Basic(http_auth) => http_auth.apply(&mut request),
-            #[cfg(feature = "aws-core")]
-            Auth::Aws {
-                credentials_provider: provider,
-                region,
-            } => sign_request(&mut request, &provider, Some(&region)).await?,
+            Auth::Basic(http_auth) => http_auth.apply(&mut request)
         }
     }
 
