@@ -40,7 +40,6 @@ mod end_to_end;
 #[cfg(all(
     feature = "sources-prometheus",
     feature = "sinks-prometheus",
-    feature = "sources-internal_metrics",
     feature = "sources-splunk_hec"
 ))]
 mod reload;

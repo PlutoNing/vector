@@ -569,7 +569,6 @@ sources-metrics = [
   "sources-aws_ecs_metrics",
   "sources-eventstoredb_metrics",
   "sources-host_metrics",
-  "sources-internal_metrics",
   "sources-mongodb_metrics",
   "sources-nginx_metrics",
   "sources-postgresql_metrics",
@@ -593,7 +592,6 @@ sources-file_descriptor = ["tokio-util/io"]
 sources-host_metrics = ["heim/cpu", "heim/host", "heim/memory", "heim/net"]
 sources-http_client = ["sources-utils-http-client"]
 sources-http_server = ["sources-utils-http", "sources-utils-http-headers", "sources-utils-http-query"]
-sources-internal_metrics = []
 sources-static_metrics = []
 sources-journald = []
 #sources-kafka = ["dep:rdkafka"]
@@ -868,7 +866,7 @@ vector-unit-test-tests = [
   "sinks-console"
 ]
 
-component-validation-runner = ["dep:tonic", "sources-internal_metrics", "sources-vector", "sinks-vector"]
+component-validation-runner = ["dep:tonic", "sources-vector", "sinks-vector"]
 # For now, only include components that implement ValidatableComponent.
 # In the future, this can change to simply reference the targets `sources`, `transforms`, `sinks`
 component-validation-tests = [

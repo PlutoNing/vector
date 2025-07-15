@@ -24,8 +24,6 @@ pub mod host_metrics;
 pub mod http_client;
 #[cfg(feature = "sources-http_server")]
 pub mod http_server;
-#[cfg(feature = "sources-internal_metrics")]
-pub mod internal_metrics;
 #[cfg(all(unix, feature = "sources-journald"))]
 pub mod journald;
 #[cfg(feature = "sources-mongodb_metrics")]
