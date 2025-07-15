@@ -541,15 +541,15 @@ sources-stdin = ["tokio-util/io"]
 # Transforms
 transforms = ["transforms-logs", "transforms-metrics"]
 transforms-logs = [
-  "transforms-remap",
+
   "transforms-sample",
 ]
 transforms-metrics = [
-  "transforms-remap",
+
   "transforms-tag_cardinality_limit",
 ]
 
-transforms-remap = []
+
 transforms-sample = ["transforms-impl-sample"]
 transforms-tag_cardinality_limit = ["dep:bloomy", "dep:hashbrown"]
 
@@ -589,18 +589,18 @@ all-integration-tests = [
 
 postgres_sink-integration-tests = ["sinks-postgres"]
 disable-resolv-conf = []
-shutdown-tests = ["api", "sinks-blackhole", "sinks-console", "sources", "transforms-remap", "unix"]
+shutdown-tests = ["api", "sinks-blackhole", "sinks-console", "sources", "unix"]
 cli-tests = ["sinks-blackhole", "sinks-socket", "sources-demo_logs", "sources-file"]
 test-utils = []
 
 vector-api-tests = [
   "sources-demo_logs",
-  "transforms-remap",
+
   "sinks-blackhole"
 ]
 vector-unit-test-tests = [
   "sources-demo_logs",
-  "transforms-remap",
+
   "sinks-console"
 ]
 
@@ -621,10 +621,10 @@ benches = [
   "sources-file",
   "transforms-sample",
 ]
-language-benches = ["sinks-socket","transforms-remap"]
+language-benches = ["sinks-socket"]
 # Separate benching process for metrics due to the nature of the bootstrap procedures.
 statistic-benches = []
-remap-benches = ["transforms-remap"]
+#remap-benches = ["transforms-remap"]
 codecs-benches = []
 enrichment-tables-benches = ["enrichment-tables-geoip", "enrichment-tables-mmdb", "enrichment-tables-memory"]
 proptest = ["dep:proptest", "dep:proptest-derive", "vrl/proptest"]

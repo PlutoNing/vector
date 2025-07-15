@@ -64,8 +64,6 @@ pub(crate) use self::host_metrics::*;
 pub(crate) use self::parser::*;
 #[cfg(feature = "transforms-impl-reduce")]
 pub(crate) use self::reduce::*;
-#[cfg(feature = "transforms-remap")]
-pub(crate) use self::remap::*;
 #[cfg(feature = "transforms-impl-sample")]
 pub(crate) use self::sample::*;
 #[cfg(feature = "transforms-tag_cardinality_limit")]
