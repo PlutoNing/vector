@@ -633,7 +633,6 @@ transforms-impl-reduce = []
 sinks = ["sinks-logs", "sinks-metrics"]
 sinks-logs = [
   "sinks-blackhole",
-  "sinks-clickhouse",
   "sinks-console",
   "sinks-elasticsearch",
   "sinks-file",
@@ -673,7 +672,6 @@ sinks-aws_s3 = ["dep:base64", "dep:md-5", "aws-core", "dep:aws-sdk-s3"]
 sinks-aws_sqs = ["aws-core", "dep:aws-sdk-sqs"]
 sinks-aws_sns = ["aws-core", "dep:aws-sdk-sns"]
 sinks-blackhole = []
-sinks-clickhouse = []
 sinks-console = []
 sinks-elasticsearch = ["transforms-metric_to_log"]
 sinks-file = ["dep:async-compression"]
@@ -702,7 +700,6 @@ nightly = []
 
 # Integration testing-related features
 all-integration-tests = [
-  "clickhouse-integration-tests",
   "dnstap-integration-tests",
   "es-integration-tests",
   "greptimedb-integration-tests",
@@ -714,7 +711,6 @@ all-integration-tests = [
   "webhdfs-integration-tests",
 ]
 
-clickhouse-integration-tests = ["sinks-clickhouse"]
 es-integration-tests = ["sinks-elasticsearch", "aws-core"]
 greptimedb-integration-tests = ["sinks-greptimedb_metrics", "sinks-greptimedb_logs"]
 http-client-integration-tests = ["sources-http_client"]
