@@ -43,8 +43,6 @@ mod loki;
 mod lua;
 #[cfg(feature = "transforms-metric_to_log")]
 mod metric_to_log;
-#[cfg(feature = "sources-mongodb_metrics")]
-mod mongodb_metrics;
 #[cfg(feature = "sources-nginx_metrics")]
 mod nginx_metrics;
 mod open;
@@ -86,9 +84,6 @@ mod window;
 ))]
 mod file;
 mod windows;
-
-#[cfg(feature = "sources-mongodb_metrics")]
-pub(crate) use mongodb_metrics::*;
 
 #[cfg(feature = "transforms-aggregate")]
 pub(crate) use self::aggregate::*;

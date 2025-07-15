@@ -22,8 +22,6 @@ pub mod http_client;
 pub mod http_server;
 #[cfg(all(unix, feature = "sources-journald"))]
 pub mod journald;
-#[cfg(feature = "sources-mongodb_metrics")]
-pub mod mongodb_metrics;
 #[cfg(feature = "sources-nginx_metrics")]
 pub mod nginx_metrics;
 #[cfg(feature = "sources-postgresql_metrics")]
