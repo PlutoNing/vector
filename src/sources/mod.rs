@@ -20,8 +20,6 @@ pub mod http_client;
 pub mod http_server;
 #[cfg(all(unix, feature = "sources-journald"))]
 pub mod journald;
-#[cfg(feature = "sources-postgresql_metrics")]
-pub mod postgresql_metrics;
 #[cfg(feature = "sources-socket")]
 pub mod socket;
 #[cfg(feature = "sources-static_metrics")]

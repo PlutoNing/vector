@@ -39,8 +39,6 @@ mod lua;
 mod metric_to_log;
 mod open;
 mod parser;
-#[cfg(feature = "sources-postgresql_metrics")]
-mod postgresql_metrics;
 mod process;
 #[cfg(feature = "transforms-impl-reduce")]
 mod reduce;
@@ -98,8 +96,6 @@ pub(crate) use self::lua::*;
 pub(crate) use self::metric_to_log::*;
 #[allow(unused_imports)]
 pub(crate) use self::parser::*;
-#[cfg(feature = "sources-postgresql_metrics")]
-pub(crate) use self::postgresql_metrics::*;
 #[cfg(feature = "transforms-impl-reduce")]
 pub(crate) use self::reduce::*;
 #[cfg(feature = "transforms-remap")]
