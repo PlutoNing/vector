@@ -542,7 +542,6 @@ sources-stdin = ["tokio-util/io"]
 transforms = ["transforms-logs", "transforms-metrics"]
 transforms-logs = [
   "transforms-aws_ec2_metadata",
-  "transforms-filter",
   "transforms-window",
   "transforms-log_to_metric",
   "transforms-lua",
@@ -556,7 +555,6 @@ transforms-logs = [
 ]
 transforms-metrics = [
   "transforms-aggregate",
-  "transforms-filter",
   "transforms-log_to_metric",
   "transforms-lua",
   "transforms-metric_to_log",
@@ -567,7 +565,6 @@ transforms-metrics = [
 
 transforms-aggregate = []
 transforms-aws_ec2_metadata = ["dep:arc-swap"]
-transforms-filter = []
 transforms-window = []
 transforms-log_to_metric = []
 transforms-lua = ["dep:mlua", "vector-lib/lua"]
@@ -630,7 +627,6 @@ vector-unit-test-tests = [
   "sources-demo_logs",
   "transforms-remap",
   "transforms-route",
-  "transforms-filter",
   "transforms-reduce",
   "sinks-console"
 ]
@@ -657,7 +653,7 @@ language-benches = ["sinks-socket", "transforms-lua", "transforms-remap"]
 # Separate benching process for metrics due to the nature of the bootstrap procedures.
 statistic-benches = []
 remap-benches = ["transforms-remap"]
-transform-benches = ["transforms-filter", "transforms-reduce", "transforms-route"]
+transform-benches = ["transforms-reduce", "transforms-route"]
 codecs-benches = []
 enrichment-tables-benches = ["enrichment-tables-geoip", "enrichment-tables-mmdb", "enrichment-tables-memory"]
 proptest = ["dep:proptest", "dep:proptest-derive", "vrl/proptest"]

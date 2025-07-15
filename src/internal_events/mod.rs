@@ -18,8 +18,6 @@ mod encoding_transcode;
 mod exec;
 #[cfg(any(feature = "sources-file_descriptor", feature = "sources-stdin"))]
 mod file_descriptor;
-#[cfg(feature = "transforms-filter")]
-mod filter;
 mod heartbeat;
 #[cfg(feature = "sources-host_metrics")]
 mod host_metrics;
@@ -72,8 +70,6 @@ pub(crate) use self::exec::*;
 pub(crate) use self::file::*;
 #[cfg(any(feature = "sources-file_descriptor", feature = "sources-stdin"))]
 pub(crate) use self::file_descriptor::*;
-#[cfg(feature = "transforms-filter")]
-pub(crate) use self::filter::*;
 #[cfg(feature = "sources-host_metrics")]
 pub(crate) use self::host_metrics::*;
 #[cfg(feature = "transforms-log_to_metric")]

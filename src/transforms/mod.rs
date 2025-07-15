@@ -11,8 +11,6 @@ pub mod sample;
 pub mod aggregate;
 #[cfg(feature = "transforms-exclusive-route")]
 mod exclusive_route;
-#[cfg(feature = "transforms-filter")]
-pub mod filter;
 #[cfg(feature = "transforms-log_to_metric")]
 pub mod log_to_metric;
 #[cfg(feature = "transforms-lua")]
