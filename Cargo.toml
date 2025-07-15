@@ -541,7 +541,6 @@ sources-stdin = ["tokio-util/io"]
 # Transforms
 transforms = ["transforms-logs", "transforms-metrics"]
 transforms-logs = [
-  "transforms-reduce",
   "transforms-remap",
   "transforms-route",
   "transforms-exclusive-route",
@@ -554,7 +553,6 @@ transforms-metrics = [
   "transforms-throttle",
 ]
 
-transforms-reduce = ["transforms-impl-reduce"]
 transforms-remap = []
 transforms-route = []
 transforms-exclusive-route = []
@@ -611,7 +609,6 @@ vector-unit-test-tests = [
   "sources-demo_logs",
   "transforms-remap",
   "transforms-route",
-  "transforms-reduce",
   "sinks-console"
 ]
 
@@ -636,7 +633,7 @@ language-benches = ["sinks-socket","transforms-remap"]
 # Separate benching process for metrics due to the nature of the bootstrap procedures.
 statistic-benches = []
 remap-benches = ["transforms-remap"]
-transform-benches = ["transforms-reduce", "transforms-route"]
+transform-benches = ["transforms-route"]
 codecs-benches = []
 enrichment-tables-benches = ["enrichment-tables-geoip", "enrichment-tables-mmdb", "enrichment-tables-memory"]
 proptest = ["dep:proptest", "dep:proptest-derive", "vrl/proptest"]
