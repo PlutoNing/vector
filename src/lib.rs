@@ -20,10 +20,6 @@
 #![deny(clippy::missing_const_for_fn)] // [nursery] valuable to the optimizer, but may produce false positives
 
 //! The main library to support building Vector.
-
-#[cfg(all(unix, feature = "sinks-socket"))]
-#[macro_use]
-extern crate cfg_if;
 #[macro_use]
 extern crate derivative;
 #[macro_use]

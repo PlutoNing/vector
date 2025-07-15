@@ -13,8 +13,6 @@ pub mod console;
 pub mod file;
 #[cfg(feature = "sinks-postgres")]
 pub mod postgres;
-#[cfg(feature = "sinks-socket")]
-pub mod socket;
 
 pub use vector_lib::{config::Input, sink::VectorSink};
 

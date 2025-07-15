@@ -564,7 +564,6 @@ sinks-logs = [
   "sinks-console",
   "sinks-file",
   "sinks-postgres",
-  "sinks-socket",
 ]
 sinks-metrics = [
   "sinks-blackhole",
@@ -575,7 +574,7 @@ sinks-blackhole = []
 sinks-console = []
 sinks-file = ["dep:async-compression"]
 sinks-postgres = ["dep:sqlx"]
-sinks-socket = ["sinks-utils-udp"]
+
 sinks-utils-udp = []
 # Identifies that the build is a nightly build
 nightly = []
@@ -588,7 +587,7 @@ all-integration-tests = [
 postgres_sink-integration-tests = ["sinks-postgres"]
 disable-resolv-conf = []
 shutdown-tests = ["api", "sinks-blackhole", "sinks-console", "sources", "unix"]
-cli-tests = ["sinks-blackhole", "sinks-socket", "sources-demo_logs", "sources-file"]
+cli-tests = ["sinks-blackhole",  "sources-demo_logs", "sources-file"]
 test-utils = []
 
 vector-api-tests = [
@@ -611,11 +610,10 @@ component-validation-tests = [
 # of memory when those additional dependencies are built in CI.
 benches = [
   "sinks-file",
-  "sinks-socket",
   "sources-file",
   "transforms-sample",
 ]
-language-benches = ["sinks-socket"]
+#language-benches = ["sinks-socket"]
 # Separate benching process for metrics due to the nature of the bootstrap procedures.
 statistic-benches = []
 codecs-benches = []
