@@ -561,7 +561,6 @@ sources-logs = [
   "sources-http_client",
   "sources-internal_logs",
   "sources-journald",
-  "sources-logstash",
   "sources-mqtt",
   "sources-nats",
   "sources-pulsar",
@@ -608,7 +607,6 @@ sources-internal_metrics = []
 sources-static_metrics = []
 sources-journald = []
 #sources-kafka = ["dep:rdkafka"]
-sources-logstash = ["sources-utils-net-tcp", "tokio-util/net"]
 sources-mongodb_metrics = ["dep:mongodb"]
 sources-mqtt = ["dep:rumqttc"]
 sources-nats = ["dep:async-nats", "dep:nkeys"]
@@ -812,7 +810,6 @@ all-integration-tests = [
   "http-client-integration-tests",
   "humio-integration-tests",
   "influxdb-integration-tests",
-  "logstash-integration-tests",
   "loki-integration-tests",
   "mongodb_metrics-integration-tests",
   "nats-integration-tests",
@@ -863,7 +860,6 @@ greptimedb-integration-tests = ["sinks-greptimedb_metrics", "sinks-greptimedb_lo
 humio-integration-tests = ["sinks-humio"]
 http-client-integration-tests = ["sources-http_client"]
 influxdb-integration-tests = ["sinks-influxdb"]
-logstash-integration-tests = ["docker", "sources-logstash"]
 loki-integration-tests = ["sinks-loki"]
 mongodb_metrics-integration-tests = ["sources-mongodb_metrics"]
 mqtt-integration-tests = ["sinks-mqtt", "sources-mqtt"]

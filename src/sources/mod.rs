@@ -30,8 +30,6 @@ pub mod internal_logs;
 pub mod internal_metrics;
 #[cfg(all(unix, feature = "sources-journald"))]
 pub mod journald;
-#[cfg(feature = "sources-logstash")]
-pub mod logstash;
 #[cfg(feature = "sources-mongodb_metrics")]
 pub mod mongodb_metrics;
 #[cfg(feature = "sources-mqtt")]
