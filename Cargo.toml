@@ -563,7 +563,6 @@ sinks-logs = [
   "sinks-blackhole",
   "sinks-console",
   "sinks-file",
-  "sinks-http",
   "sinks-postgres",
   "sinks-socket",
 ]
@@ -575,7 +574,6 @@ sinks-metrics = [
 sinks-blackhole = []
 sinks-console = []
 sinks-file = ["dep:async-compression"]
-sinks-http = []
 sinks-postgres = ["dep:sqlx"]
 sinks-socket = ["sinks-utils-udp"]
 sinks-utils-udp = []
@@ -595,12 +593,10 @@ test-utils = []
 
 vector-api-tests = [
   "sources-demo_logs",
-
   "sinks-blackhole"
 ]
 vector-unit-test-tests = [
   "sources-demo_logs",
-
   "sinks-console"
 ]
 
@@ -609,14 +605,12 @@ component-validation-runner = ["dep:tonic"]
 # In the future, this can change to simply reference the targets `sources`, `transforms`, `sinks`
 component-validation-tests = [
   "component-validation-runner",
-  "sinks-http",
 ]
 
 # Grouping together features for benchmarks. We exclude the API client due to it causing the build process to run out
 # of memory when those additional dependencies are built in CI.
 benches = [
   "sinks-file",
-  "sinks-http",
   "sinks-socket",
   "sources-file",
   "transforms-sample",

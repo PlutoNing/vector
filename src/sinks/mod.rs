@@ -11,8 +11,6 @@ pub mod blackhole;
 pub mod console;
 #[cfg(feature = "sinks-file")] 
 pub mod file;
-#[cfg(feature = "sinks-http")]
-pub mod http;
 #[cfg(feature = "sinks-postgres")]
 pub mod postgres;
 #[cfg(feature = "sinks-socket")]
