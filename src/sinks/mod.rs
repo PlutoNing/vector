@@ -11,11 +11,6 @@ pub mod blackhole;
 pub mod console;
 #[cfg(feature = "sinks-file")] 
 pub mod file;
-#[cfg(any(
-    feature = "sinks-greptimedb_metrics",
-    feature = "sinks-greptimedb_logs"
-))]
-pub mod greptimedb;
 #[cfg(feature = "sinks-honeycomb")]
 pub mod honeycomb;
 #[cfg(feature = "sinks-http")]

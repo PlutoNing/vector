@@ -365,8 +365,8 @@ dependencies = [
  "memchr",
  "pin-project-lite",
  "tokio",
- "zstd 0.13.2",
- "zstd-safe 7.2.1",
+ "zstd",
+ "zstd-safe",
 ]
 
 [[package]]
@@ -2641,37 +2641,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "derive_builder"
-version = "0.20.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0350b5cb0331628a5916d6c5c0b72e97393b8b6b03b47a9284f4e7f5a405ffd7"
-dependencies = [
- "derive_builder_macro",
-]
-
-[[package]]
-name = "derive_builder_core"
-version = "0.20.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d48cda787f839151732d396ac69e3473923d54312c070ee21e9effcaa8ca0b1d"
-dependencies = [
- "darling",
- "proc-macro2 1.0.95",
- "quote 1.0.40",
- "syn 2.0.104",
-]
-
-[[package]]
-name = "derive_builder_macro"
-version = "0.20.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "206868b8242f27cecce124c19fd88157fbd0dd334df2587f36417bafbc85097b"
-dependencies = [
- "derive_builder_core",
- "syn 2.0.104",
-]
-
-[[package]]
 name = "difflib"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2777,7 +2746,7 @@ dependencies = [
  "hickory-proto",
  "paste",
  "prost 0.12.6",
- "prost-build 0.12.6",
+ "prost-build",
  "snafu 0.8.6",
  "tracing 0.1.41",
  "vector-lib",
@@ -3652,42 +3621,6 @@ dependencies = [
  "graphql_client_codegen",
  "proc-macro2 1.0.95",
  "syn 1.0.109",
-]
-
-[[package]]
-name = "greptime-proto"
-version = "0.1.0"
-source = "git+https://github.com/GreptimeTeam/greptime-proto.git?tag=v0.9.0#396206c2801b5a3ec51bfe8984c66b686da910e6"
-dependencies = [
- "prost 0.12.6",
- "serde",
- "serde_json",
- "strum 0.25.0",
- "strum_macros 0.25.3",
- "tonic 0.11.0",
- "tonic-build 0.11.0",
-]
-
-[[package]]
-name = "greptimedb-ingester"
-version = "0.1.0"
-source = "git+https://github.com/GreptimeTeam/greptimedb-ingester-rust?rev=f7243393808640f5123b0d5b7b798da591a4df6e#f7243393808640f5123b0d5b7b798da591a4df6e"
-dependencies = [
- "dashmap",
- "derive_builder",
- "enum_dispatch",
- "futures 0.3.31",
- "futures-util",
- "greptime-proto",
- "parking_lot",
- "prost 0.12.6",
- "rand 0.9.1",
- "snafu 0.8.6",
- "tokio",
- "tokio-stream",
- "tonic 0.11.0",
- "tonic-build 0.9.2",
- "tower 0.4.13",
 ]
 
 [[package]]
@@ -5227,7 +5160,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "prost 0.12.6",
- "prost-build 0.12.6",
+ "prost-build",
  "prost-types 0.12.6",
 ]
 
@@ -5262,7 +5195,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "823ec7bedb1819b11633bd583ae981b0082db08492b0c3396412b85dd329ffee"
 dependencies = [
  "cc",
- "which 5.0.0",
+ "which",
 ]
 
 [[package]]
@@ -6697,16 +6630,6 @@ dependencies = [
 
 [[package]]
 name = "prettyplease"
-version = "0.1.25"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c8646e95016a7a6c4adea95bafa8a16baab64b583356217f2c85db4a39d9a86"
-dependencies = [
- "proc-macro2 1.0.95",
- "syn 1.0.109",
-]
-
-[[package]]
-name = "prettyplease"
 version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ae005bd773ab59b4725093fd7df83fd7892f7d8eafb48dbd7de6e024e4215f9d"
@@ -6832,16 +6755,6 @@ dependencies = [
 
 [[package]]
 name = "prost"
-version = "0.11.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b82eaa1d779e9a4bc1c3217db8ffbeabaae1dca241bf70183242128d48681cd"
-dependencies = [
- "bytes 1.10.1",
- "prost-derive 0.11.9",
-]
-
-[[package]]
-name = "prost"
 version = "0.12.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "deb1435c188b76130da55f17a466d252ff7b1418b2ad3e037d127b94e3411f29"
@@ -6862,28 +6775,6 @@ dependencies = [
 
 [[package]]
 name = "prost-build"
-version = "0.11.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "119533552c9a7ffacc21e099c24a0ac8bb19c2a2a3f363de84cd9b844feab270"
-dependencies = [
- "bytes 1.10.1",
- "heck 0.4.1",
- "itertools 0.10.5",
- "lazy_static",
- "log",
- "multimap",
- "petgraph",
- "prettyplease 0.1.25",
- "prost 0.11.9",
- "prost-types 0.11.9",
- "regex",
- "syn 1.0.109",
- "tempfile",
- "which 4.4.2",
-]
-
-[[package]]
-name = "prost-build"
 version = "0.12.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "22505a5c94da8e3b7c2996394d1c933236c4d743e81a410bcca4e6989fc066a4"
@@ -6895,25 +6786,12 @@ dependencies = [
  "multimap",
  "once_cell",
  "petgraph",
- "prettyplease 0.2.15",
+ "prettyplease",
  "prost 0.12.6",
  "prost-types 0.12.6",
  "regex",
  "syn 2.0.104",
  "tempfile",
-]
-
-[[package]]
-name = "prost-derive"
-version = "0.11.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e5d2d8d10f3c6ded6da8b05b5fb3b8a5082514344d56c9f871412d29b4e075b4"
-dependencies = [
- "anyhow",
- "itertools 0.10.5",
- "proc-macro2 1.0.95",
- "quote 1.0.40",
- "syn 1.0.109",
 ]
 
 [[package]]
@@ -6954,15 +6832,6 @@ dependencies = [
  "prost-types 0.13.5",
  "serde",
  "serde-value",
-]
-
-[[package]]
-name = "prost-types"
-version = "0.11.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "213622a1460818959ac1181aaeb2dc9c7f63df720db7d788b3e24eacd1983e13"
-dependencies = [
- "prost 0.11.9",
 ]
 
 [[package]]
@@ -9461,7 +9330,6 @@ dependencies = [
  "tower-layer",
  "tower-service",
  "tracing 0.1.41",
- "zstd 0.12.4",
 ]
 
 [[package]]
@@ -9496,26 +9364,13 @@ dependencies = [
 
 [[package]]
 name = "tonic-build"
-version = "0.9.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a6fdaae4c2c638bb70fe42803a26fbd6fc6ac8c72f5c59f67ecc2a2dcabf4b07"
-dependencies = [
- "prettyplease 0.1.25",
- "proc-macro2 1.0.95",
- "prost-build 0.11.9",
- "quote 1.0.40",
- "syn 1.0.109",
-]
-
-[[package]]
-name = "tonic-build"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "be4ef6dd70a610078cb4e338a0f79d06bc759ff1b22d2120c2ff02ae264ba9c2"
 dependencies = [
- "prettyplease 0.2.15",
+ "prettyplease",
  "proc-macro2 1.0.95",
- "prost-build 0.12.6",
+ "prost-build",
  "quote 1.0.40",
  "syn 2.0.104",
 ]
@@ -10224,7 +10079,6 @@ dependencies = [
  "glob",
  "goauth",
  "governor",
- "greptimedb-ingester",
  "h2 0.4.11",
  "hash_hasher",
  "hashbrown 0.14.5",
@@ -10279,7 +10133,7 @@ dependencies = [
  "proptest",
  "proptest-derive",
  "prost 0.12.6",
- "prost-build 0.12.6",
+ "prost-build",
  "prost-reflect",
  "prost-types 0.12.6",
  "quick-junit",
@@ -10325,7 +10179,7 @@ dependencies = [
  "tokio-util",
  "toml",
  "tonic 0.11.0",
- "tonic-build 0.11.0",
+ "tonic-build",
  "tower 0.5.2",
  "tower-http 0.4.4",
  "tower-test",
@@ -10348,7 +10202,7 @@ dependencies = [
  "warp",
  "windows-service",
  "wiremock",
- "zstd 0.13.2",
+ "zstd",
 ]
 
 [[package]]
@@ -10529,7 +10383,7 @@ dependencies = [
  "pin-project",
  "proptest",
  "prost 0.12.6",
- "prost-build 0.12.6",
+ "prost-build",
  "prost-types 0.12.6",
  "quanta",
  "quickcheck",
@@ -10803,7 +10657,7 @@ dependencies = [
  "uuid",
  "webbrowser",
  "woothee",
- "zstd 0.13.2",
+ "zstd",
 ]
 
 [[package]]
@@ -11022,18 +10876,6 @@ dependencies = [
  "raw-window-handle",
  "url",
  "web-sys",
-]
-
-[[package]]
-name = "which"
-version = "4.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87ba24419a2078cd2b0f2ede2691b6c66d8e47836da3b6db8265ebad47afbfc7"
-dependencies = [
- "either",
- "home",
- "once_cell",
- "rustix 0.38.40",
 ]
 
 [[package]]
@@ -11728,30 +11570,11 @@ checksum = "626bd9fa9734751fc50d6060752170984d7053f5a39061f524cda68023d4db8a"
 
 [[package]]
 name = "zstd"
-version = "0.12.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a27595e173641171fc74a1232b7b1c7a7cb6e18222c11e9dfb9888fa424c53c"
-dependencies = [
- "zstd-safe 6.0.6",
-]
-
-[[package]]
-name = "zstd"
 version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fcf2b778a664581e31e389454a7072dab1647606d44f7feea22cd5abb9c9f3f9"
 dependencies = [
- "zstd-safe 7.2.1",
-]
-
-[[package]]
-name = "zstd-safe"
-version = "6.0.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ee98ffd0b48ee95e6c5168188e44a54550b1564d9d530ee21d5f0eaed1069581"
-dependencies = [
- "libc",
- "zstd-sys",
+ "zstd-safe",
 ]
 
 [[package]]
