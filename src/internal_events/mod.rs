@@ -47,7 +47,6 @@ mod journald;
 mod kubernetes_logs;
 #[cfg(feature = "transforms-log_to_metric")]
 mod log_to_metric;
-mod logplex;
 #[cfg(feature = "sinks-loki")]
 mod loki;
 #[cfg(feature = "transforms-lua")]
@@ -152,8 +151,6 @@ pub(crate) use self::journald::*;
 pub(crate) use self::kubernetes_logs::*;
 #[cfg(feature = "transforms-log_to_metric")]
 pub(crate) use self::log_to_metric::*;
-#[cfg(feature = "sources-heroku_logs")]
-pub(crate) use self::logplex::*;
 #[cfg(feature = "sinks-loki")]
 pub(crate) use self::loki::*;
 #[cfg(feature = "transforms-lua")]

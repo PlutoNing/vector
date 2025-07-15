@@ -565,7 +565,6 @@ sources-logs = [
   "sources-demo_logs",
   "sources-exec",
   "sources-file",
-  "sources-heroku_logs",
   "sources-http_server",
   "sources-http_client",
   "sources-internal_logs",
@@ -611,7 +610,6 @@ sources-eventstoredb_metrics = []
 sources-exec = []
 sources-file = ["vector-lib/file-source"]
 sources-file_descriptor = ["tokio-util/io"]
-sources-heroku_logs = ["sources-utils-http", "sources-utils-http-query", "sources-http_server"]
 sources-host_metrics = ["heim/cpu", "heim/host", "heim/memory", "heim/net"]
 sources-http_client = ["sources-utils-http-client"]
 sources-http_server = ["sources-utils-http", "sources-utils-http-headers", "sources-utils-http-query"]
