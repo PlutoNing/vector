@@ -15,8 +15,6 @@ mod conditions;
 mod dedupe;
 #[cfg(feature = "sources-demo_logs")]
 mod demo_logs;
-#[cfg(feature = "sources-dnstap")]
-mod dnstap;
 mod encoding_transcode;
 #[cfg(feature = "sources-exec")]
 mod exec;
@@ -75,8 +73,6 @@ pub(crate) use self::api::*;
 pub(crate) use self::dedupe::*;
 #[cfg(feature = "sources-demo_logs")]
 pub(crate) use self::demo_logs::*;
-#[cfg(feature = "sources-dnstap")]
-pub(crate) use self::dnstap::*;
 #[cfg(feature = "sources-exec")]
 pub(crate) use self::exec::*;
 #[cfg(any(

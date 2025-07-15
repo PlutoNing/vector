@@ -207,8 +207,6 @@ impl RemapConfig {
 
         let mut functions = vrl::stdlib::all();
         functions.append(&mut vector_lib::enrichment::vrl_functions());
-        #[cfg(feature = "sources-dnstap")]
-        functions.append(&mut dnstap_parser::vrl_functions());
         functions.append(&mut vector_vrl_functions::all());
 
         let state = TypeState {

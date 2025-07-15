@@ -34,7 +34,7 @@ impl<E: std::error::Error> InternalEvent for UnixSocketOutgoingConnectionError<E
 
 #[cfg(all(
     unix,
-    any(feature = "sources-utils-net-unix", feature = "sources-dnstap")
+    any(feature = "sources-utils-net-unix")
 ))]
 #[derive(Debug)]
 pub struct UnixSocketError<'a, E> {
@@ -44,7 +44,7 @@ pub struct UnixSocketError<'a, E> {
 
 #[cfg(all(
     unix,
-    any(feature = "sources-utils-net-unix", feature = "sources-dnstap")
+    any(feature = "sources-utils-net-unix")
 ))]
 impl<E: std::fmt::Display> InternalEvent for UnixSocketError<'_, E> {
     fn emit(self) {

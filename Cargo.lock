@@ -2713,36 +2713,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "dnsmsg-parser"
-version = "0.1.0"
-dependencies = [
- "criterion",
- "data-encoding",
- "hickory-proto",
- "snafu 0.8.6",
-]
-
-[[package]]
-name = "dnstap-parser"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "base64 0.22.1",
- "bytes 1.10.1",
- "chrono",
- "chrono-tz",
- "dnsmsg-parser",
- "hickory-proto",
- "paste",
- "prost 0.12.6",
- "prost-build",
- "snafu 0.8.6",
- "tracing 0.1.41",
- "vector-lib",
- "vrl",
-]
-
-[[package]]
 name = "doc-comment"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -10001,8 +9971,6 @@ dependencies = [
  "csv",
  "derivative",
  "dirs-next",
- "dnsmsg-parser",
- "dnstap-parser",
  "dyn-clone",
  "encoding_rs",
  "enum_dispatch",
@@ -10454,7 +10422,6 @@ version = "0.1.0"
 dependencies = [
  "chrono-tz",
  "clap",
- "dnstap-parser",
  "enrichment",
  "glob",
  "serde",

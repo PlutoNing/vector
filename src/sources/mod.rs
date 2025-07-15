@@ -3,8 +3,6 @@ use snafu::Snafu;
 
 #[cfg(feature = "sources-demo_logs")]
 pub mod demo_logs;
-#[cfg(feature = "sources-dnstap")]
-pub mod dnstap;
 #[cfg(feature = "sources-exec")]
 pub mod exec;
 #[cfg(feature = "sources-file")]

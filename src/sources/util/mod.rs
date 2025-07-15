@@ -2,8 +2,6 @@
 #[cfg(feature = "sources-http_server")]
 mod body_decoding;
 mod encoding_config;
-#[cfg(all(unix, feature = "sources-dnstap"))]
-pub mod framestream;
 #[cfg(any(
     feature = "sources-utils-http-auth",
     feature = "sources-utils-http-encoding",
