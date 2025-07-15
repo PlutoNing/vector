@@ -522,7 +522,6 @@ sources-logs = [
   "sources-exec",
   "sources-file",
   "sources-http_server",
-  "sources-http_client",
   "sources-journald",
   "sources-file_descriptor",
   "sources-socket",
@@ -540,7 +539,6 @@ sources-exec = []
 sources-file = ["vector-lib/file-source"]
 sources-file_descriptor = ["tokio-util/io"]
 sources-host_metrics = ["heim/cpu", "heim/host", "heim/memory", "heim/net"]
-sources-http_client = ["sources-utils-http-client"]
 sources-http_server = ["sources-utils-http", "sources-utils-http-headers", "sources-utils-http-query"]
 sources-static_metrics = []
 sources-journald = []
@@ -636,11 +634,9 @@ nightly = []
 
 # Integration testing-related features
 all-integration-tests = [
-  "http-client-integration-tests",
   "postgres_sink-integration-tests",
 ]
 
-http-client-integration-tests = ["sources-http_client"]
 postgres_sink-integration-tests = ["sinks-postgres"]
 disable-resolv-conf = []
 shutdown-tests = ["api", "sinks-blackhole", "sinks-console", "sources", "transforms-lua", "transforms-remap", "unix"]
@@ -671,7 +667,6 @@ component-validation-runner = ["dep:tonic"]
 # In the future, this can change to simply reference the targets `sources`, `transforms`, `sinks`
 component-validation-tests = [
   "component-validation-runner",
-  "sources-http_client",
   "sources-http_server",
   "sinks-http",
 ]

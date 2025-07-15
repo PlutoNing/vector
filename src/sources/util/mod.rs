@@ -10,8 +10,6 @@ mod encoding_config;
     feature = "sources-utils-http-query"
 ))]
 pub mod http;
-#[cfg(any(feature = "sources-http_client"))]
-pub mod http_client;
 pub mod multiline_config;
 #[cfg(any(feature = "sources-utils-net-tcp", feature = "sources-utils-net-udp"))]
 pub mod net;
