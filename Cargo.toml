@@ -547,9 +547,6 @@ secrets-aws-secrets-manager = ["aws-core", "dep:aws-sdk-secretsmanager"]
 # Sources
 sources = ["sources-logs", "sources-metrics"]
 sources-logs = [
-  "sources-aws_kinesis_firehose",
-  "sources-aws_s3",
-  "sources-aws_sqs",
   "sources-demo_logs",
   "sources-exec",
   "sources-file",
