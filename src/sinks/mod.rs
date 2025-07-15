@@ -5,12 +5,6 @@ use snafu::Snafu;
 pub mod prelude;
 pub mod util;
 
-#[cfg(feature = "sinks-azure_blob")]
-pub mod azure_blob;
-#[cfg(feature = "sinks-azure_blob")]
-pub mod azure_common;
-#[cfg(feature = "sinks-azure_monitor_logs")]
-pub mod azure_monitor_logs;
 #[cfg(feature = "sinks-blackhole")]
 pub mod blackhole;
 #[cfg(feature = "sinks-clickhouse")]
@@ -19,7 +13,8 @@ pub mod clickhouse;
 pub mod console;
 #[cfg(feature = "sinks-databend")]
 pub mod databend;
-#[cfg(feature = "sinks-file")]
+#[cfg(feature = "sinks-file")] 
+
 pub mod file;
 #[cfg(any(
     feature = "sinks-greptimedb_metrics",
