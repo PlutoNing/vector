@@ -541,10 +541,6 @@ sources-stdin = ["tokio-util/io"]
 # Transforms
 transforms = ["transforms-logs", "transforms-metrics"]
 transforms-logs = [
-  "transforms-aws_ec2_metadata",
-  "transforms-window",
-  "transforms-log_to_metric",
-  "transforms-lua",
   "transforms-metric_to_log",
   "transforms-reduce",
   "transforms-remap",
@@ -554,20 +550,12 @@ transforms-logs = [
   "transforms-throttle",
 ]
 transforms-metrics = [
-  "transforms-aggregate",
-  "transforms-log_to_metric",
-  "transforms-lua",
   "transforms-metric_to_log",
   "transforms-remap",
   "transforms-tag_cardinality_limit",
   "transforms-throttle",
 ]
 
-transforms-aggregate = []
-transforms-aws_ec2_metadata = ["dep:arc-swap"]
-transforms-window = []
-transforms-log_to_metric = []
-transforms-lua = ["dep:mlua", "vector-lib/lua"]
 transforms-metric_to_log = []
 transforms-reduce = ["transforms-impl-reduce"]
 transforms-remap = []
@@ -613,13 +601,12 @@ all-integration-tests = [
 
 postgres_sink-integration-tests = ["sinks-postgres"]
 disable-resolv-conf = []
-shutdown-tests = ["api", "sinks-blackhole", "sinks-console", "sources", "transforms-lua", "transforms-remap", "unix"]
+shutdown-tests = ["api", "sinks-blackhole", "sinks-console", "sources", "transforms-remap", "unix"]
 cli-tests = ["sinks-blackhole", "sinks-socket", "sources-demo_logs", "sources-file"]
 test-utils = []
 
 vector-api-tests = [
   "sources-demo_logs",
-  "transforms-log_to_metric",
   "transforms-remap",
   "sinks-blackhole"
 ]
@@ -646,10 +633,9 @@ benches = [
   "sinks-http",
   "sinks-socket",
   "sources-file",
-  "transforms-lua",
   "transforms-sample",
 ]
-language-benches = ["sinks-socket", "transforms-lua", "transforms-remap"]
+language-benches = ["sinks-socket","transforms-remap"]
 # Separate benching process for metrics due to the nature of the bootstrap procedures.
 statistic-benches = []
 remap-benches = ["transforms-remap"]

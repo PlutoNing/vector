@@ -23,10 +23,6 @@ mod heartbeat;
 mod host_metrics;
 mod http;
 pub mod http_client;
-#[cfg(feature = "transforms-log_to_metric")]
-mod log_to_metric;
-#[cfg(feature = "transforms-lua")]
-mod lua;
 #[cfg(feature = "transforms-metric_to_log")]
 mod metric_to_log;
 mod open;
@@ -45,8 +41,6 @@ mod template;
 mod throttle;
 mod udp;
 mod unix;
-#[cfg(feature = "transforms-window")]
-mod window;
 
 #[cfg(any(
     feature = "sources-file",
@@ -55,8 +49,6 @@ mod window;
 mod file;
 mod windows;
 
-#[cfg(feature = "transforms-aggregate")]
-pub(crate) use self::aggregate::*;
 #[cfg(feature = "api")]
 pub(crate) use self::api::*;
 #[cfg(feature = "sources-demo_logs")]
@@ -72,10 +64,6 @@ pub(crate) use self::file::*;
 pub(crate) use self::file_descriptor::*;
 #[cfg(feature = "sources-host_metrics")]
 pub(crate) use self::host_metrics::*;
-#[cfg(feature = "transforms-log_to_metric")]
-pub(crate) use self::log_to_metric::*;
-#[cfg(feature = "transforms-lua")]
-pub(crate) use self::lua::*;
 #[cfg(feature = "transforms-metric_to_log")]
 pub(crate) use self::metric_to_log::*;
 #[allow(unused_imports)]
@@ -92,8 +80,6 @@ pub(crate) use self::tag_cardinality_limit::*;
 pub(crate) use self::throttle::*;
 #[cfg(unix)]
 pub(crate) use self::unix::*;
-#[cfg(feature = "transforms-window")]
-pub(crate) use self::window::*;
 #[cfg(windows)]
 pub(crate) use self::windows::*;
 pub use self::{
