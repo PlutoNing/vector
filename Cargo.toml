@@ -544,6 +544,7 @@ protobuf-build = ["dep:tonic-build", "dep:prost-build"]
 gcp = ["dep:base64", "dep:goauth", "dep:smpl_jwt"]
 
 # Enrichment Tables
+# maybe essential
 enrichment-tables = ["enrichment-tables-geoip", "enrichment-tables-mmdb", "enrichment-tables-memory"]
 enrichment-tables-geoip = ["dep:maxminddb"]
 enrichment-tables-mmdb = ["dep:maxminddb"]
@@ -553,8 +554,8 @@ enrichment-tables-memory = ["dep:evmap", "dep:evmap-derive", "dep:thread_local"]
 codecs-syslog = ["vector-lib/syslog"]
 
 # Secrets
+# removed
 secrets = ["secrets-aws-secrets-manager"]
-
 secrets-aws-secrets-manager = ["aws-core", "dep:aws-sdk-secretsmanager"]
 
 # Sources

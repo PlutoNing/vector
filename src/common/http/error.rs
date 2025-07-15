@@ -12,8 +12,7 @@ pub struct ErrorMessage {
 #[cfg(any(
     feature = "sources-utils-http-prelude",
     feature = "sources-utils-http-auth",
-    feature = "sources-utils-http-encoding",
-    feature = "sources-datadog_agent"
+    feature = "sources-utils-http-encoding"
 ))]
 impl ErrorMessage {
     /// Create a new `ErrorMessage` from HTTP status code and a message

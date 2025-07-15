@@ -12,8 +12,6 @@ mod batch;
 pub mod codecs;
 mod common;
 mod conditions;
-#[cfg(feature = "sources-datadog_agent")]
-mod datadog_agent;
 #[cfg(feature = "sinks-datadog_metrics")]
 mod datadog_metrics;
 #[cfg(feature = "sinks-datadog_traces")]
@@ -127,8 +125,6 @@ pub(crate) use self::aggregate::*;
 pub(crate) use self::apache_metrics::*;
 #[cfg(feature = "api")]
 pub(crate) use self::api::*;
-#[cfg(feature = "sources-datadog_agent")]
-pub(crate) use self::datadog_agent::*;
 #[cfg(feature = "sinks-datadog_metrics")]
 pub(crate) use self::datadog_metrics::*;
 #[cfg(feature = "sinks-datadog_traces")]
