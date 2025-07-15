@@ -11,8 +11,6 @@ pub mod blackhole;
 pub mod console;
 #[cfg(feature = "sinks-file")] 
 pub mod file;
-#[cfg(feature = "sinks-honeycomb")]
-pub mod honeycomb;
 #[cfg(feature = "sinks-http")]
 pub mod http;
 #[cfg(any(feature = "sinks-influxdb"))]
