@@ -5155,16 +5155,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "13dc2df351e3202783a1fe0d44375f7295ffb4049267b0f3018346dc122a1d94"
 
 [[package]]
-name = "loki-logproto"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "prost 0.12.6",
- "prost-build",
- "prost-types 0.12.6",
-]
-
-[[package]]
 name = "lru"
 version = "0.12.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -10103,7 +10093,6 @@ dependencies = [
  "kube",
  "libc",
  "listenfd",
- "loki-logproto",
  "lru 0.15.0",
  "maxminddb",
  "md-5",

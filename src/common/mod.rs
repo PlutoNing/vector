@@ -1,6 +1,6 @@
 //! Modules that are common between sources, transforms, and sinks.
 
-#[cfg(any(feature = "transforms-log_to_metric", feature = "sinks-loki"))]
+#[cfg(any(feature = "transforms-log_to_metric"))]
 pub(crate) mod expansion;
 
 #[cfg(any(

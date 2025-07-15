@@ -367,7 +367,6 @@ test-integration: ## Runs all integration tests
 test-integration: test-integration-aws test-integration-chronicle
 test-integration: test-integration-docker-logs test-integration-elasticsearch
 test-integration: test-integration-fluent test-integration-http-client
-test-integration: test-integration-loki
 test-integration: test-integration-postgres
 test-integration: test-integration-dnstap
 test-integration: test-integration-shutdown

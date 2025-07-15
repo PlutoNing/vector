@@ -35,8 +35,6 @@ mod http_client_source;
 mod journald;
 #[cfg(feature = "transforms-log_to_metric")]
 mod log_to_metric;
-#[cfg(feature = "sinks-loki")]
-mod loki;
 #[cfg(feature = "transforms-lua")]
 mod lua;
 #[cfg(feature = "transforms-metric_to_log")]
@@ -102,8 +100,6 @@ pub(crate) use self::http_client_source::*;
 pub(crate) use self::journald::*;
 #[cfg(feature = "transforms-log_to_metric")]
 pub(crate) use self::log_to_metric::*;
-#[cfg(feature = "sinks-loki")]
-pub(crate) use self::loki::*;
 #[cfg(feature = "transforms-lua")]
 pub(crate) use self::lua::*;
 #[cfg(feature = "transforms-metric_to_log")]

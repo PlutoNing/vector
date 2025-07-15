@@ -13,8 +13,6 @@ pub mod console;
 pub mod file;
 #[cfg(feature = "sinks-http")]
 pub mod http;
-#[cfg(feature = "sinks-loki")]
-pub mod loki;
 #[cfg(feature = "sinks-mezmo")]
 pub mod mezmo;
 #[cfg(feature = "sinks-new_relic")]

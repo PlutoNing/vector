@@ -108,7 +108,6 @@ members = [
   "lib/enrichment",
   "lib/fakedata",
   "lib/file-source",
-  "lib/loki-logproto",
   "lib/portpicker",
   "lib/tracing-limit",
   "lib/vector-api-client",
@@ -199,8 +198,6 @@ vector-config.workspace = true
 vector-config-common.workspace = true
 vector-config-macros.workspace = true
 vector-vrl-functions = { path = "lib/vector-vrl/functions" }
-loki-logproto = { path = "lib/loki-logproto", optional = true }
-
 # Tokio / Futures
 async-stream = { version = "0.3.6", default-features = false }
 async-trait = { version = "0.1.88", default-features = false }
@@ -632,7 +629,6 @@ sinks-logs = [
   "sinks-console",
   "sinks-file",
   "sinks-http",
-  "sinks-loki",
   "sinks-mezmo",
   "sinks-new_relic",
   "sinks-new_relic_logs",
@@ -663,7 +659,6 @@ sinks-console = []
 sinks-file = ["dep:async-compression"]
 sinks-http = []
 sinks-mezmo = []
-sinks-loki = ["loki-logproto"]
 sinks-new_relic_logs = ["sinks-http"]
 sinks-new_relic = []
 sinks-papertrail = ["dep:syslog"]
@@ -682,14 +677,12 @@ nightly = []
 all-integration-tests = [
   "dnstap-integration-tests",
   "http-client-integration-tests",
-  "loki-integration-tests",
   "postgresql_metrics-integration-tests",
   "postgres_sink-integration-tests",
   "webhdfs-integration-tests",
 ]
 
 http-client-integration-tests = ["sources-http_client"]
-loki-integration-tests = ["sinks-loki"]
 postgresql_metrics-integration-tests = ["sources-postgresql_metrics"]
 postgres_sink-integration-tests = ["sinks-postgres"]
 dnstap-integration-tests = ["sources-dnstap", "dep:bollard"]
@@ -747,7 +740,6 @@ statistic-benches = []
 remap-benches = ["transforms-remap"]
 transform-benches = ["transforms-filter", "transforms-dedupe", "transforms-reduce", "transforms-route"]
 codecs-benches = []
-loki-benches = ["sinks-loki"]
 enrichment-tables-benches = ["enrichment-tables-geoip", "enrichment-tables-mmdb", "enrichment-tables-memory"]
 proptest = ["dep:proptest", "dep:proptest-derive", "vrl/proptest"]
 
@@ -776,11 +768,6 @@ required-features = ["enrichment-tables-benches"]
 name = "languages"
 harness = false
 required-features = ["language-benches"]
-
-[[bench]]
-name = "loki"
-harness = false
-required-features = ["loki-benches"]
 
 [[bench]]
 name = "distribution_statistic"
