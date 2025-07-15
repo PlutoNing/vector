@@ -11,8 +11,6 @@ pub mod sample;
 mod exclusive_route;
 #[cfg(feature = "transforms-remap")]
 pub mod remap;
-#[cfg(feature = "transforms-route")]
-pub mod route;
 #[cfg(feature = "transforms-tag_cardinality_limit")]
 pub mod tag_cardinality_limit;
 #[cfg(feature = "transforms-throttle")]
