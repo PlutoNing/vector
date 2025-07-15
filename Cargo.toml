@@ -561,7 +561,6 @@ sources-metrics = [
   "sources-host_metrics",
   "sources-postgresql_metrics",
   "sources-static_metrics",
-  "sources-statsd",
 ]
 
 sources-aws_ecs_metrics = ["sources-utils-http-client"]
@@ -580,7 +579,6 @@ sources-static_metrics = []
 sources-journald = []
 sources-postgresql_metrics = ["dep:postgres-openssl", "dep:tokio-postgres"]
 sources-socket = ["sources-utils-net", "tokio-util/net"]
-sources-statsd = ["sources-utils-net", "tokio-util/net"]
 sources-stdin = ["tokio-util/io"]
 sources-syslog = ["codecs-syslog", "sources-utils-net", "tokio-util/net"]
 sources-utils-http = ["sources-utils-http-auth", "sources-utils-http-encoding", "sources-utils-http-error", "sources-utils-http-prelude"]
@@ -691,7 +689,6 @@ sinks-metrics = [
   "sinks-greptimedb_metrics",
   "sinks-influxdb",
   "sinks-sematext",
-  "sinks-statsd",
   "sinks-vector",
 ]
 
@@ -727,7 +724,6 @@ sinks-papertrail = ["dep:syslog"]
 sinks-postgres = ["dep:sqlx"]
 sinks-sematext = ["sinks-elasticsearch", "sinks-influxdb"]
 sinks-socket = ["sinks-utils-udp"]
-sinks-statsd = ["sinks-utils-udp", "tokio-util/net"]
 sinks-utils-udp = []
 sinks-vector = ["sinks-utils-udp", "dep:tonic", "protobuf-build", "dep:prost"]
 sinks-websocket = ["dep:tokio-tungstenite"]

@@ -467,18 +467,6 @@ fn timely_shutdown_socket_unix() {
     ));
 }
 
-
-#[test]
-fn timely_shutdown_statsd() {
-    vector::test_util::trace_init();
-    test_timely_shutdown(source_vector(
-        r#"
-    type = "statsd"
-    mode = "tcp"
-    address = "${VECTOR_TEST_ADDRESS}""#,
-    ));
-}
-
 #[test]
 fn timely_shutdown_syslog_tcp() {
     vector::test_util::trace_init();

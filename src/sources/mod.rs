@@ -28,8 +28,6 @@ pub mod postgresql_metrics;
 pub mod socket;
 #[cfg(feature = "sources-static_metrics")]
 pub mod static_metrics;
-#[cfg(feature = "sources-statsd")]
-pub mod statsd;
 #[cfg(feature = "sources-syslog")]
 pub mod syslog;
 

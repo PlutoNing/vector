@@ -53,8 +53,6 @@ pub mod papertrail;
 pub mod postgres;
 #[cfg(feature = "sinks-socket")]
 pub mod socket;
-#[cfg(feature = "sinks-statsd")]
-pub mod statsd;
 #[cfg(feature = "sinks-webhdfs")]
 pub mod webhdfs;
 #[cfg(feature = "sinks-websocket")]

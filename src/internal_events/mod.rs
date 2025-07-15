@@ -53,8 +53,6 @@ mod reduce;
 mod remap;
 mod sample;
 mod socket;
-#[cfg(feature = "sinks-statsd")]
-mod statsd_sink;
 #[cfg(feature = "transforms-tag_cardinality_limit")]
 mod tag_cardinality_limit;
 mod tcp;
@@ -124,8 +122,6 @@ pub(crate) use self::reduce::*;
 pub(crate) use self::remap::*;
 #[cfg(feature = "transforms-impl-sample")]
 pub(crate) use self::sample::*;
-#[cfg(feature = "sinks-statsd")]
-pub(crate) use self::statsd_sink::*;
 #[cfg(feature = "transforms-tag_cardinality_limit")]
 pub(crate) use self::tag_cardinality_limit::*;
 #[cfg(feature = "transforms-throttle")]
