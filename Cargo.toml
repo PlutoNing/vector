@@ -632,7 +632,6 @@ sinks-logs = [
   "sinks-console",
   "sinks-file",
   "sinks-http",
-  "sinks-keep",
   "sinks-loki",
   "sinks-mezmo",
   "sinks-new_relic",
@@ -663,7 +662,6 @@ sinks-blackhole = []
 sinks-console = []
 sinks-file = ["dep:async-compression"]
 sinks-http = []
-sinks-keep = []
 sinks-mezmo = []
 sinks-loki = ["loki-logproto"]
 sinks-new_relic_logs = ["sinks-http"]
