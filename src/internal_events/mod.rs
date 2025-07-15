@@ -12,10 +12,7 @@ mod batch;
 pub mod codecs;
 mod common;
 mod conditions;
-#[cfg(feature = "sinks-datadog_metrics")]
-mod datadog_metrics;
-#[cfg(feature = "sinks-datadog_traces")]
-mod datadog_traces;
+
 #[cfg(feature = "transforms-impl-dedupe")]
 mod dedupe;
 #[cfg(feature = "sources-demo_logs")]
@@ -125,10 +122,6 @@ pub(crate) use self::aggregate::*;
 pub(crate) use self::apache_metrics::*;
 #[cfg(feature = "api")]
 pub(crate) use self::api::*;
-#[cfg(feature = "sinks-datadog_metrics")]
-pub(crate) use self::datadog_metrics::*;
-#[cfg(feature = "sinks-datadog_traces")]
-pub(crate) use self::datadog_traces::*;
 #[cfg(feature = "transforms-impl-dedupe")]
 pub(crate) use self::dedupe::*;
 #[cfg(feature = "sources-demo_logs")]

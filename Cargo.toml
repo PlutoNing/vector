@@ -564,7 +564,6 @@ sources-logs = [
   "sources-aws_kinesis_firehose",
   "sources-aws_s3",
   "sources-aws_sqs",
-  "sources-datadog_agent",
   "sources-demo_logs",
   "sources-docker_logs",
   "sources-exec",
@@ -611,7 +610,6 @@ sources-aws_ecs_metrics = ["sources-utils-http-client"]
 sources-aws_kinesis_firehose = ["dep:base64"]
 sources-aws_s3 = ["aws-core", "dep:aws-sdk-sqs", "dep:aws-sdk-s3", "dep:async-compression", "sources-aws_sqs", "tokio-util/io"]
 sources-aws_sqs = ["aws-core", "dep:aws-sdk-sqs"]
-sources-datadog_agent = ["sources-utils-http-error", "protobuf-build", "dep:prost"]
 sources-demo_logs = ["dep:fakedata"]
 sources-dnstap = ["sources-utils-net-tcp", "dep:base64", "dep:hickory-proto", "dep:dnsmsg-parser", "dep:dnstap-parser", "protobuf-build", "dep:prost"]
 sources-docker_logs = ["docker"]
@@ -731,9 +729,6 @@ sinks-logs = [
   "sinks-clickhouse",
   "sinks-console",
   "sinks-databend",
-  "sinks-datadog_events",
-  "sinks-datadog_logs",
-  "sinks-datadog_traces",
   "sinks-elasticsearch",
   "sinks-file",
   "sinks-gcp",
@@ -767,7 +762,6 @@ sinks-metrics = [
   "sinks-aws_cloudwatch_metrics",
   "sinks-blackhole",
   "sinks-console",
-  "sinks-datadog_metrics",
   "sinks-greptimedb_metrics",
   "sinks-humio",
   "sinks-influxdb",
@@ -794,10 +788,6 @@ sinks-chronicle = []
 sinks-clickhouse = []
 sinks-console = []
 sinks-databend = ["dep:databend-client"]
-sinks-datadog_events = []
-sinks-datadog_logs = []
-sinks-datadog_metrics = ["protobuf-build", "dep:prost", "dep:prost-reflect"]
-sinks-datadog_traces = ["protobuf-build", "dep:prost", "dep:rmpv", "dep:rmp-serde", "dep:serde_bytes"]
 sinks-elasticsearch = ["transforms-metric_to_log"]
 sinks-file = ["dep:async-compression"]
 sinks-gcp = ["sinks-gcp-chronicle", "dep:base64", "gcp"]
@@ -843,10 +833,6 @@ all-integration-tests = [
   "chronicle-integration-tests",
   "clickhouse-integration-tests",
   "databend-integration-tests",
-  "datadog-agent-integration-tests",
-  "datadog-logs-integration-tests",
-  "datadog-metrics-integration-tests",
-  "datadog-traces-integration-tests",
   "dnstap-integration-tests",
   "docker-logs-integration-tests",
   "es-integration-tests",
@@ -906,10 +892,6 @@ azure-blob-integration-tests = ["sinks-azure_blob"]
 chronicle-integration-tests = ["sinks-gcp"]
 clickhouse-integration-tests = ["sinks-clickhouse"]
 databend-integration-tests = ["sinks-databend"]
-datadog-agent-integration-tests = ["sources-datadog_agent"]
-datadog-logs-integration-tests = ["sinks-datadog_logs"]
-datadog-metrics-integration-tests = ["sinks-datadog_metrics", "dep:prost"]
-datadog-traces-integration-tests = ["sources-datadog_agent", "sinks-datadog_traces", "axum/tokio"]
 docker-logs-integration-tests = ["sources-docker_logs", "unix"]
 es-integration-tests = ["sinks-elasticsearch", "aws-core"]
 eventstoredb_metrics-integration-tests = ["sources-eventstoredb_metrics"]
@@ -943,13 +925,9 @@ test-utils = []
 
 # End-to-End testing-related features
 all-e2e-tests = [
-  "e2e-tests-datadog"
 ]
 
 e2e-tests-datadog = [
-  "sources-datadog_agent",
-  "sinks-datadog_logs",
-  "sinks-datadog_metrics",
   "dep:async-compression"
 ]
 
@@ -978,8 +956,6 @@ component-validation-tests = [
   "sinks-http",
   "sinks-splunk_hec",
   "sources-splunk_hec",
-  "sinks-datadog_logs",
-  "sources-datadog_agent",
 ]
 
 # Grouping together features for benchmarks. We exclude the API client due to it causing the build process to run out

@@ -24,13 +24,6 @@ pub mod clickhouse;
 pub mod console;
 #[cfg(feature = "sinks-databend")]
 pub mod databend;
-#[cfg(any(
-    feature = "sinks-datadog_events",
-    feature = "sinks-datadog_logs",
-    feature = "sinks-datadog_metrics",
-    feature = "sinks-datadog_traces"
-))]
-pub mod datadog;
 #[cfg(feature = "sinks-file")]
 pub mod file;
 #[cfg(feature = "sinks-gcp")]

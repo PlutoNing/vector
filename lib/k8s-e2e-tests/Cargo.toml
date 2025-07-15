@@ -32,9 +32,5 @@ name = "vector-aggregator"
 required-features = ["e2e-tests"]
 
 [[test]]
-name = "vector-dd-agent-aggregator"
-required-features = ["e2e-tests"]
-
-[[test]]
 name = "vector"
 required-features = ["e2e-tests"]

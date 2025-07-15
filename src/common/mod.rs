@@ -1,11 +1,5 @@
 //! Modules that are common between sources, transforms, and sinks.
-#[cfg(any(
-    feature = "sinks-datadog_events",
-    feature = "sinks-datadog_logs",
-    feature = "sinks-datadog_metrics",
-    feature = "sinks-datadog_traces",
-))]
-pub mod datadog;
+
 
 #[cfg(any(feature = "sources-mqtt", feature = "sinks-mqtt",))]
 /// Common MQTT configuration shared by MQTT components.
