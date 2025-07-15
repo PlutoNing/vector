@@ -1,8 +1,6 @@
 #![allow(missing_docs)]
 use snafu::Snafu;
 
-#[cfg(feature = "sources-apache_metrics")]
-pub mod apache_metrics;
 #[cfg(feature = "sources-demo_logs")]
 pub mod demo_logs;
 #[cfg(feature = "sources-dnstap")]

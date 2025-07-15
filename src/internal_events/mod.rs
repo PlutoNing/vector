@@ -4,8 +4,6 @@ pub mod prelude;
 mod adaptive_concurrency;
 mod aggregate;
 
-#[cfg(feature = "sources-apache_metrics")]
-mod apache_metrics;
 #[cfg(feature = "api")]
 mod api;
 mod batch;
@@ -96,8 +94,6 @@ pub(crate) use mongodb_metrics::*;
 
 #[cfg(feature = "transforms-aggregate")]
 pub(crate) use self::aggregate::*;
-#[cfg(feature = "sources-apache_metrics")]
-pub(crate) use self::apache_metrics::*;
 #[cfg(feature = "api")]
 pub(crate) use self::api::*;
 #[cfg(feature = "transforms-impl-dedupe")]

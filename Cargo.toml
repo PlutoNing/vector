@@ -560,7 +560,6 @@ sources-logs = [
 ]
 sources-metrics = [
   "dep:prost",
-  "sources-apache_metrics",
   "sources-aws_ecs_metrics",
   "sources-eventstoredb_metrics",
   "sources-host_metrics",
@@ -572,7 +571,6 @@ sources-metrics = [
   "sources-statsd",
 ]
 
-sources-apache_metrics = ["sources-utils-http-client"]
 sources-aws_ecs_metrics = ["sources-utils-http-client"]
 sources-aws_kinesis_firehose = ["dep:base64"]
 sources-aws_s3 = ["aws-core", "dep:aws-sdk-sqs", "dep:aws-sdk-s3", "dep:async-compression", "sources-aws_sqs", "tokio-util/io"]

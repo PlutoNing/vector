@@ -1,5 +1,4 @@
 #[cfg(any(
-    feature = "sources-apache_metrics",
     feature = "sources-utils-http",
 ))]
 pub(crate) fn http_error_code(code: u16) -> String {
