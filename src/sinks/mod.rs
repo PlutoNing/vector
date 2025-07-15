@@ -55,8 +55,6 @@ pub mod papertrail;
 pub mod postgres;
 #[cfg(feature = "sinks-prometheus")]
 pub mod prometheus;
-#[cfg(feature = "sinks-pulsar")]
-pub mod pulsar;
 #[cfg(feature = "sinks-redis")]
 pub mod redis;
 #[cfg(feature = "sinks-socket")]

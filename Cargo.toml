@@ -361,7 +361,6 @@ openssl-probe = { version = "0.1.6", default-features = false }
 ordered-float = { version = "4.6.0", default-features = false }
 percent-encoding = { version = "2.3.1", default-features = false }
 postgres-openssl = { version = "0.5.1", default-features = false, features = ["runtime"], optional = true }
-pulsar = { version = "6.3.1", default-features = false, features = ["tokio-runtime", "auth-oauth2", "flate2", "lz4", "snap", "zstd"], optional = true }
 quick-junit = { version = "0.5.1" }
 rand.workspace = true
 rand_distr.workspace = true
@@ -559,7 +558,6 @@ sources-logs = [
   "sources-http_client",
   "sources-internal_logs",
   "sources-journald",
-  "sources-pulsar",
   "sources-file_descriptor",
   "sources-redis",
   "sources-socket",
@@ -610,7 +608,6 @@ sources-prometheus = ["sources-prometheus-scrape", "sources-prometheus-remote-wr
 sources-prometheus-scrape = ["sinks-prometheus", "sources-utils-http-client", "vector-lib/prometheus"]
 sources-prometheus-remote-write = ["sinks-prometheus", "sources-utils-http", "vector-lib/prometheus"]
 sources-prometheus-pushgateway = ["sinks-prometheus", "sources-utils-http", "vector-lib/prometheus"]
-sources-pulsar = ["dep:apache-avro", "dep:pulsar"]
 sources-redis = ["dep:redis"]
 sources-socket = ["sources-utils-net", "tokio-util/net"]
 sources-splunk_hec = ["dep:roaring"]
@@ -713,7 +710,6 @@ sinks-logs = [
   "sinks-new_relic_logs",
   "sinks-papertrail",
   "sinks-postgres",
-  "sinks-pulsar",
   "sinks-redis",
   "sinks-sematext",
   "sinks-socket",
@@ -770,7 +766,6 @@ sinks-new_relic = []
 sinks-papertrail = ["dep:syslog"]
 sinks-prometheus = ["dep:base64", "dep:prost", "vector-lib/prometheus"]
 sinks-postgres = ["dep:sqlx"]
-sinks-pulsar = ["dep:apache-avro", "dep:pulsar", "dep:lru"]
 sinks-redis = ["dep:redis"]
 sinks-sematext = ["sinks-elasticsearch", "sinks-influxdb"]
 sinks-socket = ["sinks-utils-udp"]
@@ -806,7 +801,6 @@ all-integration-tests = [
   "postgresql_metrics-integration-tests",
   "postgres_sink-integration-tests",
   "prometheus-integration-tests",
-  "pulsar-integration-tests",
   "redis-integration-tests",
   "splunk-integration-tests",
   "webhdfs-integration-tests",
@@ -855,7 +849,6 @@ nginx-integration-tests = ["sources-nginx_metrics"]
 postgresql_metrics-integration-tests = ["sources-postgresql_metrics"]
 postgres_sink-integration-tests = ["sinks-postgres"]
 prometheus-integration-tests = ["sinks-prometheus", "sources-prometheus", "sinks-influxdb"]
-pulsar-integration-tests = ["sinks-pulsar", "sources-pulsar"]
 redis-integration-tests = ["sinks-redis", "sources-redis"]
 splunk-integration-tests = ["sinks-splunk_hec"]
 dnstap-integration-tests = ["sources-dnstap", "dep:bollard"]

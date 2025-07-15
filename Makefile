@@ -368,7 +368,7 @@ test-integration: test-integration-appsignal test-integration-aws test-integrati
 test-integration: test-integration-databend test-integration-docker-logs test-integration-elasticsearch
 test-integration: test-integration-eventstoredb test-integration-fluent test-integration-greptimedb test-integration-humio test-integration-http-client test-integration-influxdb
 test-integration: test-integration-loki test-integration-mongodb
-test-integration: test-integration-nginx test-integration-postgres test-integration-prometheus test-integration-pulsar
+test-integration: test-integration-nginx test-integration-postgres test-integration-prometheus
 test-integration: test-integration-redis test-integration-splunk test-integration-dnstap
 test-integration: test-integration-shutdown
 
