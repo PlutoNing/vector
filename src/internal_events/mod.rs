@@ -28,10 +28,6 @@ mod exec;
 mod file_descriptor;
 #[cfg(feature = "transforms-filter")]
 mod filter;
-#[cfg(feature = "sources-fluent")]
-mod fluent;
-#[cfg(feature = "sources-gcp_pubsub")]
-mod gcp_pubsub;
 #[cfg(any(feature = "sources-vector", feature = "sources-opentelemetry"))]
 mod grpc;
 mod heartbeat;
@@ -140,10 +136,6 @@ pub(crate) use self::file::*;
 pub(crate) use self::file_descriptor::*;
 #[cfg(feature = "transforms-filter")]
 pub(crate) use self::filter::*;
-#[cfg(feature = "sources-fluent")]
-pub(crate) use self::fluent::*;
-#[cfg(feature = "sources-gcp_pubsub")]
-pub(crate) use self::gcp_pubsub::*;
 #[cfg(any(feature = "sources-vector", feature = "sources-opentelemetry"))]
 pub(crate) use self::grpc::*;
 #[cfg(feature = "sources-host_metrics")]

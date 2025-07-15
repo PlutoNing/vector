@@ -541,8 +541,6 @@ aws-core = [
 # Anything that requires Protocol Buffers.
 protobuf-build = ["dep:tonic-build", "dep:prost-build"]
 
-gcp = ["dep:base64", "dep:goauth", "dep:smpl_jwt"]
-
 # Enrichment Tables
 # maybe essential
 enrichment-tables = ["enrichment-tables-geoip", "enrichment-tables-mmdb", "enrichment-tables-memory"]
@@ -567,8 +565,6 @@ sources-logs = [
   "sources-demo_logs",
   "sources-exec",
   "sources-file",
-  "sources-fluent",
-  "sources-gcp_pubsub",
   "sources-heroku_logs",
   "sources-http_server",
   "sources-http_client",
@@ -615,8 +611,6 @@ sources-eventstoredb_metrics = []
 sources-exec = []
 sources-file = ["vector-lib/file-source"]
 sources-file_descriptor = ["tokio-util/io"]
-sources-fluent = ["dep:base64", "sources-utils-net-tcp", "sources-utils-net-unix", "tokio-util/net", "dep:rmpv", "dep:rmp-serde", "dep:serde_bytes"]
-sources-gcp_pubsub = ["gcp", "dep:h2", "dep:prost", "dep:prost-types", "protobuf-build", "dep:tonic"]
 sources-heroku_logs = ["sources-utils-http", "sources-utils-http-query", "sources-http_server"]
 sources-host_metrics = ["heim/cpu", "heim/host", "heim/memory", "heim/net"]
 sources-http_client = ["sources-utils-http-client"]
@@ -729,7 +723,6 @@ sinks-logs = [
   "sinks-databend",
   "sinks-elasticsearch",
   "sinks-file",
-  "sinks-gcp",
   "sinks-greptimedb_logs",
   "sinks-honeycomb",
   "sinks-http",
@@ -788,8 +781,6 @@ sinks-console = []
 sinks-databend = ["dep:databend-client"]
 sinks-elasticsearch = ["transforms-metric_to_log"]
 sinks-file = ["dep:async-compression"]
-sinks-gcp = ["sinks-gcp-chronicle", "dep:base64", "gcp"]
-sinks-gcp-chronicle = ["gcp"]
 sinks-greptimedb_metrics = ["dep:greptimedb-ingester"]
 sinks-greptimedb_logs = ["dep:greptimedb-ingester"]
 sinks-honeycomb = []
@@ -828,16 +819,11 @@ all-integration-tests = [
   "aws-integration-tests",
   "axiom-integration-tests",
   "azure-integration-tests",
-  "chronicle-integration-tests",
   "clickhouse-integration-tests",
   "databend-integration-tests",
   "dnstap-integration-tests",
   "es-integration-tests",
   "eventstoredb_metrics-integration-tests",
-  "fluent-integration-tests",
-  "gcp-cloud-storage-integration-tests",
-  "gcp-integration-tests",
-  "gcp-pubsub-integration-tests",
   "greptimedb-integration-tests",
   "http-client-integration-tests",
   "humio-integration-tests",
@@ -886,15 +872,10 @@ aws-sqs-integration-tests = ["sinks-aws_sqs"]
 aws-sns-integration-tests = ["sinks-aws_sns"]
 axiom-integration-tests = ["sinks-axiom"]
 azure-blob-integration-tests = ["sinks-azure_blob"]
-chronicle-integration-tests = ["sinks-gcp"]
 clickhouse-integration-tests = ["sinks-clickhouse"]
 databend-integration-tests = ["sinks-databend"]
 es-integration-tests = ["sinks-elasticsearch", "aws-core"]
 eventstoredb_metrics-integration-tests = ["sources-eventstoredb_metrics"]
-fluent-integration-tests = ["docker", "sources-fluent"]
-gcp-cloud-storage-integration-tests = ["sinks-gcp"]
-gcp-integration-tests = ["sinks-gcp"]
-gcp-pubsub-integration-tests = ["sinks-gcp", "sources-gcp_pubsub"]
 greptimedb-integration-tests = ["sinks-greptimedb_metrics", "sinks-greptimedb_logs"]
 humio-integration-tests = ["sinks-humio"]
 http-client-integration-tests = ["sources-http_client"]

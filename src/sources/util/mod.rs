@@ -17,7 +17,6 @@ pub mod http;
 #[cfg(any(feature = "sources-http_client", feature = "sources-prometheus-scrape",))]
 pub mod http_client;
 #[cfg(any(
-    feature = "sources-gcp_pubsub",
     feature = "sources-mqtt"
 ))]
 mod message_decoding;
@@ -64,7 +63,6 @@ pub use self::http::decode;
 #[cfg(feature = "sources-utils-http-prelude")]
 pub use self::http::HttpSource;
 #[cfg(any(
-    feature = "sources-gcp_pubsub",
     feature = "sources-mqtt"
 ))]
 pub use self::message_decoding::decode_message;

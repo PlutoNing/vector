@@ -26,12 +26,6 @@ pub mod console;
 pub mod databend;
 #[cfg(feature = "sinks-file")]
 pub mod file;
-#[cfg(feature = "sinks-gcp")]
-pub mod gcp;
-#[cfg(feature = "sinks-gcp-chronicle")]
-pub mod gcp_chronicle;
-#[cfg(any(feature = "sinks-gcp-chronicle", feature = "sinks-gcp"))]
-pub mod gcs_common;
 #[cfg(any(
     feature = "sinks-greptimedb_metrics",
     feature = "sinks-greptimedb_logs"
