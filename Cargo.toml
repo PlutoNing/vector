@@ -565,7 +565,6 @@ sources-logs = [
   "sources-aws_s3",
   "sources-aws_sqs",
   "sources-demo_logs",
-  "sources-docker_logs",
   "sources-exec",
   "sources-file",
   "sources-fluent",
@@ -612,7 +611,6 @@ sources-aws_s3 = ["aws-core", "dep:aws-sdk-sqs", "dep:aws-sdk-s3", "dep:async-co
 sources-aws_sqs = ["aws-core", "dep:aws-sdk-sqs"]
 sources-demo_logs = ["dep:fakedata"]
 sources-dnstap = ["sources-utils-net-tcp", "dep:base64", "dep:hickory-proto", "dep:dnsmsg-parser", "dep:dnstap-parser", "protobuf-build", "dep:prost"]
-sources-docker_logs = ["docker"]
 sources-eventstoredb_metrics = []
 sources-exec = []
 sources-file = ["vector-lib/file-source"]
@@ -834,7 +832,6 @@ all-integration-tests = [
   "clickhouse-integration-tests",
   "databend-integration-tests",
   "dnstap-integration-tests",
-  "docker-logs-integration-tests",
   "es-integration-tests",
   "eventstoredb_metrics-integration-tests",
   "fluent-integration-tests",
@@ -892,7 +889,6 @@ azure-blob-integration-tests = ["sinks-azure_blob"]
 chronicle-integration-tests = ["sinks-gcp"]
 clickhouse-integration-tests = ["sinks-clickhouse"]
 databend-integration-tests = ["sinks-databend"]
-docker-logs-integration-tests = ["sources-docker_logs", "unix"]
 es-integration-tests = ["sinks-elasticsearch", "aws-core"]
 eventstoredb_metrics-integration-tests = ["sources-eventstoredb_metrics"]
 fluent-integration-tests = ["docker", "sources-fluent"]

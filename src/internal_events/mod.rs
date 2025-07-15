@@ -19,8 +19,6 @@ mod dedupe;
 mod demo_logs;
 #[cfg(feature = "sources-dnstap")]
 mod dnstap;
-#[cfg(feature = "sources-docker_logs")]
-mod docker_logs;
 mod encoding_transcode;
 #[cfg(feature = "sources-eventstoredb_metrics")]
 mod eventstoredb_metrics;
@@ -128,8 +126,6 @@ pub(crate) use self::dedupe::*;
 pub(crate) use self::demo_logs::*;
 #[cfg(feature = "sources-dnstap")]
 pub(crate) use self::dnstap::*;
-#[cfg(feature = "sources-docker_logs")]
-pub(crate) use self::docker_logs::*;
 #[cfg(feature = "sources-eventstoredb_metrics")]
 pub(crate) use self::eventstoredb_metrics::*;
 #[cfg(feature = "sources-exec")]
