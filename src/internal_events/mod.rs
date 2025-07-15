@@ -35,8 +35,6 @@ mod socket;
 mod tag_cardinality_limit;
 mod tcp;
 mod template;
-#[cfg(feature = "transforms-throttle")]
-mod throttle;
 mod udp;
 mod unix;
 
@@ -72,8 +70,6 @@ pub(crate) use self::remap::*;
 pub(crate) use self::sample::*;
 #[cfg(feature = "transforms-tag_cardinality_limit")]
 pub(crate) use self::tag_cardinality_limit::*;
-#[cfg(feature = "transforms-throttle")]
-pub(crate) use self::throttle::*;
 #[cfg(unix)]
 pub(crate) use self::unix::*;
 #[cfg(windows)]
