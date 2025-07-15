@@ -629,7 +629,6 @@ sinks-logs = [
   "sinks-console",
   "sinks-file",
   "sinks-http",
-  "sinks-papertrail",
   "sinks-postgres",
   "sinks-socket",
   "sinks-vector",
@@ -655,7 +654,6 @@ sinks-blackhole = []
 sinks-console = []
 sinks-file = ["dep:async-compression"]
 sinks-http = []
-sinks-papertrail = ["dep:syslog"]
 sinks-postgres = ["dep:sqlx"]
 sinks-socket = ["sinks-utils-udp"]
 sinks-utils-udp = []
