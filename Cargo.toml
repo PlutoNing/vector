@@ -369,7 +369,6 @@ rand_distr.workspace = true
 redis = { version = "0.32.3", default-features = false, features = ["connection-manager", "tokio-comp", "tokio-native-tls-comp"], optional = true }
 regex = { version = "1.11.1", default-features = false, features = ["std", "perf"] }
 roaring = { version = "0.11.0", default-features = false, features = ["std"], optional = true }
-rumqttc = { version = "0.24.0", default-features = false, features = ["use-rustls"], optional = true }
 seahash = { version = "4.1.0", default-features = false }
 smallvec = { version = "1", default-features = false, features = ["union", "serde"] }
 snap = { version = "1.1.1", default-features = false }
@@ -561,7 +560,6 @@ sources-logs = [
   "sources-http_client",
   "sources-internal_logs",
   "sources-journald",
-  "sources-mqtt",
   "sources-nats",
   "sources-pulsar",
   "sources-file_descriptor",
@@ -608,7 +606,6 @@ sources-static_metrics = []
 sources-journald = []
 #sources-kafka = ["dep:rdkafka"]
 sources-mongodb_metrics = ["dep:mongodb"]
-sources-mqtt = ["dep:rumqttc"]
 sources-nats = ["dep:async-nats", "dep:nkeys"]
 sources-nginx_metrics = ["dep:nom"]
 sources-postgresql_metrics = ["dep:postgres-openssl", "dep:tokio-postgres"]
@@ -715,7 +712,6 @@ sinks-logs = [
   "sinks-keep",
   "sinks-loki",
   "sinks-mezmo",
-  "sinks-mqtt",
   "sinks-nats",
   "sinks-new_relic",
   "sinks-new_relic_logs",
@@ -773,7 +769,6 @@ sinks-influxdb = []
 sinks-keep = []
 sinks-mezmo = []
 sinks-loki = ["loki-logproto"]
-sinks-mqtt = ["dep:rumqttc"]
 sinks-nats = ["dep:async-nats", "dep:nkeys"]
 sinks-new_relic_logs = ["sinks-http"]
 sinks-new_relic = []
@@ -862,7 +857,6 @@ http-client-integration-tests = ["sources-http_client"]
 influxdb-integration-tests = ["sinks-influxdb"]
 loki-integration-tests = ["sinks-loki"]
 mongodb_metrics-integration-tests = ["sources-mongodb_metrics"]
-mqtt-integration-tests = ["sinks-mqtt", "sources-mqtt"]
 nats-integration-tests = ["sinks-nats", "sources-nats"]
 nginx-integration-tests = ["sources-nginx_metrics"]
 postgresql_metrics-integration-tests = ["sources-postgresql_metrics"]

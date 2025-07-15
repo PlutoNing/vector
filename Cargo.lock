@@ -8564,24 +8564,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rumqttc"
-version = "0.24.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e1568e15fab2d546f940ed3a21f48bbbd1c494c90c99c4481339364a497f94a9"
-dependencies = [
- "bytes 1.10.1",
- "flume",
- "futures-util",
- "log",
- "rustls-native-certs 0.7.0",
- "rustls-pemfile 2.1.0",
- "rustls-webpki 0.102.8",
- "thiserror 1.0.68",
- "tokio",
- "tokio-rustls 0.25.0",
-]
-
-[[package]]
 name = "rust_decimal"
 version = "1.33.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -11417,7 +11399,6 @@ dependencies = [
  "rmpv",
  "roaring",
  "rstest",
- "rumqttc",
  "seahash",
  "semver 1.0.26",
  "serde",
