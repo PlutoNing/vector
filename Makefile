@@ -400,11 +400,6 @@ bench-remap-functions: ## Run remap-functions benches
 	${MAYBE_ENVIRONMENT_EXEC} CRITERION_HOME="$(CRITERION_HOME)" cargo bench --manifest-path lib/vrl/stdlib/Cargo.toml ${CARGO_BENCH_FLAGS}
 	${MAYBE_ENVIRONMENT_COPY_ARTIFACTS}
 
-.PHONY: bench-remap
-bench-remap: ## Run remap benches
-	${MAYBE_ENVIRONMENT_EXEC} cargo bench --no-default-features --features "remap-benches" --bench remap ${CARGO_BENCH_FLAGS}
-	${MAYBE_ENVIRONMENT_COPY_ARTIFACTS}
-
 .PHONY: bench-languages
 bench-languages:  ### Run language comparison benches
 	${MAYBE_ENVIRONMENT_EXEC} cargo bench --no-default-features --features "language-benches" --bench languages ${CARGO_BENCH_FLAGS}
@@ -413,12 +408,6 @@ bench-languages:  ### Run language comparison benches
 .PHONY: bench-metrics
 bench-metrics: ## Run metrics benches
 	${MAYBE_ENVIRONMENT_EXEC} cargo bench --no-default-features --features "metrics-benches" ${CARGO_BENCH_FLAGS}
-	${MAYBE_ENVIRONMENT_COPY_ARTIFACTS}
-
-.PHONY: bench-all
-bench-all: ### Run all benches
-bench-all: bench-remap-functions
-	${MAYBE_ENVIRONMENT_EXEC} cargo bench --no-default-features --features "benches remap-benches  metrics-benches language-benches" ${CARGO_BENCH_FLAGS}
 	${MAYBE_ENVIRONMENT_COPY_ARTIFACTS}
 
 ##@ Checking

@@ -624,7 +624,6 @@ benches = [
 language-benches = ["sinks-socket"]
 # Separate benching process for metrics due to the nature of the bootstrap procedures.
 statistic-benches = []
-#remap-benches = ["transforms-remap"]
 codecs-benches = []
 enrichment-tables-benches = ["enrichment-tables-geoip", "enrichment-tables-mmdb", "enrichment-tables-memory"]
 proptest = ["dep:proptest", "dep:proptest-derive", "vrl/proptest"]
@@ -634,10 +633,6 @@ name = "default"
 harness = false
 required-features = ["benches"]
 
-[[bench]]
-name = "remap"
-harness = false
-required-features = ["remap-benches"]
 
 [[bench]]
 name = "enrichment_tables"
