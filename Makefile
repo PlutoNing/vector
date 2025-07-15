@@ -405,11 +405,6 @@ bench-remap: ## Run remap benches
 	${MAYBE_ENVIRONMENT_EXEC} cargo bench --no-default-features --features "remap-benches" --bench remap ${CARGO_BENCH_FLAGS}
 	${MAYBE_ENVIRONMENT_COPY_ARTIFACTS}
 
-.PHONY: bench-transform
-bench-transform: ## Run transform benches
-	${MAYBE_ENVIRONMENT_EXEC} cargo bench --no-default-features --features "transform-benches" --bench transform ${CARGO_BENCH_FLAGS}
-	${MAYBE_ENVIRONMENT_COPY_ARTIFACTS}
-
 .PHONY: bench-languages
 bench-languages:  ### Run language comparison benches
 	${MAYBE_ENVIRONMENT_EXEC} cargo bench --no-default-features --features "language-benches" --bench languages ${CARGO_BENCH_FLAGS}

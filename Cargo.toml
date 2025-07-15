@@ -659,12 +659,6 @@ name = "distribution_statistic"
 harness = false
 required-features = ["statistic-benches"]
 
-[[bench]]
-name = "transform"
-path = "benches/transform/main.rs"
-harness = false
-test = false
-required-features = ["transform-benches"]
 
 [[bench]]
 name = "codecs"
