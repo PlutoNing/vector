@@ -4,8 +4,7 @@ mod encoding_config;
     feature = "sources-utils-http-auth",
     feature = "sources-utils-http-encoding",
     feature = "sources-utils-http-headers",
-    feature = "sources-utils-http-prelude",
-    feature = "sources-utils-http-query"
+    feature = "sources-utils-http-prelude"
 ))]
 pub mod http;
 pub mod multiline_config;
@@ -38,8 +37,6 @@ pub use wrappers::{AfterRead, AfterReadExt};
 
 #[cfg(feature = "sources-utils-http-headers")]
 pub use self::http::add_headers;
-#[cfg(feature = "sources-utils-http-query")]
-pub use self::http::add_query_parameters;
 #[cfg(any(
     feature = "sources-utils-http-encoding"
 ))]
