@@ -98,47 +98,6 @@ impl InternalEvent for HttpEventsReceived<'_> {
     }
 }
 
-#[cfg(feature = "sources-utils-http")]
-#[derive(Debug)]
-pub struct HttpBadRequest<'a> {
-    code: u16,
-    error_code: String,
-    message: &'a str,
-}
-
-#[cfg(feature = "sources-utils-http")]
-impl<'a> HttpBadRequest<'a> {
-    pub fn new(code: u16, message: &'a str) -> Self {
-        Self {
-            code,
-            error_code: super::prelude::http_error_code(code),
-            message,
-        }
-    }
-}
-
-#[cfg(feature = "sources-utils-http")]
-impl InternalEvent for HttpBadRequest<'_> {
-    fn emit(self) {
-        warn!(
-            message = "Received bad request.",
-            error = %self.message,
-            error_code = %self.error_code,
-            error_type = error_type::REQUEST_FAILED,
-            error_stage = error_stage::RECEIVING,
-            http_code = %self.code,
-
-        );
-        counter!(
-            "component_errors_total",
-            "error_code" => self.error_code,
-            "error_type" => error_type::REQUEST_FAILED,
-            "error_stage" => error_stage::RECEIVING,
-        )
-        .increment(1);
-    }
-}
-
 #[derive(Debug)]
 pub struct HttpDecompressError<'a> {
     pub error: &'a dyn Error,

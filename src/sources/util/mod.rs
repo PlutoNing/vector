@@ -1,11 +1,5 @@
 #![allow(missing_docs)]
 mod encoding_config;
-#[cfg(any(
-    feature = "sources-utils-http-auth",
-    feature = "sources-utils-http-encoding",
-    feature = "sources-utils-http-prelude"
-))]
-pub mod http;
 pub mod multiline_config;
 #[cfg(any(feature = "sources-utils-net-tcp", feature = "sources-utils-net-udp"))]
 pub mod net;
@@ -33,10 +27,3 @@ pub use unix_datagram::build_unix_datagram_source;
 #[cfg(all(unix, feature = "sources-utils-net-unix",))]
 pub use unix_stream::build_unix_stream_source;
 pub use wrappers::{AfterRead, AfterReadExt};
-
-#[cfg(any(
-    feature = "sources-utils-http-encoding"
-))]
-pub use self::http::decode;
-#[cfg(feature = "sources-utils-http-prelude")]
-pub use self::http::HttpSource;
