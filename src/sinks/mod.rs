@@ -11,10 +11,7 @@ pub mod blackhole;
 pub mod clickhouse;
 #[cfg(feature = "sinks-console")]
 pub mod console;
-#[cfg(feature = "sinks-databend")]
-pub mod databend;
 #[cfg(feature = "sinks-file")] 
-
 pub mod file;
 #[cfg(any(
     feature = "sinks-greptimedb_metrics",
