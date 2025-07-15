@@ -18,8 +18,6 @@ pub mod host_metrics;
 pub mod journald;
 #[cfg(feature = "sources-static_metrics")]
 pub mod static_metrics;
-#[cfg(feature = "sources-syslog")]
-pub mod syslog;
 
 pub mod util;
 
