@@ -11,8 +11,6 @@ pub mod codecs;
 mod common;
 mod conditions;
 
-#[cfg(feature = "transforms-impl-dedupe")]
-mod dedupe;
 #[cfg(feature = "sources-demo_logs")]
 mod demo_logs;
 mod encoding_transcode;
@@ -63,8 +61,6 @@ mod windows;
 pub(crate) use self::aggregate::*;
 #[cfg(feature = "api")]
 pub(crate) use self::api::*;
-#[cfg(feature = "transforms-impl-dedupe")]
-pub(crate) use self::dedupe::*;
 #[cfg(feature = "sources-demo_logs")]
 pub(crate) use self::demo_logs::*;
 #[cfg(feature = "sources-exec")]
