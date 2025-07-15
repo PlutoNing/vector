@@ -642,7 +642,6 @@ transforms-impl-reduce = []
 # Sinks
 sinks = ["sinks-logs", "sinks-metrics"]
 sinks-logs = [
-  "sinks-axiom",
   "sinks-azure_blob",
   "sinks-azure_monitor_logs",
   "sinks-blackhole",
@@ -687,7 +686,6 @@ sinks-aws_kinesis_streams = ["aws-core", "dep:aws-sdk-kinesis"]
 sinks-aws_s3 = ["dep:base64", "dep:md-5", "aws-core", "dep:aws-sdk-s3"]
 sinks-aws_sqs = ["aws-core", "dep:aws-sdk-sqs"]
 sinks-aws_sns = ["aws-core", "dep:aws-sdk-sns"]
-sinks-axiom = ["sinks-http"]
 sinks-azure_blob = ["dep:azure_core", "dep:azure_identity", "dep:azure_storage", "dep:azure_storage_blobs"]
 sinks-azure_monitor_logs = []
 sinks-blackhole = []
@@ -722,7 +720,6 @@ nightly = []
 
 # Integration testing-related features
 all-integration-tests = [
-  "axiom-integration-tests",
   "azure-integration-tests",
   "clickhouse-integration-tests",
   "databend-integration-tests",
@@ -741,7 +738,6 @@ azure-integration-tests = [
   "azure-blob-integration-tests"
 ]
 
-axiom-integration-tests = ["sinks-axiom"]
 azure-blob-integration-tests = ["sinks-azure_blob"]
 clickhouse-integration-tests = ["sinks-clickhouse"]
 databend-integration-tests = ["sinks-databend"]
