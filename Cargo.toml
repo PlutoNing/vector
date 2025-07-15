@@ -631,7 +631,6 @@ sinks-logs = [
   "sinks-http",
   "sinks-postgres",
   "sinks-socket",
-  "sinks-vector",
   "sinks-webhdfs",
   "sinks-websocket",
   "sinks-websocket-server",
@@ -640,7 +639,6 @@ sinks-metrics = [
   "sinks-aws_cloudwatch_metrics",
   "sinks-blackhole",
   "sinks-console",
-  "sinks-vector",
 ]
 
 sinks-aws_cloudwatch_logs = ["aws-core", "dep:aws-sdk-cloudwatchlogs", "dep:aws-sdk-kms"]
@@ -657,7 +655,6 @@ sinks-http = []
 sinks-postgres = ["dep:sqlx"]
 sinks-socket = ["sinks-utils-udp"]
 sinks-utils-udp = []
-sinks-vector = ["sinks-utils-udp", "dep:tonic", "protobuf-build", "dep:prost"]
 sinks-websocket = ["dep:tokio-tungstenite"]
 sinks-websocket-server = ["dep:tokio-tungstenite", "sources-utils-http-auth", "sources-utils-http-error", "sources-utils-http-prelude"]
 sinks-webhdfs = ["dep:opendal"]
