@@ -37,11 +37,6 @@ impl<T, F> AfterRead<T, F> {
     pub const fn get_ref(&self) -> &T {
         &self.inner
     }
-
-    #[cfg(all(unix, feature = "sources-utils-net-unix"))]
-    pub const fn get_mut_ref(&mut self) -> &mut T {
-        &mut self.inner
-    }
 }
 
 impl<T: AsyncRead, F> AsyncRead for AfterRead<T, F>

@@ -32,39 +32,6 @@ impl<E: std::error::Error> InternalEvent for UnixSocketOutgoingConnectionError<E
     }
 }
 
-#[cfg(all(
-    unix,
-    any(feature = "sources-utils-net-unix")
-))]
-#[derive(Debug)]
-pub struct UnixSocketError<'a, E> {
-    pub(crate) error: &'a E,
-    pub path: &'a std::path::Path,
-}
-
-#[cfg(all(
-    unix,
-    any(feature = "sources-utils-net-unix")
-))]
-impl<E: std::fmt::Display> InternalEvent for UnixSocketError<'_, E> {
-    fn emit(self) {
-        error!(
-            message = "Unix socket error.",
-            error = %self.error,
-            path = ?self.path,
-            error_type = error_type::CONNECTION_FAILED,
-            stage = error_stage::PROCESSING,
-
-        );
-        counter!(
-            "component_errors_total",
-            "error_type" => error_type::CONNECTION_FAILED,
-            "stage" => error_stage::PROCESSING,
-        )
-        .increment(1);
-    }
-}
-
 #[derive(Debug)]
 pub struct UnixSocketSendError<'a, E> {
     pub(crate) error: &'a E,
