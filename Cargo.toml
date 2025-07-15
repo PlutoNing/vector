@@ -561,7 +561,6 @@ sources-logs = [
 sources-metrics = [
   "dep:prost",
   "sources-aws_ecs_metrics",
-  "sources-eventstoredb_metrics",
   "sources-host_metrics",
   "sources-mongodb_metrics",
   "sources-nginx_metrics",
@@ -577,7 +576,6 @@ sources-aws_s3 = ["aws-core", "dep:aws-sdk-sqs", "dep:aws-sdk-s3", "dep:async-co
 sources-aws_sqs = ["aws-core", "dep:aws-sdk-sqs"]
 sources-demo_logs = ["dep:fakedata"]
 sources-dnstap = ["sources-utils-net-tcp", "dep:base64", "dep:hickory-proto", "dep:dnsmsg-parser", "dep:dnstap-parser", "protobuf-build", "dep:prost"]
-sources-eventstoredb_metrics = []
 sources-exec = []
 sources-file = ["vector-lib/file-source"]
 sources-file_descriptor = ["tokio-util/io"]
@@ -764,7 +762,6 @@ all-integration-tests = [
   "databend-integration-tests",
   "dnstap-integration-tests",
   "es-integration-tests",
-  "eventstoredb_metrics-integration-tests",
   "greptimedb-integration-tests",
   "http-client-integration-tests",
   "influxdb-integration-tests",
@@ -809,7 +806,6 @@ azure-blob-integration-tests = ["sinks-azure_blob"]
 clickhouse-integration-tests = ["sinks-clickhouse"]
 databend-integration-tests = ["sinks-databend"]
 es-integration-tests = ["sinks-elasticsearch", "aws-core"]
-eventstoredb_metrics-integration-tests = ["sources-eventstoredb_metrics"]
 greptimedb-integration-tests = ["sinks-greptimedb_metrics", "sinks-greptimedb_logs"]
 http-client-integration-tests = ["sources-http_client"]
 influxdb-integration-tests = ["sinks-influxdb"]
