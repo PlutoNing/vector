@@ -13,8 +13,6 @@ pub mod console;
 pub mod file;
 #[cfg(feature = "sinks-http")]
 pub mod http;
-#[cfg(any(feature = "sinks-influxdb"))]
-pub mod influxdb;
 #[cfg(feature = "sinks-keep")]
 pub mod keep;
 #[cfg(feature = "sinks-loki")]

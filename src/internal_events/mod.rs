@@ -31,8 +31,6 @@ mod http;
 pub mod http_client;
 #[cfg(feature = "sources-utils-http-client")]
 mod http_client_source;
-#[cfg(feature = "sinks-influxdb")]
-mod influxdb;
 #[cfg(all(unix, feature = "sources-journald"))]
 mod journald;
 #[cfg(feature = "transforms-log_to_metric")]
@@ -100,8 +98,6 @@ pub(crate) use self::filter::*;
 pub(crate) use self::host_metrics::*;
 #[cfg(feature = "sources-utils-http-client")]
 pub(crate) use self::http_client_source::*;
-#[cfg(feature = "sinks-influxdb")]
-pub(crate) use self::influxdb::*;
 #[cfg(all(unix, feature = "sources-journald"))]
 pub(crate) use self::journald::*;
 #[cfg(feature = "transforms-log_to_metric")]

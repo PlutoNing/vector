@@ -632,7 +632,6 @@ sinks-logs = [
   "sinks-console",
   "sinks-file",
   "sinks-http",
-  "sinks-influxdb",
   "sinks-keep",
   "sinks-loki",
   "sinks-mezmo",
@@ -650,7 +649,6 @@ sinks-metrics = [
   "sinks-aws_cloudwatch_metrics",
   "sinks-blackhole",
   "sinks-console",
-  "sinks-influxdb",
   "sinks-vector",
 ]
 
@@ -665,7 +663,6 @@ sinks-blackhole = []
 sinks-console = []
 sinks-file = ["dep:async-compression"]
 sinks-http = []
-sinks-influxdb = []
 sinks-keep = []
 sinks-mezmo = []
 sinks-loki = ["loki-logproto"]
@@ -687,7 +684,6 @@ nightly = []
 all-integration-tests = [
   "dnstap-integration-tests",
   "http-client-integration-tests",
-  "influxdb-integration-tests",
   "loki-integration-tests",
   "postgresql_metrics-integration-tests",
   "postgres_sink-integration-tests",
@@ -695,7 +691,6 @@ all-integration-tests = [
 ]
 
 http-client-integration-tests = ["sources-http_client"]
-influxdb-integration-tests = ["sinks-influxdb"]
 loki-integration-tests = ["sinks-loki"]
 postgresql_metrics-integration-tests = ["sources-postgresql_metrics"]
 postgres_sink-integration-tests = ["sinks-postgres"]
