@@ -427,28 +427,6 @@ fn timely_shutdown_journald() {
 }
 
 #[test]
-fn timely_shutdown_prometheus() {
-    let address = next_addr();
-    test_timely_shutdown_with_sub(
-        vector_with(create_file(PROMETHEUS_SINK_CONFIG), address, false),
-        |_| {
-            test_timely_shutdown(vector_with(
-                create_file(
-                    source_config(
-                        r#"
-        type = "prometheus_scrape"
-        hosts = ["http://${VECTOR_TEST_ADDRESS}"]"#,
-                    )
-                    .as_str(),
-                ),
-                address,
-                false,
-            ));
-        },
-    );
-}
-
-#[test]
 fn timely_shutdown_kafka() {
     test_timely_shutdown(source_vector(
         r#"

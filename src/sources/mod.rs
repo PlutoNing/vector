@@ -24,12 +24,6 @@ pub mod http_server;
 pub mod journald;
 #[cfg(feature = "sources-postgresql_metrics")]
 pub mod postgresql_metrics;
-#[cfg(any(
-    feature = "sources-prometheus-scrape",
-    feature = "sources-prometheus-remote-write",
-    feature = "sources-prometheus-pushgateway"
-))]
-pub mod prometheus;
 #[cfg(feature = "sources-socket")]
 pub mod socket;
 #[cfg(feature = "sources-static_metrics")]

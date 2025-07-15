@@ -48,12 +48,6 @@ mod parser;
 #[cfg(feature = "sources-postgresql_metrics")]
 mod postgresql_metrics;
 mod process;
-#[cfg(any(
-    feature = "sources-prometheus-scrape",
-    feature = "sources-prometheus-remote-write",
-    feature = "sinks-prometheus"
-))]
-mod prometheus;
 #[cfg(feature = "transforms-impl-reduce")]
 mod reduce;
 mod remap;
@@ -124,12 +118,6 @@ pub(crate) use self::metric_to_log::*;
 pub(crate) use self::parser::*;
 #[cfg(feature = "sources-postgresql_metrics")]
 pub(crate) use self::postgresql_metrics::*;
-#[cfg(any(
-    feature = "sources-prometheus-scrape",
-    feature = "sources-prometheus-remote-write",
-    feature = "sinks-prometheus"
-))]
-pub(crate) use self::prometheus::*;
 #[cfg(feature = "transforms-impl-reduce")]
 pub(crate) use self::reduce::*;
 #[cfg(feature = "transforms-remap")]

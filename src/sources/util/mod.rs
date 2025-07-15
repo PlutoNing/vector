@@ -12,7 +12,7 @@ pub mod framestream;
     feature = "sources-utils-http-query"
 ))]
 pub mod http;
-#[cfg(any(feature = "sources-http_client", feature = "sources-prometheus-scrape",))]
+#[cfg(any(feature = "sources-http_client"))]
 pub mod http_client;
 pub mod multiline_config;
 #[cfg(any(feature = "sources-utils-net-tcp", feature = "sources-utils-net-udp"))]
@@ -49,8 +49,6 @@ pub use self::http::add_headers;
 #[cfg(feature = "sources-utils-http-query")]
 pub use self::http::add_query_parameters;
 #[cfg(any(
-    feature = "sources-prometheus-scrape",
-    feature = "sources-prometheus-remote-write",
     feature = "sources-utils-http-encoding"
 ))]
 pub use self::http::decode;

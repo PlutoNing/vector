@@ -7033,19 +7033,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "prometheus-parser"
-version = "0.1.0"
-dependencies = [
- "indexmap 2.10.0",
- "nom 8.0.0",
- "prost 0.12.6",
- "prost-build 0.12.6",
- "prost-types 0.12.6",
- "snafu 0.8.6",
- "vector-common",
-]
-
-[[package]]
 name = "proptest"
 version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -10986,7 +10973,6 @@ dependencies = [
  "codecs",
  "enrichment",
  "file-source",
- "prometheus-parser",
  "vector-api-client",
  "vector-buffers",
  "vector-common",

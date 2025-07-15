@@ -37,9 +37,3 @@ pub mod config {
         WildcardMatching, MEMORY_BUFFER_DEFAULT_MAX_EVENTS,
     };
 }
-
-
-#[cfg(feature = "prometheus")]
-pub mod prometheus {
-    pub use prometheus_parser as parser;
-}

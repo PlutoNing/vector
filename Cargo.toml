@@ -110,7 +110,6 @@ members = [
   "lib/file-source",
   "lib/loki-logproto",
   "lib/portpicker",
-  "lib/prometheus-parser",
   "lib/tracing-limit",
   "lib/vector-api-client",
   "lib/vector-buffers",
@@ -561,7 +560,6 @@ sources-metrics = [
   "dep:prost",
   "sources-host_metrics",
   "sources-postgresql_metrics",
-  "sources-prometheus",
   "sources-static_metrics",
   "sources-statsd",
 ]
@@ -581,10 +579,6 @@ sources-http_server = ["sources-utils-http", "sources-utils-http-headers", "sour
 sources-static_metrics = []
 sources-journald = []
 sources-postgresql_metrics = ["dep:postgres-openssl", "dep:tokio-postgres"]
-sources-prometheus = ["sources-prometheus-scrape", "sources-prometheus-remote-write", "sources-prometheus-pushgateway"]
-sources-prometheus-scrape = ["sinks-prometheus", "sources-utils-http-client", "vector-lib/prometheus"]
-sources-prometheus-remote-write = ["sinks-prometheus", "sources-utils-http", "vector-lib/prometheus"]
-sources-prometheus-pushgateway = ["sinks-prometheus", "sources-utils-http", "vector-lib/prometheus"]
 sources-socket = ["sources-utils-net", "tokio-util/net"]
 sources-statsd = ["sources-utils-net", "tokio-util/net"]
 sources-stdin = ["tokio-util/io"]
@@ -696,7 +690,6 @@ sinks-metrics = [
   "sinks-console",
   "sinks-greptimedb_metrics",
   "sinks-influxdb",
-  "sinks-prometheus",
   "sinks-sematext",
   "sinks-statsd",
   "sinks-vector",
@@ -731,7 +724,6 @@ sinks-loki = ["loki-logproto"]
 sinks-new_relic_logs = ["sinks-http"]
 sinks-new_relic = []
 sinks-papertrail = ["dep:syslog"]
-sinks-prometheus = ["dep:base64", "dep:prost", "vector-lib/prometheus"]
 sinks-postgres = ["dep:sqlx"]
 sinks-sematext = ["sinks-elasticsearch", "sinks-influxdb"]
 sinks-socket = ["sinks-utils-udp"]
@@ -761,7 +753,6 @@ all-integration-tests = [
   "loki-integration-tests",
   "postgresql_metrics-integration-tests",
   "postgres_sink-integration-tests",
-  "prometheus-integration-tests",
   "webhdfs-integration-tests",
 ]
 
@@ -803,11 +794,10 @@ influxdb-integration-tests = ["sinks-influxdb"]
 loki-integration-tests = ["sinks-loki"]
 postgresql_metrics-integration-tests = ["sources-postgresql_metrics"]
 postgres_sink-integration-tests = ["sinks-postgres"]
-prometheus-integration-tests = ["sinks-prometheus", "sources-prometheus", "sinks-influxdb"]
 dnstap-integration-tests = ["sources-dnstap", "dep:bollard"]
 webhdfs-integration-tests = ["sinks-webhdfs"]
 disable-resolv-conf = []
-shutdown-tests = ["api", "sinks-blackhole", "sinks-console", "sinks-prometheus", "sources", "transforms-lua", "transforms-remap", "unix"]
+shutdown-tests = ["api", "sinks-blackhole", "sinks-console", "sources", "transforms-lua", "transforms-remap", "unix"]
 cli-tests = ["sinks-blackhole", "sinks-socket", "sources-demo_logs", "sources-file"]
 test-utils = []
 

@@ -35,7 +35,7 @@ pub mod greptimedb;
 pub mod honeycomb;
 #[cfg(feature = "sinks-http")]
 pub mod http;
-#[cfg(any(feature = "sinks-influxdb", feature = "prometheus-integration-tests"))]
+#[cfg(any(feature = "sinks-influxdb"))]
 pub mod influxdb;
 #[cfg(feature = "sinks-keep")]
 pub mod keep;
@@ -51,8 +51,6 @@ pub mod opendal_common;
 pub mod papertrail;
 #[cfg(feature = "sinks-postgres")]
 pub mod postgres;
-#[cfg(feature = "sinks-prometheus")]
-pub mod prometheus;
 #[cfg(feature = "sinks-socket")]
 pub mod socket;
 #[cfg(feature = "sinks-statsd")]
