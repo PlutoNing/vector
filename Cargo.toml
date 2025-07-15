@@ -560,7 +560,6 @@ sources-logs = [
 sources-metrics = [
   "dep:prost",
   "sources-host_metrics",
-  "sources-nginx_metrics",
   "sources-postgresql_metrics",
   "sources-prometheus",
   "sources-static_metrics",
@@ -581,7 +580,6 @@ sources-http_client = ["sources-utils-http-client"]
 sources-http_server = ["sources-utils-http", "sources-utils-http-headers", "sources-utils-http-query"]
 sources-static_metrics = []
 sources-journald = []
-sources-nginx_metrics = ["dep:nom"]
 sources-postgresql_metrics = ["dep:postgres-openssl", "dep:tokio-postgres"]
 sources-prometheus = ["sources-prometheus-scrape", "sources-prometheus-remote-write", "sources-prometheus-pushgateway"]
 sources-prometheus-scrape = ["sinks-prometheus", "sources-utils-http-client", "vector-lib/prometheus"]
@@ -761,7 +759,6 @@ all-integration-tests = [
   "http-client-integration-tests",
   "influxdb-integration-tests",
   "loki-integration-tests",
-  "nginx-integration-tests",
   "postgresql_metrics-integration-tests",
   "postgres_sink-integration-tests",
   "prometheus-integration-tests",
@@ -804,7 +801,6 @@ greptimedb-integration-tests = ["sinks-greptimedb_metrics", "sinks-greptimedb_lo
 http-client-integration-tests = ["sources-http_client"]
 influxdb-integration-tests = ["sinks-influxdb"]
 loki-integration-tests = ["sinks-loki"]
-nginx-integration-tests = ["sources-nginx_metrics"]
 postgresql_metrics-integration-tests = ["sources-postgresql_metrics"]
 postgres_sink-integration-tests = ["sinks-postgres"]
 prometheus-integration-tests = ["sinks-prometheus", "sources-prometheus", "sinks-influxdb"]

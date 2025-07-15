@@ -43,8 +43,6 @@ mod loki;
 mod lua;
 #[cfg(feature = "transforms-metric_to_log")]
 mod metric_to_log;
-#[cfg(feature = "sources-nginx_metrics")]
-mod nginx_metrics;
 mod open;
 mod parser;
 #[cfg(feature = "sources-postgresql_metrics")]
@@ -122,8 +120,6 @@ pub(crate) use self::loki::*;
 pub(crate) use self::lua::*;
 #[cfg(feature = "transforms-metric_to_log")]
 pub(crate) use self::metric_to_log::*;
-#[cfg(feature = "sources-nginx_metrics")]
-pub(crate) use self::nginx_metrics::*;
 #[allow(unused_imports)]
 pub(crate) use self::parser::*;
 #[cfg(feature = "sources-postgresql_metrics")]
