@@ -13,14 +13,10 @@ pub mod console;
 pub mod file;
 #[cfg(feature = "sinks-http")]
 pub mod http;
-#[cfg(feature = "sinks-webhdfs")]
-pub mod opendal_common;
 #[cfg(feature = "sinks-postgres")]
 pub mod postgres;
 #[cfg(feature = "sinks-socket")]
 pub mod socket;
-#[cfg(feature = "sinks-webhdfs")]
-pub mod webhdfs;
 #[cfg(feature = "sinks-websocket")]
 pub mod websocket;
 #[cfg(feature = "sinks-websocket-server")]

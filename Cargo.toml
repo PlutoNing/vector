@@ -249,10 +249,6 @@ aws-smithy-runtime = { version = "1.8.3", default-features = false, features = [
 aws-smithy-runtime-api = { version = "1.7.3", default-features = false, optional = true }
 aws-smithy-types = { version = "1.2.11", default-features = false, features = ["rt-tokio"], optional = true }
 
-
-# OpenDAL
-opendal = { version = "0.53", default-features = false, features = ["services-webhdfs"], optional = true }
-
 # Tower
 tower = { version = "0.5.2", default-features = false, features = ["buffer", "limit", "retry", "timeout", "util", "balance", "discover"] }
 tower-http = { version = "0.4.4", default-features = false, features = ["compression-full", "decompression-gzip", "trace"] }
@@ -631,7 +627,6 @@ sinks-logs = [
   "sinks-http",
   "sinks-postgres",
   "sinks-socket",
-  "sinks-webhdfs",
   "sinks-websocket",
   "sinks-websocket-server",
 ]
@@ -657,7 +652,6 @@ sinks-socket = ["sinks-utils-udp"]
 sinks-utils-udp = []
 sinks-websocket = ["dep:tokio-tungstenite"]
 sinks-websocket-server = ["dep:tokio-tungstenite", "sources-utils-http-auth", "sources-utils-http-error", "sources-utils-http-prelude"]
-sinks-webhdfs = ["dep:opendal"]
 
 # Identifies that the build is a nightly build
 nightly = []
@@ -668,14 +662,12 @@ all-integration-tests = [
   "http-client-integration-tests",
   "postgresql_metrics-integration-tests",
   "postgres_sink-integration-tests",
-  "webhdfs-integration-tests",
 ]
 
 http-client-integration-tests = ["sources-http_client"]
 postgresql_metrics-integration-tests = ["sources-postgresql_metrics"]
 postgres_sink-integration-tests = ["sinks-postgres"]
 dnstap-integration-tests = ["sources-dnstap", "dep:bollard"]
-webhdfs-integration-tests = ["sinks-webhdfs"]
 disable-resolv-conf = []
 shutdown-tests = ["api", "sinks-blackhole", "sinks-console", "sources", "transforms-lua", "transforms-remap", "unix"]
 cli-tests = ["sinks-blackhole", "sinks-socket", "sources-demo_logs", "sources-file"]
