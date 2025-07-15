@@ -560,7 +560,6 @@ sources-logs = [
 ]
 sources-metrics = [
   "dep:prost",
-  "sources-aws_ecs_metrics",
   "sources-host_metrics",
   "sources-mongodb_metrics",
   "sources-nginx_metrics",
