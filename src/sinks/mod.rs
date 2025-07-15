@@ -5,9 +5,6 @@ use snafu::Snafu;
 pub mod prelude;
 pub mod util;
 
-
-#[cfg(feature = "sinks-appsignal")]
-pub mod appsignal;
 #[cfg(feature = "sinks-axiom")]
 pub mod axiom;
 #[cfg(feature = "sinks-azure_blob")]

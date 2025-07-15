@@ -642,7 +642,6 @@ transforms-impl-reduce = []
 # Sinks
 sinks = ["sinks-logs", "sinks-metrics"]
 sinks-logs = [
-  "sinks-appsignal",
   "sinks-aws_cloudwatch_logs",
   "sinks-aws_kinesis_firehose",
   "sinks-aws_kinesis_streams",
@@ -678,7 +677,6 @@ sinks-logs = [
   "sinks-websocket-server",
 ]
 sinks-metrics = [
-  "sinks-appsignal",
   "sinks-aws_cloudwatch_metrics",
   "sinks-blackhole",
   "sinks-console",
@@ -688,7 +686,6 @@ sinks-metrics = [
   "sinks-vector",
 ]
 
-sinks-appsignal = []
 sinks-aws_cloudwatch_logs = ["aws-core", "dep:aws-sdk-cloudwatchlogs", "dep:aws-sdk-kms"]
 sinks-aws_cloudwatch_metrics = ["aws-core", "dep:aws-sdk-cloudwatch"]
 sinks-aws_kinesis_firehose = ["aws-core", "dep:aws-sdk-firehose"]
@@ -731,7 +728,6 @@ nightly = []
 
 # Integration testing-related features
 all-integration-tests = [
-  "appsignal-integration-tests",
   "axiom-integration-tests",
   "azure-integration-tests",
   "clickhouse-integration-tests",
@@ -746,9 +742,6 @@ all-integration-tests = [
   "postgres_sink-integration-tests",
   "webhdfs-integration-tests",
 ]
-
-appsignal-integration-tests = ["sinks-appsignal"]
-
 
 azure-integration-tests = [
   "azure-blob-integration-tests"
