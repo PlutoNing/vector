@@ -575,16 +575,15 @@ sinks-console = []
 sinks-file = ["dep:async-compression"]
 sinks-postgres = ["dep:sqlx"]
 
-sinks-utils-udp = []
 # Identifies that the build is a nightly build
 nightly = []
 
 # Integration testing-related features
 all-integration-tests = [
-  "postgres_sink-integration-tests",
+
 ]
 
-postgres_sink-integration-tests = ["sinks-postgres"]
+
 disable-resolv-conf = []
 shutdown-tests = ["api", "sinks-blackhole", "sinks-console", "sources", "unix"]
 cli-tests = ["sinks-blackhole",  "sources-demo_logs", "sources-file"]
