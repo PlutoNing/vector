@@ -164,7 +164,7 @@ impl Builder {
 #[derive(Debug, Clone)]
 pub struct SourceSender {
     // The default output is optional because some sources, e.g. `datadog_agent`
-    // and `opentelemetry`, can be configured to only output to named outputs.
+    // , can be configured to only output to named outputs.
     default_output: Option<Output>,
     named_outputs: HashMap<String, Output>,
 }

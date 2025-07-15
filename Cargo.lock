@@ -6867,23 +6867,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "opentelemetry-proto"
-version = "0.1.0"
-dependencies = [
- "bytes 1.10.1",
- "chrono",
- "hex",
- "ordered-float 4.6.0",
- "prost 0.12.6",
- "prost-build 0.12.6",
- "tonic 0.11.0",
- "tonic-build 0.11.0",
- "vector-core",
- "vector-lookup",
- "vrl",
-]
-
-[[package]]
 name = "option-ext"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -11783,7 +11766,6 @@ dependencies = [
  "codecs",
  "enrichment",
  "file-source",
- "opentelemetry-proto",
  "prometheus-parser",
  "vector-api-client",
  "vector-buffers",

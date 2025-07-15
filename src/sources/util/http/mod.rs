@@ -2,7 +2,6 @@
 mod encoding;
 #[cfg(any(
     feature = "sources-http_server",
-    feature = "sources-opentelemetry",
     feature = "sources-utils-http-headers"
 ))]
 mod headers;
