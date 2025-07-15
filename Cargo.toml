@@ -523,7 +523,6 @@ sources-logs = [
   "sources-file",
   "sources-journald",
   "sources-file_descriptor",
-  "sources-socket",
   "sources-stdin",
   "sources-syslog",
 ]
@@ -540,7 +539,6 @@ sources-file_descriptor = ["tokio-util/io"]
 sources-host_metrics = ["heim/cpu", "heim/host", "heim/memory", "heim/net"]
 sources-static_metrics = []
 sources-journald = []
-sources-socket = ["sources-utils-net", "tokio-util/net"]
 sources-stdin = ["tokio-util/io"]
 sources-syslog = ["codecs-syslog", "sources-utils-net", "tokio-util/net"]
 sources-utils-net = ["sources-utils-net-tcp", "sources-utils-net-udp", "sources-utils-net-unix"]
@@ -667,12 +665,11 @@ benches = [
   "sinks-http",
   "sinks-socket",
   "sources-file",
-  "sources-socket",
   "sources-syslog",
   "transforms-lua",
   "transforms-sample",
 ]
-language-benches = ["sinks-socket", "sources-socket", "transforms-lua", "transforms-remap"]
+language-benches = ["sinks-socket", "transforms-lua", "transforms-remap"]
 # Separate benching process for metrics due to the nature of the bootstrap procedures.
 statistic-benches = []
 remap-benches = ["transforms-remap"]

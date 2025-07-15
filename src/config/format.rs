@@ -170,7 +170,6 @@ mod tests {
     // Here we test that the deserializations from various formats match
     // the TOML format.
     #[cfg(all(
-        feature = "sources-socket",
         feature = "transforms-sample",
         feature = "sinks-socket"
     ))]

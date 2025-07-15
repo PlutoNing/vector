@@ -16,8 +16,6 @@ pub mod file_descriptors;
 pub mod host_metrics;
 #[cfg(all(unix, feature = "sources-journald"))]
 pub mod journald;
-#[cfg(feature = "sources-socket")]
-pub mod socket;
 #[cfg(feature = "sources-static_metrics")]
 pub mod static_metrics;
 #[cfg(feature = "sources-syslog")]

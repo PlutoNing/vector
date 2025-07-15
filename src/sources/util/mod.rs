@@ -5,11 +5,9 @@ pub mod multiline_config;
 pub mod net;
 #[cfg(all(
     unix,
-    any(feature = "sources-socket", feature = "sources-utils-net-unix",)
+    any(feature = "sources-utils-net-unix",)
 ))]
 pub mod unix;
-#[cfg(all(unix, feature = "sources-socket"))]
-mod unix_datagram;
 #[cfg(all(unix, feature = "sources-utils-net-unix"))]
 mod unix_stream;
 mod wrappers;
@@ -19,11 +17,9 @@ pub use encoding_config::EncodingConfig;
 pub use multiline_config::MultilineConfig;
 #[cfg(all(
     unix,
-    any(feature = "sources-socket", feature = "sources-utils-net-unix",)
+    any( feature = "sources-utils-net-unix",)
 ))]
 pub use unix::change_socket_permissions;
-#[cfg(all(unix, feature = "sources-socket",))]
-pub use unix_datagram::build_unix_datagram_source;
 #[cfg(all(unix, feature = "sources-utils-net-unix",))]
 pub use unix_stream::build_unix_stream_source;
 pub use wrappers::{AfterRead, AfterReadExt};
