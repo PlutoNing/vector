@@ -28,8 +28,6 @@ mod exec;
 mod file_descriptor;
 #[cfg(feature = "transforms-filter")]
 mod filter;
-#[cfg(any(feature = "sources-vector"))]
-mod grpc;
 mod heartbeat;
 #[cfg(feature = "sources-host_metrics")]
 mod host_metrics;
@@ -121,8 +119,6 @@ pub(crate) use self::file::*;
 pub(crate) use self::file_descriptor::*;
 #[cfg(feature = "transforms-filter")]
 pub(crate) use self::filter::*;
-#[cfg(any(feature = "sources-vector"))]
-pub(crate) use self::grpc::*;
 #[cfg(feature = "sources-host_metrics")]
 pub(crate) use self::host_metrics::*;
 #[cfg(feature = "sources-utils-http-client")]

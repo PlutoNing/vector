@@ -560,7 +560,6 @@ sources-logs = [
   "sources-socket",
   "sources-stdin",
   "sources-syslog",
-  "sources-vector",
 ]
 sources-metrics = [
   "dep:prost",
@@ -574,7 +573,6 @@ sources-metrics = [
   "sources-prometheus",
   "sources-static_metrics",
   "sources-statsd",
-  "sources-vector",
 ]
 
 sources-apache_metrics = ["sources-utils-http-client"]
@@ -617,8 +615,6 @@ sources-utils-net = ["sources-utils-net-tcp", "sources-utils-net-udp", "sources-
 sources-utils-net-tcp = ["listenfd", "dep:ipnet"]
 sources-utils-net-udp = ["listenfd"]
 sources-utils-net-unix = []
-
-sources-vector = ["dep:prost", "dep:tonic", "protobuf-build"]
 
 # Transforms
 transforms = ["transforms-logs", "transforms-metrics"]
@@ -854,7 +850,7 @@ vector-unit-test-tests = [
   "sinks-console"
 ]
 
-component-validation-runner = ["dep:tonic", "sources-vector", "sinks-vector"]
+component-validation-runner = ["dep:tonic"]
 # For now, only include components that implement ValidatableComponent.
 # In the future, this can change to simply reference the targets `sources`, `transforms`, `sinks`
 component-validation-tests = [

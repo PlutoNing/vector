@@ -57,8 +57,6 @@ pub mod prometheus;
 pub mod socket;
 #[cfg(feature = "sinks-statsd")]
 pub mod statsd;
-#[cfg(feature = "sinks-vector")]
-pub mod vector;
 #[cfg(feature = "sinks-webhdfs")]
 pub mod webhdfs;
 #[cfg(feature = "sinks-websocket")]

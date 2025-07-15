@@ -5,7 +5,6 @@ crate::cli_subcommands! {
     manifests,
     mod publish_metadata,
     release_cue,
-    mod vector,
     mod vrl_wasm,
 }
 

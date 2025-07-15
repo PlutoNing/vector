@@ -46,8 +46,6 @@ pub mod static_metrics;
 pub mod statsd;
 #[cfg(feature = "sources-syslog")]
 pub mod syslog;
-#[cfg(feature = "sources-vector")]
-pub mod vector;
 
 pub mod util;
 
