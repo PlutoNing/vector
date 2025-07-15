@@ -3,7 +3,6 @@ mod encoding_config;
 #[cfg(any(
     feature = "sources-utils-http-auth",
     feature = "sources-utils-http-encoding",
-    feature = "sources-utils-http-headers",
     feature = "sources-utils-http-prelude"
 ))]
 pub mod http;
@@ -35,8 +34,6 @@ pub use unix_datagram::build_unix_datagram_source;
 pub use unix_stream::build_unix_stream_source;
 pub use wrappers::{AfterRead, AfterReadExt};
 
-#[cfg(feature = "sources-utils-http-headers")]
-pub use self::http::add_headers;
 #[cfg(any(
     feature = "sources-utils-http-encoding"
 ))]
