@@ -13,8 +13,6 @@ pub mod console;
 pub mod file;
 #[cfg(feature = "sinks-http")]
 pub mod http;
-#[cfg(feature = "sinks-new_relic")]
-pub mod new_relic;
 #[cfg(feature = "sinks-webhdfs")]
 pub mod opendal_common;
 #[cfg(feature = "sinks-papertrail")]
