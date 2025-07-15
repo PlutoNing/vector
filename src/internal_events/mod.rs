@@ -23,8 +23,6 @@ mod heartbeat;
 mod host_metrics;
 mod http;
 pub mod http_client;
-#[cfg(feature = "transforms-metric_to_log")]
-mod metric_to_log;
 mod open;
 mod parser;
 mod process;
@@ -64,8 +62,6 @@ pub(crate) use self::file::*;
 pub(crate) use self::file_descriptor::*;
 #[cfg(feature = "sources-host_metrics")]
 pub(crate) use self::host_metrics::*;
-#[cfg(feature = "transforms-metric_to_log")]
-pub(crate) use self::metric_to_log::*;
 #[allow(unused_imports)]
 pub(crate) use self::parser::*;
 #[cfg(feature = "transforms-impl-reduce")]

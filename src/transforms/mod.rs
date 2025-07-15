@@ -9,8 +9,6 @@ pub mod sample;
 
 #[cfg(feature = "transforms-exclusive-route")]
 mod exclusive_route;
-#[cfg(feature = "transforms-metric_to_log")]
-pub mod metric_to_log;
 #[cfg(feature = "transforms-remap")]
 pub mod remap;
 #[cfg(feature = "transforms-route")]
