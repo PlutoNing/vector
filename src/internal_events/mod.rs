@@ -69,8 +69,6 @@ mod reduce;
 mod remap;
 mod sample;
 mod socket;
-#[cfg(any(feature = "sources-splunk_hec", feature = "sinks-splunk_hec"))]
-mod splunk_hec;
 #[cfg(feature = "sinks-statsd")]
 mod statsd_sink;
 #[cfg(feature = "transforms-tag_cardinality_limit")]
@@ -159,8 +157,6 @@ pub(crate) use self::reduce::*;
 pub(crate) use self::remap::*;
 #[cfg(feature = "transforms-impl-sample")]
 pub(crate) use self::sample::*;
-#[cfg(any(feature = "sources-splunk_hec", feature = "sinks-splunk_hec"))]
-pub(crate) use self::splunk_hec::*;
 #[cfg(feature = "sinks-statsd")]
 pub(crate) use self::statsd_sink::*;
 #[cfg(feature = "transforms-tag_cardinality_limit")]

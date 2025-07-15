@@ -39,8 +39,7 @@ mod doesnt_reload;
 mod end_to_end;
 #[cfg(all(
     feature = "sources-prometheus",
-    feature = "sinks-prometheus",
-    feature = "sources-splunk_hec"
+    feature = "sinks-prometheus"
 ))]
 mod reload;
 #[cfg(all(feature = "sinks-console", feature = "sources-demo_logs"))]

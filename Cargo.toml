@@ -558,7 +558,6 @@ sources-logs = [
   "sources-journald",
   "sources-file_descriptor",
   "sources-socket",
-  "sources-splunk_hec",
   "sources-stdin",
   "sources-syslog",
   "sources-vector",
@@ -603,7 +602,6 @@ sources-prometheus-scrape = ["sinks-prometheus", "sources-utils-http-client", "v
 sources-prometheus-remote-write = ["sinks-prometheus", "sources-utils-http", "vector-lib/prometheus"]
 sources-prometheus-pushgateway = ["sinks-prometheus", "sources-utils-http", "vector-lib/prometheus"]
 sources-socket = ["sources-utils-net", "tokio-util/net"]
-sources-splunk_hec = ["dep:roaring"]
 sources-statsd = ["sources-utils-net", "tokio-util/net"]
 sources-stdin = ["tokio-util/io"]
 sources-syslog = ["codecs-syslog", "sources-utils-net", "tokio-util/net"]
@@ -694,7 +692,6 @@ sinks-logs = [
   "sinks-greptimedb_logs",
   "sinks-honeycomb",
   "sinks-http",
-  "sinks-humio",
   "sinks-influxdb",
   "sinks-keep",
   "sinks-loki",
@@ -705,7 +702,6 @@ sinks-logs = [
   "sinks-postgres",
   "sinks-sematext",
   "sinks-socket",
-  "sinks-splunk_hec",
   "sinks-vector",
   "sinks-webhdfs",
   "sinks-websocket",
@@ -717,13 +713,11 @@ sinks-metrics = [
   "sinks-blackhole",
   "sinks-console",
   "sinks-greptimedb_metrics",
-  "sinks-humio",
   "sinks-influxdb",
   "sinks-prometheus",
   "sinks-sematext",
   "sinks-statsd",
   "sinks-vector",
-  "sinks-splunk_hec"
 ]
 
 sinks-appsignal = []
@@ -748,7 +742,6 @@ sinks-greptimedb_metrics = ["dep:greptimedb-ingester"]
 sinks-greptimedb_logs = ["dep:greptimedb-ingester"]
 sinks-honeycomb = []
 sinks-http = []
-sinks-humio = ["sinks-splunk_hec", "transforms-metric_to_log"]
 sinks-influxdb = []
 sinks-keep = []
 sinks-mezmo = []
@@ -760,7 +753,6 @@ sinks-prometheus = ["dep:base64", "dep:prost", "vector-lib/prometheus"]
 sinks-postgres = ["dep:sqlx"]
 sinks-sematext = ["sinks-elasticsearch", "sinks-influxdb"]
 sinks-socket = ["sinks-utils-udp"]
-sinks-splunk_hec = []
 sinks-statsd = ["sinks-utils-udp", "tokio-util/net"]
 sinks-utils-udp = []
 sinks-vector = ["sinks-utils-udp", "dep:tonic", "protobuf-build", "dep:prost"]
@@ -784,7 +776,6 @@ all-integration-tests = [
   "eventstoredb_metrics-integration-tests",
   "greptimedb-integration-tests",
   "http-client-integration-tests",
-  "humio-integration-tests",
   "influxdb-integration-tests",
   "loki-integration-tests",
   "mongodb_metrics-integration-tests",
@@ -792,7 +783,6 @@ all-integration-tests = [
   "postgresql_metrics-integration-tests",
   "postgres_sink-integration-tests",
   "prometheus-integration-tests",
-  "splunk-integration-tests",
   "webhdfs-integration-tests",
 ]
 
@@ -830,7 +820,6 @@ databend-integration-tests = ["sinks-databend"]
 es-integration-tests = ["sinks-elasticsearch", "aws-core"]
 eventstoredb_metrics-integration-tests = ["sources-eventstoredb_metrics"]
 greptimedb-integration-tests = ["sinks-greptimedb_metrics", "sinks-greptimedb_logs"]
-humio-integration-tests = ["sinks-humio"]
 http-client-integration-tests = ["sources-http_client"]
 influxdb-integration-tests = ["sinks-influxdb"]
 loki-integration-tests = ["sinks-loki"]
@@ -839,7 +828,6 @@ nginx-integration-tests = ["sources-nginx_metrics"]
 postgresql_metrics-integration-tests = ["sources-postgresql_metrics"]
 postgres_sink-integration-tests = ["sinks-postgres"]
 prometheus-integration-tests = ["sinks-prometheus", "sources-prometheus", "sinks-influxdb"]
-splunk-integration-tests = ["sinks-splunk_hec"]
 dnstap-integration-tests = ["sources-dnstap", "dep:bollard"]
 webhdfs-integration-tests = ["sinks-webhdfs"]
 disable-resolv-conf = []
@@ -874,8 +862,6 @@ component-validation-tests = [
   "sources-http_client",
   "sources-http_server",
   "sinks-http",
-  "sinks-splunk_hec",
-  "sources-splunk_hec",
 ]
 
 # Grouping together features for benchmarks. We exclude the API client due to it causing the build process to run out

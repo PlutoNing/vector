@@ -35,8 +35,6 @@ pub mod greptimedb;
 pub mod honeycomb;
 #[cfg(feature = "sinks-http")]
 pub mod http;
-#[cfg(feature = "sinks-humio")]
-pub mod humio;
 #[cfg(any(feature = "sinks-influxdb", feature = "prometheus-integration-tests"))]
 pub mod influxdb;
 #[cfg(feature = "sinks-keep")]
@@ -57,8 +55,6 @@ pub mod postgres;
 pub mod prometheus;
 #[cfg(feature = "sinks-socket")]
 pub mod socket;
-#[cfg(feature = "sinks-splunk_hec")]
-pub mod splunk_hec;
 #[cfg(feature = "sinks-statsd")]
 pub mod statsd;
 #[cfg(feature = "sinks-vector")]

@@ -489,15 +489,6 @@ fn timely_shutdown_socket_unix() {
     ));
 }
 
-#[test]
-fn timely_shutdown_splunk_hec() {
-    vector::test_util::trace_init();
-    test_timely_shutdown(source_vector(
-        r#"
-    type = "splunk_hec"
-    address = "${VECTOR_TEST_ADDRESS}""#,
-    ));
-}
 
 #[test]
 fn timely_shutdown_statsd() {

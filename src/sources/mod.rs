@@ -40,8 +40,6 @@ pub mod postgresql_metrics;
 pub mod prometheus;
 #[cfg(feature = "sources-socket")]
 pub mod socket;
-#[cfg(feature = "sources-splunk_hec")]
-pub mod splunk_hec;
 #[cfg(feature = "sources-static_metrics")]
 pub mod static_metrics;
 #[cfg(feature = "sources-statsd")]

@@ -16,7 +16,6 @@ use crate::{
     sinks::prometheus::exporter::PrometheusExporterConfig,
     sources::{
         internal_metrics::InternalMetricsConfig, prometheus::PrometheusRemoteWriteConfig,
-        splunk_hec::SplunkConfig,
     },
     test_util::{self, mock::basic_sink, next_addr, start_topology, temp_dir, wait_for_tcp},
 };
@@ -44,11 +43,6 @@ fn prom_exporter_sink(addr: SocketAddr, flush_period_secs: u64) -> PrometheusExp
     }
 }
 
-fn splunk_source_config(addr: SocketAddr) -> SplunkConfig {
-    let mut config = SplunkConfig::default();
-    config.address = addr;
-    config
-}
 
 #[tokio::test]
 async fn topology_reuse_old_port() {
@@ -77,14 +71,6 @@ async fn topology_rebuild_old() {
 
     let address_0 = next_addr();
     let address_1 = next_addr();
-
-    let mut old_config = Config::builder();
-    old_config.add_source("in", splunk_source_config(address_0));
-    old_config.add_sink("out", &["in"], basic_sink(1).1);
-
-    let mut new_config = Config::builder();
-    new_config.add_source("in", splunk_source_config(address_1));
-    new_config.add_sink("out", &["in"], basic_sink(1).1);
 
     // Will cause the new_config to fail on build
     let _bind = TcpListener::bind(address_1).unwrap();
