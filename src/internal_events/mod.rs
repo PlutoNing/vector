@@ -66,8 +66,6 @@ mod process;
     feature = "sinks-prometheus"
 ))]
 mod prometheus;
-#[cfg(feature = "sources-redis")]
-mod redis;
 #[cfg(feature = "transforms-impl-reduce")]
 mod reduce;
 mod remap;
@@ -159,8 +157,6 @@ pub(crate) use self::postgresql_metrics::*;
     feature = "sinks-prometheus"
 ))]
 pub(crate) use self::prometheus::*;
-#[cfg(feature = "sources-redis")]
-pub(crate) use self::redis::*;
 #[cfg(feature = "transforms-impl-reduce")]
 pub(crate) use self::reduce::*;
 #[cfg(feature = "transforms-remap")]

@@ -2203,11 +2203,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "35ed6e9d84f0b51a7f52daf1c7d71dd136fd7a3f41a8462b8cdb8c78d920fad4"
 dependencies = [
  "bytes 1.10.1",
- "futures-core",
  "memchr",
- "pin-project-lite",
- "tokio",
- "tokio-util",
 ]
 
 [[package]]
@@ -7818,32 +7814,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "redis"
-version = "0.32.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f0f6a8c53351d89a3869a703459995a0bcadcfa846002707fbc7e5cca235c4a"
-dependencies = [
- "arc-swap",
- "backon",
- "bytes 1.10.1",
- "cfg-if",
- "combine 4.6.6",
- "futures-channel",
- "futures-util",
- "itoa",
- "native-tls",
- "num-bigint",
- "percent-encoding",
- "pin-project-lite",
- "ryu",
- "socket2 0.5.10",
- "tokio",
- "tokio-native-tls",
- "tokio-util",
- "url",
-]
-
-[[package]]
 name = "redox_syscall"
 version = "0.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -11046,7 +11016,6 @@ dependencies = [
  "rand 0.9.1",
  "rand_distr",
  "ratatui",
- "redis",
  "regex",
  "reqwest 0.11.26",
  "rmp-serde",

@@ -364,7 +364,6 @@ postgres-openssl = { version = "0.5.1", default-features = false, features = ["r
 quick-junit = { version = "0.5.1" }
 rand.workspace = true
 rand_distr.workspace = true
-redis = { version = "0.32.3", default-features = false, features = ["connection-manager", "tokio-comp", "tokio-native-tls-comp"], optional = true }
 regex = { version = "1.11.1", default-features = false, features = ["std", "perf"] }
 roaring = { version = "0.11.0", default-features = false, features = ["std"], optional = true }
 seahash = { version = "4.1.0", default-features = false }
@@ -559,7 +558,6 @@ sources-logs = [
   "sources-internal_logs",
   "sources-journald",
   "sources-file_descriptor",
-  "sources-redis",
   "sources-socket",
   "sources-splunk_hec",
   "sources-stdin",
@@ -608,7 +606,6 @@ sources-prometheus = ["sources-prometheus-scrape", "sources-prometheus-remote-wr
 sources-prometheus-scrape = ["sinks-prometheus", "sources-utils-http-client", "vector-lib/prometheus"]
 sources-prometheus-remote-write = ["sinks-prometheus", "sources-utils-http", "vector-lib/prometheus"]
 sources-prometheus-pushgateway = ["sinks-prometheus", "sources-utils-http", "vector-lib/prometheus"]
-sources-redis = ["dep:redis"]
 sources-socket = ["sources-utils-net", "tokio-util/net"]
 sources-splunk_hec = ["dep:roaring"]
 sources-statsd = ["sources-utils-net", "tokio-util/net"]
@@ -710,7 +707,6 @@ sinks-logs = [
   "sinks-new_relic_logs",
   "sinks-papertrail",
   "sinks-postgres",
-  "sinks-redis",
   "sinks-sematext",
   "sinks-socket",
   "sinks-splunk_hec",
@@ -766,7 +762,6 @@ sinks-new_relic = []
 sinks-papertrail = ["dep:syslog"]
 sinks-prometheus = ["dep:base64", "dep:prost", "vector-lib/prometheus"]
 sinks-postgres = ["dep:sqlx"]
-sinks-redis = ["dep:redis"]
 sinks-sematext = ["sinks-elasticsearch", "sinks-influxdb"]
 sinks-socket = ["sinks-utils-udp"]
 sinks-splunk_hec = []
@@ -801,7 +796,6 @@ all-integration-tests = [
   "postgresql_metrics-integration-tests",
   "postgres_sink-integration-tests",
   "prometheus-integration-tests",
-  "redis-integration-tests",
   "splunk-integration-tests",
   "webhdfs-integration-tests",
 ]
@@ -849,7 +843,6 @@ nginx-integration-tests = ["sources-nginx_metrics"]
 postgresql_metrics-integration-tests = ["sources-postgresql_metrics"]
 postgres_sink-integration-tests = ["sinks-postgres"]
 prometheus-integration-tests = ["sinks-prometheus", "sources-prometheus", "sinks-influxdb"]
-redis-integration-tests = ["sinks-redis", "sources-redis"]
 splunk-integration-tests = ["sinks-splunk_hec"]
 dnstap-integration-tests = ["sources-dnstap", "dep:bollard"]
 webhdfs-integration-tests = ["sinks-webhdfs"]
