@@ -228,7 +228,6 @@ aws-config = { version = "1.6.1", default-features = false, features = ["behavio
 aws-credential-types = { version = "1.2.3", default-features = false, features = ["hardcoded-credentials"], optional = true }
 aws-sdk-cloudwatch = { version = "1.70.0", default-features = false, features = ["behavior-version-latest", "rt-tokio"], optional = true }
 aws-sdk-cloudwatchlogs = { version = "1.76.0", default-features = false, features = ["behavior-version-latest", "rt-tokio"], optional = true }
-aws-sdk-elasticsearch = { version = "1.67.0", default-features = false, features = ["behavior-version-latest", "rt-tokio"], optional = true }
 aws-sdk-firehose = { version = "1.71.0", default-features = false, features = ["behavior-version-latest", "rt-tokio"], optional = true }
 aws-sdk-kinesis = { version = "1.66.0", default-features = false, features = ["behavior-version-latest", "rt-tokio"], optional = true }
 aws-sdk-kms = { version = "1.75.0", default-features = false, features = ["behavior-version-latest", "rt-tokio"], optional = true }
@@ -634,7 +633,6 @@ sinks = ["sinks-logs", "sinks-metrics"]
 sinks-logs = [
   "sinks-blackhole",
   "sinks-console",
-  "sinks-elasticsearch",
   "sinks-file",
   "sinks-greptimedb_logs",
   "sinks-honeycomb",
@@ -671,7 +669,6 @@ sinks-aws_sqs = ["aws-core", "dep:aws-sdk-sqs"]
 sinks-aws_sns = ["aws-core", "dep:aws-sdk-sns"]
 sinks-blackhole = []
 sinks-console = []
-sinks-elasticsearch = ["transforms-metric_to_log"]
 sinks-file = ["dep:async-compression"]
 sinks-greptimedb_metrics = ["dep:greptimedb-ingester"]
 sinks-greptimedb_logs = ["dep:greptimedb-ingester"]
@@ -698,7 +695,6 @@ nightly = []
 # Integration testing-related features
 all-integration-tests = [
   "dnstap-integration-tests",
-  "es-integration-tests",
   "greptimedb-integration-tests",
   "http-client-integration-tests",
   "influxdb-integration-tests",
@@ -708,7 +704,6 @@ all-integration-tests = [
   "webhdfs-integration-tests",
 ]
 
-es-integration-tests = ["sinks-elasticsearch", "aws-core"]
 greptimedb-integration-tests = ["sinks-greptimedb_metrics", "sinks-greptimedb_logs"]
 http-client-integration-tests = ["sources-http_client"]
 influxdb-integration-tests = ["sinks-influxdb"]
