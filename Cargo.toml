@@ -642,12 +642,6 @@ transforms-impl-reduce = []
 # Sinks
 sinks = ["sinks-logs", "sinks-metrics"]
 sinks-logs = [
-  "sinks-aws_cloudwatch_logs",
-  "sinks-aws_kinesis_firehose",
-  "sinks-aws_kinesis_streams",
-  "sinks-aws_s3",
-  "sinks-aws_sns",
-  "sinks-aws_sqs",
   "sinks-axiom",
   "sinks-azure_blob",
   "sinks-azure_monitor_logs",
