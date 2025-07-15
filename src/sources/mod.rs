@@ -14,8 +14,6 @@ pub mod file;
 pub mod file_descriptors;
 #[cfg(feature = "sources-host_metrics")]
 pub mod host_metrics;
-#[cfg(feature = "sources-http_server")]
-pub mod http_server;
 #[cfg(all(unix, feature = "sources-journald"))]
 pub mod journald;
 #[cfg(feature = "sources-socket")]

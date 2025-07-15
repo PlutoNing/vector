@@ -521,7 +521,6 @@ sources-logs = [
   "sources-demo_logs",
   "sources-exec",
   "sources-file",
-  "sources-http_server",
   "sources-journald",
   "sources-file_descriptor",
   "sources-socket",
@@ -539,7 +538,6 @@ sources-exec = []
 sources-file = ["vector-lib/file-source"]
 sources-file_descriptor = ["tokio-util/io"]
 sources-host_metrics = ["heim/cpu", "heim/host", "heim/memory", "heim/net"]
-sources-http_server = ["sources-utils-http", "sources-utils-http-headers", "sources-utils-http-query"]
 sources-static_metrics = []
 sources-journald = []
 sources-socket = ["sources-utils-net", "tokio-util/net"]
@@ -666,7 +664,6 @@ component-validation-runner = ["dep:tonic"]
 # In the future, this can change to simply reference the targets `sources`, `transforms`, `sinks`
 component-validation-tests = [
   "component-validation-runner",
-  "sources-http_server",
   "sinks-http",
 ]
 

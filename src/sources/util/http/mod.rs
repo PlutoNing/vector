@@ -1,7 +1,6 @@
 #[cfg(feature = "sources-utils-http-encoding")]
 mod encoding;
 #[cfg(any(
-    feature = "sources-http_server",
     feature = "sources-utils-http-headers"
 ))]
 mod headers;
@@ -9,7 +8,6 @@ mod method;
 #[cfg(feature = "sources-utils-http-prelude")]
 mod prelude;
 #[cfg(any(
-    feature = "sources-http_server",
     feature = "sources-utils-http-query"
 ))]
 mod query;
