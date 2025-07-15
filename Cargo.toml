@@ -613,7 +613,6 @@ benches = [
   "sources-file",
   "transforms-sample",
 ]
-#language-benches = ["sinks-socket"]
 # Separate benching process for metrics due to the nature of the bootstrap procedures.
 statistic-benches = []
 codecs-benches = []
@@ -630,11 +629,6 @@ required-features = ["benches"]
 name = "enrichment_tables"
 harness = false
 required-features = ["enrichment-tables-benches"]
-
-[[bench]]
-name = "languages"
-harness = false
-required-features = ["language-benches"]
 
 [[bench]]
 name = "distribution_statistic"
