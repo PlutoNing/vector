@@ -634,7 +634,6 @@ transforms-impl-reduce = []
 sinks = ["sinks-logs", "sinks-metrics"]
 sinks-logs = [
   "sinks-blackhole",
-  "sinks-chronicle",
   "sinks-clickhouse",
   "sinks-console",
   "sinks-databend",
@@ -676,7 +675,6 @@ sinks-aws_s3 = ["dep:base64", "dep:md-5", "aws-core", "dep:aws-sdk-s3"]
 sinks-aws_sqs = ["aws-core", "dep:aws-sdk-sqs"]
 sinks-aws_sns = ["aws-core", "dep:aws-sdk-sns"]
 sinks-blackhole = []
-sinks-chronicle = []
 sinks-clickhouse = []
 sinks-console = []
 sinks-databend = ["dep:databend-client"]
