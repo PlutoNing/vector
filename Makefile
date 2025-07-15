@@ -380,10 +380,6 @@ endif
 test-e2e-kubernetes: ## Runs Kubernetes E2E tests (Sorry, no `ENVIRONMENT=true` support)
 	RUST_VERSION=${RUST_VERSION} scripts/test-e2e-kubernetes.sh
 
-.PHONY: test-cli
-test-cli: ## Runs cli tests
-	${MAYBE_ENVIRONMENT_EXEC} cargo nextest run --no-fail-fast --no-default-features --features cli-tests --test integration --test-threads 4
-
 .PHONY: test-component-validation
 test-component-validation: ## Runs component validation tests
 	${MAYBE_ENVIRONMENT_EXEC} cargo nextest run --no-fail-fast --no-default-features --features component-validation-tests --status-level pass --test-threads 4 components::validation::tests

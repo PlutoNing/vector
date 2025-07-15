@@ -585,9 +585,6 @@ all-integration-tests = [
 
 
 disable-resolv-conf = []
-shutdown-tests = ["api", "sinks-blackhole", "sinks-console", "sources", "unix"]
-cli-tests = ["sinks-blackhole",  "sources-demo_logs", "sources-file"]
-test-utils = []
 
 vector-api-tests = [
   "sources-demo_logs",

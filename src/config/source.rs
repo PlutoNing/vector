@@ -143,49 +143,6 @@ pub struct SourceContext {
 }
 
 impl SourceContext {
-    #[cfg(any(test, feature = "test-utils"))]
-    pub fn new_shutdown(
-        key: &ComponentKey,
-        out: SourceSender,
-    ) -> (Self, crate::shutdown::SourceShutdownCoordinator) {
-        let mut shutdown = crate::shutdown::SourceShutdownCoordinator::default();
-        let (shutdown_signal, _) = shutdown.register_source(key, false);
-        (
-            Self {
-                key: key.clone(),
-                globals: GlobalOptions::default(),
-                enrichment_tables: Default::default(),
-                shutdown: shutdown_signal,
-                out,
-                proxy: Default::default(),
-                acknowledgements: false,
-                schema_definitions: HashMap::default(),
-                schema: Default::default(),
-                extra_context: Default::default(),
-            },
-            shutdown,
-        )
-    }
-
-    #[cfg(any(test, feature = "test-utils"))]
-    pub fn new_test(
-        out: SourceSender,
-        schema_definitions: Option<HashMap<Option<String>, schema::Definition>>,
-    ) -> Self {
-        Self {
-            key: ComponentKey::from("default"),
-            globals: GlobalOptions::default(),
-            enrichment_tables: Default::default(),
-            shutdown: ShutdownSignal::noop(),
-            out,
-            proxy: Default::default(),
-            acknowledgements: false,
-            schema_definitions: schema_definitions.unwrap_or_default(),
-            schema: Default::default(),
-            extra_context: Default::default(),
-        }
-    }
-
     pub fn do_acknowledgements(&self, config: SourceAcknowledgementsConfig) -> bool {
         let config = AcknowledgementsConfig::from(config);
         if config.enabled() {
