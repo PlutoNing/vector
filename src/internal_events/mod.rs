@@ -27,8 +27,6 @@ mod heartbeat;
 mod host_metrics;
 mod http;
 pub mod http_client;
-#[cfg(all(unix, feature = "sources-journald"))]
-mod journald;
 #[cfg(feature = "transforms-log_to_metric")]
 mod log_to_metric;
 #[cfg(feature = "transforms-lua")]
@@ -82,8 +80,6 @@ pub(crate) use self::file_descriptor::*;
 pub(crate) use self::filter::*;
 #[cfg(feature = "sources-host_metrics")]
 pub(crate) use self::host_metrics::*;
-#[cfg(all(unix, feature = "sources-journald"))]
-pub(crate) use self::journald::*;
 #[cfg(feature = "transforms-log_to_metric")]
 pub(crate) use self::log_to_metric::*;
 #[cfg(feature = "transforms-lua")]

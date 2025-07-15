@@ -521,7 +521,6 @@ sources-logs = [
   "sources-demo_logs",
   "sources-exec",
   "sources-file",
-  "sources-journald",
   "sources-file_descriptor",
   "sources-stdin",
 ]
@@ -537,7 +536,6 @@ sources-file = ["vector-lib/file-source"]
 sources-file_descriptor = ["tokio-util/io"]
 sources-host_metrics = ["heim/cpu", "heim/host", "heim/memory", "heim/net"]
 sources-static_metrics = []
-sources-journald = []
 sources-stdin = ["tokio-util/io"]
 sources-utils-net = ["sources-utils-net-tcp", "sources-utils-net-udp", "sources-utils-net-unix"]
 sources-utils-net-tcp = ["listenfd", "dep:ipnet"]
@@ -628,10 +626,6 @@ disable-resolv-conf = []
 shutdown-tests = ["api", "sinks-blackhole", "sinks-console", "sources", "transforms-lua", "transforms-remap", "unix"]
 cli-tests = ["sinks-blackhole", "sinks-socket", "sources-demo_logs", "sources-file"]
 test-utils = []
-
-
-
-
 
 vector-api-tests = [
   "sources-demo_logs",
