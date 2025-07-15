@@ -5,7 +5,7 @@ use vector_lib::{
     internal_event::{ComponentEventsDropped, InternalEvent, UNINTENTIONAL},
 };
 
-#[cfg(any(feature = "sources-file", feature = "sources-kubernetes_logs"))]
+#[cfg(any(feature = "sources-file"))]
 pub use self::source::*;
 
 use vector_lib::internal_event::{error_stage, error_type};
@@ -101,7 +101,7 @@ impl<P: std::fmt::Debug> InternalEvent for FileIoError<'_, P> {
     }
 }
 
-#[cfg(any(feature = "sources-file", feature = "sources-kubernetes_logs"))]
+#[cfg(any(feature = "sources-file"))]
 mod source {
     use std::{io::Error, path::Path, time::Duration};
 

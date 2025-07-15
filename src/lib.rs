@@ -79,8 +79,6 @@ pub mod extra_context;
 pub(crate) mod graph;
 pub mod heartbeat;
 pub mod http;
-#[allow(unreachable_pub)]
-pub mod kubernetes;
 pub mod line_agg;
 pub mod list;
 #[cfg(any(feature = "sources-nats", feature = "sinks-nats"))]

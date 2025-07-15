@@ -43,8 +43,6 @@ mod influxdb;
 mod internal_logs;
 #[cfg(all(unix, feature = "sources-journald"))]
 mod journald;
-#[cfg(feature = "sources-kubernetes_logs")]
-mod kubernetes_logs;
 #[cfg(feature = "transforms-log_to_metric")]
 mod log_to_metric;
 #[cfg(feature = "sinks-loki")]
@@ -100,7 +98,6 @@ mod window;
 
 #[cfg(any(
     feature = "sources-file",
-    feature = "sources-kubernetes_logs",
     feature = "sinks-file",
 ))]
 mod file;
@@ -127,7 +124,6 @@ pub(crate) use self::eventstoredb_metrics::*;
 pub(crate) use self::exec::*;
 #[cfg(any(
     feature = "sources-file",
-    feature = "sources-kubernetes_logs",
     feature = "sinks-file",
 ))]
 pub(crate) use self::file::*;
@@ -147,8 +143,6 @@ pub(crate) use self::influxdb::*;
 pub(crate) use self::internal_logs::*;
 #[cfg(all(unix, feature = "sources-journald"))]
 pub(crate) use self::journald::*;
-#[cfg(feature = "sources-kubernetes_logs")]
-pub(crate) use self::kubernetes_logs::*;
 #[cfg(feature = "transforms-log_to_metric")]
 pub(crate) use self::log_to_metric::*;
 #[cfg(feature = "sinks-loki")]

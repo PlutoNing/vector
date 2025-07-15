@@ -498,9 +498,6 @@ target-powerpc-unknown-linux-gnu = ["api", "api-client", "enrichment-tables", "s
 unix = ["tikv-jemallocator", "allocation-tracing"]
 allocation-tracing = []
 
-# Enables kubernetes dependencies and shared code. Kubernetes-related sources,
-# transforms and sinks should depend on this feature.
-kubernetes = ["dep:k8s-openapi", "dep:kube"]
 
 docker = ["dep:bollard", "dep:dirs-next"]
 
@@ -567,7 +564,6 @@ sources-logs = [
   "sources-http_client",
   "sources-internal_logs",
   "sources-journald",
-  "sources-kubernetes_logs",
   "sources-logstash",
   "sources-mqtt",
   "sources-nats",
@@ -615,7 +611,6 @@ sources-internal_metrics = []
 sources-static_metrics = []
 sources-journald = []
 #sources-kafka = ["dep:rdkafka"]
-sources-kubernetes_logs = ["vector-lib/file-source", "kubernetes", "transforms-reduce"]
 sources-logstash = ["sources-utils-net-tcp", "tokio-util/net"]
 sources-mongodb_metrics = ["dep:mongodb"]
 sources-mqtt = ["dep:rumqttc"]
