@@ -45,8 +45,6 @@ pub mod keep;
 pub mod loki;
 #[cfg(feature = "sinks-mezmo")]
 pub mod mezmo;
-#[cfg(feature = "sinks-nats")]
-pub mod nats;
 #[cfg(feature = "sinks-new_relic")]
 pub mod new_relic;
 #[cfg(feature = "sinks-webhdfs")]

@@ -81,8 +81,6 @@ pub mod heartbeat;
 pub mod http;
 pub mod line_agg;
 pub mod list;
-#[cfg(any(feature = "sources-nats", feature = "sinks-nats"))]
-pub(crate) mod nats;
 pub mod net;
 #[allow(unreachable_pub)]
 pub(crate) mod proto;
