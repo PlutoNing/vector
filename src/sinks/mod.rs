@@ -17,10 +17,6 @@ pub mod http;
 pub mod postgres;
 #[cfg(feature = "sinks-socket")]
 pub mod socket;
-#[cfg(feature = "sinks-websocket")]
-pub mod websocket;
-#[cfg(feature = "sinks-websocket-server")]
-pub mod websocket_server;
 
 pub use vector_lib::{config::Input, sink::VectorSink};
 

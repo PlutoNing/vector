@@ -627,8 +627,6 @@ sinks-logs = [
   "sinks-http",
   "sinks-postgres",
   "sinks-socket",
-  "sinks-websocket",
-  "sinks-websocket-server",
 ]
 sinks-metrics = [
   "sinks-aws_cloudwatch_metrics",
@@ -650,9 +648,6 @@ sinks-http = []
 sinks-postgres = ["dep:sqlx"]
 sinks-socket = ["sinks-utils-udp"]
 sinks-utils-udp = []
-sinks-websocket = ["dep:tokio-tungstenite"]
-sinks-websocket-server = ["dep:tokio-tungstenite", "sources-utils-http-auth", "sources-utils-http-error", "sources-utils-http-prelude"]
-
 # Identifies that the build is a nightly build
 nightly = []
 
