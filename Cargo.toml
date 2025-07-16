@@ -583,7 +583,6 @@ all-integration-tests = [
 
 ]
 
-
 disable-resolv-conf = []
 
 vector-api-tests = [
@@ -602,38 +601,4 @@ component-validation-tests = [
   "component-validation-runner",
 ]
 
-# Grouping together features for benchmarks. We exclude the API client due to it causing the build process to run out
-# of memory when those additional dependencies are built in CI.
-benches = [
-  "sinks-file",
-  "sources-file",
-  "transforms-sample",
-]
-# Separate benching process for metrics due to the nature of the bootstrap procedures.
-statistic-benches = []
-codecs-benches = []
-enrichment-tables-benches = ["enrichment-tables-geoip", "enrichment-tables-mmdb", "enrichment-tables-memory"]
 proptest = ["dep:proptest", "dep:proptest-derive", "vrl/proptest"]
-
-[[bench]]
-name = "default"
-harness = false
-required-features = ["benches"]
-
-
-[[bench]]
-name = "enrichment_tables"
-harness = false
-required-features = ["enrichment-tables-benches"]
-
-[[bench]]
-name = "distribution_statistic"
-harness = false
-required-features = ["statistic-benches"]
-
-
-[[bench]]
-name = "codecs"
-path = "benches/codecs/main.rs"
-harness = false
-required-features = ["codecs-benches"]
