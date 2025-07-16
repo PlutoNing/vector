@@ -99,9 +99,4 @@ vector-common = { path = "../vector-common", default-features = false, features 
 default = []
 lua = ["dep:mlua", "dep:tokio-stream", "vrl/lua"]
 vrl = []
-test = ["vector-common/test", "proptest"]
-
-[[bench]]
-name = "event"
-path = "benches/event/main.rs"
-harness = false
+test = []

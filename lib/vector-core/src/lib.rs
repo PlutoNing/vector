@@ -38,8 +38,6 @@ pub mod serde;
 pub mod sink;
 pub mod source;
 pub mod tcp;
-#[cfg(test)]
-mod test_util;
 pub mod time;
 pub mod tls;
 pub mod transform;
