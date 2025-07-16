@@ -6,10 +6,6 @@ edition = "2021"
 publish = false
 license = "MPL-2.0"
 
-[[test]]
-name = "integration"
-path = "tests/integration/lib.rs"
-
 [dependencies]
 chrono.workspace = true
 chrono-tz.workspace = true
