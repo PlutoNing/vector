@@ -21,17 +21,22 @@
 #     type: "demo_logs"
 #     format: "syslog"
 #     interval: 1
-sources:
-  in:
-    type: "stdin"
-
+# sources:
+#   in:
+#     type: "stdin"
+#=========================================================================================
+# metric to console
 sinks:
   out:
     inputs:
-      - "in"
+      - "my_source_id"
     type: "console"
     encoding:
       codec: "text"
+sources:
+  my_source_id:
+    type: host_metrics
+
 # Parse Syslog logs
 # See the Vector Remap Language reference for more info: https://vrl.dev
 # transforms:

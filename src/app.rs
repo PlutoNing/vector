@@ -41,6 +41,7 @@ pub fn worker_threads() -> Option<NonZeroUsize> {
     NonZeroUsize::new(WORKER_THREADS.load(Ordering::Relaxed))
 }
 
+/* 定义app的config */
 pub struct ApplicationConfig {
     pub config_paths: Vec<config::ConfigPath>,
     pub topology: RunningTopology,
@@ -51,6 +52,7 @@ pub struct ApplicationConfig {
     pub extra_context: ExtraContext,
 }
 
+/* app本体? */
 pub struct Application {
     pub root_opts: RootOpts,
     pub config: ApplicationConfig,
