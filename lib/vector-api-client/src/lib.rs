@@ -17,7 +17,6 @@ mod client;
 /// GraphQL queries
 pub mod gql;
 mod subscription;
-pub mod test;
 
 pub use client::*;
 pub use subscription::*;
