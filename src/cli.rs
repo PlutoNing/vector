@@ -13,21 +13,21 @@ use crate::top;
 use crate::{config, convert_config, generate, get_version, graph, list, unit_test, validate};
 use crate::{generate_schema, signal};
 /* 程序选项 */
-#[derive(Parser, Debug)]
-#[command(rename_all = "kebab-case")]
+#[derive(Parser, Debug)] /* Parser是 clap 库提供的一个派生宏，用于自动生成命令行解析逻辑。 */
+#[command(rename_all = "kebab-case")] /* 指定命令行选项的命名风格为 "kebab-case"，即选项名称中使用连字符分隔单词（例如，--some-option）。 */
 pub struct Opts {
     #[command(flatten)]
     pub root: RootOpts,
 
-    #[command(subcommand)]
+    #[command(subcommand)] /* #[command(subcommand)] 表示 sub_command 是一个子命令，clap 会根据命令行输入解析出具体的子命令。 */
     pub sub_command: Option<SubCommand>,
 }
 
-impl Opts {
+impl Opts { /* 获取启动时的命令行选项,app.get_matches() 解析命令行参数，并返回一个 ArgMatches 实例。 Opts::from_arg_matches(...) 将 ArgMatches 转换为 Opts 实例。 */
     pub fn get_matches() -> Result<Self, clap::Error> {
-        let version = get_version();
-        let app = Opts::command().version(version);
-        Opts::from_arg_matches(&app.get_matches())
+        let version = get_version();/* Opts::command() 是 clap 提供的一个方法，用于创建一个命令行应用程序实例 */
+        let app = Opts::command().version(version); /* .version(version) 设置应用程序的版本信息。 */
+        Opts::from_arg_matches(&app.get_matches())/* app.get_matches() 解析命令行参数，并返回一个 ArgMatches 实例 */
     }
 
     pub const fn log_level(&self) -> &'static str {

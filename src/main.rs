@@ -12,7 +12,7 @@ fn main() -> ExitCode {
         use crate::vector::internal_telemetry::allocations::{
             init_allocation_tracing, REPORTING_INTERVAL_MS, TRACK_ALLOCATIONS,
         };
-        use std::sync::atomic::Ordering;
+        use std::sync::atomic::Ordering; /* 获取命令行选项 */
         let opts = vector::cli::Opts::get_matches()
             .map_err(|error| {
                 // Printing to stdout/err can itself fail; ignore it.
@@ -35,7 +35,7 @@ fn main() -> ExitCode {
             TRACK_ALLOCATIONS.store(true, Ordering::Relaxed);
             init_allocation_tracing();
         }
-    }
+    }/* 刚刚生成了opts */
 
     let exit_code = Application::run(ExtraContext::default())
         .code()/* 如果 Application::run 返回一个实现了 Termination trait 的类型，code()提取退出码 */

@@ -19,9 +19,9 @@ pub(super) struct Registry {
     recency: RwLock<Option<Recency<Key, MetricKeyMatcher>>>,
 }
 
-impl Registry {
+impl Registry { /* 产生一个新的registry */
     fn new() -> Self {
-        Self {
+        Self { /* 看来是个metrics  registry, 主要参数是存储 */
             registry: MetricsRegistry::new(GenerationalStorage::new(VectorStorage)),
             recency: RwLock::new(None),
         }
@@ -118,14 +118,14 @@ impl Registry {
 /// `with_test_recorder` closure, and use it across all the tests that require a test
 /// recorder. Given the large number of such tests, we are retaining this global test recorder hack
 /// here, but some day we should refactor the tests to eliminate it.
-#[derive(Clone)]
-pub(super) enum VectorRecorder {
+#[derive(Clone)]/* 自动为 VectorRecorder 实现 Clone trait，使得枚举的实例可以被克隆 */
+pub(super) enum VectorRecorder { /* 包含一组registry （用于存储metric） */
     Global(Arc<Registry>),
     ThreadLocal,
 }
 
-impl VectorRecorder {
-    pub(super) fn new_global() -> Self {
+impl VectorRecorder { /* 函数创建registry （一个metric registry , 包含了特定的存储） */
+    pub(super) fn new_global() -> Self { /* Global 变体包含一个 Arc<Registry>，用于全局的 Registry。Arc 是一个线程安全的引用计数智能指针，允许多个所有者共享同一个 Registry 实例。 */
         Self::Global(Arc::new(Registry::new()))
     }
 

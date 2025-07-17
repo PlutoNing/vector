@@ -10,12 +10,12 @@ use std::{sync::OnceLock, time::Duration};
 use chrono::Utc;
 use metric_matcher::MetricKeyMatcher;
 use metrics::Key;
-use metrics_tracing_context::TracingContextLayer;
-use metrics_util::layers::Layer;
+
+
 use snafu::Snafu;
 
 pub use self::ddsketch::{AgentDDSketch, BinMap, Config};
-use self::{label_filter::VectorLabelFilter, recorder::Registry, recorder::VectorRecorder};
+use self::{recorder::Registry, recorder::VectorRecorder};
 use crate::{
     config::metrics_expiration::PerMetricSetExpiration,
     event::{Metric, MetricValue},
@@ -51,15 +51,15 @@ static CARDINALITY_COUNTER_KEY: Key = Key::from_static_name(CARDINALITY_COUNTER_
 pub struct Controller {
     recorder: VectorRecorder,
 }
-
+/* 尝试获取环境变量 DISABLE_INTERNAL_METRICS_CORE 的值 */
 fn metrics_enabled() -> bool {
     !matches!(std::env::var("DISABLE_INTERNAL_METRICS_CORE"), Ok(x) if x == "true")
 }
 
 fn tracing_context_layer_enabled() -> bool {
-    !matches!(std::env::var("DISABLE_INTERNAL_METRICS_TRACING_INTEGRATION"), Ok(x) if x == "true")
+    false
 }
-
+/* 好像是初始化全局的metric registry */
 fn init(recorder: VectorRecorder) -> Result<()> {
     // An escape hatch to allow disabling internal metrics core. May be used for
     // performance reasons. This is a hidden and undocumented functionality.
@@ -78,11 +78,11 @@ fn init(recorder: VectorRecorder) -> Result<()> {
     // case it doesn't _do_ much other than shepherd into the registry and
     // update the cardinality counter, see above, as needed.
     if tracing_context_layer_enabled() {
-        // Apply a layer to capture tracing span fields as labels.
-        metrics::set_global_recorder(
-            TracingContextLayer::new(VectorLabelFilter).layer(recorder.clone()),
-        )
-        .map_err(|_| Error::AlreadyInitialized)?;
+
+
+
+
+
     } else {
         metrics::set_global_recorder(recorder.clone()).map_err(|_| Error::AlreadyInitialized)?;
     }
@@ -105,11 +105,11 @@ fn init(recorder: VectorRecorder) -> Result<()> {
 }
 
 /// Initialize the default metrics sub-system
-///
+/// 初始化默认的metrics子系统 （启动时调用）
 /// # Errors
 ///
 /// This function will error if it is called multiple times.
-pub fn init_global() -> Result<()> {
+pub fn init_global() -> Result<()> {/* VectorRecorder::new_global()生成一个registry */
     init(VectorRecorder::new_global())
 }
 

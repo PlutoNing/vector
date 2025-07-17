@@ -188,7 +188,7 @@ where
 pub(super) struct GenerationalStorage<S> {
     inner: S,
 }
-
+/* 生成一个特定存储方式的存储? */
 impl<S> GenerationalStorage<S> {
     /// Creates a new [`GenerationalStorage`].
     ///

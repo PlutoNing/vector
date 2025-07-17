@@ -10,7 +10,7 @@ use std::{
 };
 
 use futures_util::{future::ready, Stream, StreamExt};
-use metrics_tracing_context::MetricsLayer;
+
 use tokio::sync::{
     broadcast::{self, Receiver, Sender},
     oneshot,
@@ -52,25 +52,25 @@ static SUBSCRIBERS: Mutex<Option<Vec<oneshot::Sender<Vec<LogEvent>>>>> =
 /// has been initialized.
 static SENDER: OnceLock<Sender<LogEvent>> = OnceLock::new();
 
-fn metrics_layer_enabled() -> bool {
-    !matches!(std::env::var("DISABLE_INTERNAL_METRICS_TRACING_INTEGRATION"), Ok(x) if x == "true")
-}
+
+
+
 
 pub fn init(color: bool, json: bool, levels: &str, internal_log_rate_limit: u64) {
     let fmt_filter = tracing_subscriber::filter::Targets::from_str(levels).expect(
         "logging filter targets were not formatted correctly or did not specify a valid level",
     );
 
-    let metrics_layer =
-        metrics_layer_enabled().then(|| MetricsLayer::new().with_filter(LevelFilter::INFO));
+
+
 
     let broadcast_layer = RateLimitedLayer::new(BroadcastLayer::new())
         .with_default_limit(internal_log_rate_limit)
         .with_filter(fmt_filter.clone());
 
     let subscriber = tracing_subscriber::registry()
-        .with(metrics_layer)
         .with(broadcast_layer);
+
 
     #[cfg(feature = "tokio-console")]
     let subscriber = {
