@@ -69,7 +69,6 @@ pub mod common;
 pub mod encoding_transcode;
 pub mod enrichment_tables;
 pub mod extra_context;
-pub(crate) mod graph;
 pub mod heartbeat;
 pub mod http;
 pub mod line_agg;
