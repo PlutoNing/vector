@@ -78,11 +78,11 @@ struct Builder<'a> {
     diff: &'a ConfigDiff,/* 新config带来的diff */
     shutdown_coordinator: SourceShutdownCoordinator, /*  */
     errors: Vec<String>,
-    outputs: HashMap<OutputId, UnboundedSender<fanout::ControlMessage>>,
-    tasks: HashMap<ComponentKey, Task>, /* 好像是source或者output的一个task */
+    outputs: HashMap<OutputId, UnboundedSender<fanout::ControlMessage>>, /*  */
+    tasks: HashMap<ComponentKey, Task>, /* 好像是source或者output的一个task, sink的也在这 */
     buffers: HashMap<ComponentKey, BuiltBuffer>,
-    inputs: HashMap<ComponentKey, (BufferSender<EventArray>, Inputs<OutputId>)>,
-    healthchecks: HashMap<ComponentKey, Task>,
+    inputs: HashMap<ComponentKey, (BufferSender<EventArray>, Inputs<OutputId>)>,/* buffer的tx */
+    healthchecks: HashMap<ComponentKey, Task>, /* healthcheck的进程 */
     detach_triggers: HashMap<ComponentKey, Trigger>,
     extra_context: ExtraContext,
     utilization_emitter: UtilizationEmitter,
@@ -116,7 +116,7 @@ impl<'a> Builder<'a> {
         let enrichment_tables = self.load_enrichment_tables().await;/* 一般是空的 */
         let source_tasks = self.build_sources(enrichment_tables).await; /* 构建source */
         self.build_transforms(enrichment_tables).await; /* 好像一般也是空的 */
-        self.build_sinks(enrichment_tables).await;
+        self.build_sinks(enrichment_tables).await; /* 构建sink */
 
         // We should have all the data for the enrichment tables loaded now, so switch them over to
         // readonly.
@@ -369,7 +369,7 @@ impl<'a> Builder<'a> {
             // to shutdown unless some input is given.
             let server = async move {
                 debug!("Source starting.");
-
+/* 这里是开始获取指标的逻辑 */
                 let mut result = select! {
                     biased;
 
@@ -573,7 +573,7 @@ impl<'a> Builder<'a> {
             ) {
                 self.errors.append(&mut err);
             };
-
+/* buffer的tx rx */
             let (tx, rx) = if let Some(buffer) = self.buffers.remove(key) {
                 buffer
             } else {
@@ -609,7 +609,7 @@ impl<'a> Builder<'a> {
                 app_name_slug: crate::get_slugified_app_name(),
                 extra_context: self.extra_context.clone(),
             };
-
+/* 这里的sink就是具体的sink了, 比如到console */
             let (sink, healthcheck) = match sink.inner.build(cx).await {
                 Err(error) => {
                     self.errors.push(format!("Sink \"{}\": {}", key, error));
@@ -632,7 +632,7 @@ impl<'a> Builder<'a> {
                 // this future won't be run so this rx won't be taken
                 // which will enable us to reuse rx to rebuild
                 // old configuration by passing this Arc<Mutex<Option<_>>>
-                // yet again.
+                // yet again.   buffer的rx
                 let rx = rx
                     .lock()
                     .unwrap()
@@ -703,7 +703,7 @@ impl<'a> Builder<'a> {
             };
 
             let healthcheck_task = Task::new(key.clone(), typetag, healthcheck_task);
-
+/* key是sink的id */
             self.inputs.insert(key.clone(), (tx, sink_inputs.clone()));
             self.healthchecks.insert(key.clone(), healthcheck_task); /* health任务塞进去 */
             self.tasks.insert(key.clone(), task); /* 把sink task塞进去 */
@@ -713,14 +713,14 @@ impl<'a> Builder<'a> {
 }
 
 pub struct TopologyPieces {
-    pub(super) inputs: HashMap<ComponentKey, (BufferSender<EventArray>, Inputs<OutputId>)>,
-    pub(crate) outputs: HashMap<ComponentKey, HashMap<Option<String>, fanout::ControlChannel>>,
-    pub(super) tasks: HashMap<ComponentKey, Task>,
-    pub(crate) source_tasks: HashMap<ComponentKey, Task>,
-    pub(super) healthchecks: HashMap<ComponentKey, Task>,
-    pub(crate) shutdown_coordinator: SourceShutdownCoordinator,
-    pub(crate) detach_triggers: HashMap<ComponentKey, Trigger>,
-    pub(crate) utilization_emitter: Option<UtilizationEmitter>,
+    pub(super) inputs: HashMap<ComponentKey, (BufferSender<EventArray>, Inputs<OutputId>)>, /* 里面是buffer的tx */
+    pub(crate) outputs: HashMap<ComponentKey, HashMap<Option<String>, fanout::ControlChannel>>, /*  */
+    pub(super) tasks: HashMap<ComponentKey, Task>, /* source，output,sink等的task */
+    pub(crate) source_tasks: HashMap<ComponentKey, Task>, /* source的task */
+    pub(super) healthchecks: HashMap<ComponentKey, Task>, /*  */
+    pub(crate) shutdown_coordinator: SourceShutdownCoordinator, /*  */
+    pub(crate) detach_triggers: HashMap<ComponentKey, Trigger>, /*  */
+    pub(crate) utilization_emitter: Option<UtilizationEmitter>, /*  */
 }
 /* 构建拓扑的方法 */
 impl TopologyPieces {/*  */
@@ -729,7 +729,7 @@ impl TopologyPieces {/*  */
         diff: &ConfigDiff,/* 这个config的产生的变化 */
         buffers: HashMap<ComponentKey, BuiltBuffer>,
         extra_context: ExtraContext,
-    ) -> Option<Self> {
+    ) -> Option<Self> {/* 构建各种东西, source, sink等等 */
         match TopologyPieces::build(config, diff, buffers, extra_context).await {
             Err(errors) => {
                 for error in errors {

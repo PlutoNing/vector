@@ -1184,9 +1184,9 @@ impl RunningTopology {
     }
 
     pub async fn start_validated(
-        config: Config,
-        diff: ConfigDiff,
-        mut pieces: TopologyPieces,
+        config: Config, /* 新config */
+        diff: ConfigDiff, /* 新config带来的变化 */
+        mut pieces: TopologyPieces, /* 配置的新拓扑, 包含了source, sink等等 */
     ) -> Option<(Self, ShutdownErrorReceiver)> {
         let (abort_tx, abort_rx) = mpsc::unbounded_channel();
 

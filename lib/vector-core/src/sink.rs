@@ -69,7 +69,7 @@ impl VectorSink {
     pub fn from_event_sink(sink: impl Sink<Event, Error = ()> + Send + Unpin + 'static) -> Self {
         VectorSink::Sink(Box::new(EventSink::new(sink)))
     }
-
+    /* 可以拿来构建一个输出到stdout的console */
     /// Converts an event stream into a `VectorSink`
     pub fn from_event_streamsink(sink: impl StreamSink<Event> + Send + 'static) -> Self {
         let sink = Box::new(sink);

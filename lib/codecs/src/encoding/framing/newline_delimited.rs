@@ -23,7 +23,7 @@ impl NewlineDelimitedEncoderConfig {
 /// A codec for handling bytes that are delimited by (a) newline(s).
 #[derive(Debug, Clone)]
 pub struct NewlineDelimitedEncoder(CharacterDelimitedEncoder);
-
+/* 新行encoder是什么 */
 impl Default for NewlineDelimitedEncoder {
     fn default() -> Self {
         Self(CharacterDelimitedEncoder::new(b'\n'))

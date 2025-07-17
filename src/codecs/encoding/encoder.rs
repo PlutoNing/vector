@@ -66,7 +66,7 @@ where
 impl Encoder<Framer> {
     /// Creates a new `Encoder` with the specified `Serializer` to produce bytes
     /// from a structured event, and the `Framer` to wrap these into a byte
-    /// frame.
+    /// frame. 把framer和序列化器组合成编码器
     pub const fn new(framer: Framer, serializer: Serializer) -> Self {
         Self { framer, serializer }
     }

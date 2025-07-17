@@ -36,7 +36,7 @@ impl EncodingConfig {
     pub const fn config(&self) -> &SerializerConfig {
         &self.encoding
     }
-
+/* 根据类型新建一个序列化器, 比如文本的序列化器 */
     /// Build the `Serializer` for this config.
     pub fn build(&self) -> crate::Result<Serializer> {
         self.encoding.build()
@@ -83,7 +83,7 @@ impl EncodingConfigWithFraming {
             },
         }
     }
-
+    /* 获取transform */
     /// Build a `Transformer` that applies the encoding rules to an event before serialization.
     pub fn transformer(&self) -> Transformer {
         self.encoding.transformer.clone()
@@ -93,11 +93,11 @@ impl EncodingConfigWithFraming {
     pub const fn config(&self) -> (&Option<FramingConfig>, &SerializerConfig) {
         (&self.framing, &self.encoding.encoding)
     }
-
+/* encoding的build   Result<(Framer, Serializer)可能分别是字符分割编码器,和文本序列化器 */
     /// Build the `Framer` and `Serializer` for this config.
     pub fn build(&self, sink_type: SinkType) -> crate::Result<(Framer, Serializer)> {
         let framer = self.framing.as_ref().map(|framing| framing.build());
-        let serializer = self.encoding.build()?;
+        let serializer = self.encoding.build()?; /* 根据类型新建一个序列化器, 比如文本的 */
 
         let framer = match (framer, &serializer) {
             (Some(framer), _) => framer,
@@ -125,7 +125,7 @@ impl EncodingConfigWithFraming {
                 | Serializer::Logfmt(_)
                 | Serializer::NativeJson(_)
                 | Serializer::RawMessage(_)
-                | Serializer::Text(_),
+                | Serializer::Text(_), /* host metric到Console是这个路径 */
             ) => NewlineDelimitedEncoder::default().into(),
         };
 

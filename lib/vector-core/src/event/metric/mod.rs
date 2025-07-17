@@ -68,7 +68,7 @@ pub struct Metric {
     #[serde(skip, default = "EventMetadata::default")]
     metadata: EventMetadata,
 }
-
+/* 表示一个指标 */
 impl Metric {
     /// Creates a new `Metric` with the given `name`, `kind`, and `value`.
     pub fn new<T: Into<String>>(name: T, kind: MetricKind, value: MetricValue) -> Self {

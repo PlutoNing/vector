@@ -318,7 +318,7 @@ impl HostMetricsConfig {
     pub fn scrape_interval_secs(&mut self, value: f64) {
         self.scrape_interval_secs = Duration::from_secs_f64(value);
     }
-
+/*  */
     async fn run(self, mut out: SourceSender, shutdown: ShutdownSignal) -> Result<(), ()> {
         let duration = self.scrape_interval_secs;
         let mut interval = IntervalStream::new(time::interval(duration)).take_until(shutdown);
@@ -329,9 +329,9 @@ impl HostMetricsConfig {
 
         while interval.next().await.is_some() {
             bytes_received.emit(ByteSize(0));
-            let metrics = generator.capture_metrics().await;
+            let metrics = generator.capture_metrics().await; /* 获取指标 */
             let count = metrics.len();
-            if (out.send_batch(metrics).await).is_err() {
+            if (out.send_batch(metrics).await).is_err() {/* 发送出去 */
                 emit!(StreamClosedError { count });
                 return Err(());
             }
@@ -381,7 +381,7 @@ impl HostMetrics {
     pub fn buffer(&self) -> MetricsBuffer {
         MetricsBuffer::new(self.config.namespace.clone())
     }
-
+/* 获取系统的指标 */
     async fn capture_metrics(&mut self) -> Vec<Metric> {
         let mut buffer = self.buffer();
 
@@ -517,7 +517,7 @@ impl MetricsBuffer {
                 .with_timestamp(Some(self.timestamp)),
         )
     }
-
+/* 发送一个指标? */
     fn gauge(&mut self, name: &str, value: f64, tags: MetricTags) {
         self.metrics.push(
             Metric::new(name, MetricKind::Absolute, MetricValue::Gauge { value })

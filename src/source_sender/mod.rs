@@ -266,7 +266,7 @@ impl SourceSender {/* 为什么这里需要个builder */
         self.named_outputs.insert(name, output);
         recv
     }
-
+/* 发送到buffer的tx */
     /// Get a mutable reference to the default output, panicking if none exists.
     const fn default_output_mut(&mut self) -> &mut Output {
         self.default_output.as_mut().expect("no default output")
@@ -291,14 +291,14 @@ impl SourceSender {/* 为什么这里需要个builder */
     }
 
     /// Send a batch of events to the default output.
-    ///
+    /// 发送指标出去
     /// This internally handles emitting [EventsSent] and [ComponentEventsDropped] events.
     pub async fn send_batch<I, E>(&mut self, events: I) -> Result<(), ClosedError>
     where
         E: Into<Event> + ByteSizeOf,
         I: IntoIterator<Item = E>,
         <I as IntoIterator>::IntoIter: ExactSizeIterator,
-    {
+    {/* 发送指标 */
         self.default_output_mut().send_batch(events).await
     }
 
@@ -460,7 +460,7 @@ impl Output {/* 新建一个output, 制定了buffer大小 */
         }
         Ok(())
     }
-
+/*  */
     async fn send_batch<I, E>(&mut self, events: I) -> Result<(), ClosedError>
     where
         E: Into<Event> + ByteSizeOf,

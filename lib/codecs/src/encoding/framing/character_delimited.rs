@@ -35,7 +35,7 @@ pub struct CharacterDelimitedEncoderOptions {
     #[serde(with = "vector_core::serde::ascii_char")]
     pub delimiter: u8,
 }
-
+/* 字符分割的文本编码器 */
 /// An encoder for handling bytes that are delimited by (a) chosen character(s).
 #[derive(Debug, Clone)]
 pub struct CharacterDelimitedEncoder {

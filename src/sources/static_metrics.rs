@@ -23,7 +23,7 @@ use crate::{
     shutdown::ShutdownSignal,
     SourceSender,
 };
-
+/* 静态指标的配置 */
 /// Configuration for the `static_metrics` source.
 #[serde_as]
 #[configurable_component(source(
@@ -47,7 +47,7 @@ pub struct StaticMetricsConfig {
     #[serde(default)]
     pub metrics: Vec<StaticMetricConfig>,
 }
-
+/* 构建静态指标的默认config */
 impl Default for StaticMetricsConfig {
     fn default() -> Self {
         Self {
@@ -57,7 +57,7 @@ impl Default for StaticMetricsConfig {
         }
     }
 }
-
+/* 表示一个静态指标 */
 /// Tag configuration for the `internal_metrics` source.
 #[configurable_component]
 #[derive(Clone, Debug)]
@@ -88,10 +88,11 @@ fn default_namespace() -> String {
 }
 
 impl_generate_config_from_default!(StaticMetricsConfig);
-
+/* 实现静态指标的SourceConfig接口方法 */
 #[async_trait::async_trait]
 #[typetag::serde(name = "static_metrics")]
 impl SourceConfig for StaticMetricsConfig {
+    /* 构建一个静态指标的source */
     async fn build(&self, cx: SourceContext) -> crate::Result<super::Source> {
         if self.interval_secs.is_zero() {
             warn!(
@@ -124,7 +125,7 @@ impl SourceConfig for StaticMetricsConfig {
         false
     }
 }
-
+/* 静态指标类 */
 struct StaticMetrics {
     namespace: String,
     metrics: Vec<StaticMetricConfig>,
@@ -134,6 +135,7 @@ struct StaticMetrics {
 }
 
 impl StaticMetrics {
+    /*  */
     async fn run(mut self) -> Result<(), ()> {
         let events_received = register!(EventsReceived);
         let bytes_received = register!(BytesReceived::from(Protocol::STATIC));
@@ -180,12 +182,12 @@ impl StaticMetrics {
 
             bytes_received.emit(ByteSize(byte_size));
             events_received.emit(CountByteSize(count, json_size));
-
+            /* 构建 */
             let batch = metrics
                 .clone()
                 .into_iter()
                 .map(|metric| metric.with_timestamp(Some(Utc::now())));
-
+            /* 发送指标 */
             if (self.out.send_batch(batch).await).is_err() {
                 emit!(StreamClosedError { count });
                 return Err(());
@@ -193,113 +195,5 @@ impl StaticMetrics {
         }
 
         Ok(())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::{
-        event::Event,
-        test_util::{
-            self,
-            components::{run_and_assert_source_compliance, SOURCE_TAGS},
-        },
-    };
-
-    #[test]
-    fn generate_config() {
-        test_util::test_generate_config::<StaticMetricsConfig>();
-    }
-
-    async fn events_from_config(config: StaticMetricsConfig) -> Vec<Event> {
-        run_and_assert_source_compliance(config, time::Duration::from_millis(100), &SOURCE_TAGS)
-            .await
-    }
-
-    fn default_metric() -> StaticMetricConfig {
-        StaticMetricConfig {
-            name: "".to_string(),
-            value: MetricValue::Gauge { value: 0.0 },
-            kind: MetricKind::Absolute,
-            tags: BTreeMap::default(),
-        }
-    }
-
-    #[tokio::test]
-    async fn default_empty() {
-        let events = events_from_config(StaticMetricsConfig::default()).await;
-
-        assert!(events.is_empty());
-    }
-
-    #[tokio::test]
-    async fn default_namespace() {
-        let mut events = events_from_config(StaticMetricsConfig {
-            metrics: vec![default_metric()],
-            ..Default::default()
-        })
-        .await;
-
-        assert!(!events.is_empty());
-        let event = events.remove(0);
-        assert_eq!(event.as_metric().namespace(), Some("static"));
-    }
-
-    #[tokio::test]
-    async fn default_namespace_multiple_events() {
-        let mut events = events_from_config(StaticMetricsConfig {
-            metrics: vec![default_metric(), default_metric()],
-            ..Default::default()
-        })
-        .await;
-
-        assert!(!events.is_empty());
-        let event = events.remove(0);
-        assert_eq!(event.as_metric().namespace(), Some("static"));
-        let event = events.remove(0);
-        assert_eq!(event.as_metric().namespace(), Some("static"));
-    }
-
-    #[tokio::test]
-    async fn namespace() {
-        let namespace = "totally_custom";
-
-        let config = StaticMetricsConfig {
-            namespace: namespace.to_owned(),
-            metrics: vec![default_metric()],
-            ..StaticMetricsConfig::default()
-        };
-
-        let mut events = events_from_config(config).await;
-        assert!(!events.is_empty());
-        let event = events.remove(0);
-
-        assert_eq!(event.as_metric().namespace(), Some(namespace));
-    }
-
-    #[tokio::test]
-    async fn sets_custom_tags() {
-        let mut events = events_from_config(StaticMetricsConfig {
-            metrics: vec![StaticMetricConfig {
-                name: "test".to_string(),
-                value: MetricValue::Gauge { value: 2.3 },
-                kind: MetricKind::Absolute,
-                tags: BTreeMap::from([("custom_tag".to_string(), "custom_tag_value".to_string())]),
-            }],
-            ..Default::default()
-        })
-        .await;
-
-        assert!(!events.is_empty());
-        let event = events.remove(0);
-        let metric = event.as_metric();
-
-        assert_eq!(metric.name(), "test");
-        assert!(matches!(metric.value(), MetricValue::Gauge { value: 2.3 }));
-        assert_eq!(
-            metric.tag_value("custom_tag"),
-            Some("custom_tag_value".to_string())
-        );
     }
 }

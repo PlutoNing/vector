@@ -19,7 +19,7 @@ use crate::{
 #[derive(Clone, Debug, Derivative)]
 #[derivative(Default)]
 #[serde(rename_all = "lowercase")]
-pub enum Target {
+pub enum Target {/* 表示是到stdout还是stderr */
     /// Write output to [STDOUT][stdout].
     ///
     /// [stdout]: https://en.wikipedia.org/wiki/Standard_streams#Standard_output_(stdout)
@@ -42,10 +42,10 @@ pub enum Target {
 pub struct ConsoleSinkConfig {
     #[configurable(derived)]
     #[serde(default = "default_target")]
-    pub target: Target,
+    pub target: Target, /*  */
 
     #[serde(flatten)]
-    pub encoding: EncodingConfigWithFraming,
+    pub encoding: EncodingConfigWithFraming, /*  */
 
     #[configurable(derived)]
     #[serde(
@@ -53,7 +53,7 @@ pub struct ConsoleSinkConfig {
         deserialize_with = "crate::serde::bool_or_struct",
         skip_serializing_if = "crate::serde::is_default"
     )]
-    pub acknowledgements: AcknowledgementsConfig,
+    pub acknowledgements: AcknowledgementsConfig, /* 需要ack? */
 }
 
 const fn default_target() -> Target {
@@ -61,6 +61,7 @@ const fn default_target() -> Target {
 }
 
 impl GenerateConfig for ConsoleSinkConfig {
+    /* 获取一个默认的? */
     fn generate_config() -> toml::Value {
         toml::Value::try_from(Self {
             target: Target::Stdout,
@@ -70,13 +71,16 @@ impl GenerateConfig for ConsoleSinkConfig {
         .unwrap()
     }
 }
-/* 构建一个sink? */
+/* 构建一个sink?  开始构建指定的output了*/
 #[async_trait::async_trait]
 #[typetag::serde(name = "console")]
 impl SinkConfig for ConsoleSinkConfig {
+    /* 构建指定的sink */
     async fn build(&self, _cx: SinkContext) -> crate::Result<(VectorSink, Healthcheck)> {
         let transformer = self.encoding.transformer();
-        let (framer, serializer) = self.encoding.build(SinkType::StreamBased)?;
+        /* Result<(Framer, Serializer)可能分别是字符分割编码器,和文本序列化器 */
+        let (framer, serializer) = self.encoding.build(SinkType::StreamBased)?; 
+        /* 把(framer, serializer)组合为encoder */
         let encoder = Encoder::<Framer>::new(framer, serializer);
 
         let sink: VectorSink = match self.target {

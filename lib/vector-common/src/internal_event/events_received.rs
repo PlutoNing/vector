@@ -9,7 +9,7 @@ crate::registered_event!(
         events: Counter = counter!("component_received_events_total"),
         event_bytes: Counter = counter!("component_received_event_bytes_total"),
     }
-
+/* emit是什么意思 */
     fn emit(&self, data: CountByteSize) {
         let CountByteSize(count, byte_size) = data;
 

@@ -120,7 +120,7 @@ pub fn init(color: bool, json: bool, levels: &str, internal_log_rate_limit: u64)
 pub fn reset_early_buffer() -> Option<Vec<LogEvent>> {
     get_early_buffer().replace(Vec::new())
 }
-
+/* 获取早期的buffer的event */
 /// Gets a  mutable reference to the early buffer.
 fn get_early_buffer() -> MutexGuard<'static, Option<Vec<LogEvent>>> {
     BUFFER
@@ -156,7 +156,7 @@ fn try_broadcast_event(log: LogEvent) {
         _ = sender.send(log);
     }
 }
-
+/* 获取早期的buffer的event? */
 /// Consumes the early buffered events.
 ///
 /// # Panics
@@ -186,7 +186,7 @@ fn maybe_get_trace_sender() -> Option<&'static broadcast::Sender<LogEvent>> {
 fn get_trace_receiver() -> broadcast::Receiver<LogEvent> {
     get_trace_sender().subscribe()
 }
-
+/* 获取SUBSCRIBERS? */
 /// Gets a mutable reference to the list of waiting subscribers, if it exists.
 fn get_trace_subscriber_list() -> MutexGuard<'static, Option<Vec<oneshot::Sender<Vec<LogEvent>>>>> {
     SUBSCRIBERS.lock().expect("poisoned locks are dumb")
@@ -227,7 +227,7 @@ pub fn stop_early_buffering() {
     {
         return;
     }
-
+/* 把buffered_events发给subscribers_tx */
     // We won the right to capture all buffered events and forward them to any waiting subscribers,
     // so let's grab the subscriber list and see if there's actually anyone waiting.
     let subscribers = get_trace_subscriber_list().take();

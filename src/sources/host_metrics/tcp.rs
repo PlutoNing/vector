@@ -24,7 +24,7 @@ const TCP_TX_QUEUED_BYTES_TOTAL: &str = "tcp_tx_queued_bytes_total";
 const TCP_RX_QUEUED_BYTES_TOTAL: &str = "tcp_rx_queued_bytes_total";
 const STATE: &str = "state";
 
-impl HostMetrics {
+impl HostMetrics {/* 获取tcp的指标 */
     pub async fn tcp_metrics(&self, output: &mut super::MetricsBuffer) {
         match build_tcp_stats().await {
             Ok(stats) => {
@@ -268,7 +268,7 @@ fn parse_nl_inet_hdrs(
 
     Ok(())
 }
-
+/* 构建TCP当前的状态? */
 async fn build_tcp_stats() -> Result<TcpStats, TcpError> {
     let mut tcp_stats = TcpStats::default();
     let resp = fetch_netlink_inet_headers(AF_INET).await?;

@@ -17,7 +17,7 @@ pub struct TextSerializerConfig {
     #[serde(default, skip_serializing_if = "vector_core::serde::is_default")]
     pub metric_tag_values: MetricTagValues,
 }
-
+/* 文本的序列化 */
 impl TextSerializerConfig {
     /// Creates a new `TextSerializerConfig`.
     pub const fn new(metric_tag_values: MetricTagValues) -> Self {
@@ -49,7 +49,7 @@ impl TextSerializerConfig {
 pub struct TextSerializer {
     metric_tag_values: MetricTagValues,
 }
-
+/* 新建一个文本的序列化 */
 impl TextSerializer {
     /// Creates a new `TextSerializer`.
     pub const fn new(metric_tag_values: MetricTagValues) -> Self {

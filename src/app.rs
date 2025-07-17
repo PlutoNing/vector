@@ -43,8 +43,8 @@ pub fn worker_threads() -> Option<NonZeroUsize> {
 
 /* 定义app的config */
 pub struct ApplicationConfig {
-    pub config_paths: Vec<config::ConfigPath>,
-    pub topology: RunningTopology,
+    pub config_paths: Vec<config::ConfigPath>, /* 配置文件路径 */
+    pub topology: RunningTopology, /* 构建的拓扑 */
     pub graceful_crash_receiver: ShutdownErrorReceiver,
     pub internal_topologies: Vec<RunningTopology>,
     #[cfg(feature = "api")]
@@ -99,7 +99,7 @@ impl ApplicationConfig { /* vector::app::ApplicationConfig::from_opts vector::ap
     ) -> Result<Self, ExitCode> {
         #[cfg(feature = "api")]
         let api = config.api;
-/* 解析好的config下一步来到这， 看来是生成什么拓扑 */
+/* 解析好的config下一步来到这， 看来是生成什么拓扑(包含source, sink等的东西) */
         let (topology, graceful_crash_receiver) =
             RunningTopology::start_init_validated(config, extra_context.clone())
                 .await
@@ -233,7 +233,7 @@ impl Application {
             },
         ))
     }
-
+/* 开启app? */
     pub fn start(self, handle: &Handle) -> Result<StartedApplication, ExitCode> {
         // Any internal_logs sources will have grabbed a copy of the
         // early buffer by this point and set up a subscriber.
@@ -251,8 +251,8 @@ impl Application {
         let topology_controller = SharedTopologyController::new(TopologyController {
             #[cfg(feature = "api")]
             api_server: config.setup_api(handle),
-            topology: config.topology,
-            config_paths: config.config_paths.clone(),
+            topology: config.topology, /* 构建的拓扑 */
+            config_paths: config.config_paths.clone(), /* 配置文件路径 */
             require_healthy: root_opts.require_healthy,
             extra_context: config.extra_context,
         });
@@ -277,11 +277,11 @@ pub struct StartedApplication {
     pub allow_empty_config: bool,
 }
 
-impl StartedApplication {
+impl StartedApplication { /* 初始化好config, 已经相关source, sink进程后调用 */
     pub async fn run(self) -> ExitStatus {
         self.main().await.shutdown().await
     }
-
+/* app的主函数? */
     pub async fn main(self) -> FinishedApplication {
         let Self {
             config_paths,

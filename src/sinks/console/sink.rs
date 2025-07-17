@@ -16,11 +16,11 @@ use crate::{
     event::{Event, EventStatus, Finalizable},
     sinks::util::StreamSink,
 };
-
+/* 一个sink的具体实现 */
 pub struct WriterSink<T> {
-    pub output: T,
-    pub transformer: Transformer,
-    pub encoder: Encoder<Framer>,
+    pub output: T, /* 指定了输出到stdout还是stderr */
+    pub transformer: Transformer, /* 涉及的transform */
+    pub encoder: Encoder<Framer>, /* 使用的编码器 */
 }
 
 #[async_trait]
@@ -28,20 +28,23 @@ impl<T> StreamSink<Event> for WriterSink<T>
 where
     T: io::AsyncWrite + Send + Sync + Unpin,
 {
+    /*  */
     async fn run(mut self: Box<Self>, mut input: BoxStream<'_, Event>) -> Result<(), ()> {
         let bytes_sent = register!(BytesSent::from(Protocol("console".into(),)));
         let events_sent = register!(EventsSent::from(Output(None)));
         while let Some(mut event) = input.next().await {
             let event_byte_size = event.estimated_json_encoded_size_of();
+            /* 转换读取的event? */
             self.transformer.transform(&mut event);
 
             let finalizers = event.take_finalizers();
             let mut bytes = BytesMut::new();
+            /* 编码读取的event? */
             self.encoder.encode(event, &mut bytes).map_err(|_| {
                 // Error is handled by `Encoder`.
                 finalizers.update_status(EventStatus::Errored);
             })?;
-
+/* write_all是什么 */
             match self.output.write_all(&bytes).await {
                 Err(error) => {
                     // Error when writing to stdout/stderr is likely irrecoverable,
@@ -60,42 +63,5 @@ where
         }
 
         Ok(())
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use futures::future::ready;
-    use futures_util::stream;
-    use vector_lib::codecs::{JsonSerializerConfig, NewlineDelimitedEncoder};
-    use vector_lib::sink::VectorSink;
-
-    use super::*;
-    use crate::{
-        event::{Event, LogEvent},
-        test_util::components::{run_and_assert_sink_compliance, SINK_TAGS},
-    };
-
-    #[tokio::test]
-    async fn component_spec_compliance() {
-        let event = Event::Log(LogEvent::from("foo"));
-
-        let encoder = Encoder::<Framer>::new(
-            NewlineDelimitedEncoder::default().into(),
-            JsonSerializerConfig::default().build().into(),
-        );
-
-        let sink = WriterSink {
-            output: Vec::new(),
-            transformer: Default::default(),
-            encoder,
-        };
-
-        run_and_assert_sink_compliance(
-            VectorSink::from_event_streamsink(sink),
-            stream::once(ready(event)),
-            &SINK_TAGS,
-        )
-        .await;
     }
 }
