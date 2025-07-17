@@ -7,7 +7,7 @@ use clap::{ArgAction, CommandFactory, FromArgMatches, Parser};
 #[cfg(windows)]
 use crate::service;
 
-use crate::{config, get_version, graph, list, unit_test};
+use crate::{config, get_version, graph, unit_test};
 use crate::{signal};
 /* 程序选项 */
 #[derive(Parser, Debug)] /* Parser是 clap 库提供的一个派生宏，用于自动生成命令行解析逻辑。 */
@@ -30,7 +30,6 @@ impl Opts { /* 获取启动时的命令行选项,app.get_matches() 解析命令�
     pub const fn log_level(&self) -> &'static str {
         let (quiet_level, verbose_level) = match self.sub_command {
             Some(SubCommand::Graph(_))
-            | Some(SubCommand::List(_))
             | Some(SubCommand::Test(_)) => {
                 if self.root.verbose == 0 {
                     (self.root.quiet + 1, self.root.verbose)
@@ -255,9 +254,6 @@ pub enum SubCommand {
     #[command(hide = true)]
     Config(config::Opts),
 
-    /// List available components, then exit.
-    List(list::Opts),
-
     /// Run Vector config unit tests, then exit. This command is experimental and therefore subject to change.
     /// For guidance on how to write unit tests check out <https://vector.dev/guides/level-up/unit-testing/>.
     Test(unit_test::Opts),
@@ -282,7 +278,6 @@ impl SubCommand {
         match self {
             Self::Config(c) => config::cmd(c),
             Self::Graph(g) => graph::cmd(g),
-            Self::List(l) => list::cmd(l),
             #[cfg(windows)]
             Self::Service(s) => service::cmd(s),
             Self::Test(t) => unit_test::cmd(t, &mut signals.handler).await,

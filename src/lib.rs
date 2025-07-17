@@ -73,7 +73,6 @@ pub(crate) mod graph;
 pub mod heartbeat;
 pub mod http;
 pub mod line_agg;
-pub mod list;
 pub mod net;
 #[allow(unreachable_pub)]
 pub(crate) mod proto;
