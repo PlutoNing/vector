@@ -48,7 +48,6 @@ pub fn compile(mut builder: ConfigBuilder) -> Result<(Config, Vec<String>), Vec<
         transforms,
         tests,
         provider: _,
-        secret,
         graceful_shutdown_duration,
         allow_empty: _,
     } = builder;
@@ -134,7 +133,6 @@ pub fn compile(mut builder: ConfigBuilder) -> Result<(Config, Vec<String>), Vec<
             sinks,
             transforms,
             tests,
-            secret,
             graceful_shutdown_duration,
         };
 

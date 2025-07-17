@@ -1,6 +1,5 @@
 mod config_builder;
 mod loader;
-mod secret;
 mod source;
 
 use std::{
@@ -15,7 +14,6 @@ use config_builder::ConfigBuilderLoader;
 use glob::glob;
 use loader::process::Process;
 pub use loader::*;
-pub use secret::*;
 pub use source::*;
 use vector_lib::configurable::NamedComponent;
 
@@ -138,20 +136,7 @@ pub async fn load_from_paths_with_provider_and_secrets(
     signal_handler: &mut signal::SignalHandler,
     allow_empty: bool,
 ) -> Result<Config, Vec<String>> {
-    // Load secret backends first
-    let mut secrets_backends_loader = load_secret_backends_from_paths(config_paths)?;
-    // And then, if needed, retrieve secrets from configured backends
-    let mut builder = if secrets_backends_loader.has_secrets_to_retrieve() { 
-        /* 20250717164350 这个路径应该不是需要的 */
-        let resolved_secrets = secrets_backends_loader
-            .retrieve(&mut signal_handler.subscribe())
-            .await
-            .map_err(|e| vec![e])?;
-        load_builder_from_paths_with_secrets(config_paths, resolved_secrets)?
-    } else {
-        debug!(message = "No secret placeholder found, skipping secret resolution.");
-        load_builder_from_paths(config_paths)? /* 从配置文件路径 -> config结构体成员里面 */
-    };
+    let mut builder = load_builder_from_paths(config_paths)?;
     /* 现在builder包含了配置项 */
     builder.allow_empty = allow_empty;
 
@@ -217,14 +202,6 @@ pub fn load_builder_from_paths(config_paths: &[ConfigPath]) -> Result<ConfigBuil
     loader_from_paths(ConfigBuilderLoader::new(), config_paths)
 }
 
-/// Uses `ConfigBuilderLoader` to process `ConfigPaths`, performing secret replacement and deserializing to a `ConfigBuilder`
-pub fn load_builder_from_paths_with_secrets(
-    config_paths: &[ConfigPath],
-    secrets: HashMap<String, String>,
-) -> Result<ConfigBuilder, Vec<String>> {
-    loader_from_paths(ConfigBuilderLoader::with_secrets(secrets), config_paths)
-}
-
 /// Uses `SourceLoader` to process `ConfigPaths`, deserializing to a toml `SourceMap`.
 pub fn load_source_from_paths(
     config_paths: &[ConfigPath],
@@ -232,12 +209,6 @@ pub fn load_source_from_paths(
     loader_from_paths(SourceLoader::new(), config_paths)
 }
 
-/// Uses `SecretBackendLoader` to process `ConfigPaths`, deserializing to a `SecretBackends`.
-pub fn load_secret_backends_from_paths(
-    config_paths: &[ConfigPath],
-) -> Result<SecretBackendLoader, Vec<String>> {
-    loader_from_paths(SecretBackendLoader::new(), config_paths)
-}
 
 pub fn load_from_str(input: &str, format: Format) -> Result<Config, Vec<String>> {
     let builder = load_from_inputs(std::iter::once((input.as_bytes(), format)))?;

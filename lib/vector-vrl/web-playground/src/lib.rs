@@ -90,7 +90,6 @@ fn compile(mut input: Input) -> Result<VrlCompileResult, VrlDiagnosticResult> {
     let mut target_value = TargetValue {
         value: event.clone(),
         metadata: Value::Object(BTreeMap::new()),
-        secrets: Secrets::new(),
     };
 
     let program = match compile_with_state(&input.program, &functions, &state, config) {

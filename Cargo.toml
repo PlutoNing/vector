@@ -26,12 +26,6 @@ test = false
 bench = false
 required-features = ["default-no-api-client"]
 
-[[bin]]
-name = "secret-backend-example"
-path = "src/config/loading/secret_backend_example.rs"
-test = false
-bench = false
-required-features = ["secret-backend-example"]
 
 [[test]]
 name = "integration"
@@ -225,7 +219,6 @@ aws-sdk-firehose = { version = "1.71.0", default-features = false, features = ["
 aws-sdk-kinesis = { version = "1.66.0", default-features = false, features = ["behavior-version-latest", "rt-tokio"], optional = true }
 aws-sdk-kms = { version = "1.75.0", default-features = false, features = ["behavior-version-latest", "rt-tokio"], optional = true }
 aws-sdk-s3 = { version = "1.15.0", default-features = false, features = ["behavior-version-latest", "rt-tokio"], optional = true }
-aws-sdk-secretsmanager = { version = "1.76.0", default-features = false, features = ["behavior-version-latest", "rt-tokio"], optional = true }
 aws-sdk-sns = { version = "1.73.0", default-features = false, features = ["behavior-version-latest", "rt-tokio"], optional = true }
 aws-sdk-sqs = { version = "1.64.0", default-features = false, features = ["behavior-version-latest", "rt-tokio"], optional = true }
 aws-types = { version = "1.3.7", default-features = false, optional = true }
@@ -423,21 +416,18 @@ ntapi = { git = "https://github.com/MSxDOS/ntapi.git", rev = "24fc1e47677fc9f6e3
 
 [features]
 # Default features for *-unknown-linux-gnu and *-apple-darwin
-default = ["api", "api-client", "enrichment-tables", "sinks", "sources",  "transforms", "unix", "secrets"]
+default = ["api", "api-client", "enrichment-tables", "sinks", "sources",  "transforms", "unix"]
 # Default features for `cargo docs`. The same as `default` but without `rdkafka?/gssapi-vendored` which would require installing libsasl in our doc build environment.
-docs = ["api", "api-client", "enrichment-tables", "sinks", "sources",  "transforms", "unix", "secrets"]
+docs = ["api", "api-client", "enrichment-tables", "sinks", "sources",  "transforms", "unix"]
 # Default features for *-unknown-linux-* which make use of `cmake` for dependencies
-default-cmake = ["api", "api-client", "enrichment-tables","sinks", "sources",  "transforms", "unix","secrets"]
+default-cmake = ["api", "api-client", "enrichment-tables","sinks", "sources",  "transforms", "unix"]
 # Default features for *-pc-windows-msvc
 # TODO: Enable SASL https://github.com/vectordotdev/vector/pull/3081#issuecomment-659298042
-default-msvc = ["api", "api-client", "enrichment-tables", "sinks", "sources", "transforms", "secrets"]
-default-musl = ["api", "api-client", "enrichment-tables", "sinks", "sources",  "transforms", "unix", "secrets"]
-default-no-api-client = ["api", "enrichment-tables", "sinks", "sources",  "transforms", "unix",  "secrets"]
-default-no-vrl-cli = ["api", "sinks", "sources",  "transforms", "unix",  "secrets"]
+default-msvc = ["api", "api-client", "enrichment-tables", "sinks", "sources", "transforms"]
+default-musl = ["api", "api-client", "enrichment-tables", "sinks", "sources",  "transforms", "unix"]
+default-no-api-client = ["api", "enrichment-tables", "sinks", "sources",  "transforms", "unix"]
+default-no-vrl-cli = ["api", "sinks", "sources",  "transforms", "unix"]
 tokio-console = ["dep:console-subscriber", "tokio/tracing"]
-
-# Enables the binary secret-backend-example
-secret-backend-example = ["transforms"]
 
 all-logs = ["sinks-logs", "sources-logs",  "transforms-logs"]
 all-metrics = ["sinks-metrics", "sources-metrics", "transforms-metrics"]
@@ -445,18 +435,18 @@ all-metrics = ["sinks-metrics", "sources-metrics", "transforms-metrics"]
 # Target specific release features.
 # The `make` tasks will select this according to the appropriate triple.
 # Use this section to turn off or on specific features for specific triples.
-target-aarch64-unknown-linux-gnu = ["api", "api-client", "enrichment-tables",  "sinks", "sources",  "transforms", "unix", "secrets"]
-target-aarch64-unknown-linux-musl = ["api", "api-client", "enrichment-tables",  "sinks", "sources",  "transforms", "unix", "secrets"]
-target-armv7-unknown-linux-gnueabihf = ["api", "api-client", "enrichment-tables",  "sinks", "sources", "transforms", "unix", "secrets"]
-target-armv7-unknown-linux-musleabihf = ["api", "api-client", "enrichment-tables", "sinks", "sources",  "transforms", "secrets"]
-target-arm-unknown-linux-gnueabi = ["api", "api-client", "enrichment-tables", "sinks", "sources",  "transforms", "unix", "secrets"]
-target-arm-unknown-linux-musleabi = ["api", "api-client",  "enrichment-tables", "sinks", "sources",  "transforms", "secrets"]
-target-x86_64-unknown-linux-gnu = ["api", "api-client", "enrichment-tables", "sinks", "sources",  "transforms", "unix", "secrets"]
-target-x86_64-unknown-linux-musl = ["api", "api-client", "enrichment-tables", "sinks", "sources", "transforms", "unix", "secrets"]
+target-aarch64-unknown-linux-gnu = ["api", "api-client", "enrichment-tables",  "sinks", "sources",  "transforms", "unix"]
+target-aarch64-unknown-linux-musl = ["api", "api-client", "enrichment-tables",  "sinks", "sources",  "transforms", "unix"]
+target-armv7-unknown-linux-gnueabihf = ["api", "api-client", "enrichment-tables",  "sinks", "sources", "transforms", "unix"]
+target-armv7-unknown-linux-musleabihf = ["api", "api-client", "enrichment-tables", "sinks", "sources",  "transforms"]
+target-arm-unknown-linux-gnueabi = ["api", "api-client", "enrichment-tables", "sinks", "sources",  "transforms", "unix"]
+target-arm-unknown-linux-musleabi = ["api", "api-client",  "enrichment-tables", "sinks", "sources",  "transforms"]
+target-x86_64-unknown-linux-gnu = ["api", "api-client", "enrichment-tables", "sinks", "sources",  "transforms", "unix"]
+target-x86_64-unknown-linux-musl = ["api", "api-client", "enrichment-tables", "sinks", "sources", "transforms", "unix"]
 # Does not currently build
-target-powerpc64le-unknown-linux-gnu = ["api", "api-client", "enrichment-tables", "sinks", "sources", "transforms", "unix", "secrets"]
+target-powerpc64le-unknown-linux-gnu = ["api", "api-client", "enrichment-tables", "sinks", "sources", "transforms", "unix"]
 # Currently doesn't build due to lack of support for 64-bit atomics
-target-powerpc-unknown-linux-gnu = ["api", "api-client", "enrichment-tables", "sinks", "sources", "transforms", "unix", "secrets"]
+target-powerpc-unknown-linux-gnu = ["api", "api-client", "enrichment-tables", "sinks", "sources", "transforms", "unix"]
 
 # Enables features that work only on systems providing `cfg(unix)`
 unix = ["tikv-jemallocator", "allocation-tracing"]
@@ -509,11 +499,6 @@ enrichment-tables-memory = ["dep:evmap", "dep:evmap-derive", "dep:thread_local"]
 
 # Codecs
 codecs-syslog = ["vector-lib/syslog"]
-
-# Secrets
-# removed
-secrets = ["secrets-aws-secrets-manager"]
-secrets-aws-secrets-manager = ["aws-core", "dep:aws-sdk-secretsmanager"]
 
 # Sources
 sources = ["sources-logs", "sources-metrics"]

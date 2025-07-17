@@ -1,9 +1,9 @@
-use std::{collections::HashMap, io::Read};
+use std::{io::Read};
 
 use indexmap::IndexMap;
 use toml::value::Table;
 
-use super::{deserialize_table, loader, prepare_input, secret};
+use super::{deserialize_table, loader, prepare_input};
 use super::{ComponentHint, Process};
 use crate::config::{
     ComponentKey, ConfigBuilder, EnrichmentTableOuter, SinkOuter, SourceOuter, TestDefinition,
@@ -12,21 +12,12 @@ use crate::config::{
 
 pub struct ConfigBuilderLoader {
     builder: ConfigBuilder,
-    secrets: Option<HashMap<String, String>>,
 }
 /* 一个解析配置文件内容的? */
 impl ConfigBuilderLoader {
     pub fn new() -> Self {
         Self {
             builder: ConfigBuilder::default(),
-            secrets: None,
-        }
-    }
-
-    pub fn with_secrets(secrets: HashMap<String, String>) -> Self {
-        Self {
-            builder: ConfigBuilder::default(),
-            secrets: Some(secrets),
         }
     }
 }
@@ -35,11 +26,6 @@ impl Process for ConfigBuilderLoader {
     /// 解析配置文件内容, 替换掉环境变量
     fn prepare<R: Read>(&mut self, input: R) -> Result<String, Vec<String>> {
         let prepared_input = prepare_input(input)?;/* prepared_input:替换掉环境变量的配置文件内容 */
-        let prepared_input = self
-            .secrets
-            .as_ref()
-            .map(|s| secret::interpolate(&prepared_input, s))
-            .unwrap_or(Ok(prepared_input))?; /* 这一步应该可以省略 */
         Ok(prepared_input)
     }
     /* table应该是反序列化之后的配置文件内容, hint可能是none */

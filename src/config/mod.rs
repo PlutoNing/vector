@@ -12,7 +12,6 @@ use std::{
 use crate::{
     conditions,
     event::{Metric, Value},
-    secrets::SecretBackends,
     serde::OneOrMany,
 };
 
@@ -40,7 +39,6 @@ mod graph;
 mod loading;
 pub mod provider;
 pub mod schema;
-mod secret;
 mod sink;
 mod source;
 mod transform;
@@ -55,11 +53,10 @@ pub use enrichment_table::{EnrichmentTableConfig, EnrichmentTableOuter};
 pub use format::{Format, FormatHint};
 pub use loading::{
     load, load_builder_from_paths, load_from_paths, load_from_paths_with_provider_and_secrets,
-    load_from_str, load_source_from_paths, merge_path_lists, process_paths, COLLECTOR,
+    load_from_str, load_source_from_paths, merge_path_lists, process_paths,
     CONFIG_PATHS,
 };
 pub use provider::ProviderConfig;
-pub use secret::SecretBackend;
 pub use sink::{BoxedSink, SinkConfig, SinkContext, SinkHealthcheckOptions, SinkOuter};
 pub use source::{BoxedSource, SourceConfig, SourceContext, SourceOuter};
 pub use transform::{
@@ -138,7 +135,6 @@ pub struct Config {
     transforms: IndexMap<ComponentKey, TransformOuter<OutputId>>,
     pub enrichment_tables: IndexMap<ComponentKey, EnrichmentTableOuter<OutputId>>,
     tests: Vec<TestDefinition>,
-    secret: IndexMap<ComponentKey, SecretBackends>,
     pub graceful_shutdown_duration: Option<Duration>,
 }
 

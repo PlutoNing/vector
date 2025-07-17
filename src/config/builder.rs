@@ -4,7 +4,7 @@ use indexmap::IndexMap;
 use vector_lib::config::GlobalOptions;
 use vector_lib::configurable::configurable_component;
 
-use crate::{enrichment_tables::EnrichmentTables, providers::Providers, secrets::SecretBackends};
+use crate::{enrichment_tables::EnrichmentTables, providers::Providers};
 
 #[cfg(feature = "api")]
 use super::api;
@@ -62,9 +62,6 @@ pub struct ConfigBuilder {
     /// the typical configuration files that must be passed to Vector.
     pub provider: Option<Providers>,
 
-    /// All configured secrets backends.
-    #[serde(default)]
-    pub secret: IndexMap<ComponentKey, SecretBackends>,
 
     /// The duration in seconds to wait for graceful shutdown after SIGINT or SIGTERM are received.
     /// After the duration has passed, Vector will force shutdown. Default value is 60 seconds. This
@@ -92,7 +89,7 @@ impl From<Config> for ConfigBuilder {
             sinks,
             transforms,
             tests,
-            secret,
+
             graceful_shutdown_duration,
         } = config;
 
@@ -125,7 +122,6 @@ impl From<Config> for ConfigBuilder {
             transforms,
             provider: None,
             tests,
-            secret,
             graceful_shutdown_duration,
             allow_empty: false,
         }
@@ -255,11 +251,6 @@ impl ConfigBuilder {
                 errors.push(format!("duplicate test name found: {}", wt.name));
             }
         });
-        with.secret.keys().for_each(|k| {
-            if self.secret.contains_key(k) {
-                errors.push(format!("duplicate secret id found: {}", k));
-            }
-        });
         if !errors.is_empty() {
             return Err(errors);
         }
@@ -270,7 +261,6 @@ impl ConfigBuilder {
         info!("sinks: {:?}", self.sinks);
         self.transforms.extend(with.transforms);
         self.tests.extend(with.tests);
-        self.secret.extend(with.secret);
 
         Ok(())
     }
