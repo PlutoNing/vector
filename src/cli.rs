@@ -12,7 +12,7 @@ use crate::tap;
 use crate::top;
 use crate::{config, convert_config, generate, get_version, graph, list, unit_test, validate};
 use crate::{generate_schema, signal};
-
+/* 程序选项 */
 #[derive(Parser, Debug)]
 #[command(rename_all = "kebab-case")]
 pub struct Opts {
@@ -58,7 +58,7 @@ impl Opts {
         }
     }
 }
-
+/* 定义命令行选项 */
 #[derive(Parser, Debug)]
 #[command(rename_all = "kebab-case")]
 pub struct RootOpts {
@@ -223,13 +223,7 @@ pub struct RootOpts {
     )]
     pub allocation_tracing_reporting_interval_ms: u64,
 
-    /// Disable probing and configuration of root certificate locations on the system for OpenSSL.
-    ///
-    /// The probe functionality manipulates the `SSL_CERT_FILE` and `SSL_CERT_DIR` environment variables
-    /// in the Vector process. This behavior can be problematic for users of the `exec` source, which by
-    /// default inherits the environment of the Vector process.
-    #[arg(long, env = "VECTOR_OPENSSL_NO_PROBE", default_value = "false")]
-    pub openssl_no_probe: bool,
+
 
     /// Allow the configuration to run without any components. This is useful for loading in an
     /// empty stub config that will later be replaced with actual components. Note that this is
@@ -238,7 +232,7 @@ pub struct RootOpts {
     #[arg(long, env = "VECTOR_ALLOW_EMPTY_CONFIG", default_value = "false")]
     pub allow_empty_config: bool,
 }
-
+/* 实现opt的方法 */
 impl RootOpts {
     /// Return a list of config paths with the associated formats.
     pub fn config_paths_with_formats(&self) -> Vec<config::ConfigPath> {
@@ -256,13 +250,13 @@ impl RootOpts {
         )
         .collect()
     }
-
+    /* 启动时初始化root opt */
     pub fn init_global(&self) {
-        if !self.openssl_no_probe {
-            unsafe {
-                openssl_probe::init_openssl_env_vars();
-            }
-        }
+
+
+
+
+
 
         crate::metrics::init_global().expect("metrics initialization failed");
     }

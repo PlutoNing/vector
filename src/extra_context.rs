@@ -5,7 +5,7 @@ use std::{
     marker::{Send, Sync},
     sync::Arc,
 };
-
+/* 这个结构体作为主程序run的参数 */
 /// Structure containing any extra data.
 /// The data is held in an [`Arc`] so is cheap to clone.
 #[derive(Clone, Default)]

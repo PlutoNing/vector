@@ -8,14 +8,12 @@
             "type": "lldb",
             "request": "launch",
             "name": "Cargo launch",
-            "cargo": {
-                "args": [
-                    "build",
-                    "--lib"
-                ]
-            },
-            "args": []
+            "program": "${workspaceFolder}/target/debug/vector",
+            "cwd": "${workspaceFolder}",
+            "args": [],
+            "stopOnEntry": true
         }
+
     
     ]
 }

@@ -165,7 +165,7 @@ impl ApplicationConfig {
         }
     }
 }
-
+/* 运行程序 */
 impl Application {
     pub fn run(extra_context: ExtraContext) -> ExitStatus {
         let (runtime, app) =
@@ -173,16 +173,16 @@ impl Application {
 
         runtime.block_on(app.run())
     }
-
+/* 运行调用层次: main->run->prepare_start */
     pub fn prepare_start(
         extra_context: ExtraContext,
-    ) -> Result<(Runtime, StartedApplication), ExitCode> {
-        Self::prepare(extra_context)
-            .and_then(|(runtime, app)| app.start(runtime.handle()).map(|app| (runtime, app)))
+    ) -> Result<(Runtime, StartedApplication), ExitCode> { /* 返回一个 Result 类型，表示操作的结果。成功时返回一个包含 Runtime 和 StartedApplication 的元组，失败时返回一个 ExitCode */
+        Self::prepare(extra_context)/* prepare 方法返回一个 Result<(Runtime, Application), ExitCode> */
+            .and_then(|(runtime, app)| app.start(runtime.handle()).map(|app| (runtime, app)))/* and_then 是 Result 类型的方法，用于链式处理成功的结果。如果 prepare 方法成功，and_then 会接收一个包含 runtime 和 app 的元组，并执行闭包中的代码。 */
     }
-
+    /*main->run->prepare_start->prepare ; 返回rt和app, 然后app.start(runtime.handle()).map(|app| (runtime, app)) */
     pub fn prepare(extra_context: ExtraContext) -> Result<(Runtime, Self), ExitCode> {
-        let opts = Opts::get_matches().map_err(|error| {
+        let opts = Opts::get_matches().map_err(|error| { /* opts 是一个类型为 Opts 的变量。它通常用于存储从命令行解析得到的选项和参数 */
             // Printing to stdout/err can itself fail; ignore it.
             _ = error.print();
             exitcode::USAGE
@@ -190,7 +190,7 @@ impl Application {
 
         Self::prepare_from_opts(opts, extra_context)
     }
-
+    /* main->run->prepare_start->prepare->prepare_from_opts */
     pub fn prepare_from_opts(
         opts: Opts,
         extra_context: ExtraContext,
@@ -206,10 +206,10 @@ impl Application {
             opts.root.internal_log_rate_limit,
         );
 
-        // Can only log this after initializing the logging subsystem
-        if opts.root.openssl_no_probe {
-            debug!(message = "Disabled probing and configuration of root certificate locations on the system for OpenSSL.");
-        }
+
+
+
+
 
         let runtime = build_runtime(opts.root.threads, "vector-worker")?;
 
