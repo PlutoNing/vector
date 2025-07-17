@@ -1,7 +1,7 @@
 use std::{
     cell::RefCell,
     collections::{BTreeSet, HashMap},
-    env, mem,
+    mem,
 };
 
 use indexmap::IndexMap;
@@ -488,33 +488,6 @@ pub fn default_schema_settings() -> SchemaSettings {
         .with_visitor(DisallowUnevaluatedPropertiesVisitor::from_settings)
         .with_visitor(GenerateHumanFriendlyNameVisitor::from_settings)
 }
-
-pub fn generate_root_schema<T>() -> Result<RootSchema, GenerateError>
-where
-    T: Configurable + 'static,
-{
-    generate_root_schema_with_settings::<T>(default_schema_settings())
-}
-
-pub fn generate_root_schema_with_settings<T>(
-    schema_settings: SchemaSettings,
-) -> Result<RootSchema, GenerateError>
-where
-    T: Configurable + 'static,
-{
-    let schema_gen = RefCell::new(schema_settings.into_generator());
-
-    // Set env variable to enable generating all schemas, including platform-specific ones.
-    env::set_var("VECTOR_GENERATE_SCHEMA", "true");
-
-    let schema =
-        get_or_generate_schema(&T::as_configurable_ref(), &schema_gen, Some(T::metadata()))?;
-
-    env::remove_var("VECTOR_GENERATE_SCHEMA");
-
-    Ok(schema_gen.into_inner().into_root_schema(schema))
-}
-
 pub fn get_or_generate_schema(
     config: &ConfigurableRef,
     gen: &RefCell<SchemaGenerator>,

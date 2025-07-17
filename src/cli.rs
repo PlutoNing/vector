@@ -8,7 +8,7 @@ use clap::{ArgAction, CommandFactory, FromArgMatches, Parser};
 use crate::service;
 
 use crate::{config, get_version, graph, list, unit_test};
-use crate::{generate_schema, signal};
+use crate::{signal};
 /* 程序选项 */
 #[derive(Parser, Debug)] /* Parser是 clap 库提供的一个派生宏，用于自动生成命令行解析逻辑。 */
 #[command(rename_all = "kebab-case")] /* 指定命令行选项的命名风格为 "kebab-case"，即选项名称中使用连字符分隔单词（例如，--some-option）。 */
@@ -251,16 +251,6 @@ impl RootOpts {
 #[derive(Parser, Debug)]
 #[command(rename_all = "kebab-case")]
 pub enum SubCommand {
-    /// Generate the configuration schema for this version of Vector. (experimental)
-    ///
-    /// A JSON Schema document will be generated that represents the valid schema for a
-    /// Vector configuration. This schema is based on the "full" configuration, such that for usages
-    /// where a configuration is split into multiple files, the schema would apply to those files
-    /// only when concatenated together.
-    ///
-    /// By default all output is writen to stdout. The `output_path` option can be used to redirect to a file.
-    GenerateSchema(generate_schema::Opts),
-
     /// Output a provided Vector configuration file/dir as a single JSON object, useful for checking in to version control.
     #[command(hide = true)]
     Config(config::Opts),
@@ -291,7 +281,6 @@ impl SubCommand {
     ) -> exitcode::ExitCode {
         match self {
             Self::Config(c) => config::cmd(c),
-            Self::GenerateSchema(opts) => generate_schema::cmd(opts),
             Self::Graph(g) => graph::cmd(g),
             Self::List(l) => list::cmd(l),
             #[cfg(windows)]
