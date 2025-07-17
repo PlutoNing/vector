@@ -141,8 +141,8 @@ pub async fn load_from_paths_with_provider_and_secrets(
     // Load secret backends first
     let mut secrets_backends_loader = load_secret_backends_from_paths(config_paths)?;
     // And then, if needed, retrieve secrets from configured backends
-    let mut builder = if secrets_backends_loader.has_secrets_to_retrieve() { /* 20250717164350 这个路径应该不是需要的 */
-        debug!(message = "Secret placeholders found, retrieving secrets from configured backends.");
+    let mut builder = if secrets_backends_loader.has_secrets_to_retrieve() { 
+        /* 20250717164350 这个路径应该不是需要的 */
         let resolved_secrets = secrets_backends_loader
             .retrieve(&mut signal_handler.subscribe())
             .await

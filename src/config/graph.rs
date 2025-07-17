@@ -70,17 +70,6 @@ impl Graph {
         Self::new_inner(sources, transforms, sinks, false, schema, wildcard_matching)
     }
 
-    pub fn new_unchecked(
-        sources: &IndexMap<ComponentKey, SourceOuter>,
-        transforms: &IndexMap<ComponentKey, TransformOuter<String>>,
-        sinks: &IndexMap<ComponentKey, SinkOuter<String>>,
-        schema: schema::Options,
-        wildcard_matching: WildcardMatching,
-    ) -> Self {
-        Self::new_inner(sources, transforms, sinks, true, schema, wildcard_matching)
-            .expect("errors ignored")
-    }
-
     fn new_inner(
         sources: &IndexMap<ComponentKey, SourceOuter>,
         transforms: &IndexMap<ComponentKey, TransformOuter<String>>,
@@ -372,45 +361,4 @@ impl Graph {
             .collect()
     }
 
-    /// From a given root node, get all paths from the root node to leaf nodes
-    /// where the leaf node must be a sink. This is useful for determining which
-    /// components are relevant in a Vector unit test.
-    ///
-    /// Caller must check for cycles before calling this function.
-    pub fn paths_to_sink_from(&self, root: &ComponentKey) -> Vec<Vec<ComponentKey>> {
-        let mut traversal: VecDeque<(ComponentKey, Vec<_>)> = VecDeque::new();
-        let mut paths = Vec::new();
-
-        traversal.push_back((root.to_owned(), Vec::new()));
-        while !traversal.is_empty() {
-            let (n, mut path) = traversal.pop_back().expect("can't be empty");
-            path.push(n.clone());
-            let neighbors = self
-                .edges
-                .iter()
-                .filter(|e| e.from.component == n)
-                .map(|e| e.to.clone())
-                .collect::<Vec<_>>();
-
-            if neighbors.is_empty() {
-                paths.push(path.clone());
-            } else {
-                for neighbor in neighbors {
-                    traversal.push_back((neighbor, path.clone()));
-                }
-            }
-        }
-
-        // Keep only components from paths that end at a sink
-        paths
-            .into_iter()
-            .filter(|path| {
-                if let Some(key) = path.last() {
-                    matches!(self.nodes.get(key), Some(Node::Sink { ty: _ }))
-                } else {
-                    false
-                }
-            })
-            .collect()
-    }
 }

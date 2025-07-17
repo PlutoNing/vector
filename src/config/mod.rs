@@ -44,7 +44,6 @@ mod secret;
 mod sink;
 mod source;
 mod transform;
-pub mod unit_test;
 mod validation;
 mod vars;
 pub mod watcher;
@@ -66,7 +65,6 @@ pub use source::{BoxedSource, SourceConfig, SourceContext, SourceOuter};
 pub use transform::{
     get_transform_output_ids, BoxedTransform, TransformConfig, TransformContext, TransformOuter,
 };
-pub use unit_test::{build_unit_tests, build_unit_tests_main, UnitTestResult};
 pub use validation::warnings;
 pub use vars::{interpolate, ENVIRONMENT_VARIABLE_INTERPOLATION_REGEX};
 pub use vector_lib::{

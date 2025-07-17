@@ -12,9 +12,9 @@ mod vrl;
 pub use self::datadog_search::{DatadogSearchConfig, DatadogSearchRunner};
 pub use self::vrl::VrlConfig;
 use self::{
-    is_log::{check_is_log, check_is_log_with_context},
-    is_metric::{check_is_metric, check_is_metric_with_context},
-    is_trace::{check_is_trace, check_is_trace_with_context},
+    is_log::{check_is_log},
+    is_metric::{check_is_metric},
+    is_trace::{check_is_trace},
     vrl::Vrl,
 };
 
@@ -61,22 +61,6 @@ impl Condition {
             Condition::DatadogSearch(x) => x.check(e),
             Condition::AlwaysPass => (true, e),
             Condition::AlwaysFail => (false, e),
-        }
-    }
-
-    /// Checks if a condition is true, with a `Result`-oriented return for easier composition.
-    ///
-    /// This can be mildly expensive for conditions that do not often match, as it allocates a string for the error
-    /// case. As such, it should typically be avoided in hot paths.
-    pub(crate) fn check_with_context(&self, e: Event) -> (Result<(), String>, Event) {
-        match self {
-            Condition::IsLog => check_is_log_with_context(e),
-            Condition::IsMetric => check_is_metric_with_context(e),
-            Condition::IsTrace => check_is_trace_with_context(e),
-            Condition::Vrl(x) => x.check_with_context(e),
-            Condition::DatadogSearch(x) => x.check_with_context(e),
-            Condition::AlwaysPass => (Ok(()), e),
-            Condition::AlwaysFail => (Ok(()), e),
         }
     }
 }
