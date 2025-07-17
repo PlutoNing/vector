@@ -7,7 +7,7 @@ use clap::{ArgAction, CommandFactory, FromArgMatches, Parser};
 #[cfg(windows)]
 use crate::service;
 
-use crate::{config, generate, get_version, graph, list, unit_test};
+use crate::{config, get_version, graph, list, unit_test};
 use crate::{generate_schema, signal};
 /* 程序选项 */
 #[derive(Parser, Debug)] /* Parser是 clap 库提供的一个派生宏，用于自动生成命令行解析逻辑。 */
@@ -30,7 +30,6 @@ impl Opts { /* 获取启动时的命令行选项,app.get_matches() 解析命令�
     pub const fn log_level(&self) -> &'static str {
         let (quiet_level, verbose_level) = match self.sub_command {
             Some(SubCommand::Graph(_))
-            | Some(SubCommand::Generate(_))
             | Some(SubCommand::List(_))
             | Some(SubCommand::Test(_)) => {
                 if self.root.verbose == 0 {
@@ -252,9 +251,6 @@ impl RootOpts {
 #[derive(Parser, Debug)]
 #[command(rename_all = "kebab-case")]
 pub enum SubCommand {
-    /// Generate a Vector configuration containing a list of components.
-    Generate(generate::Opts),
-
     /// Generate the configuration schema for this version of Vector. (experimental)
     ///
     /// A JSON Schema document will be generated that represents the valid schema for a
@@ -295,7 +291,6 @@ impl SubCommand {
     ) -> exitcode::ExitCode {
         match self {
             Self::Config(c) => config::cmd(c),
-            Self::Generate(g) => generate::cmd(g),
             Self::GenerateSchema(opts) => generate_schema::cmd(opts),
             Self::Graph(g) => graph::cmd(g),
             Self::List(l) => list::cmd(l),
