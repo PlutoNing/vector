@@ -4,9 +4,6 @@ use std::{num::NonZeroU64, path::PathBuf};
 
 use clap::{ArgAction, CommandFactory, FromArgMatches, Parser};
 
-#[cfg(windows)]
-use crate::service;
-
 use crate::{config, get_version};
 use crate::{signal};
 /* 程序选项 */
@@ -240,10 +237,6 @@ pub enum SubCommand {
     #[command(hide = true)]
     Config(config::Opts),
 
-    /// Manage the vector service.
-    #[cfg(windows)]
-    Service(service::Opts),
-
     /// Vector Remap Language CLI
     Vrl(vrl::cli::Opts),
 }
@@ -256,8 +249,6 @@ impl SubCommand {
     ) -> exitcode::ExitCode {
         match self {
             Self::Config(c) => config::cmd(c),
-            #[cfg(windows)]
-            Self::Service(s) => service::cmd(s),
             Self::Vrl(s) => {
                 let mut functions = vrl::stdlib::all();
                 functions.extend(vector_vrl_functions::all());
