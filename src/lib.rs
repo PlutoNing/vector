@@ -99,7 +99,7 @@ pub mod trace;
 #[allow(unreachable_pub)]
 pub mod transforms;
 pub mod types;
-pub mod unit_test;
+
 pub(crate) mod utilization;
 #[cfg(windows)]
 pub mod vector_windows;

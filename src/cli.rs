@@ -7,7 +7,7 @@ use clap::{ArgAction, CommandFactory, FromArgMatches, Parser};
 #[cfg(windows)]
 use crate::service;
 
-use crate::{config, get_version, graph, unit_test};
+use crate::{config, get_version, graph};
 use crate::{signal};
 /* 程序选项 */
 #[derive(Parser, Debug)] /* Parser是 clap 库提供的一个派生宏，用于自动生成命令行解析逻辑。 */
@@ -29,8 +29,7 @@ impl Opts { /* 获取启动时的命令行选项,app.get_matches() 解析命令�
 
     pub const fn log_level(&self) -> &'static str {
         let (quiet_level, verbose_level) = match self.sub_command {
-            Some(SubCommand::Graph(_))
-            | Some(SubCommand::Test(_)) => {
+            Some(SubCommand::Graph(_)) => {
                 if self.root.verbose == 0 {
                     (self.root.quiet + 1, self.root.verbose)
                 } else {
@@ -237,12 +236,6 @@ impl RootOpts {
     }
     /* 启动时初始化root opt */
     pub fn init_global(&self) {
-
-
-
-
-
-
         crate::metrics::init_global().expect("metrics initialization failed");
     }
 }
@@ -253,10 +246,6 @@ pub enum SubCommand {
     /// Output a provided Vector configuration file/dir as a single JSON object, useful for checking in to version control.
     #[command(hide = true)]
     Config(config::Opts),
-
-    /// Run Vector config unit tests, then exit. This command is experimental and therefore subject to change.
-    /// For guidance on how to write unit tests check out <https://vector.dev/guides/level-up/unit-testing/>.
-    Test(unit_test::Opts),
 
     /// Output the topology as visual representation using the DOT language which can be rendered by GraphViz
     Graph(graph::Opts),
@@ -272,7 +261,7 @@ pub enum SubCommand {
 impl SubCommand {
     pub async fn execute(
         &self,
-        mut signals: signal::SignalPair,
+        _signals: signal::SignalPair,
         _color: bool,
     ) -> exitcode::ExitCode {
         match self {
@@ -280,7 +269,6 @@ impl SubCommand {
             Self::Graph(g) => graph::cmd(g),
             #[cfg(windows)]
             Self::Service(s) => service::cmd(s),
-            Self::Test(t) => unit_test::cmd(t, &mut signals.handler).await,
             Self::Vrl(s) => {
                 let mut functions = vrl::stdlib::all();
                 functions.extend(vector_vrl_functions::all());
