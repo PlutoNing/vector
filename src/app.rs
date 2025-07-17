@@ -197,10 +197,8 @@ impl Application {
     ) -> Result<(Runtime, Self), ExitCode> {
         opts.root.init_global();
 
-        let color = opts.root.color.use_color();
-
         init_logging(
-            color,
+            true,
             opts.root.log_format,
             opts.log_level(),
             opts.root.internal_log_rate_limit,
@@ -217,7 +215,7 @@ impl Application {
         let mut signals = SignalPair::new(&runtime);
 
         if let Some(sub_command) = &opts.sub_command {
-            return Err(runtime.block_on(sub_command.execute(signals, color)));
+            return Err(runtime.block_on(sub_command.execute(signals, true)));
         }
 
         let config = runtime.block_on(ApplicationConfig::from_opts(

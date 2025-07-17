@@ -138,15 +138,7 @@ pub struct RootOpts {
     #[arg(long, default_value = "text", env = "VECTOR_LOG_FORMAT")]
     pub log_format: LogFormat,
 
-    /// Control when ANSI terminal formatting is used.
-    ///
-    /// By default `vector` will try and detect if `stdout` is a terminal, if it is
-    /// ANSI will be enabled. Otherwise it will be disabled. By providing this flag with
-    /// the `--color always` option will always enable ANSI terminal formatting. `--color never`
-    /// will disable all ANSI terminal formatting. `--color auto` will attempt
-    /// to detect it automatically.
-    #[arg(long, default_value = "auto", env = "VECTOR_COLOR")]
-    pub color: Color,
+
 
     /// Watch for changes in configuration file, and reload accordingly.
     #[arg(short, long, env = "VECTOR_WATCH_CONFIG")]
@@ -349,28 +341,10 @@ impl SubCommand {
     }
 }
 
-#[derive(clap::ValueEnum, Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Color {
-    Auto,
-    Always,
-    Never,
-}
 
-impl Color {
-    pub fn use_color(&self) -> bool {
-        match self {
-            #[cfg(unix)]
-            Color::Auto => {
-                use std::io::IsTerminal;
-                std::io::stdout().is_terminal()
-            }
-            #[cfg(windows)]
-            Color::Auto => false, // ANSI colors are not supported by cmd.exe
-            Color::Always => true,
-            Color::Never => false,
-        }
-    }
-}
+
+
+
 
 #[derive(clap::ValueEnum, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LogFormat {
