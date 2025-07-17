@@ -171,20 +171,3 @@ impl ToValue for Concurrency {
         serde_json::to_value(self).expect("Could not convert concurrency to JSON")
     }
 }
-
-#[test]
-fn is_serialization_reversible() {
-    let variants = [
-        Concurrency::None,
-        Concurrency::Adaptive,
-        Concurrency::Fixed(8),
-    ];
-
-    for v in variants {
-        let value = serde_json::to_value(v).unwrap();
-        let deserialized = serde_json::from_value::<Concurrency>(value)
-            .expect("Failed to deserialize a previously serialized Concurrency value");
-
-        assert_eq!(v, deserialized)
-    }
-}

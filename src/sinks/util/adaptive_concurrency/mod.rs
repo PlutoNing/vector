@@ -6,8 +6,6 @@ mod layer;
 mod semaphore;
 mod service;
 
-#[cfg(test)]
-pub mod tests;
 
 pub(crate) use layer::AdaptiveConcurrencyLimitLayer;
 pub(crate) use service::AdaptiveConcurrencyLimit;

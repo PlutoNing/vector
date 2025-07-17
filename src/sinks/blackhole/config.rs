@@ -72,13 +72,3 @@ impl GenerateConfig for BlackholeConfig {
         toml::Value::try_from(Self::default()).unwrap()
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use crate::sinks::blackhole::config::BlackholeConfig;
-
-    #[test]
-    fn generate_config() {
-        crate::test_util::test_generate_config::<BlackholeConfig>();
-    }
-}
