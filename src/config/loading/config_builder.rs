@@ -14,7 +14,7 @@ pub struct ConfigBuilderLoader {
     builder: ConfigBuilder,
     secrets: Option<HashMap<String, String>>,
 }
-
+/* 一个解析配置文件内容的? */
 impl ConfigBuilderLoader {
     pub fn new() -> Self {
         Self {
@@ -32,17 +32,17 @@ impl ConfigBuilderLoader {
 }
 
 impl Process for ConfigBuilderLoader {
-    /// Prepares input for a `ConfigBuilder` by interpolating environment variables.
+    /// 解析配置文件内容, 替换掉环境变量
     fn prepare<R: Read>(&mut self, input: R) -> Result<String, Vec<String>> {
-        let prepared_input = prepare_input(input)?;
+        let prepared_input = prepare_input(input)?;/* prepared_input:替换掉环境变量的配置文件内容 */
         let prepared_input = self
             .secrets
             .as_ref()
             .map(|s| secret::interpolate(&prepared_input, s))
-            .unwrap_or(Ok(prepared_input))?;
+            .unwrap_or(Ok(prepared_input))?; /* 这一步应该可以省略 */
         Ok(prepared_input)
     }
-
+    /* table应该是反序列化之后的配置文件内容, hint可能是none */
     /// Merge a TOML `Table` with a `ConfigBuilder`. Component types extend specific keys.
     fn merge(&mut self, table: Table, hint: Option<ComponentHint>) -> Result<(), Vec<String>> {
         match hint {
@@ -75,7 +75,7 @@ impl Process for ConfigBuilderLoader {
                         .map(|(_, test)| test),
                 );
             }
-            None => {
+            None => { /* 把解析出的配置项吸收到自己config里面 */
                 self.builder.append(deserialize_table(table)?)?;
             }
         };

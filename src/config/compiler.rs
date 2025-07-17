@@ -5,7 +5,7 @@ use super::{
 
 use indexmap::{IndexMap, IndexSet};
 use vector_lib::id::Inputs;
-
+/* 什么是compile, builder包含了配置项 */
 pub fn compile(mut builder: ConfigBuilder) -> Result<(Config, Vec<String>), Vec<String>> {
     let mut errors = Vec::new();
 
@@ -61,6 +61,7 @@ pub fn compile(mut builder: ConfigBuilder) -> Result<(Config, Vec<String>), Vec<
                 .filter_map(|(key, table)| table.as_sink(key)),
         )
         .collect::<IndexMap<_, _>>();
+    info!("all_sinks sinks: {:?}", all_sinks);
     let sources_and_table_sources = sources
         .clone()
         .into_iter()
@@ -70,7 +71,7 @@ pub fn compile(mut builder: ConfigBuilder) -> Result<(Config, Vec<String>), Vec<
                 .filter_map(|(key, table)| table.as_source(key)),
         )
         .collect::<IndexMap<_, _>>();
-
+            info!("sources_and_table_sources sinks: {:?}", sources_and_table_sources);
     let graph = match Graph::new(
         &sources_and_table_sources,
         &transforms,
@@ -84,7 +85,7 @@ pub fn compile(mut builder: ConfigBuilder) -> Result<(Config, Vec<String>), Vec<
             return Err(errors);
         }
     };
-
+//  info!("graph sinks: {:?}", graph);
     if let Err(type_errors) = graph.typecheck() {
         errors.extend(type_errors);
     }
@@ -120,7 +121,7 @@ pub fn compile(mut builder: ConfigBuilder) -> Result<(Config, Vec<String>), Vec<
         .into_iter()
         .map(|test| test.resolve_outputs(&graph))
         .collect::<Result<Vec<_>, Vec<_>>>()?;
-
+        /* 再建一个新的config返回 */
     if errors.is_empty() {
         let mut config = Config {
             global,

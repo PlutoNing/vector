@@ -18,7 +18,7 @@ pub static ENVIRONMENT_VARIABLE_INTERPOLATION_REGEX: LazyLock<Regex> = LazyLock:
     )
     .unwrap()
 });
-
+/* str是配置文件内容 ,在给定的字符串中替换环境变量占位符*/
 /// Result<interpolated config, errors>
 pub fn interpolate(input: &str, vars: &HashMap<String, String>) -> Result<String, Vec<String>> {
     let mut errors = Vec::new();

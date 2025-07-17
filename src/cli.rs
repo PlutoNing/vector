@@ -122,7 +122,7 @@ pub struct RootOpts {
     #[arg(short, long, env = "VECTOR_REQUIRE_HEALTHY")]
     pub require_healthy: Option<bool>,
 
-    /// Number of threads to use for processing (default is number of available cores)
+    /// 线程数量
     #[arg(short, long, env = "VECTOR_THREADS")]
     pub threads: Option<usize>,
 

@@ -43,8 +43,8 @@ pub fn log_schema() -> &'static LogSchema {
 /// specify which fields should hold specific data that is also set by Vector once an event is
 /// flowing through a topology.
 #[configurable_component]
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[serde(default)]
+#[derive(Clone, Debug, Eq, PartialEq)] /* #[derive(...)] 是一个派生宏，用于自动为结构体实现一些常用的特征（traits） */
+#[serde(default)] /* 是 Serde 库的一个属性，用于序列化和反序列化。它指定在反序列化时，如果某个字段缺失，则使用默认值。 */
 pub struct LogSchema {
     /// The name of the event field to treat as the event message.
     ///

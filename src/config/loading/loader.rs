@@ -55,14 +55,14 @@ pub(super) mod process {
         /// Prepares input for serialization. This can be a useful step to interpolate
         /// environment variables or perform some other pre-processing on the input.
         fn prepare<R: Read>(&mut self, input: R) -> Result<String, Vec<String>>;
-
+/* 加载配置文件内容 */
         /// Calls into the `prepare` method, and deserializes a `Read` to a `T`.
         fn load<R: std::io::Read, T>(&mut self, input: R, format: Format) -> Result<T, Vec<String>>
         where
             T: serde::de::DeserializeOwned,
         {
             let value = self.prepare(input)?;
-
+/* value是配置文件内容, 调用对应格式的反序列化器? */
             format::deserialize(&value, format)
         }
 
@@ -157,15 +157,15 @@ pub(super) mod process {
                 Err(errors)
             }
         }
-
+        /* 加载配置文件内容, 返回反序列化之后的 */
         /// Loads and deserializes a file into a TOML `Table`.
         fn load_file(
             &mut self,
-            path: &Path,
-            format: Format,
+            path: &Path, /* 文件路径 */
+            format: Format, /* 比如说YAML */
         ) -> Result<Option<(String, Table)>, Vec<String>> {
             if let (Ok(name), Some(file)) = (component_name(path), open_file(path)) {
-                self.load(file, format).map(|value| Some((name, value)))
+                self.load(file, format).map(|value| Some((name, value))) /* 返回的是反序列化之后的配置内容 */
             } else {
                 Ok(None)
             }
@@ -213,12 +213,12 @@ where
 {
     /// Consumes Self, and returns the final, deserialized `T`.
     fn take(self) -> T;
-
+/* 解析配置文件内容? 20250717154552 */
     /// Deserializes a file with the provided format, and makes the result available via `take`.
     /// Returns a vector of non-fatal warnings on success, or a vector of error strings on failure.
     fn load_from_file(&mut self, path: &Path, format: Format) -> Result<(), Vec<String>> {
         if let Some((_, table)) = self.load_file(path, format)? {
-            self.merge(table, None)?;
+            self.merge(table, None)?; /* 把配置项吸收到self里面 */
             Ok(())
         } else {
             Ok(())

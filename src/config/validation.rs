@@ -193,7 +193,7 @@ pub fn check_outputs(config: &ConfigBuilder) -> Result<(), Vec<String>> {
         Err(errors)
     }
 }
-
+/* 似乎不是很有必要 */
 pub async fn check_buffer_preconditions(config: &Config) -> Result<(), Vec<String>> {
     // We need to assert that Vector's data directory is located on a mountpoint that has enough
     // capacity to allow all sinks with disk buffers configured to be able to use up to their

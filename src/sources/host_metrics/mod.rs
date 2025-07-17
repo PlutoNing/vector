@@ -94,16 +94,16 @@ struct FilterList {
 }
 
 /// Configuration for the `host_metrics` source.
-#[serde_as]
-#[configurable_component(source("host_metrics", "Collect metric data from the local system."))]
+#[serde_as] /* 启用 serde_with 的功能，允许在序列化和反序列化时使用自定义的格式。 */
+#[configurable_component(source("host_metrics", "Collect metric data from the local system."))]/* 自定义的属性宏，用于标记这个结构体是一个可配置的组件，类型为 source，并提供描述信息。 */
 #[derive(Clone, Debug, Derivative)]
-#[derivative(Default)]
-#[serde(deny_unknown_fields)]
+#[derivative(Default)]/* 使用 Derivative 宏为结构体实现 Default 特征。 */
+#[serde(deny_unknown_fields)]/* 在反序列化时，如果遇到未知字段，将会导致错误。 */
 pub struct HostMetricsConfig {
     /// The interval between metric gathering, in seconds.
     #[serde_as(as = "serde_with::DurationSeconds<u64>")]
     #[serde(default = "default_scrape_interval")]
-    #[configurable(metadata(docs::human_name = "Scrape Interval"))]
+    #[configurable(metadata(docs::human_name = "Scrape Interval"))]/* 为配置生成文档时提供人类可读的名称。 */
     pub scrape_interval_secs: Duration,
 
     /// The list of host metric collector services to use.

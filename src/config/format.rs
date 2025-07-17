@@ -73,7 +73,7 @@ impl Format {
         }
     }
 }
-
+/* str是format格式配置文件的内容 */
 /// Parse the string represented in the specified format.
 pub fn deserialize<T>(content: &str, format: Format) -> Result<T, Vec<String>>
 where

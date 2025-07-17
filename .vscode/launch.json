@@ -11,7 +11,10 @@
             "program": "${workspaceFolder}/target/debug/vector",
             "cwd": "${workspaceFolder}",
             "args": [],
-            "stopOnEntry": true
+            "stopOnEntry": true,
+            "env": {
+                "RUST_LOG":"debug"
+            }
         }
 
     

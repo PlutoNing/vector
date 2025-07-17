@@ -17,7 +17,7 @@ use vector_lib::{
 
 use super::{dot_graph::GraphConfig, schema, ComponentKey, ProxyConfig, Resource};
 use crate::{extra_context::ExtraContext, shutdown::ShutdownSignal, SourceSender};
-
+/* 使用 Box 装箱一个实现了 SourceConfig 特征的动态对象。这种用法允许在运行时决定具体的 SourceConfig 实现。 */
 pub type BoxedSource = Box<dyn SourceConfig>;
 
 impl Configurable for BoxedSource {
@@ -43,7 +43,7 @@ impl<T: SourceConfig + 'static> From<T> for BoxedSource {
         Box::new(value)
     }
 }
-
+/* config里面对一个source的定义 */
 /// Fully resolved source component.
 #[configurable_component]
 #[configurable(metadata(docs::component_base_type = "source"))]
@@ -59,7 +59,7 @@ pub struct SourceOuter {
 
     #[serde(default, skip)]
     pub sink_acknowledgements: bool,
-
+/*  */
     #[configurable(metadata(docs::hidden))]
     #[serde(flatten)]
     pub(crate) inner: BoxedSource,

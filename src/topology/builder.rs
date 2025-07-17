@@ -74,8 +74,8 @@ static TRANSFORM_CONCURRENCY_LIMIT: LazyLock<usize> = LazyLock::new(|| {
 const INTERNAL_SOURCES: [&str; 2] = ["internal_logs", "internal_metrics"];
 
 struct Builder<'a> {
-    config: &'a super::Config,
-    diff: &'a ConfigDiff,
+    config: &'a super::Config,/* 现在的新config */
+    diff: &'a ConfigDiff,/* 新config带来的diff */
     shutdown_coordinator: SourceShutdownCoordinator,
     errors: Vec<String>,
     outputs: HashMap<OutputId, UnboundedSender<fanout::ControlMessage>>,
@@ -87,7 +87,7 @@ struct Builder<'a> {
     extra_context: ExtraContext,
     utilization_emitter: UtilizationEmitter,
 }
-
+/* 基于config构建拓扑 */
 impl<'a> Builder<'a> {
     fn new(
         config: &'a super::Config,
@@ -110,10 +110,10 @@ impl<'a> Builder<'a> {
             utilization_emitter: UtilizationEmitter::new(),
         }
     }
-
+/* 构建一个拓扑,（config, diff已经初始化在了self） */
     /// Builds the new pieces of the topology found in `self.diff`.
     async fn build(mut self) -> Result<TopologyPieces, Vec<String>> {
-        let enrichment_tables = self.load_enrichment_tables().await;
+        let enrichment_tables = self.load_enrichment_tables().await;/* 一般是空的 */
         let source_tasks = self.build_sources(enrichment_tables).await;
         self.build_transforms(enrichment_tables).await;
         self.build_sinks(enrichment_tables).await;
@@ -152,14 +152,14 @@ impl<'a> Builder<'a> {
 
         finalized_outputs
     }
-
+/* build之前加载enrichment表 */
     /// Loads, or reloads the enrichment tables.
     /// The tables are stored in the `ENRICHMENT_TABLES` global variable.
     async fn load_enrichment_tables(&mut self) -> &'static vector_lib::enrichment::TableRegistry {
         let mut enrichment_tables = HashMap::new();
-
+/* 'tables: 是一个标签，标记了这个 for 循环 */
         // Build enrichment tables
-        'tables: for (name, table_outer) in self.config.enrichment_tables.iter() {
+        'tables: for (name, table_outer) in self.config.enrichment_tables.iter() {/* 这里的循环一般是空的 */
             let table_name = name.to_string();
             if ENRICHMENT_TABLES.needs_reload(&table_name) {
                 let indexes = if !self.diff.enrichment_tables.is_added(name) {
@@ -206,10 +206,10 @@ impl<'a> Builder<'a> {
 
         &ENRICHMENT_TABLES
     }
-
+/* 构建拓扑过程中调用,  */
     async fn build_sources(
         &mut self,
-        enrichment_tables: &vector_lib::enrichment::TableRegistry,
+        enrichment_tables: &vector_lib::enrichment::TableRegistry,/* 可能是空的 */
     ) -> HashMap<ComponentKey, Task> {
         let mut source_tasks = HashMap::new();
 
@@ -233,6 +233,7 @@ impl<'a> Builder<'a> {
             debug!(component = %key, "Building new source.");
 
             let typetag = source.inner.get_component_name();
+            /* 20250717201231 */
             let source_outputs = source.inner.outputs(self.config.schema.log_namespace());
 
             let span = error_span!(
@@ -721,11 +722,11 @@ pub struct TopologyPieces {
     pub(crate) detach_triggers: HashMap<ComponentKey, Trigger>,
     pub(crate) utilization_emitter: Option<UtilizationEmitter>,
 }
-
-impl TopologyPieces {
+/* 构建拓扑的方法 */
+impl TopologyPieces {/*  */
     pub async fn build_or_log_errors(
-        config: &Config,
-        diff: &ConfigDiff,
+        config: &Config,/* 解析出的config */
+        diff: &ConfigDiff,/* 这个config的产生的变化 */
         buffers: HashMap<ComponentKey, BuiltBuffer>,
         extra_context: ExtraContext,
     ) -> Option<Self> {

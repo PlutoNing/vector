@@ -1171,11 +1171,11 @@ impl RunningTopology {
         self.source_tasks
             .insert(key.clone(), spawn_named(source_task, task_name.as_ref()));
     }
-
+/* 解析好的config来这里生成拓扑 */
     pub async fn start_init_validated(
-        config: Config,
+        config: Config,  /* 刚刚加载解析出的config */
         extra_context: ExtraContext,
-    ) -> Option<(Self, ShutdownErrorReceiver)> {
+    ) -> Option<(Self, ShutdownErrorReceiver)> {/* 这个diff描述的就是这个新config的增量 */
         let diff = ConfigDiff::initial(&config);
         let pieces =
             TopologyPieces::build_or_log_errors(&config, &diff, HashMap::new(), extra_context)

@@ -103,7 +103,7 @@ impl ComponentConfig {
         None
     }
 }
-
+/* 表示一个配置文件的路径 */
 #[derive(Debug, Clone, Ord, PartialOrd, Eq, PartialEq)]
 pub enum ConfigPath {
     File(PathBuf, FormatHint),
@@ -127,7 +127,7 @@ impl ConfigPath {
         }
     }
 }
-
+/* 最终构建的config? */
 #[derive(Debug, Default, Serialize)]
 pub struct Config {
     #[cfg(feature = "api")]
@@ -152,7 +152,7 @@ impl Config {
     pub fn is_empty(&self) -> bool {
         self.sources.is_empty()
     }
-
+/* 获取source源 */
     pub fn sources(&self) -> impl Iterator<Item = (&ComponentKey, &SourceOuter)> {
         self.sources.iter()
     }
@@ -239,7 +239,7 @@ impl Config {
         }
     }
 }
-
+/* 作为config.healthchecks */
 /// Healthcheck options.
 #[configurable_component]
 #[derive(Clone, Copy, Debug)]
@@ -303,7 +303,7 @@ impl Resource {
     pub const fn udp(addr: SocketAddr) -> Self {
         Self::Port(addr, Protocol::Udp)
     }
-
+/* 检查配置项的source和sink有没有冲突 */
     /// From given components returns all that have a resource conflict with any other component.
     pub fn conflicts<K: Eq + Hash + Clone>(
         components: impl IntoIterator<Item = (K, Vec<Resource>)>,

@@ -4,7 +4,7 @@ use indexmap::IndexMap;
 use vector_lib::config::OutputId;
 
 use super::{ComponentKey, Config, EnrichmentTableOuter};
-
+/* config的diff是什么, 里面每个成员描述的是config对应组件的变化 */
 #[derive(Debug)]
 pub struct ConfigDiff {
     pub sources: Difference,
@@ -16,12 +16,12 @@ pub struct ConfigDiff {
     pub components_to_reload: HashSet<ComponentKey>,
 }
 
-impl ConfigDiff {
+impl ConfigDiff {/* initial是在最开始产生config之后, 基于空的和这个新config产生一个diff */
     pub fn initial(initial: &Config) -> Self {
         Self::new(&Config::default(), initial, HashSet::new())
     }
-
-    pub fn new(old: &Config, new: &Config, components_to_reload: HashSet<ComponentKey>) -> Self {
+/* old是刚生成的默认值config, new是之前正儿八经解析出的config? */
+    pub fn new(old: &Config, new: &Config, components_to_reload: HashSet<ComponentKey>) -> Self {/*  */
         ConfigDiff {
             sources: Difference::new(&old.sources, &new.sources, &components_to_reload),
             transforms: Difference::new(&old.transforms, &new.transforms, &components_to_reload),
@@ -67,7 +67,7 @@ impl ConfigDiff {
             || self.enrichment_tables.contains(key)
     }
 }
-
+/* 感觉像是描述config的组件的变化. 比如sources: Difference::new(&old.sources, &new.sources, &components_to_reload), */
 #[derive(Debug)]
 pub struct Difference {
     pub to_remove: HashSet<ComponentKey>,
@@ -75,7 +75,7 @@ pub struct Difference {
     pub to_add: HashSet<ComponentKey>,
 }
 
-impl Difference {
+impl Difference {/* 基于新旧组件求出并补差什么的 */
     fn new<C>(
         old: &IndexMap<ComponentKey, C>,
         new: &IndexMap<ComponentKey, C>,

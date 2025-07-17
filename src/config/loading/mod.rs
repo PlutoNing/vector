@@ -71,13 +71,13 @@ pub fn process_paths(config_paths: &[ConfigPath]) -> Option<Vec<ConfigPath>> {
     let starting_paths = if !config_paths.is_empty() {
         config_paths.to_owned()
     } else {
-        default_config_paths()
+        default_config_paths() /* 不额外指定的话,走这里 */
     };
 
     let mut paths = Vec::new();
 
     for config_path in &starting_paths {
-        let config_pattern: &PathBuf = config_path.into();
+        let config_pattern: &PathBuf = config_path.into(); /* config_pattern可以看见路径了 */
 
         let matches: Vec<PathBuf> = match glob(config_pattern.to_str().expect("No ability to glob"))
         {
@@ -115,7 +115,7 @@ pub fn process_paths(config_paths: &[ConfigPath]) -> Option<Vec<ConfigPath>> {
             .lock()
             .map(|mut guard| guard.clone_from(&paths)),
     );
-
+/* paths里面就是找到的配置文件路径, 比如/etc/vector/vector.yaml */
     Some(paths)
 }
 
@@ -134,14 +134,14 @@ pub fn load_from_paths(config_paths: &[ConfigPath]) -> Result<Config, Vec<String
 /// in the builder, the config is used as bootstrapping for a remote source. Otherwise,
 /// provider instantiation is skipped.
 pub async fn load_from_paths_with_provider_and_secrets(
-    config_paths: &[ConfigPath],
+    config_paths: &[ConfigPath], /* 配置文件列表 */
     signal_handler: &mut signal::SignalHandler,
     allow_empty: bool,
 ) -> Result<Config, Vec<String>> {
     // Load secret backends first
     let mut secrets_backends_loader = load_secret_backends_from_paths(config_paths)?;
     // And then, if needed, retrieve secrets from configured backends
-    let mut builder = if secrets_backends_loader.has_secrets_to_retrieve() {
+    let mut builder = if secrets_backends_loader.has_secrets_to_retrieve() { /* 20250717164350 这个路径应该不是需要的 */
         debug!(message = "Secret placeholders found, retrieving secrets from configured backends.");
         let resolved_secrets = secrets_backends_loader
             .retrieve(&mut signal_handler.subscribe())
@@ -150,20 +150,20 @@ pub async fn load_from_paths_with_provider_and_secrets(
         load_builder_from_paths_with_secrets(config_paths, resolved_secrets)?
     } else {
         debug!(message = "No secret placeholder found, skipping secret resolution.");
-        load_builder_from_paths(config_paths)?
+        load_builder_from_paths(config_paths)? /* 从配置文件路径 -> config结构体成员里面 */
     };
-
+    /* 现在builder包含了配置项 */
     builder.allow_empty = allow_empty;
 
     validation::check_provider(&builder)?;
     signal_handler.clear();
 
     // If there's a provider, overwrite the existing config builder with the remote variant.
-    if let Some(mut provider) = builder.provider {
+    if let Some(mut provider) = builder.provider { /* 一般是空的 */
         builder = provider.build(signal_handler).await?;
         debug!(message = "Provider configured.", provider = ?provider.get_component_name());
     }
-
+    /* 这里构建一个config */
     let (new_config, build_warnings) = builder.build_with_warnings()?;
 
     validation::check_buffer_preconditions(&new_config).await?;
@@ -174,7 +174,7 @@ pub async fn load_from_paths_with_provider_and_secrets(
 
     Ok(new_config)
 }
-
+/* loader一个解析内容的loader?  config_paths配置文件路径  */
 /// Iterators over `ConfigPaths`, and processes a file/dir according to a provided `Loader`.
 fn loader_from_paths<T, L>(mut loader: L, config_paths: &[ConfigPath]) -> Result<T, Vec<String>>
 where
@@ -185,13 +185,13 @@ where
 
     for config_path in config_paths {
         match config_path {
-            ConfigPath::File(path, format_hint) => {
-                match loader.load_from_file(
+            ConfigPath::File(path, format_hint) => { /* 一般都是文件, 都是这个路径 */
+                match loader.load_from_file( /* 取出配置文件内容,解析,反序列化,读取配置项,吸收进来 */
                     path,
                     format_hint
                         .or_else(move || Format::from_path(&path).ok())
                         .unwrap_or_default(),
-                ) {
+                ) {/* 这里是解析的结果 */
                     Ok(()) => {}
                     Err(errs) => errors.extend(errs),
                 };
@@ -211,7 +211,7 @@ where
         Err(errors)
     }
 }
-
+/* 应该是加载配置文件内容了, 最终把每个选项分类加载到config里面 */
 /// Uses `ConfigBuilderLoader` to process `ConfigPaths`, deserializing to a `ConfigBuilder`.
 pub fn load_builder_from_paths(config_paths: &[ConfigPath]) -> Result<ConfigBuilder, Vec<String>> {
     loader_from_paths(ConfigBuilderLoader::new(), config_paths)
@@ -269,13 +269,13 @@ fn load_from_inputs(
         Err(errors)
     }
 }
-
+/* 20250717155121 ,返回替换掉环境变量的配置文件内容字符串  */
 pub fn prepare_input<R: std::io::Read>(mut input: R) -> Result<String, Vec<String>> {
     let mut source_string = String::new();
     input
         .read_to_string(&mut source_string)
         .map_err(|e| vec![e.to_string()])?;
-
+    /* source string就是配置文件内容 */
     let mut vars = std::env::vars().collect::<HashMap<_, _>>();
     if !vars.contains_key("HOSTNAME") {
         if let Ok(hostname) = crate::get_hostname() {
@@ -293,7 +293,7 @@ where
 
     format::deserialize(&with_vars, format)
 }
-
+/* 默认的配置文件路径 */
 #[cfg(not(windows))]
 fn default_path() -> PathBuf {
     "/etc/vector/vector.yaml".into()
@@ -305,7 +305,7 @@ fn default_path() -> PathBuf {
         std::env::var("ProgramFiles").expect("%ProgramFiles% environment variable must be defined");
     format!("{}\\Vector\\config\\vector.yaml", program_files).into()
 }
-
+/* 获取默认的配置文件路径 */
 fn default_config_paths() -> Vec<ConfigPath> {
     #[cfg(not(windows))]
     let default_path = default_path();

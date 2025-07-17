@@ -142,7 +142,7 @@ impl ConfigBuilder {
 
         Ok(config)
     }
-
+    /* 构建一个config返回 */
     pub fn build_with_warnings(self) -> Result<(Config, Vec<String>), Vec<String>> {
         compiler::compile(self)
     }
@@ -207,7 +207,7 @@ impl ConfigBuilder {
     pub fn set_data_dir(&mut self, path: &Path) {
         self.global.data_dir = Some(path.to_owned());
     }
-
+/* 处理配置文件选项? 把配置项附加到自己的各个配置成员里面 */
     pub fn append(&mut self, with: Self) -> Result<(), Vec<String>> {
         let mut errors = Vec::new();
 
@@ -244,6 +244,7 @@ impl ConfigBuilder {
                 errors.push(format!("duplicate sink id found: {}", k));
             }
         });
+        info!("sinks: {:?}", self.sinks);
         with.transforms.keys().for_each(|k| {
             if self.transforms.contains_key(k) {
                 errors.push(format!("duplicate transform id found: {}", k));
@@ -266,6 +267,7 @@ impl ConfigBuilder {
         self.enrichment_tables.extend(with.enrichment_tables);
         self.sources.extend(with.sources);
         self.sinks.extend(with.sinks);
+        info!("sinks: {:?}", self.sinks);
         self.transforms.extend(with.transforms);
         self.tests.extend(with.tests);
         self.secret.extend(with.secret);

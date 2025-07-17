@@ -59,7 +59,7 @@ pub struct Application {
     pub signals: SignalPair,
 }
 
-impl ApplicationConfig {
+impl ApplicationConfig { /* vector::app::ApplicationConfig::from_opts vector::app::Application::prepare_from_opts vector::app::Application::prepare vector::app::Application::prepare_start vector::app::Application::run vector::main*/
     pub async fn from_opts(
         opts: &RootOpts,
         signal_handler: &mut SignalHandler,
@@ -78,7 +78,7 @@ impl ApplicationConfig {
         } else {
             None
         };
-
+/* 加载配置 20250717152148 */
         let config = load_configs(
             &config_paths,
             watcher_conf,
@@ -91,15 +91,15 @@ impl ApplicationConfig {
 
         Self::from_config(config_paths, config, extra_context).await
     }
-
+/*  */
     pub async fn from_config(
-        config_paths: Vec<ConfigPath>,
-        config: Config,
+        config_paths: Vec<ConfigPath>, /* 配置文件路径 */
+        config: Config, /* 读取,解析好的config结构体 */
         extra_context: ExtraContext,
     ) -> Result<Self, ExitCode> {
         #[cfg(feature = "api")]
         let api = config.api;
-
+/* 解析好的config下一步来到这， 看来是生成什么拓扑 */
         let (topology, graceful_crash_receiver) =
             RunningTopology::start_init_validated(config, extra_context.clone())
                 .await
@@ -208,13 +208,13 @@ impl Application {
 
 
 
-
+/* 构建rt */
         let runtime = build_runtime(opts.root.threads, "vector-worker")?;
 
         // Signal handler for OS and provider messages.
         let mut signals = SignalPair::new(&runtime);
 
-        if let Some(sub_command) = &opts.sub_command {
+        if let Some(sub_command) = &opts.sub_command { /* 这里不一定执行 */
             return Err(runtime.block_on(sub_command.execute(signals, true)));
         }
 
@@ -482,7 +482,7 @@ fn get_log_levels(default: &str) -> String {
         })
         .unwrap_or_else(|_| default.into())
 }
-
+/* 构建一个多线程的运行时 20250717150927 */
 pub fn build_runtime(threads: Option<usize>, thread_name: &str) -> Result<Runtime, ExitCode> {
     let mut rt_builder = runtime::Builder::new_multi_thread();
     rt_builder.max_blocking_threads(20_000);
@@ -501,9 +501,9 @@ pub fn build_runtime(threads: Option<usize>, thread_name: &str) -> Result<Runtim
     debug!(messaged = "Building runtime.", worker_threads = threads);
     Ok(rt_builder.build().expect("Unable to create async runtime"))
 }
-
+/* 加载配置  20250717152203, 读取配置文件, 解析, 存入config结构体 */
 pub async fn load_configs(
-    config_paths: &[ConfigPath],
+    config_paths: &[ConfigPath], /* 里面是搜索的可能的conf路径? */
     watcher_conf: Option<config::watcher::WatcherConfig>,
     require_healthy: Option<bool>,
     allow_empty_config: bool,
@@ -511,7 +511,7 @@ pub async fn load_configs(
     signal_handler: &mut SignalHandler,
 ) -> Result<Config, ExitCode> {
     let config_paths = config::process_paths(config_paths).ok_or(exitcode::CONFIG)?;
-
+    /* config_paths是搜索的配置文件路径列表 */
     let watched_paths = config_paths
         .iter()
         .map(<&PathBuf>::from)
@@ -521,7 +521,7 @@ pub async fn load_configs(
         message = "Loading configs.",
         paths = ?watched_paths
     );
-
+    /* 20250717153620  secrets是什么? */
     let mut config = config::load_from_paths_with_provider_and_secrets(
         &config_paths,
         signal_handler,
@@ -529,10 +529,10 @@ pub async fn load_configs(
     )
     .await
     .map_err(handle_config_errors)?;
+    /* 刚刚处理了config */
+    let mut watched_component_paths = Vec::new(); /* 内容空 */
 
-    let mut watched_component_paths = Vec::new();
-
-    if let Some(watcher_conf) = watcher_conf {
+    if let Some(watcher_conf) = watcher_conf {/* 无用的块? */
         for (name, transform) in config.transforms() {
             let files = transform.inner.files_to_watch();
             let component_config =
@@ -569,8 +569,8 @@ pub async fn load_configs(
             exitcode::CONFIG
         })?;
     }
-
-    config::init_log_schema(config.global.log_schema.clone(), true);
+/* log schema是什么 */
+    config::init_log_schema(config.global.log_schema.clone(), true);/* 这里是初始化这两个字段 */
     config::init_telemetry(config.global.telemetry.clone(), true);
 
     if !config.healthchecks.enabled {

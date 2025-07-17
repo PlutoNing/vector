@@ -58,7 +58,7 @@ pub enum ShutdownError {
     #[snafu(display(r#"The task for sink "{key}" died during execution: {error}"#))]
     SinkAborted { key: ComponentKey, error: String },
 }
-
+/* 20250717151013 */
 /// Convenience struct for app setup handling.
 pub struct SignalPair {
     pub handler: SignalHandler,
