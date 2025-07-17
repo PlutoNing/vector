@@ -6,10 +6,7 @@ use clap::{ArgAction, CommandFactory, FromArgMatches, Parser};
 
 #[cfg(windows)]
 use crate::service;
-#[cfg(feature = "api-client")]
-use crate::tap;
-#[cfg(feature = "api-client")]
-use crate::top;
+
 use crate::{config, convert_config, generate, get_version, graph, list, unit_test, validate};
 use crate::{generate_schema, signal};
 /* 程序选项 */
@@ -295,14 +292,6 @@ pub enum SubCommand {
     /// Output the topology as visual representation using the DOT language which can be rendered by GraphViz
     Graph(graph::Opts),
 
-    /// Display topology and metrics in the console, for a local or remote Vector instance
-    #[cfg(feature = "api-client")]
-    Top(top::Opts),
-
-    /// Observe output log events from source or transform components. Logs are sampled at a specified interval.
-    #[cfg(feature = "api-client")]
-    Tap(tap::Opts),
-
     /// Manage the vector service.
     #[cfg(windows)]
     Service(service::Opts),
@@ -326,11 +315,7 @@ impl SubCommand {
             Self::List(l) => list::cmd(l),
             #[cfg(windows)]
             Self::Service(s) => service::cmd(s),
-            #[cfg(feature = "api-client")]
-            Self::Tap(t) => tap::cmd(t, signals.receiver).await,
             Self::Test(t) => unit_test::cmd(t, &mut signals.handler).await,
-            #[cfg(feature = "api-client")]
-            Self::Top(t) => top::cmd(t).await,
             Self::Validate(v) => validate::validate(v, color).await,
             Self::Vrl(s) => {
                 let mut functions = vrl::stdlib::all();
@@ -340,9 +325,6 @@ impl SubCommand {
         }
     }
 }
-
-
-
 
 
 
