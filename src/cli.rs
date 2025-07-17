@@ -7,7 +7,7 @@ use clap::{ArgAction, CommandFactory, FromArgMatches, Parser};
 #[cfg(windows)]
 use crate::service;
 
-use crate::{config, convert_config, generate, get_version, graph, list, unit_test};
+use crate::{config, generate, get_version, graph, list, unit_test};
 use crate::{generate_schema, signal};
 /* 程序选项 */
 #[derive(Parser, Debug)] /* Parser是 clap 库提供的一个派生宏，用于自动生成命令行解析逻辑。 */
@@ -31,7 +31,6 @@ impl Opts { /* 获取启动时的命令行选项,app.get_matches() 解析命令�
         let (quiet_level, verbose_level) = match self.sub_command {
             Some(SubCommand::Graph(_))
             | Some(SubCommand::Generate(_))
-            | Some(SubCommand::ConvertConfig(_))
             | Some(SubCommand::List(_))
             | Some(SubCommand::Test(_)) => {
                 if self.root.verbose == 0 {
@@ -253,15 +252,6 @@ impl RootOpts {
 #[derive(Parser, Debug)]
 #[command(rename_all = "kebab-case")]
 pub enum SubCommand {
-
-    /// Convert a config file from one format to another.
-    /// This command can also walk directories recursively and convert all config files that are discovered.
-    /// Note that this is a best effort conversion due to the following reasons:
-    /// * The comments from the original config file are not preserved.
-    /// * Explicitly set default values in the original implementation might be omitted.
-    /// * Depending on how each source/sink config struct configures serde, there might be entries with null values.
-    ConvertConfig(convert_config::Opts),
-
     /// Generate a Vector configuration containing a list of components.
     Generate(generate::Opts),
 
@@ -305,7 +295,6 @@ impl SubCommand {
     ) -> exitcode::ExitCode {
         match self {
             Self::Config(c) => config::cmd(c),
-            Self::ConvertConfig(opts) => convert_config::cmd(opts),
             Self::Generate(g) => generate::cmd(g),
             Self::GenerateSchema(opts) => generate_schema::cmd(opts),
             Self::Graph(g) => graph::cmd(g),

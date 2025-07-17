@@ -68,7 +68,6 @@ pub mod async_read;
 #[allow(unreachable_pub)]
 pub mod codecs;
 pub mod common;
-mod convert_config;
 pub mod encoding_transcode;
 pub mod enrichment_tables;
 pub mod extra_context;
