@@ -108,7 +108,7 @@ impl ShutdownSignal {
 }
 
 type IsInternal = bool;
-
+/* 作为source builder的self.shutdown_coordinator  */
 #[derive(Debug, Default)]
 pub struct SourceShutdownCoordinator {
     shutdown_begun_triggers: HashMap<ComponentKey, (IsInternal, Trigger)>,
@@ -116,13 +116,13 @@ pub struct SourceShutdownCoordinator {
     shutdown_complete_tripwires: HashMap<ComponentKey, Tripwire>,
 }
 
-impl SourceShutdownCoordinator {
+impl SourceShutdownCoordinator {/* 往里面注册一个source */
     /// Creates the necessary Triggers and Tripwires for coordinating shutdown of this Source and
     /// stores them as needed.  Returns the `ShutdownSignal` for this Source as well as a Tripwire
     /// that will be notified if the Source should be forcibly shut down.
     pub fn register_source(
         &mut self,
-        id: &ComponentKey,
+        id: &ComponentKey, /* 新source的id */
         internal: bool,
     ) -> (ShutdownSignal, impl Future<Output = ()>) {
         let (shutdown_begun_trigger, shutdown_begun_tripwire) = Tripwire::new();

@@ -14,7 +14,7 @@ use crate::{
 pub struct MemoryBuffer {
     capacity: NonZeroUsize,
 }
-
+/* 新建一个mem buffer */
 impl MemoryBuffer {
     pub fn new(capacity: NonZeroUsize) -> Self {
         MemoryBuffer { capacity }

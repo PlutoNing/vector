@@ -76,10 +76,10 @@ const INTERNAL_SOURCES: [&str; 2] = ["internal_logs", "internal_metrics"];
 struct Builder<'a> {
     config: &'a super::Config,/* 现在的新config */
     diff: &'a ConfigDiff,/* 新config带来的diff */
-    shutdown_coordinator: SourceShutdownCoordinator,
+    shutdown_coordinator: SourceShutdownCoordinator, /*  */
     errors: Vec<String>,
     outputs: HashMap<OutputId, UnboundedSender<fanout::ControlMessage>>,
-    tasks: HashMap<ComponentKey, Task>,
+    tasks: HashMap<ComponentKey, Task>, /* 好像是source或者output的一个task */
     buffers: HashMap<ComponentKey, BuiltBuffer>,
     inputs: HashMap<ComponentKey, (BufferSender<EventArray>, Inputs<OutputId>)>,
     healthchecks: HashMap<ComponentKey, Task>,
@@ -114,8 +114,8 @@ impl<'a> Builder<'a> {
     /// Builds the new pieces of the topology found in `self.diff`.
     async fn build(mut self) -> Result<TopologyPieces, Vec<String>> {
         let enrichment_tables = self.load_enrichment_tables().await;/* 一般是空的 */
-        let source_tasks = self.build_sources(enrichment_tables).await;
-        self.build_transforms(enrichment_tables).await;
+        let source_tasks = self.build_sources(enrichment_tables).await; /* 构建source */
+        self.build_transforms(enrichment_tables).await; /* 好像一般也是空的 */
         self.build_sinks(enrichment_tables).await;
 
         // We should have all the data for the enrichment tables loaded now, so switch them over to
@@ -233,7 +233,7 @@ impl<'a> Builder<'a> {
             debug!(component = %key, "Building new source.");
 
             let typetag = source.inner.get_component_name();
-            /* 20250717201231 */
+            /* 20250717201231 里面可能是SourceOutput*/
             let source_outputs = source.inner.outputs(self.config.schema.log_namespace());
 
             let span = error_span!(
@@ -255,21 +255,21 @@ impl<'a> Builder<'a> {
             let mut controls = HashMap::new();
             let mut schema_definitions = HashMap::with_capacity(source_outputs.len());
 
-            for output in source_outputs.into_iter() {
+            for output in source_outputs.into_iter() {/* key可能就是my_source_id */
                 let mut rx = builder.add_source_output(output.clone(), key.clone());
-
+/* 把builder的self.default_output设置为tx, 返回rx */
                 let (mut fanout, control) = Fanout::new();
                 let source_type = source.inner.get_component_name();
                 let source = Arc::new(key.clone());
-
+/* 这就开始导出source了? */
                 let pump = async move {
                     debug!("Source pump starting.");
 
                     while let Some(SourceSenderItem {
                         events: mut array,
                         send_reference,
-                    }) = rx.next().await
-                    {
+                    }) = rx.next().await/* 从rx读取 */
+                    { /* 如果读取到了 */
                         array.set_output_id(&source);
                         array.set_source_type(source_type);
                         fanout
@@ -284,7 +284,7 @@ impl<'a> Builder<'a> {
                     debug!("Source pump finished normally.");
                     Ok(TaskOutput::Source)
                 };
-
+/* 把span塞到pump里面，push进去 */
                 pumps.push(pump.instrument(span.clone()));
                 controls.insert(
                     OutputId {
@@ -332,7 +332,7 @@ impl<'a> Builder<'a> {
                 Ok(TaskOutput::Source)
             };
             let pump = Task::new(key.clone(), typetag, pump);
-
+            /* 包含了self.default_output的一个source */
             let pipeline = builder.build();
 
             let (shutdown_signal, force_shutdown_tripwire) = self
@@ -340,17 +340,17 @@ impl<'a> Builder<'a> {
                 .register_source(key, INTERNAL_SOURCES.contains(&typetag));
 
             let context = SourceContext {
-                key: key.clone(),
+                key: key.clone(), /* source的id */
                 globals: self.config.global.clone(),
                 enrichment_tables: enrichment_tables.clone(),
-                shutdown: shutdown_signal,
-                out: pipeline,
+                shutdown: shutdown_signal, /* self.shutdown_coordinator里面那个 */
+                out: pipeline, /* 是self.default_output那个tx */
                 proxy: ProxyConfig::merge_with_env(&self.config.global.proxy, &source.proxy),
                 acknowledgements: source.sink_acknowledgements,
                 schema_definitions,
                 schema: self.config.schema,
                 extra_context: self.extra_context.clone(),
-            };
+            };/* impl SourceConfig for HostMetricsConfig */
             let source = source.inner.build(context).await;
             let server = match source {
                 Err(error) => {
@@ -413,13 +413,13 @@ impl<'a> Builder<'a> {
             let server = Task::new(key.clone(), typetag, server);
 
             self.outputs.extend(controls);
-            self.tasks.insert(key.clone(), pump);
+            self.tasks.insert(key.clone(), pump); /* 这是两个task */
             source_tasks.insert(key.clone(), server);
         }
 
         source_tasks
     }
-
+/* 构建完config之后, 构建enrichment, source,然后基于enrichment构建transform */
     async fn build_transforms(
         &mut self,
         enrichment_tables: &vector_lib::enrichment::TableRegistry,
@@ -525,7 +525,7 @@ impl<'a> Builder<'a> {
             self.tasks.insert(key.clone(), transform_task);
         }
     }
-
+/* 获取config之后, 构建source, transform, sinks, 这里构建sinks */
     async fn build_sinks(&mut self, enrichment_tables: &vector_lib::enrichment::TableRegistry) {
         let table_sinks = self
             .config
@@ -550,7 +550,7 @@ impl<'a> Builder<'a> {
             let healthcheck = sink.healthcheck();
             let enable_healthcheck = healthcheck.enabled && self.config.healthchecks.enabled;
             let healthcheck_timeout = healthcheck.timeout;
-
+            /* 可能是Console */
             let typetag = sink.inner.get_component_name();
             let input_type = sink.inner.input().data_type();
 
@@ -589,12 +589,12 @@ impl<'a> Builder<'a> {
                         key.to_string(),
                         buffer_span,
                     )
-                    .await;
+                    .await; /* 返回的是buffer的tx和rx */
                 match buffer {
                     Err(error) => {
                         self.errors.push(format!("Sink \"{}\": {}", key, error));
                         continue;
-                    }
+                    }/* buffer的tx rx */
                     Ok((tx, rx)) => (tx, Arc::new(Mutex::new(Some(rx.into_stream())))),
                 }
             };
@@ -663,7 +663,7 @@ impl<'a> Builder<'a> {
                     TaskError::Opaque
                 })
             };
-
+            /* 像是开启一个task, 运行上面这个siink */
             let task = Task::new(key.clone(), typetag, sink);
 
             let component_key = key.clone();
@@ -705,8 +705,8 @@ impl<'a> Builder<'a> {
             let healthcheck_task = Task::new(key.clone(), typetag, healthcheck_task);
 
             self.inputs.insert(key.clone(), (tx, sink_inputs.clone()));
-            self.healthchecks.insert(key.clone(), healthcheck_task);
-            self.tasks.insert(key.clone(), task);
+            self.healthchecks.insert(key.clone(), healthcheck_task); /* health任务塞进去 */
+            self.tasks.insert(key.clone(), task); /* 把sink task塞进去 */
             self.detach_triggers.insert(key.clone(), trigger);
         }
     }

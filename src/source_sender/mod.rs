@@ -91,10 +91,10 @@ impl From<SourceSenderItem> for EventArray {
         val.events
     }
 }
-
+/* 感觉像是个buf? */
 pub struct Builder {
     buf_size: usize,
-    default_output: Option<Output>,
+    default_output: Option<Output>, /* 是channel的tx */
     named_outputs: HashMap<String, Output>,
     lag_time: Option<Histogram>,
 }
@@ -115,11 +115,11 @@ impl Builder {
         self.buf_size = n;
         self
     }
-
+/* 初始化builder的self.default_output . 返回对应的rx */
     pub fn add_source_output(
         &mut self,
-        output: SourceOutput,
-        component_key: ComponentKey,
+        output: SourceOutput,/*  */
+        component_key: ComponentKey, /* 可能是source的Id */
     ) -> LimitedReceiver<SourceSenderItem> {
         let lag_time = self.lag_time.clone();
         let log_definition = output.schema_definition.clone();
@@ -135,9 +135,9 @@ impl Builder {
                     lag_time,
                     log_definition,
                     output_id,
-                );
+                );/* output是channel 的tx */
                 self.default_output = Some(output);
-                rx
+                rx /* 返回channel的rx */
             }
             Some(name) => {
                 let (output, rx) = Output::new_with_buffer(
@@ -152,7 +152,7 @@ impl Builder {
             }
         }
     }
-
+/* 从builder获取一个source? */
     pub fn build(self) -> SourceSender {
         SourceSender {
             default_output: self.default_output,
@@ -169,7 +169,7 @@ pub struct SourceSender {
     named_outputs: HashMap<String, Output>,
 }
 
-impl SourceSender {
+impl SourceSender {/* 为什么这里需要个builder */
     pub fn builder() -> Builder {
         Builder::default()
     }
@@ -359,17 +359,17 @@ impl Drop for UnsentEventCount {
         }
     }
 }
-
+/* 表示一个output? */
 #[derive(Clone)]
 struct Output {
-    sender: LimitedSender<SourceSenderItem>,
+    sender: LimitedSender<SourceSenderItem>, /* 是tx channel */
     lag_time: Option<Histogram>,
     events_sent: Registered<EventsSent>,
     /// The schema definition that will be attached to Log events sent through here
     log_definition: Option<Arc<Definition>>,
     /// The OutputId related to this source sender. This is set as the `upstream_id` in
     /// `EventMetadata` for all event sent through here.
-    output_id: Arc<OutputId>,
+    output_id: Arc<OutputId>, /* 里面包含了source id */
 }
 
 impl fmt::Debug for Output {
@@ -382,14 +382,14 @@ impl fmt::Debug for Output {
     }
 }
 
-impl Output {
+impl Output {/* 新建一个output, 制定了buffer大小 */
     fn new_with_buffer(
-        n: usize,
+        n: usize,  /* buffer大小 */
         output: String,
         lag_time: Option<Histogram>,
         log_definition: Option<Arc<Definition>>,
         output_id: OutputId,
-    ) -> (Self, LimitedReceiver<SourceSenderItem>) {
+    ) -> (Self, LimitedReceiver<SourceSenderItem>) {/* 看来output是基于channel的 */
         let (tx, rx) = channel::limited(n);
         (
             Self {

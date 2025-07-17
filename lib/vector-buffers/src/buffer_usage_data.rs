@@ -199,7 +199,7 @@ pub struct BufferUsageSnapshot {
     pub max_size_bytes: u64,
     pub max_size_events: usize,
 }
-
+/*  */
 /// Builder for tracking buffer usage metrics.
 ///
 /// While building a buffer topology, `BufferUsage` can be utilized to create metrics storage for each individual buffer

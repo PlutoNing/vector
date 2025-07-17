@@ -64,7 +64,7 @@ struct TopologyStage<T: Bufferable> {
 
 /// Builder for constructing buffer topologies.
 pub struct TopologyBuilder<T: Bufferable> {
-    stages: Vec<TopologyStage<T>>,
+    stages: Vec<TopologyStage<T>>, /* 里面可能是一堆mem buffer */
 }
 
 impl<T: Bufferable> TopologyBuilder<T> {
@@ -85,8 +85,8 @@ impl<T: Bufferable> TopologyBuilder<T> {
     ///   as there is no other stage to overflow to
     /// - a stage cannot use the "block" or "drop newest" mode when there is a subsequent stage, and
     ///   must user the "overflow" mode
-    ///
-    /// Any occurrence of either of these scenarios will result in an error during build.
+    ///Any occurrence of either of these scenarios will result in an error during build.
+    /// stage可能是个mem buffer
     pub fn stage<S>(&mut self, stage: S, when_full: WhenFull) -> &mut Self
     where
         S: IntoBuffer<T> + 'static,
@@ -101,9 +101,9 @@ impl<T: Bufferable> TopologyBuilder<T> {
     /// Consumes this builder, returning the sender and receiver that can be used by components.
     ///
     /// # Errors
-    ///
+    ///fd213dff344
     /// If there was a configuration error with one of the stages, an error variant will be returned
-    /// explaining the issue.
+    /// explaining the issue. /* 总体上像是构造了buffer的sender和receiver (builder的stages里面有buffer) */
     pub async fn build(
         self,
         buffer_id: String,
@@ -111,8 +111,8 @@ impl<T: Bufferable> TopologyBuilder<T> {
     ) -> Result<(BufferSender<T>, BufferReceiver<T>), TopologyError> {
         // We pop stages off in reverse order to build from the inside out.
         let mut buffer_usage = BufferUsage::from_span(span.clone());
-        let mut current_stage = None;
-
+        let mut current_stage = None; /* 里面是buffer的sender和receiver */
+            /* 遍历builder的buffers */
         for (stage_idx, stage) in self.stages.into_iter().enumerate().rev() {
             // Make sure the stage is valid for our current builder state.
             match stage.when_full {
@@ -142,7 +142,7 @@ impl<T: Bufferable> TopologyBuilder<T> {
                 .into_buffer_parts(usage_handle.clone())
                 .await
                 .context(FailedToBuildStageSnafu { stage_idx })?;
-
+/* buffer还有sender和receiver? */
             let (mut sender, mut receiver) = match current_stage.take() {
                 None => (
                     BufferSender::new(sender, stage.when_full),

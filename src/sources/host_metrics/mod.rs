@@ -284,10 +284,10 @@ impl_generate_config_from_default!(HostMetricsConfig);
 
 #[async_trait::async_trait]
 #[typetag::serde(name = "host_metrics")]
-impl SourceConfig for HostMetricsConfig {
+impl SourceConfig for HostMetricsConfig {/* source ctx包含了各种东西 */
+    /* 构建一些文件系统相关, 运行config的run异步函数 */
     async fn build(&self, cx: SourceContext) -> crate::Result<super::Source> {
         init_roots();
-
         #[cfg(not(target_os = "linux"))]
         {
             if self.cgroups.is_some() || self.has_collector(Collector::CGroups) {
@@ -300,7 +300,7 @@ impl SourceConfig for HostMetricsConfig {
 
         let mut config = self.clone();
         config.namespace = config.namespace.filter(|namespace| !namespace.is_empty());
-
+/* run是个异步函数 */
         Ok(Box::pin(config.run(cx.out, cx.shutdown)))
     }
 
@@ -312,7 +312,7 @@ impl SourceConfig for HostMetricsConfig {
         false
     }
 }
-
+/*  */
 impl HostMetricsConfig {
     /// Set the interval to collect internal metrics.
     pub fn scrape_interval_secs(&mut self, value: f64) {
@@ -543,7 +543,7 @@ where
 {
     filter_result_sync(result, message)
 }
-
+/* 构建一些fs root */
 #[allow(clippy::missing_const_for_fn)]
 fn init_roots() {
     #[cfg(target_os = "linux")]

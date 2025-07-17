@@ -75,7 +75,7 @@ impl SourceOuter {
         }
     }
 }
-
+/* 每个source都要实现这个接口 */
 /// Generalized interface for describing and building source components.
 #[async_trait]
 #[typetag::serde(tag = "type")]
@@ -120,13 +120,13 @@ pub trait SourceConfig: DynClone + NamedComponent + core::fmt::Debug + Send + Sy
 }
 
 dyn_clone::clone_trait_object!(SourceConfig);
-
+/* 表示一个source */
 pub struct SourceContext {
-    pub key: ComponentKey,
+    pub key: ComponentKey, /*   source的id  */
     pub globals: GlobalOptions,
     pub enrichment_tables: vector_lib::enrichment::TableRegistry,
-    pub shutdown: ShutdownSignal,
-    pub out: SourceSender,
+    pub shutdown: ShutdownSignal,  /* self.shutdown_coordinator里面那个 */
+    pub out: SourceSender, /*  是self.default_output那个tx*/
     pub proxy: ProxyConfig,
     pub acknowledgements: bool,
     pub schema: schema::Options,

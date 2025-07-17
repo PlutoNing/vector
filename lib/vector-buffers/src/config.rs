@@ -220,7 +220,7 @@ pub enum BufferType {
         when_full: WhenFull,
     },
 }
-
+/* 指内存,硬盘什么的 */
 impl BufferType {
     /// Gets the metadata around disk usage by the buffer, if supported.
     ///
@@ -280,7 +280,7 @@ impl BufferType {
             BufferType::Memory {
                 when_full,
                 max_events,
-            } => {
+            } => {/* 新建一个mem buffer塞进去 */
                 builder.stage(MemoryBuffer::new(max_events), when_full);
             }
             BufferType::DiskV2 {
@@ -373,13 +373,13 @@ impl BufferConfig {
         T: Bufferable + Clone + Finalizable,
     {
         let mut builder = TopologyBuilder::default();
-
-        for stage in self.stages() {
+        /* stage是个buffer type的指针 */
+        for stage in self.stages() { /* 把自己新建一个,塞到builder的stage里面 */
             stage.add_to_builder(&mut builder, data_dir.clone(), buffer_id.clone())?;
         }
 
         builder
-            .build(buffer_id, span)
+            .build(buffer_id, span) /* 是fd213dff344那个函数 */
             .await
             .context(FailedToBuildTopologySnafu)
     }

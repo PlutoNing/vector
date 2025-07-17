@@ -70,7 +70,7 @@ impl GenerateConfig for ConsoleSinkConfig {
         .unwrap()
     }
 }
-
+/* 构建一个sink? */
 #[async_trait::async_trait]
 #[typetag::serde(name = "console")]
 impl SinkConfig for ConsoleSinkConfig {
