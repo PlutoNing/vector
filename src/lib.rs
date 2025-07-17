@@ -105,7 +105,6 @@ pub mod transforms;
 pub mod types;
 pub mod unit_test;
 pub(crate) mod utilization;
-pub mod validate;
 #[cfg(windows)]
 pub mod vector_windows;
 

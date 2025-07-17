@@ -7,7 +7,7 @@ use clap::{ArgAction, CommandFactory, FromArgMatches, Parser};
 #[cfg(windows)]
 use crate::service;
 
-use crate::{config, convert_config, generate, get_version, graph, list, unit_test, validate};
+use crate::{config, convert_config, generate, get_version, graph, list, unit_test};
 use crate::{generate_schema, signal};
 /* 程序选项 */
 #[derive(Parser, Debug)] /* Parser是 clap 库提供的一个派生宏，用于自动生成命令行解析逻辑。 */
@@ -29,8 +29,7 @@ impl Opts { /* 获取启动时的命令行选项,app.get_matches() 解析命令�
 
     pub const fn log_level(&self) -> &'static str {
         let (quiet_level, verbose_level) = match self.sub_command {
-            Some(SubCommand::Validate(_))
-            | Some(SubCommand::Graph(_))
+            Some(SubCommand::Graph(_))
             | Some(SubCommand::Generate(_))
             | Some(SubCommand::ConvertConfig(_))
             | Some(SubCommand::List(_))
@@ -254,8 +253,6 @@ impl RootOpts {
 #[derive(Parser, Debug)]
 #[command(rename_all = "kebab-case")]
 pub enum SubCommand {
-    /// Validate the target config, then exit.
-    Validate(validate::Opts),
 
     /// Convert a config file from one format to another.
     /// This command can also walk directories recursively and convert all config files that are discovered.
@@ -304,7 +301,7 @@ impl SubCommand {
     pub async fn execute(
         &self,
         mut signals: signal::SignalPair,
-        color: bool,
+        _color: bool,
     ) -> exitcode::ExitCode {
         match self {
             Self::Config(c) => config::cmd(c),
@@ -316,7 +313,6 @@ impl SubCommand {
             #[cfg(windows)]
             Self::Service(s) => service::cmd(s),
             Self::Test(t) => unit_test::cmd(t, &mut signals.handler).await,
-            Self::Validate(v) => validate::validate(v, color).await,
             Self::Vrl(s) => {
                 let mut functions = vrl::stdlib::all();
                 functions.extend(vector_vrl_functions::all());
