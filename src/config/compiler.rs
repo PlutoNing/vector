@@ -38,8 +38,6 @@ pub fn compile(mut builder: ConfigBuilder) -> Result<(Config, Vec<String>), Vec<
 
     let ConfigBuilder {
         global,
-        #[cfg(feature = "api")]
-        api,
         schema,
         healthchecks,
         enrichment_tables,
@@ -124,8 +122,6 @@ pub fn compile(mut builder: ConfigBuilder) -> Result<(Config, Vec<String>), Vec<
     if errors.is_empty() {
         let mut config = Config {
             global,
-            #[cfg(feature = "api")]
-            api,
             schema,
             healthchecks,
             enrichment_tables,

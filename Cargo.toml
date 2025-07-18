@@ -19,14 +19,6 @@ name = "vector"
 test = false
 bench = false
 
-[[bin]]
-name = "graphql-schema"
-path = "src/api/schema/gen.rs"
-test = false
-bench = false
-required-features = ["default-no-api-client"]
-
-
 [[test]]
 name = "integration"
 path = "tests/integration/lib.rs"
@@ -102,7 +94,6 @@ members = [
   "lib/file-source",
   "lib/portpicker",
   "lib/tracing-limit",
-  "lib/vector-api-client",
   "lib/vector-buffers",
   "lib/vector-common",
   "lib/vector-config",
@@ -415,17 +406,17 @@ ntapi = { git = "https://github.com/MSxDOS/ntapi.git", rev = "24fc1e47677fc9f6e3
 
 [features]
 # Default features for *-unknown-linux-gnu and *-apple-darwin
-default = ["api", "api-client", "enrichment-tables", "sinks", "sources",  "transforms", "unix"]
+default = [ "enrichment-tables", "sinks", "sources",  "transforms", "unix"]
 # Default features for `cargo docs`. The same as `default` but without `rdkafka?/gssapi-vendored` which would require installing libsasl in our doc build environment.
-docs = ["api", "api-client", "enrichment-tables", "sinks", "sources",  "transforms", "unix"]
+docs = [ "enrichment-tables", "sinks", "sources",  "transforms", "unix"]
 # Default features for *-unknown-linux-* which make use of `cmake` for dependencies
-default-cmake = ["api", "api-client", "enrichment-tables","sinks", "sources",  "transforms", "unix"]
+default-cmake = [ "enrichment-tables","sinks", "sources",  "transforms", "unix"]
 # Default features for *-pc-windows-msvc
 # TODO: Enable SASL https://github.com/vectordotdev/vector/pull/3081#issuecomment-659298042
-default-msvc = ["api", "api-client", "enrichment-tables", "sinks", "sources", "transforms"]
-default-musl = ["api", "api-client", "enrichment-tables", "sinks", "sources",  "transforms", "unix"]
-default-no-api-client = ["api", "enrichment-tables", "sinks", "sources",  "transforms", "unix"]
-default-no-vrl-cli = ["api", "sinks", "sources",  "transforms", "unix"]
+default-msvc = [ "enrichment-tables", "sinks", "sources", "transforms"]
+default-musl = [ "enrichment-tables", "sinks", "sources",  "transforms", "unix"]
+default-no-api-client = ["enrichment-tables", "sinks", "sources",  "transforms", "unix"]
+default-no-vrl-cli = [ "sinks", "sources",  "transforms", "unix"]
 tokio-console = ["dep:console-subscriber", "tokio/tracing"]
 
 all-logs = ["sinks-logs", "sources-logs",  "transforms-logs"]
@@ -434,18 +425,18 @@ all-metrics = ["sinks-metrics", "sources-metrics", "transforms-metrics"]
 # Target specific release features.
 # The `make` tasks will select this according to the appropriate triple.
 # Use this section to turn off or on specific features for specific triples.
-target-aarch64-unknown-linux-gnu = ["api", "api-client", "enrichment-tables",  "sinks", "sources",  "transforms", "unix"]
-target-aarch64-unknown-linux-musl = ["api", "api-client", "enrichment-tables",  "sinks", "sources",  "transforms", "unix"]
-target-armv7-unknown-linux-gnueabihf = ["api", "api-client", "enrichment-tables",  "sinks", "sources", "transforms", "unix"]
-target-armv7-unknown-linux-musleabihf = ["api", "api-client", "enrichment-tables", "sinks", "sources",  "transforms"]
-target-arm-unknown-linux-gnueabi = ["api", "api-client", "enrichment-tables", "sinks", "sources",  "transforms", "unix"]
-target-arm-unknown-linux-musleabi = ["api", "api-client",  "enrichment-tables", "sinks", "sources",  "transforms"]
-target-x86_64-unknown-linux-gnu = ["api", "api-client", "enrichment-tables", "sinks", "sources",  "transforms", "unix"]
-target-x86_64-unknown-linux-musl = ["api", "api-client", "enrichment-tables", "sinks", "sources", "transforms", "unix"]
+target-aarch64-unknown-linux-gnu = [ "enrichment-tables",  "sinks", "sources",  "transforms", "unix"]
+target-aarch64-unknown-linux-musl = [ "enrichment-tables",  "sinks", "sources",  "transforms", "unix"]
+target-armv7-unknown-linux-gnueabihf = [ "enrichment-tables",  "sinks", "sources", "transforms", "unix"]
+target-armv7-unknown-linux-musleabihf = [ "enrichment-tables", "sinks", "sources",  "transforms"]
+target-arm-unknown-linux-gnueabi = [ "enrichment-tables", "sinks", "sources",  "transforms", "unix"]
+target-arm-unknown-linux-musleabi = [  "enrichment-tables", "sinks", "sources",  "transforms"]
+target-x86_64-unknown-linux-gnu = [ "enrichment-tables", "sinks", "sources",  "transforms", "unix"]
+target-x86_64-unknown-linux-musl = [ "enrichment-tables", "sinks", "sources", "transforms", "unix"]
 # Does not currently build
-target-powerpc64le-unknown-linux-gnu = ["api", "api-client", "enrichment-tables", "sinks", "sources", "transforms", "unix"]
+target-powerpc64le-unknown-linux-gnu = [ "enrichment-tables", "sinks", "sources", "transforms", "unix"]
 # Currently doesn't build due to lack of support for 64-bit atomics
-target-powerpc-unknown-linux-gnu = ["api", "api-client", "enrichment-tables", "sinks", "sources", "transforms", "unix"]
+target-powerpc-unknown-linux-gnu = [ "enrichment-tables", "sinks", "sources", "transforms", "unix"]
 
 # Enables features that work only on systems providing `cfg(unix)`
 unix = ["tikv-jemallocator", "allocation-tracing"]
@@ -453,24 +444,6 @@ allocation-tracing = []
 
 
 docker = ["dep:bollard", "dep:dirs-next"]
-
-# API
-api = [
-  "dep:async-graphql",
-  "dep:async-graphql-warp",
-  "dep:base64",
-  "vector-lib/api",
-]
-
-# API client
-api-client = [
-  "dep:crossterm",
-  "dep:num-format",
-  "dep:number_prefix",
-  "dep:ratatui",
-  "vector-lib/api",
-  "vector-lib/api-client",
-]
 
 aws-core = [
   "aws-runtime",
@@ -568,11 +541,6 @@ all-integration-tests = [
 ]
 
 disable-resolv-conf = []
-
-vector-api-tests = [
-  "sources-demo_logs",
-  "sinks-blackhole"
-]
 vector-unit-test-tests = [
   "sources-demo_logs",
   "sinks-console"

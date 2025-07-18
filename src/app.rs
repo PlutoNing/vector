@@ -14,8 +14,6 @@ use tokio::sync::{broadcast::error::RecvError, MutexGuard};
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
 use crate::extra_context::ExtraContext;
-#[cfg(feature = "api")]
-use crate::{api, internal_events::ApiStarted};
 use crate::{
     cli::{handle_config_errors, LogFormat, Opts, RootOpts, WatchConfigMethod},
     config::{self, ComponentConfig, Config, ConfigPath},
@@ -47,8 +45,6 @@ pub struct ApplicationConfig {
     pub topology: RunningTopology, /* 构建的拓扑 */
     pub graceful_crash_receiver: ShutdownErrorReceiver,
     pub internal_topologies: Vec<RunningTopology>,
-    #[cfg(feature = "api")]
-    pub api: config::api::Options,
     pub extra_context: ExtraContext,
 }
 
@@ -97,8 +93,6 @@ impl ApplicationConfig { /* vector::app::ApplicationConfig::from_opts vector::ap
         config: Config, /* 读取,解析好的config结构体 */
         extra_context: ExtraContext,
     ) -> Result<Self, ExitCode> {
-        #[cfg(feature = "api")]
-        let api = config.api;
 /* 解析好的config下一步来到这， 看来是生成什么拓扑(包含source, sink等的东西) */
         let (topology, graceful_crash_receiver) =
             RunningTopology::start_init_validated(config, extra_context.clone())
@@ -110,8 +104,6 @@ impl ApplicationConfig { /* vector::app::ApplicationConfig::from_opts vector::ap
             topology,
             graceful_crash_receiver,
             internal_topologies: Vec::new(),
-            #[cfg(feature = "api")]
-            api,
             extra_context,
         })
     }
@@ -130,40 +122,6 @@ impl ApplicationConfig { /* vector::app::ApplicationConfig::from_opts vector::ap
         Ok(())
     }
 
-    /// Configure the API server, if applicable
-    #[cfg(feature = "api")]
-    pub fn setup_api(&self, handle: &Handle) -> Option<api::Server> {
-        if self.api.enabled {
-            match api::Server::start(
-                self.topology.config(),
-                self.topology.watch(),
-                std::sync::Arc::clone(&self.topology.running),
-                handle,
-            ) {
-                Ok(api_server) => {
-                    emit!(ApiStarted {
-                        addr: self.api.address.unwrap(),
-                        playground: self.api.playground,
-                        graphql: self.api.graphql
-                    });
-
-                    Some(api_server)
-                }
-                Err(error) => {
-                    let error = error.to_string();
-                    error!("An error occurred that Vector couldn't handle: {}.", error);
-                    _ = self
-                        .topology
-                        .abort_tx
-                        .send(crate::signal::ShutdownError::ApiFailed { error });
-                    None
-                }
-            }
-        } else {
-            info!(message="API is disabled, enable by setting `api.enabled` to `true` and use commands like `vector top`.");
-            None
-        }
-    }
 }
 /* 运行程序 */
 impl Application {
@@ -249,8 +207,6 @@ impl Application {
         } = self;
 
         let topology_controller = SharedTopologyController::new(TopologyController {
-            #[cfg(feature = "api")]
-            api_server: config.setup_api(handle),
             topology: config.topology, /* 构建的拓扑 */
             config_paths: config.config_paths.clone(), /* 配置文件路径 */
             require_healthy: root_opts.require_healthy,

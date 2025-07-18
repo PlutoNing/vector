@@ -27,7 +27,6 @@ pub use vector_lib::configurable::component::{
     GenerateConfig, SinkDescription, TransformDescription,
 };
 
-pub mod api;
 mod builder;
 mod cmd;
 mod compiler;
@@ -125,8 +124,6 @@ impl ConfigPath {
 /* 最终构建的config? */
 #[derive(Debug, Default, Serialize)]
 pub struct Config {
-    #[cfg(feature = "api")]
-    pub api: api::Options,
     pub schema: schema::Options,
     pub global: GlobalOptions,
     pub healthchecks: HealthcheckOptions,

@@ -1,7 +1,5 @@
 use std::sync::Arc;
 
-#[cfg(feature = "api")]
-use crate::api;
 use crate::extra_context::ExtraContext;
 use crate::internal_events::{VectorRecoveryError, VectorReloadError, VectorReloaded};
 use futures_util::FutureExt as _;
@@ -34,8 +32,6 @@ pub struct TopologyController {
     pub topology: RunningTopology,
     pub config_paths: Vec<config::ConfigPath>,
     pub require_healthy: Option<bool>,
-    #[cfg(feature = "api")]
-    pub api_server: Option<api::Server>,
     pub extra_context: ExtraContext,
 }
 
@@ -62,55 +58,12 @@ impl TopologyController {
             .healthchecks
             .set_require_healthy(self.require_healthy);
 
-        // Start the api server or disable it, if necessary
-        #[cfg(feature = "api")]
-        if !new_config.api.enabled {
-            if let Some(server) = self.api_server.take() {
-                debug!("Dropping api server.");
-                drop(server)
-            }
-        } else if self.api_server.is_none() {
-            use crate::internal_events::ApiStarted;
-            use std::sync::atomic::AtomicBool;
-            use tokio::runtime::Handle;
-
-            debug!("Starting api server.");
-
-            self.api_server = match api::Server::start(
-                self.topology.config(),
-                self.topology.watch(),
-                Arc::<AtomicBool>::clone(&self.topology.running),
-                &Handle::current(),
-            ) {
-                Ok(api_server) => {
-                    emit!(ApiStarted {
-                        addr: new_config.api.address.unwrap(),
-                        playground: new_config.api.playground,
-                        graphql: new_config.api.graphql,
-                    });
-
-                    Some(api_server)
-                }
-                Err(error) => {
-                    let error = error.to_string();
-                    error!("An error occurred that Vector couldn't handle: {}.", error);
-                    return ReloadOutcome::FatalError(ShutdownError::ApiFailed { error });
-                }
-            }
-        }
-
         match self
             .topology
             .reload_config_and_respawn(new_config, self.extra_context.clone())
             .await
         {
             Ok(true) => {
-                #[cfg(feature = "api")]
-                // Pass the new config to the API server.
-                if let Some(ref api_server) = self.api_server {
-                    api_server.update_config(self.topology.config());
-                }
-
                 emit!(VectorReloaded {
                     config_paths: &self.config_paths
                 });

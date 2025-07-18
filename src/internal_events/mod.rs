@@ -4,8 +4,6 @@ pub mod prelude;
 mod adaptive_concurrency;
 mod aggregate;
 
-#[cfg(feature = "api")]
-mod api;
 mod batch;
 pub mod codecs;
 mod common;
@@ -45,8 +43,6 @@ mod unix;
 mod file;
 mod windows;
 
-#[cfg(feature = "api")]
-pub(crate) use self::api::*;
 #[cfg(feature = "sources-demo_logs")]
 pub(crate) use self::demo_logs::*;
 #[cfg(feature = "sources-exec")]

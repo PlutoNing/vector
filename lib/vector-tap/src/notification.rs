@@ -1,6 +1,10 @@
-#[cfg(feature = "api")]
-use async_graphql::{SimpleObject, Union};
-
+// #[cfg(feature = "api")]
+// use async_graphql::{SimpleObject, Union};
+/* ​**#[cfg_attr]**​：
+当 api feature 启用时，自动为 Matched 派生 SimpleObject trait（来自 async_graphql），使其成为 GraphQL 对象类型。
+​效果​：
+启用 api 时：Matched 会暴露为 GraphQL 类型，字段可被查询。
+未启用时：仅作为普通 Rust 结构体。 */
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "api", derive(SimpleObject))]
 /// A component was found that matched the provided pattern

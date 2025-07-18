@@ -6,8 +6,6 @@ use vector_lib::configurable::configurable_component;
 
 use crate::{enrichment_tables::EnrichmentTables, providers::Providers};
 
-#[cfg(feature = "api")]
-use super::api;
 use super::{
     compiler, schema, BoxedSink, BoxedSource, BoxedTransform, ComponentKey, Config,
     EnrichmentTableOuter, HealthcheckOptions, SinkOuter, SourceOuter, TestDefinition,
@@ -21,11 +19,6 @@ use super::{
 pub struct ConfigBuilder {
     #[serde(flatten)]
     pub global: GlobalOptions,
-
-    #[cfg(feature = "api")]
-    #[configurable(derived)]
-    #[serde(default)]
-    pub api: api::Options,
 
     #[configurable(derived)]
     #[configurable(metadata(docs::hidden))]
@@ -80,8 +73,6 @@ impl From<Config> for ConfigBuilder {
     fn from(config: Config) -> Self {
         let Config {
             global,
-            #[cfg(feature = "api")]
-            api,
             schema,
             healthchecks,
             enrichment_tables,
@@ -112,8 +103,6 @@ impl From<Config> for ConfigBuilder {
 
         ConfigBuilder {
             global,
-            #[cfg(feature = "api")]
-            api,
             schema,
             healthchecks,
             enrichment_tables,
@@ -206,11 +195,6 @@ impl ConfigBuilder {
 /* 处理配置文件选项? 把配置项附加到自己的各个配置成员里面 */
     pub fn append(&mut self, with: Self) -> Result<(), Vec<String>> {
         let mut errors = Vec::new();
-
-        #[cfg(feature = "api")]
-        if let Err(error) = self.api.merge(with.api) {
-            errors.push(error);
-        }
 
         self.provider = with.provider;
 

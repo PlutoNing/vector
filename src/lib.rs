@@ -56,9 +56,6 @@ pub mod expiring_hash_map;
 #[macro_use]
 #[allow(unreachable_pub)]
 pub mod internal_events;
-#[cfg(feature = "api")]
-#[allow(unreachable_pub)]
-pub mod api;
 pub mod app;
 pub mod async_read;
 
