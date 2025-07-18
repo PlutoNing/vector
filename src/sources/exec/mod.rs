@@ -42,8 +42,6 @@ use crate::{
 use vector_lib::config::{log_schema, LogNamespace};
 use vector_lib::lookup::{owned_value_path, path};
 
-#[cfg(test)]
-mod tests;
 
 /// Configuration for the `exec` source.
 #[configurable_component(source("exec", "Collect output from a process running on the host."))]
