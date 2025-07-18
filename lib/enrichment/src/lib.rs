@@ -4,8 +4,6 @@ pub mod find_enrichment_table_records;
 pub mod get_enrichment_table_record;
 pub mod tables;
 
-#[cfg(test)]
-mod test_util;
 mod vrl_util;
 
 use dyn_clone::DynClone;

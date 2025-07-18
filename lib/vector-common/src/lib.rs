@@ -39,8 +39,6 @@ pub mod conversion {
 pub mod event_data_eq;
 pub use event_data_eq::EventDataEq;
 
-#[cfg(any(test, feature = "test"))]
-pub mod event_test_util;
 
 pub mod finalization;
 pub mod finalizer;

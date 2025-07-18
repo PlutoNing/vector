@@ -79,25 +79,9 @@ impl<E: RegisterInternalEvent> RegisterInternalEvent for DefaultName<E> {
     }
 }
 
-#[cfg(any(test, feature = "test"))]
-pub fn emit(event: impl InternalEvent) {
-    if let Some(name) = event.name() {
-        super::event_test_util::record_internal_event(name);
-    }
-    event.emit();
-}
-
 #[cfg(not(any(test, feature = "test")))]
 pub fn emit(event: impl InternalEvent) {
     event.emit();
-}
-
-#[cfg(any(test, feature = "test"))]
-pub fn register<E: RegisterInternalEvent>(event: E) -> E::Handle {
-    if let Some(name) = event.name() {
-        super::event_test_util::record_internal_event(name);
-    }
-    event.register()
 }
 
 #[cfg(not(any(test, feature = "test")))]

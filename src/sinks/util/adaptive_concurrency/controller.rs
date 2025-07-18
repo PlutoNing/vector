@@ -9,8 +9,6 @@ use tower::timeout::error::Elapsed;
 use vector_lib::internal_event::{InternalEventHandle as _, Registered};
 
 use super::{instant_now, semaphore::ShrinkableSemaphore, AdaptiveConcurrencySettings};
-#[cfg(test)]
-use crate::test_util::stats::{TimeHistogram, TimeWeightedSum};
 use crate::{
     http::HttpError,
     internal_events::{

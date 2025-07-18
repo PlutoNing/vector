@@ -89,7 +89,6 @@ pub mod sources;
 pub mod stats;
 
 pub mod template;
-pub mod test_util;
 
 #[allow(unreachable_pub)]
 pub mod topology;

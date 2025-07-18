@@ -623,40 +623,6 @@ impl EventDataEq for LogEvent {
     }
 }
 
-#[cfg(any(test, feature = "test"))]
-mod test_utils {
-    use super::{log_schema, Bytes, LogEvent, Utc};
-
-    // these rely on the global log schema, which is no longer supported when using the
-    // "LogNamespace::Vector" namespace.
-    // The tests that rely on this are testing the "Legacy" log namespace. As these
-    // tests are updated, they should be migrated away from using these implementations
-    // to make it more clear which namespace is being used
-
-    impl From<Bytes> for LogEvent {
-        fn from(message: Bytes) -> Self {
-            let mut log = LogEvent::default();
-            log.maybe_insert(log_schema().message_key_target_path(), message);
-            if let Some(timestamp_key) = log_schema().timestamp_key_target_path() {
-                log.insert(timestamp_key, Utc::now());
-            }
-            log
-        }
-    }
-
-    impl From<&str> for LogEvent {
-        fn from(message: &str) -> Self {
-            message.to_owned().into()
-        }
-    }
-
-    impl From<String> for LogEvent {
-        fn from(message: String) -> Self {
-            Bytes::from(message).into()
-        }
-    }
-}
-
 impl From<Value> for LogEvent {
     fn from(value: Value) -> Self {
         Self::from_parts(value, EventMetadata::default())

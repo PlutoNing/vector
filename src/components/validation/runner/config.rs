@@ -10,7 +10,6 @@ use crate::{
     config::{BoxedSink, BoxedSource, BoxedTransform, ConfigBuilder},
     sinks::vector::VectorConfig as VectorSinkConfig,
     sources::vector::VectorConfig as VectorSourceConfig,
-    test_util::next_addr,
 };
 
 use super::{
