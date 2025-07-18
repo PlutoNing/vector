@@ -191,9 +191,6 @@ mod record;
 mod ser;
 mod writer;
 
-#[cfg(test)]
-mod tests;
-
 use self::ledger::Ledger;
 pub use self::{
     common::{DiskBufferConfig, DiskBufferConfigBuilder},

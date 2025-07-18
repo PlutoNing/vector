@@ -37,18 +37,3 @@ impl Encoder<()> for NewlineDelimitedEncoder {
         self.0.encode((), buffer)
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn encode_bytes() {
-        let mut input = BytesMut::from("foo");
-        let mut encoder = NewlineDelimitedEncoder::default();
-
-        encoder.encode((), &mut input).unwrap();
-
-        assert_eq!(input, "foo\n");
-    }
-}

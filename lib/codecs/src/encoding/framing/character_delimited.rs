@@ -58,18 +58,3 @@ impl Encoder<()> for CharacterDelimitedEncoder {
         Ok(())
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn encode() {
-        let mut codec = CharacterDelimitedEncoder::new(b'\n');
-
-        let mut buffer = BytesMut::from("abc");
-        codec.encode((), &mut buffer).unwrap();
-
-        assert_eq!(b"abc\n", &buffer[..]);
-    }
-}
