@@ -10,8 +10,7 @@ use bytes::{Bytes, BytesMut};
 pub use error::StreamDecodingError;
 pub use format::{
     BoxedDeserializer, BytesDeserializer, BytesDeserializerConfig,
-    InfluxdbDeserializer,
-    InfluxdbDeserializerConfig, JsonDeserializer, JsonDeserializerConfig, JsonDeserializerOptions,
+    JsonDeserializer, JsonDeserializerConfig, JsonDeserializerOptions,
     NativeDeserializer, NativeDeserializerConfig, NativeJsonDeserializer,
     NativeJsonDeserializerConfig, NativeJsonDeserializerOptions, ProtobufDeserializer,
     ProtobufDeserializerConfig, ProtobufDeserializerOptions,
@@ -237,11 +236,6 @@ pub enum DeserializerConfig {
     /// [experimental]: https://vector.dev/highlights/2022-03-31-native-event-codecs
     NativeJson(NativeJsonDeserializerConfig),
 
-    /// Decodes the raw bytes as an [Influxdb Line Protocol][influxdb] message.
-    ///
-    /// [influxdb]: https://docs.influxdata.com/influxdb/cloud/reference/syntax/line-protocol
-    Influxdb(InfluxdbDeserializerConfig),
-
     /// Decodes the raw bytes as a string and passes them as input to a [VRL][vrl] program.
     ///
     /// [vrl]: https://vector.dev/docs/reference/vrl
@@ -279,12 +273,6 @@ impl From<NativeJsonDeserializerConfig> for DeserializerConfig {
     }
 }
 
-impl From<InfluxdbDeserializerConfig> for DeserializerConfig {
-    fn from(config: InfluxdbDeserializerConfig) -> Self {
-        Self::Influxdb(config)
-    }
-}
-
 impl DeserializerConfig {
     /// Build the `Deserializer` from this configuration.
     pub fn build(&self) -> vector_common::Result<Deserializer> {
@@ -298,7 +286,6 @@ impl DeserializerConfig {
                 Ok(Deserializer::Native(NativeDeserializerConfig.build()))
             }
             DeserializerConfig::NativeJson(config) => Ok(Deserializer::NativeJson(config.build())),
-            DeserializerConfig::Influxdb(config) => Ok(Deserializer::Influxdb(config.build())),
             DeserializerConfig::Vrl(config) => Ok(Deserializer::Vrl(config.build()?)),
         }
     }
@@ -309,7 +296,6 @@ impl DeserializerConfig {
             DeserializerConfig::Native => FramingConfig::LengthDelimited(Default::default()),
             DeserializerConfig::Bytes
             | DeserializerConfig::Json(_)
-            | DeserializerConfig::Influxdb(_)
             | DeserializerConfig::NativeJson(_) => {
                 FramingConfig::NewlineDelimited(Default::default())
             }
@@ -338,7 +324,6 @@ impl DeserializerConfig {
             DeserializerConfig::Native => NativeDeserializerConfig.output_type(),
             DeserializerConfig::NativeJson(config) => config.output_type(),
             DeserializerConfig::Vrl(config) => config.output_type(),
-            DeserializerConfig::Influxdb(config) => config.output_type(),
         }
     }
 
@@ -352,7 +337,6 @@ impl DeserializerConfig {
             DeserializerConfig::Syslog(config) => config.schema_definition(log_namespace),
             DeserializerConfig::Native => NativeDeserializerConfig.schema_definition(log_namespace),
             DeserializerConfig::NativeJson(config) => config.schema_definition(log_namespace),
-            DeserializerConfig::Influxdb(config) => config.schema_definition(log_namespace),
             DeserializerConfig::Vrl(config) => config.schema_definition(log_namespace),
         }
     }
@@ -383,7 +367,6 @@ impl DeserializerConfig {
                 DeserializerConfig::Json(_)
                 | DeserializerConfig::NativeJson(_)
                 | DeserializerConfig::Bytes
-                | DeserializerConfig::Influxdb(_)
                 | DeserializerConfig::Vrl(_),
                 _,
             ) => "text/plain",
@@ -411,8 +394,6 @@ pub enum Deserializer {
     NativeJson(NativeJsonDeserializer),
     /// Uses an opaque `Deserializer` implementation for deserialization.
     Boxed(BoxedDeserializer),
-    /// Uses a `InfluxdbDeserializer` for deserialization.
-    Influxdb(InfluxdbDeserializer),
     /// Uses a `VrlDeserializer` for deserialization.
     Vrl(VrlDeserializer),
 }
@@ -432,7 +413,6 @@ impl format::Deserializer for Deserializer {
             Deserializer::Native(deserializer) => deserializer.parse(bytes, log_namespace),
             Deserializer::NativeJson(deserializer) => deserializer.parse(bytes, log_namespace),
             Deserializer::Boxed(deserializer) => deserializer.parse(bytes, log_namespace),
-            Deserializer::Influxdb(deserializer) => deserializer.parse(bytes, log_namespace),
             Deserializer::Vrl(deserializer) => deserializer.parse(bytes, log_namespace),
         }
     }

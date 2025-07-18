@@ -1926,7 +1926,6 @@ dependencies = [
  "flate2",
  "futures 0.3.31",
  "indoc",
- "influxdb-line-protocol",
  "memchr",
  "ordered-float 4.6.0",
  "prost 0.12.6",
