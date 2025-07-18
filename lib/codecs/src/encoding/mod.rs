@@ -9,7 +9,7 @@ use std::fmt::Debug;
 use bytes::BytesMut;
 pub use format::{
     AvroSerializer, AvroSerializerConfig, AvroSerializerOptions, CefSerializer,
-    CefSerializerConfig, CsvSerializer, CsvSerializerConfig, GelfSerializer, GelfSerializerConfig,
+    CefSerializerConfig, CsvSerializer, CsvSerializerConfig,
     JsonSerializer, JsonSerializerConfig, JsonSerializerOptions, LogfmtSerializer,
     LogfmtSerializerConfig, NativeJsonSerializer, NativeJsonSerializerConfig, NativeSerializer,
     NativeSerializerConfig, ProtobufSerializer, ProtobufSerializerConfig,
@@ -198,24 +198,6 @@ pub enum SerializerConfig {
     ///
     Csv(CsvSerializerConfig),
 
-    /// Encodes an event as a [GELF][gelf] message.
-    ///
-    /// This codec is experimental for the following reason:
-    ///
-    /// The GELF specification is more strict than the actual Graylog receiver.
-    /// Vector's encoder currently adheres more strictly to the GELF spec, with
-    /// the exception that some characters such as `@`  are allowed in field names.
-    ///
-    /// Other GELF codecs, such as Loki's, use a [Go SDK][implementation] that is maintained
-    /// by Graylog and is much more relaxed than the GELF spec.
-    ///
-    /// Going forward, Vector will use that [Go SDK][implementation] as the reference implementation, which means
-    /// the codec might continue to relax the enforcement of the specification.
-    ///
-    /// [gelf]: https://docs.graylog.org/docs/gelf
-    /// [implementation]: https://github.com/Graylog2/go-gelf/blob/v2/gelf/reader.go
-    Gelf,
-
     /// Encodes an event as [JSON][json].
     ///
     /// [json]: https://www.json.org/
@@ -285,12 +267,6 @@ impl From<CsvSerializerConfig> for SerializerConfig {
     }
 }
 
-impl From<GelfSerializerConfig> for SerializerConfig {
-    fn from(_: GelfSerializerConfig) -> Self {
-        Self::Gelf
-    }
-}
-
 impl From<JsonSerializerConfig> for SerializerConfig {
     fn from(config: JsonSerializerConfig) -> Self {
         Self::Json(config)
@@ -342,7 +318,6 @@ impl SerializerConfig {
             )),
             SerializerConfig::Cef(config) => Ok(Serializer::Cef(config.build()?)),
             SerializerConfig::Csv(config) => Ok(Serializer::Csv(config.build()?)),
-            SerializerConfig::Gelf => Ok(Serializer::Gelf(GelfSerializerConfig::new().build())),
             SerializerConfig::Json(config) => Ok(Serializer::Json(config.build())),
             SerializerConfig::Logfmt => Ok(Serializer::Logfmt(LogfmtSerializerConfig.build())),
             SerializerConfig::Native => Ok(Serializer::Native(NativeSerializerConfig.build())),
@@ -382,10 +357,7 @@ impl SerializerConfig {
             | SerializerConfig::Logfmt
             | SerializerConfig::NativeJson
             | SerializerConfig::RawMessage
-            | SerializerConfig::Text(_) => FramingConfig::NewlineDelimited,
-            SerializerConfig::Gelf => {
-                FramingConfig::CharacterDelimited(CharacterDelimitedEncoderConfig::new(0))
-            }
+            | SerializerConfig::Text(_) => FramingConfig::NewlineDelimited
         }
     }
 
@@ -397,7 +369,6 @@ impl SerializerConfig {
             }
             SerializerConfig::Cef(config) => config.input_type(),
             SerializerConfig::Csv(config) => config.input_type(),
-            SerializerConfig::Gelf => GelfSerializerConfig::input_type(),
             SerializerConfig::Json(config) => config.input_type(),
             SerializerConfig::Logfmt => LogfmtSerializerConfig.input_type(),
             SerializerConfig::Native => NativeSerializerConfig.input_type(),
@@ -416,7 +387,6 @@ impl SerializerConfig {
             }
             SerializerConfig::Cef(config) => config.schema_requirement(),
             SerializerConfig::Csv(config) => config.schema_requirement(),
-            SerializerConfig::Gelf => GelfSerializerConfig::schema_requirement(),
             SerializerConfig::Json(config) => config.schema_requirement(),
             SerializerConfig::Logfmt => LogfmtSerializerConfig.schema_requirement(),
             SerializerConfig::Native => NativeSerializerConfig.schema_requirement(),
@@ -437,8 +407,6 @@ pub enum Serializer {
     Cef(CefSerializer),
     /// Uses a `CsvSerializer` for serialization.
     Csv(CsvSerializer),
-    /// Uses a `GelfSerializer` for serialization.
-    Gelf(GelfSerializer),
     /// Uses a `JsonSerializer` for serialization.
     Json(JsonSerializer),
     /// Uses a `LogfmtSerializer` for serialization.
@@ -459,7 +427,7 @@ impl Serializer {
     /// Check if the serializer supports encoding an event to JSON via `Serializer::to_json_value`.
     pub fn supports_json(&self) -> bool {
         match self {
-            Serializer::Json(_) | Serializer::NativeJson(_) | Serializer::Gelf(_) => true,
+            Serializer::Json(_) | Serializer::NativeJson(_) => true,
             Serializer::Avro(_)
             | Serializer::Cef(_)
             | Serializer::Csv(_)
@@ -479,7 +447,6 @@ impl Serializer {
     /// if you need to determine the capability to encode to JSON at runtime.
     pub fn to_json_value(&self, event: Event) -> Result<serde_json::Value, vector_common::Error> {
         match self {
-            Serializer::Gelf(serializer) => serializer.to_json_value(event),
             Serializer::Json(serializer) => serializer.to_json_value(event),
             Serializer::NativeJson(serializer) => serializer.to_json_value(event),
             Serializer::Avro(_)
@@ -511,12 +478,6 @@ impl From<CefSerializer> for Serializer {
 impl From<CsvSerializer> for Serializer {
     fn from(serializer: CsvSerializer) -> Self {
         Self::Csv(serializer)
-    }
-}
-
-impl From<GelfSerializer> for Serializer {
-    fn from(serializer: GelfSerializer) -> Self {
-        Self::Gelf(serializer)
     }
 }
 
@@ -570,7 +531,6 @@ impl tokio_util::codec::Encoder<Event> for Serializer {
             Serializer::Avro(serializer) => serializer.encode(event, buffer),
             Serializer::Cef(serializer) => serializer.encode(event, buffer),
             Serializer::Csv(serializer) => serializer.encode(event, buffer),
-            Serializer::Gelf(serializer) => serializer.encode(event, buffer),
             Serializer::Json(serializer) => serializer.encode(event, buffer),
             Serializer::Logfmt(serializer) => serializer.encode(event, buffer),
             Serializer::Native(serializer) => serializer.encode(event, buffer),

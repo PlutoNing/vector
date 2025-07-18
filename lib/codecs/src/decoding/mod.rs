@@ -9,8 +9,8 @@ use crate::decoding::format::{VrlDeserializer, VrlDeserializerConfig};
 use bytes::{Bytes, BytesMut};
 pub use error::StreamDecodingError;
 pub use format::{
-    BoxedDeserializer, BytesDeserializer, BytesDeserializerConfig, GelfDeserializer,
-    GelfDeserializerConfig, GelfDeserializerOptions, InfluxdbDeserializer,
+    BoxedDeserializer, BytesDeserializer, BytesDeserializerConfig,
+    InfluxdbDeserializer,
     InfluxdbDeserializerConfig, JsonDeserializer, JsonDeserializerConfig, JsonDeserializerOptions,
     NativeDeserializer, NativeDeserializerConfig, NativeJsonDeserializer,
     NativeJsonDeserializerConfig, NativeJsonDeserializerOptions, ProtobufDeserializer,
@@ -20,8 +20,8 @@ pub use format::{
 pub use format::{SyslogDeserializer, SyslogDeserializerConfig, SyslogDeserializerOptions};
 pub use framing::{
     BoxedFramer, BoxedFramingError, BytesDecoder, BytesDecoderConfig, CharacterDelimitedDecoder,
-    CharacterDelimitedDecoderConfig, CharacterDelimitedDecoderOptions, ChunkedGelfDecoder,
-    ChunkedGelfDecoderConfig, ChunkedGelfDecoderOptions, FramingError, LengthDelimitedDecoder,
+    CharacterDelimitedDecoderConfig, CharacterDelimitedDecoderOptions,
+    FramingError, LengthDelimitedDecoder,
     LengthDelimitedDecoderConfig, NewlineDelimitedDecoder, NewlineDelimitedDecoderConfig,
     NewlineDelimitedDecoderOptions, OctetCountingDecoder, OctetCountingDecoderConfig,
     OctetCountingDecoderOptions,
@@ -100,11 +100,6 @@ pub enum FramingConfig {
     ///
     /// [octet_counting]: https://tools.ietf.org/html/rfc6587#section-3.4.1
     OctetCounting(OctetCountingDecoderConfig),
-
-    /// Byte frames which are chunked GELF messages.
-    ///
-    /// [chunked_gelf]: https://go2docs.graylog.org/current/getting_in_log_data/gelf.html
-    ChunkedGelf(ChunkedGelfDecoderConfig),
 }
 
 impl From<BytesDecoderConfig> for FramingConfig {
@@ -137,12 +132,6 @@ impl From<OctetCountingDecoderConfig> for FramingConfig {
     }
 }
 
-impl From<ChunkedGelfDecoderConfig> for FramingConfig {
-    fn from(config: ChunkedGelfDecoderConfig) -> Self {
-        Self::ChunkedGelf(config)
-    }
-}
-
 impl FramingConfig {
     /// Build the `Framer` from this configuration.
     pub fn build(&self) -> Framer {
@@ -152,7 +141,6 @@ impl FramingConfig {
             FramingConfig::LengthDelimited(config) => Framer::LengthDelimited(config.build()),
             FramingConfig::NewlineDelimited(config) => Framer::NewlineDelimited(config.build()),
             FramingConfig::OctetCounting(config) => Framer::OctetCounting(config.build()),
-            FramingConfig::ChunkedGelf(config) => Framer::ChunkedGelf(config.build()),
         }
     }
 }
@@ -172,8 +160,6 @@ pub enum Framer {
     OctetCounting(OctetCountingDecoder),
     /// Uses an opaque `Framer` implementation for framing.
     Boxed(BoxedFramer),
-    /// Uses a `ChunkedGelfDecoder` for framing.
-    ChunkedGelf(ChunkedGelfDecoder),
 }
 
 impl tokio_util::codec::Decoder for Framer {
@@ -188,7 +174,6 @@ impl tokio_util::codec::Decoder for Framer {
             Framer::NewlineDelimited(framer) => framer.decode(src),
             Framer::OctetCounting(framer) => framer.decode(src),
             Framer::Boxed(framer) => framer.decode(src),
-            Framer::ChunkedGelf(framer) => framer.decode(src),
         }
     }
 
@@ -200,7 +185,6 @@ impl tokio_util::codec::Decoder for Framer {
             Framer::NewlineDelimited(framer) => framer.decode_eof(src),
             Framer::OctetCounting(framer) => framer.decode_eof(src),
             Framer::Boxed(framer) => framer.decode_eof(src),
-            Framer::ChunkedGelf(framer) => framer.decode_eof(src),
         }
     }
 }
@@ -255,24 +239,6 @@ pub enum DeserializerConfig {
     /// [experimental]: https://vector.dev/highlights/2022-03-31-native-event-codecs
     NativeJson(NativeJsonDeserializerConfig),
 
-    /// Decodes the raw bytes as a [GELF][gelf] message.
-    ///
-    /// This codec is experimental for the following reason:
-    ///
-    /// The GELF specification is more strict than the actual Graylog receiver.
-    /// Vector's decoder currently adheres more strictly to the GELF spec, with
-    /// the exception that some characters such as `@`  are allowed in field names.
-    ///
-    /// Other GELF codecs such as Loki's, use a [Go SDK][implementation] that is maintained
-    /// by Graylog, and is much more relaxed than the GELF spec.
-    ///
-    /// Going forward, Vector will use that [Go SDK][implementation] as the reference implementation, which means
-    /// the codec may continue to relax the enforcement of specification.
-    ///
-    /// [gelf]: https://docs.graylog.org/docs/gelf
-    /// [implementation]: https://github.com/Graylog2/go-gelf/blob/v2/gelf/reader.go
-    Gelf(GelfDeserializerConfig),
-
     /// Decodes the raw bytes as an [Influxdb Line Protocol][influxdb] message.
     ///
     /// [influxdb]: https://docs.influxdata.com/influxdb/cloud/reference/syntax/line-protocol
@@ -308,12 +274,6 @@ impl From<JsonDeserializerConfig> for DeserializerConfig {
 impl From<SyslogDeserializerConfig> for DeserializerConfig {
     fn from(config: SyslogDeserializerConfig) -> Self {
         Self::Syslog(config)
-    }
-}
-
-impl From<GelfDeserializerConfig> for DeserializerConfig {
-    fn from(config: GelfDeserializerConfig) -> Self {
-        Self::Gelf(config)
     }
 }
 
@@ -354,7 +314,6 @@ impl DeserializerConfig {
                 Ok(Deserializer::Native(NativeDeserializerConfig.build()))
             }
             DeserializerConfig::NativeJson(config) => Ok(Deserializer::NativeJson(config.build())),
-            DeserializerConfig::Gelf(config) => Ok(Deserializer::Gelf(config.build())),
             DeserializerConfig::Influxdb(config) => Ok(Deserializer::Influxdb(config.build())),
             DeserializerConfig::Vrl(config) => Ok(Deserializer::Vrl(config.build()?)),
         }
@@ -374,18 +333,14 @@ impl DeserializerConfig {
             DeserializerConfig::Protobuf(_) => FramingConfig::Bytes,
             #[cfg(feature = "syslog")]
             DeserializerConfig::Syslog(_) => FramingConfig::NewlineDelimited(Default::default()),
-            DeserializerConfig::Vrl(_) => FramingConfig::Bytes,
-            DeserializerConfig::Gelf(_) => {
-                FramingConfig::CharacterDelimited(CharacterDelimitedDecoderConfig::new(0))
-            }
+            DeserializerConfig::Vrl(_) => FramingConfig::Bytes
         }
     }
 
     /// Returns an appropriate default framing config for the given deserializer with message based inputs.
     pub fn default_message_based_framing(&self) -> FramingConfig {
         match self {
-            DeserializerConfig::Gelf(_) => FramingConfig::ChunkedGelf(Default::default()),
-            _ => FramingConfig::Bytes,
+            _ => FramingConfig::Bytes
         }
     }
 
@@ -403,7 +358,6 @@ impl DeserializerConfig {
             DeserializerConfig::Syslog(config) => config.output_type(),
             DeserializerConfig::Native => NativeDeserializerConfig.output_type(),
             DeserializerConfig::NativeJson(config) => config.output_type(),
-            DeserializerConfig::Gelf(config) => config.output_type(),
             DeserializerConfig::Vrl(config) => config.output_type(),
             DeserializerConfig::Influxdb(config) => config.output_type(),
         }
@@ -423,7 +377,6 @@ impl DeserializerConfig {
             DeserializerConfig::Syslog(config) => config.schema_definition(log_namespace),
             DeserializerConfig::Native => NativeDeserializerConfig.schema_definition(log_namespace),
             DeserializerConfig::NativeJson(config) => config.schema_definition(log_namespace),
-            DeserializerConfig::Gelf(config) => config.schema_definition(log_namespace),
             DeserializerConfig::Influxdb(config) => config.schema_definition(log_namespace),
             DeserializerConfig::Vrl(config) => config.schema_definition(log_namespace),
         }
@@ -437,8 +390,7 @@ impl DeserializerConfig {
                 FramingConfig::NewlineDelimited(_),
             ) => "application/x-ndjson",
             (
-                DeserializerConfig::Gelf(_)
-                | DeserializerConfig::Json(_)
+                DeserializerConfig::Json(_)
                 | DeserializerConfig::NativeJson(_),
                 FramingConfig::CharacterDelimited(CharacterDelimitedDecoderConfig {
                     character_delimited:
@@ -456,7 +408,6 @@ impl DeserializerConfig {
                 DeserializerConfig::Json(_)
                 | DeserializerConfig::NativeJson(_)
                 | DeserializerConfig::Bytes
-                | DeserializerConfig::Gelf(_)
                 | DeserializerConfig::Influxdb(_)
                 | DeserializerConfig::Vrl(_),
                 _,
@@ -487,8 +438,6 @@ pub enum Deserializer {
     NativeJson(NativeJsonDeserializer),
     /// Uses an opaque `Deserializer` implementation for deserialization.
     Boxed(BoxedDeserializer),
-    /// Uses a `GelfDeserializer` for deserialization.
-    Gelf(GelfDeserializer),
     /// Uses a `InfluxdbDeserializer` for deserialization.
     Influxdb(InfluxdbDeserializer),
     /// Uses a `VrlDeserializer` for deserialization.
@@ -511,29 +460,8 @@ impl format::Deserializer for Deserializer {
             Deserializer::Native(deserializer) => deserializer.parse(bytes, log_namespace),
             Deserializer::NativeJson(deserializer) => deserializer.parse(bytes, log_namespace),
             Deserializer::Boxed(deserializer) => deserializer.parse(bytes, log_namespace),
-            Deserializer::Gelf(deserializer) => deserializer.parse(bytes, log_namespace),
             Deserializer::Influxdb(deserializer) => deserializer.parse(bytes, log_namespace),
             Deserializer::Vrl(deserializer) => deserializer.parse(bytes, log_namespace),
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn gelf_stream_default_framing_is_null_delimited() {
-        let deserializer_config = DeserializerConfig::from(GelfDeserializerConfig::default());
-        let framing_config = deserializer_config.default_stream_framing();
-        assert!(matches!(
-            framing_config,
-            FramingConfig::CharacterDelimited(CharacterDelimitedDecoderConfig {
-                character_delimited: CharacterDelimitedDecoderOptions {
-                    delimiter: 0,
-                    max_length: None,
-                }
-            })
-        ));
     }
 }

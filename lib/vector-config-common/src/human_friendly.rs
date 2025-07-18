@@ -46,7 +46,7 @@ static WELL_KNOWN_REPLACEMENTS: LazyLock<HashMap<String, &'static str>> = LazyLo
 static WELL_KNOWN_ACRONYMS: LazyLock<HashSet<String>> = LazyLock::new(|| {
     let acronyms = &[
         "api", "aws", "ec2", "ecs", "hec", "http", "https", "nginx", "s3",
-        "sqs", "tls", "ssl", "otel", "gelf", "csv", "json", "rfc3339", "lz4", "us", "eu", "bsd",
+        "sqs", "tls", "ssl", "otel", "csv", "json", "rfc3339", "lz4", "us", "eu", "bsd",
         "vrl", "tcp", "udp", "id", "uuid", "kms", "uri", "url", "acp", "uid", "ip", "pid",
         "ndjson", "ewma", "rtt", "cpu", "acl", "imds", "acl", "alpn", "sasl",
     ];

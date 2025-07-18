@@ -167,7 +167,6 @@ fn deserializer_config_to_serializer(config: &DeserializerConfig) -> encoding::S
         DeserializerConfig::Syslog { .. } => SerializerConfig::Logfmt,
         DeserializerConfig::Native => SerializerConfig::Native,
         DeserializerConfig::NativeJson { .. } => SerializerConfig::NativeJson,
-        DeserializerConfig::Gelf { .. } => SerializerConfig::Gelf,
         DeserializerConfig::Avro { avro } => SerializerConfig::Avro { avro: avro.into() },
         // TODO: Influxdb has no serializer yet
         DeserializerConfig::Influxdb { .. } => todo!(),
@@ -198,8 +197,6 @@ fn decoder_framing_to_encoding_framer(framing: &decoding::FramingConfig) -> enco
         // TODO: There's no equivalent octet counting framer for encoding... although
         // there's no particular reason that would make it hard to write.
         decoding::FramingConfig::OctetCounting(_) => todo!(),
-        // TODO: chunked gelf is not supported yet in encoding
-        decoding::FramingConfig::ChunkedGelf(_) => todo!(),
     };
 
     framing_config.build()
@@ -212,7 +209,6 @@ fn serializer_config_to_deserializer(
         SerializerConfig::Avro { .. } => todo!(),
         SerializerConfig::Cef { .. } => todo!(),
         SerializerConfig::Csv { .. } => todo!(),
-        SerializerConfig::Gelf => DeserializerConfig::Gelf(Default::default()),
         SerializerConfig::Json(_) => DeserializerConfig::Json(Default::default()),
         SerializerConfig::Logfmt => todo!(),
         SerializerConfig::Native => DeserializerConfig::Native,
