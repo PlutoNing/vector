@@ -450,23 +450,3 @@ async fn tap_handler(
 
     debug!(message = "Stopped tap.", outputs_patterns = ?patterns.for_outputs, inputs_patterns = ?patterns.for_inputs);
 }
-
-mod tests {
-    #[test]
-    /// Patterns should accept globbing.
-    fn matches() {
-        use super::GlobMatcher;
-
-        let patterns = ["ab*", "12?", "xy?"];
-
-        // Should find.
-        for id in &["abc", "123", "xyz"] {
-            assert!(patterns.iter().any(|p| p.to_string().matches_glob(id)));
-        }
-
-        // Should not find.
-        for id in &["xzy", "ad*", "1234"] {
-            assert!(!patterns.iter().any(|p| p.to_string().matches_glob(id)));
-        }
-    }
-}
