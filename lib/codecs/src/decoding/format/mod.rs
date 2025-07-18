@@ -3,7 +3,6 @@
 
 #![deny(missing_docs)]
 
-mod avro;
 mod bytes;
 mod influxdb;
 mod json;
@@ -15,7 +14,6 @@ mod syslog;
 mod vrl;
 
 use ::bytes::Bytes;
-pub use avro::{AvroDeserializer, AvroDeserializerConfig, AvroDeserializerOptions};
 use dyn_clone::DynClone;
 pub use influxdb::{InfluxdbDeserializer, InfluxdbDeserializerConfig};
 pub use json::{JsonDeserializer, JsonDeserializerConfig, JsonDeserializerOptions};

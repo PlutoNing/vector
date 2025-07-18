@@ -8,7 +8,7 @@ use std::fmt::Debug;
 
 use bytes::BytesMut;
 pub use format::{
-    AvroSerializer, AvroSerializerConfig, AvroSerializerOptions, CefSerializer,
+    CefSerializer,
     CefSerializerConfig, CsvSerializer, CsvSerializerConfig,
     JsonSerializer, JsonSerializerConfig, JsonSerializerOptions, LogfmtSerializer,
     LogfmtSerializerConfig, NativeJsonSerializer, NativeJsonSerializerConfig, NativeSerializer,
@@ -177,14 +177,6 @@ impl tokio_util::codec::Encoder<()> for Framer {
 #[serde(tag = "codec", rename_all = "snake_case")]
 #[configurable(metadata(docs::enum_tag_description = "The codec to use for encoding events."))]
 pub enum SerializerConfig {
-    /// Encodes an event as an [Apache Avro][apache_avro] message.
-    ///
-    /// [apache_avro]: https://avro.apache.org/
-    Avro {
-        /// Apache Avro-specific encoder options.
-        avro: AvroSerializerOptions,
-    },
-
     /// Encodes an event as a CEF (Common Event Format) formatted message.
     ///
     Cef(
@@ -249,12 +241,6 @@ pub enum SerializerConfig {
     Text(TextSerializerConfig),
 }
 
-impl From<AvroSerializerConfig> for SerializerConfig {
-    fn from(config: AvroSerializerConfig) -> Self {
-        Self::Avro { avro: config.avro }
-    }
-}
-
 impl From<CefSerializerConfig> for SerializerConfig {
     fn from(config: CefSerializerConfig) -> Self {
         Self::Cef(config)
@@ -313,9 +299,6 @@ impl SerializerConfig {
     /// Build the `Serializer` from this configuration.
     pub fn build(&self) -> Result<Serializer, Box<dyn std::error::Error + Send + Sync + 'static>> {
         match self {
-            SerializerConfig::Avro { avro } => Ok(Serializer::Avro(
-                AvroSerializerConfig::new(avro.schema.clone()).build()?,
-            )),
             SerializerConfig::Cef(config) => Ok(Serializer::Cef(config.build()?)),
             SerializerConfig::Csv(config) => Ok(Serializer::Csv(config.build()?)),
             SerializerConfig::Json(config) => Ok(Serializer::Json(config.build())),
@@ -335,19 +318,7 @@ impl SerializerConfig {
     /// Return an appropriate default framer for the given serializer.
     pub fn default_stream_framing(&self) -> FramingConfig {
         match self {
-            // TODO: Technically, Avro messages are supposed to be framed[1] as a vector of
-            // length-delimited buffers -- `len` as big-endian 32-bit unsigned integer, followed by
-            // `len` bytes -- with a "zero-length buffer" to terminate the overall message... which
-            // our length delimited framer obviously will not do.
-            //
-            // This is OK for now, because the Avro serializer is more ceremonial than anything
-            // else, existing to curry serializer config options to Pulsar's native client, not to
-            // actually serialize the bytes themselves... but we're still exposing this method and
-            // we should do so accurately, even if practically it doesn't need to be.
-            //
-            // [1]: https://avro.apache.org/docs/1.11.1/specification/_print/#message-framing
-            SerializerConfig::Avro { .. }
-            | SerializerConfig::Native
+            SerializerConfig::Native
             | SerializerConfig::Protobuf(_) => {
                 FramingConfig::LengthDelimited(LengthDelimitedEncoderConfig::default())
             }
@@ -364,9 +335,6 @@ impl SerializerConfig {
     /// The data type of events that are accepted by this `Serializer`.
     pub fn input_type(&self) -> DataType {
         match self {
-            SerializerConfig::Avro { avro } => {
-                AvroSerializerConfig::new(avro.schema.clone()).input_type()
-            }
             SerializerConfig::Cef(config) => config.input_type(),
             SerializerConfig::Csv(config) => config.input_type(),
             SerializerConfig::Json(config) => config.input_type(),
@@ -382,9 +350,6 @@ impl SerializerConfig {
     /// The schema required by the serializer.
     pub fn schema_requirement(&self) -> schema::Requirement {
         match self {
-            SerializerConfig::Avro { avro } => {
-                AvroSerializerConfig::new(avro.schema.clone()).schema_requirement()
-            }
             SerializerConfig::Cef(config) => config.schema_requirement(),
             SerializerConfig::Csv(config) => config.schema_requirement(),
             SerializerConfig::Json(config) => config.schema_requirement(),
@@ -401,8 +366,6 @@ impl SerializerConfig {
 /// Serialize structured events as bytes.
 #[derive(Debug, Clone)]
 pub enum Serializer {
-    /// Uses an `AvroSerializer` for serialization.
-    Avro(AvroSerializer),
     /// Uses a `CefSerializer` for serialization.
     Cef(CefSerializer),
     /// Uses a `CsvSerializer` for serialization.
@@ -428,8 +391,7 @@ impl Serializer {
     pub fn supports_json(&self) -> bool {
         match self {
             Serializer::Json(_) | Serializer::NativeJson(_) => true,
-            Serializer::Avro(_)
-            | Serializer::Cef(_)
+            Serializer::Cef(_)
             | Serializer::Csv(_)
             | Serializer::Logfmt(_)
             | Serializer::Text(_)
@@ -449,8 +411,7 @@ impl Serializer {
         match self {
             Serializer::Json(serializer) => serializer.to_json_value(event),
             Serializer::NativeJson(serializer) => serializer.to_json_value(event),
-            Serializer::Avro(_)
-            | Serializer::Cef(_)
+            Serializer::Cef(_)
             | Serializer::Csv(_)
             | Serializer::Logfmt(_)
             | Serializer::Text(_)
@@ -460,12 +421,6 @@ impl Serializer {
                 panic!("Serializer does not support JSON")
             }
         }
-    }
-}
-
-impl From<AvroSerializer> for Serializer {
-    fn from(serializer: AvroSerializer) -> Self {
-        Self::Avro(serializer)
     }
 }
 
@@ -528,7 +483,6 @@ impl tokio_util::codec::Encoder<Event> for Serializer {
 
     fn encode(&mut self, event: Event, buffer: &mut BytesMut) -> Result<(), Self::Error> {
         match self {
-            Serializer::Avro(serializer) => serializer.encode(event, buffer),
             Serializer::Cef(serializer) => serializer.encode(event, buffer),
             Serializer::Csv(serializer) => serializer.encode(event, buffer),
             Serializer::Json(serializer) => serializer.encode(event, buffer),

@@ -105,7 +105,7 @@ impl EncodingConfigWithFraming {
                 SinkType::StreamBased => NewlineDelimitedEncoder::default().into(),
                 SinkType::MessageBased => CharacterDelimitedEncoder::new(b',').into(),
             },
-            (None, Serializer::Avro(_) | Serializer::Native(_)) => {
+            (None, Serializer::Native(_)) => {
                 LengthDelimitedEncoder::default().into()
             }
             (None, Serializer::Protobuf(_)) => {

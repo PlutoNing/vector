@@ -160,14 +160,11 @@ fn deserializer_config_to_serializer(config: &DeserializerConfig) -> encoding::S
                 },
             })
         }
-        // TODO: We need to create an Avro serializer because, certainly, for any source decoding
-        // the data as Avro, we can't possibly send anything else without the source just
-        // immediately barfing.
+
         #[cfg(feature = "codecs-syslog")]
         DeserializerConfig::Syslog { .. } => SerializerConfig::Logfmt,
         DeserializerConfig::Native => SerializerConfig::Native,
         DeserializerConfig::NativeJson { .. } => SerializerConfig::NativeJson,
-        DeserializerConfig::Avro { avro } => SerializerConfig::Avro { avro: avro.into() },
         // TODO: Influxdb has no serializer yet
         DeserializerConfig::Influxdb { .. } => todo!(),
         DeserializerConfig::Vrl { .. } => unimplemented!(),
@@ -206,7 +203,6 @@ fn serializer_config_to_deserializer(
     config: &SerializerConfig,
 ) -> vector_lib::Result<decoding::Deserializer> {
     let deserializer_config = match config {
-        SerializerConfig::Avro { .. } => todo!(),
         SerializerConfig::Cef { .. } => todo!(),
         SerializerConfig::Csv { .. } => todo!(),
         SerializerConfig::Json(_) => DeserializerConfig::Json(Default::default()),

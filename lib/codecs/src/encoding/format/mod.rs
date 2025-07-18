@@ -3,7 +3,6 @@
 
 #![deny(missing_docs)]
 
-mod avro;
 mod cef;
 mod common;
 mod csv;
@@ -18,7 +17,6 @@ mod text;
 use std::fmt::Debug;
 
 pub use self::csv::{CsvSerializer, CsvSerializerConfig};
-pub use avro::{AvroSerializer, AvroSerializerConfig, AvroSerializerOptions};
 pub use cef::{CefSerializer, CefSerializerConfig};
 use dyn_clone::DynClone;
 pub use json::{JsonSerializer, JsonSerializerConfig, JsonSerializerOptions};
