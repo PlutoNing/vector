@@ -3,7 +3,6 @@
 
 #![deny(missing_docs)]
 
-mod cef;
 mod common;
 mod csv;
 mod json;
@@ -17,7 +16,6 @@ mod text;
 use std::fmt::Debug;
 
 pub use self::csv::{CsvSerializer, CsvSerializerConfig};
-pub use cef::{CefSerializer, CefSerializerConfig};
 use dyn_clone::DynClone;
 pub use json::{JsonSerializer, JsonSerializerConfig, JsonSerializerOptions};
 pub use logfmt::{LogfmtSerializer, LogfmtSerializerConfig};
