@@ -445,15 +445,3 @@ pub fn validate_component(test_case_data_path: std::path::PathBuf) {
 
     run_validation(configuration, test_case_data_path);
 }
-
-#[cfg(all(test, feature = "component-validation-tests"))]
-mod tests {
-    #[test_generator::test_resources("tests/validation/components/**/*.yaml")]
-    pub fn validate_component(test_case_data_path: &str) {
-        crate::test_util::trace_init();
-
-        let test_case_data_path = std::path::PathBuf::from(test_case_data_path.to_string());
-
-        super::validate_component(test_case_data_path);
-    }
-}
