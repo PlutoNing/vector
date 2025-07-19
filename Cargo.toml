@@ -404,37 +404,37 @@ ntapi = { git = "https://github.com/MSxDOS/ntapi.git", rev = "24fc1e47677fc9f6e3
 
 [features]
 # Default features for *-unknown-linux-gnu and *-apple-darwin
-default = [  "sinks", "sources",  "transforms", "unix"]
+default = [  "sinks", "sources", "unix"]
 # Default features for `cargo docs`. The same as `default` but without `rdkafka?/gssapi-vendored` which would require installing libsasl in our doc build environment.
-docs = [  "sinks", "sources",  "transforms", "unix"]
+docs = [  "sinks", "sources", "unix"]
 # Default features for *-unknown-linux-* which make use of `cmake` for dependencies
-default-cmake = [ "sinks", "sources",  "transforms", "unix"]
+default-cmake = [ "sinks", "sources", "unix"]
 # Default features for *-pc-windows-msvc
 # TODO: Enable SASL https://github.com/vectordotdev/vector/pull/3081#issuecomment-659298042
-default-msvc = [  "sinks", "sources", "transforms"]
-default-musl = [  "sinks", "sources",  "transforms", "unix"]
-default-no-api-client = [ "sinks", "sources",  "transforms", "unix"]
-default-no-vrl-cli = [ "sinks", "sources",  "transforms", "unix"]
+default-msvc = [  "sinks", "sources"]
+default-musl = [  "sinks", "sources",  "unix"]
+default-no-api-client = [ "sinks", "sources",   "unix"]
+default-no-vrl-cli = [ "sinks", "sources",   "unix"]
 tokio-console = ["dep:console-subscriber", "tokio/tracing"]
 
-all-logs = ["sinks-logs", "transforms-logs"]
-all-metrics = ["sinks-metrics", "sources-metrics", "transforms-metrics"]
+all-logs = ["sinks-logs"]
+all-metrics = ["sinks-metrics", "sources-metrics"]
 
 # Target specific release features.
 # The `make` tasks will select this according to the appropriate triple.
 # Use this section to turn off or on specific features for specific triples.
-target-aarch64-unknown-linux-gnu = [   "sinks", "sources",  "transforms", "unix"]
-target-aarch64-unknown-linux-musl = [   "sinks", "sources",  "transforms", "unix"]
-target-armv7-unknown-linux-gnueabihf = [   "sinks", "sources", "transforms", "unix"]
-target-armv7-unknown-linux-musleabihf = [  "sinks", "sources",  "transforms"]
-target-arm-unknown-linux-gnueabi = [  "sinks", "sources",  "transforms", "unix"]
-target-arm-unknown-linux-musleabi = [   "sinks", "sources",  "transforms"]
-target-x86_64-unknown-linux-gnu = [  "sinks", "sources",  "transforms", "unix"]
-target-x86_64-unknown-linux-musl = [  "sinks", "sources", "transforms", "unix"]
+target-aarch64-unknown-linux-gnu = [   "sinks", "sources", "unix"]
+target-aarch64-unknown-linux-musl = [   "sinks", "sources",  "unix"]
+target-armv7-unknown-linux-gnueabihf = [   "sinks", "sources", "unix"]
+target-armv7-unknown-linux-musleabihf = [  "sinks", "sources",  ]
+target-arm-unknown-linux-gnueabi = [  "sinks", "sources",  "unix"]
+target-arm-unknown-linux-musleabi = [   "sinks", "sources", ]
+target-x86_64-unknown-linux-gnu = [  "sinks", "sources",   "unix"]
+target-x86_64-unknown-linux-musl = [  "sinks", "sources","unix"]
 # Does not currently build
-target-powerpc64le-unknown-linux-gnu = [  "sinks", "sources", "transforms", "unix"]
+target-powerpc64le-unknown-linux-gnu = [  "sinks", "sources", "unix"]
 # Currently doesn't build due to lack of support for 64-bit atomics
-target-powerpc-unknown-linux-gnu = [  "sinks", "sources", "transforms", "unix"]
+target-powerpc-unknown-linux-gnu = [  "sinks", "sources",  "unix"]
 
 # Enables features that work only on systems providing `cfg(unix)`
 unix = ["tikv-jemallocator"]
@@ -451,15 +451,6 @@ sources-metrics = [
 ]
 
 sources-host_metrics = ["heim/cpu", "heim/host", "heim/memory", "heim/net"]
-
-# Transforms
-transforms = ["transforms-logs", "transforms-metrics"]
-transforms-logs = [
-
-]
-transforms-metrics = [
-
-]
 
 # Sinks
 sinks = ["sinks-logs", "sinks-metrics"]
