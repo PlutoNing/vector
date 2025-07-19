@@ -470,21 +470,4 @@ sinks-postgres = ["dep:sqlx"]
 # Identifies that the build is a nightly build
 nightly = []
 
-# Integration testing-related features
-all-integration-tests = [
-
-]
-
-disable-resolv-conf = []
-vector-unit-test-tests = [
-  "sinks-console"
-]
-
-component-validation-runner = ["dep:tonic"]
-# For now, only include components that implement ValidatableComponent.
-# In the future, this can change to simply reference the targets `sources`, `transforms`, `sinks`
-component-validation-tests = [
-  "component-validation-runner",
-]
-
 proptest = ["dep:proptest", "dep:proptest-derive", "vrl/proptest"]
