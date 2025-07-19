@@ -5,7 +5,6 @@ mod error;
 pub mod format;
 pub mod framing;
 
-use crate::decoding::format::{VrlDeserializer, VrlDeserializerConfig};
 use bytes::{Bytes, BytesMut};
 pub use error::StreamDecodingError;
 pub use format::{
@@ -229,11 +228,6 @@ pub enum DeserializerConfig {
     /// [vector_native_json]: https://github.com/vectordotdev/vector/blob/master/lib/codecs/tests/data/native_encoding/schema.cue
     /// [experimental]: https://vector.dev/highlights/2022-03-31-native-event-codecs
     NativeJson(NativeJsonDeserializerConfig),
-
-    /// Decodes the raw bytes as a string and passes them as input to a [VRL][vrl] program.
-    ///
-    /// [vrl]: https://vector.dev/docs/reference/vrl
-    Vrl(VrlDeserializerConfig),
 }
 
 impl From<BytesDeserializerConfig> for DeserializerConfig {
@@ -279,7 +273,6 @@ impl DeserializerConfig {
                 Ok(Deserializer::Native(NativeDeserializerConfig.build()))
             }
             DeserializerConfig::NativeJson(config) => Ok(Deserializer::NativeJson(config.build())),
-            DeserializerConfig::Vrl(config) => Ok(Deserializer::Vrl(config.build()?)),
         }
     }
 
@@ -294,7 +287,6 @@ impl DeserializerConfig {
             }
             #[cfg(feature = "syslog")]
             DeserializerConfig::Syslog(_) => FramingConfig::NewlineDelimited(Default::default()),
-            DeserializerConfig::Vrl(_) => FramingConfig::Bytes
         }
     }
 
@@ -314,7 +306,6 @@ impl DeserializerConfig {
             DeserializerConfig::Syslog(config) => config.output_type(),
             DeserializerConfig::Native => NativeDeserializerConfig.output_type(),
             DeserializerConfig::NativeJson(config) => config.output_type(),
-            DeserializerConfig::Vrl(config) => config.output_type(),
         }
     }
 
@@ -327,7 +318,6 @@ impl DeserializerConfig {
             DeserializerConfig::Syslog(config) => config.schema_definition(log_namespace),
             DeserializerConfig::Native => NativeDeserializerConfig.schema_definition(log_namespace),
             DeserializerConfig::NativeJson(config) => config.schema_definition(log_namespace),
-            DeserializerConfig::Vrl(config) => config.schema_definition(log_namespace),
         }
     }
 
@@ -355,8 +345,7 @@ impl DeserializerConfig {
             (
                 DeserializerConfig::Json(_)
                 | DeserializerConfig::NativeJson(_)
-                | DeserializerConfig::Bytes
-                | DeserializerConfig::Vrl(_),
+                | DeserializerConfig::Bytes,
                 _,
             ) => "text/plain",
             #[cfg(feature = "syslog")]
@@ -381,8 +370,6 @@ pub enum Deserializer {
     NativeJson(NativeJsonDeserializer),
     /// Uses an opaque `Deserializer` implementation for deserialization.
     Boxed(BoxedDeserializer),
-    /// Uses a `VrlDeserializer` for deserialization.
-    Vrl(VrlDeserializer),
 }
 
 impl format::Deserializer for Deserializer {
@@ -399,7 +386,6 @@ impl format::Deserializer for Deserializer {
             Deserializer::Native(deserializer) => deserializer.parse(bytes, log_namespace),
             Deserializer::NativeJson(deserializer) => deserializer.parse(bytes, log_namespace),
             Deserializer::Boxed(deserializer) => deserializer.parse(bytes, log_namespace),
-            Deserializer::Vrl(deserializer) => deserializer.parse(bytes, log_namespace),
         }
     }
 }
