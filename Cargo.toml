@@ -459,14 +459,7 @@ transforms-logs = [
 ]
 transforms-metrics = [
 
-  "transforms-tag_cardinality_limit",
 ]
-
-transforms-tag_cardinality_limit = ["dep:bloomy", "dep:hashbrown"]
-
-# Implementations of transforms
-transforms-impl-sample = []
-transforms-impl-reduce = []
 
 # Sinks
 sinks = ["sinks-logs", "sinks-metrics"]
