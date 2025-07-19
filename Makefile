@@ -64,9 +64,6 @@ export ENVIRONMENT_PUBLISH ?=
 export AWS_ACCESS_KEY_ID ?= "dummy"
 export AWS_SECRET_ACCESS_KEY ?= "dummy"
 
-# Set version
-export VERSION ?= $(shell command -v cargo >/dev/null && cargo vdev version || echo unknown)
-
 # Set if you are on the CI and actually want the things to happen. (Non-CI users should never set this.)
 export CI ?= false
 
@@ -367,11 +364,6 @@ test-integration: test-integration-docker-logs test-integration-elasticsearch
 test-integration: test-integration-fluent test-integration-http-client
 test-integration: test-integration-shutdown
 
-test-integration-%-cleanup:
-	cargo vdev --verbose integration stop $*
-
-test-integration-%:
-	cargo vdev --verbose integration test $*
 ifeq ($(AUTODESPAWN), true)
 	make test-integration-$*-cleanup
 endif
@@ -403,63 +395,6 @@ bench-metrics: ## Run metrics benches
 
 ##@ Checking
 
-.PHONY: check
-check: ## Run prerequisite code checks
-	${MAYBE_ENVIRONMENT_EXEC} cargo vdev check rust
-
-.PHONY: check-all
-check-all: ## Check everything
-check-all: check-fmt check-clippy check-docs
-check-all: check-version check-examples check-component-features
-check-all: check-scripts check-deny check-component-docs check-licenses
-
-.PHONY: check-component-features
-check-component-features: ## Check that all component features are setup properly
-	${MAYBE_ENVIRONMENT_EXEC} cargo vdev check component-features
-
-.PHONY: check-clippy
-check-clippy: ## Check code with Clippy
-	${MAYBE_ENVIRONMENT_EXEC} cargo vdev check rust --clippy
-
-.PHONY: check-docs
-check-docs: ## Check that all /docs file are valid
-	${MAYBE_ENVIRONMENT_EXEC} cargo vdev check docs
-
-.PHONY: check-fmt
-check-fmt: ## Check that all files are formatted properly
-	${MAYBE_ENVIRONMENT_EXEC} cargo vdev check fmt
-
-.PHONY: check-licenses
-check-licenses: ## Check that the 3rd-party license file is up to date
-	${MAYBE_ENVIRONMENT_EXEC} cargo vdev check licenses
-
-.PHONY: check-markdown
-check-markdown: ## Check that markdown is styled properly
-	${MAYBE_ENVIRONMENT_EXEC} cargo vdev check markdown
-
-.PHONY: check-version
-check-version: ## Check that Vector's version is correct accounting for recent changes
-	${MAYBE_ENVIRONMENT_EXEC} cargo vdev check version
-
-.PHONY: check-examples
-check-examples: ## Check that the config/examples files are valid
-	${MAYBE_ENVIRONMENT_EXEC} cargo vdev check examples
-
-.PHONY: check-scripts
-check-scripts: ## Check that scripts do not have common mistakes
-	${MAYBE_ENVIRONMENT_EXEC} cargo vdev check scripts
-
-.PHONY: check-deny
-check-deny: ## Check advisories licenses and sources for crate dependencies
-	${MAYBE_ENVIRONMENT_EXEC} cargo vdev check deny
-
-.PHONY: check-events
-check-events: ## Check that events satisfy patterns set in https://github.com/vectordotdev/vector/blob/master/rfcs/2020-03-17-2064-event-driven-observability.md
-	${MAYBE_ENVIRONMENT_EXEC} cargo vdev check events
-
-.PHONY: check-component-docs
-check-component-docs: generate-component-docs ## Checks that the machine-generated component Cue docs are up-to-date.
-	${MAYBE_ENVIRONMENT_EXEC} cargo vdev check component-docs
 
 ##@ Rustdoc
 build-rustdoc: ## Build Vector's Rustdocs
@@ -467,20 +402,6 @@ build-rustdoc: ## Build Vector's Rustdocs
 	${MAYBE_ENVIRONMENT_EXEC} cargo doc --no-deps --workspace
 
 ##@ Packaging
-
-# archives
-target/artifacts/vector-${VERSION}-%.tar.gz: export TRIPLE :=$(@:target/artifacts/vector-${VERSION}-%.tar.gz=%)
-target/artifacts/vector-${VERSION}-%.tar.gz: override PROFILE =release
-target/artifacts/vector-${VERSION}-%.tar.gz: target/%/release/vector.tar.gz
-	@echo "Built to ${<}, relocating to ${@}"
-	@mkdir -p target/artifacts/
-	@cp -v \
-		${<} \
-		${@}
-
-.PHONY: package
-package: build ## Build the Vector archive
-	${MAYBE_ENVIRONMENT_EXEC} cargo vdev package archive
 
 .PHONY: package-x86_64-unknown-linux-gnu-all
 package-x86_64-unknown-linux-gnu-all: package-x86_64-unknown-linux-gnu package-deb-x86_64-unknown-linux-gnu package-rpm-x86_64-unknown-linux-gnu # Build all x86_64 GNU packages
@@ -500,124 +421,10 @@ package-armv7-unknown-linux-gnueabihf-all: package-armv7-unknown-linux-gnueabihf
 .PHONY: package-arm-unknown-linux-gnueabi-all
 package-arm-unknown-linux-gnueabi-all: package-arm-unknown-linux-gnueabi package-deb-arm-gnu  # Build all arm-unknown-linux-gnueabihf GNU packages
 
-.PHONY: package-x86_64-unknown-linux-gnu
-package-x86_64-unknown-linux-gnu: target/artifacts/vector-${VERSION}-x86_64-unknown-linux-gnu.tar.gz ## Build an archive suitable for the `x86_64-unknown-linux-gnu` triple.
-	@echo "Output to ${<}."
-
-.PHONY: package-x86_64-unknown-linux-musl
-package-x86_64-unknown-linux-musl: target/artifacts/vector-${VERSION}-x86_64-unknown-linux-musl.tar.gz ## Build an archive suitable for the `x86_64-unknown-linux-musl` triple.
-	@echo "Output to ${<}."
-
-.PHONY: package-aarch64-unknown-linux-musl
-package-aarch64-unknown-linux-musl: target/artifacts/vector-${VERSION}-aarch64-unknown-linux-musl.tar.gz ## Build an archive suitable for the `aarch64-unknown-linux-musl` triple.
-	@echo "Output to ${<}."
-
-.PHONY: package-aarch64-unknown-linux-gnu
-package-aarch64-unknown-linux-gnu: target/artifacts/vector-${VERSION}-aarch64-unknown-linux-gnu.tar.gz ## Build an archive suitable for the `aarch64-unknown-linux-gnu` triple.
-	@echo "Output to ${<}."
-
-.PHONY: package-armv7-unknown-linux-gnueabihf
-package-armv7-unknown-linux-gnueabihf: target/artifacts/vector-${VERSION}-armv7-unknown-linux-gnueabihf.tar.gz ## Build an archive suitable for the `armv7-unknown-linux-gnueabihf` triple.
-	@echo "Output to ${<}."
-
-.PHONY: package-armv7-unknown-linux-musleabihf
-package-armv7-unknown-linux-musleabihf: target/artifacts/vector-${VERSION}-armv7-unknown-linux-musleabihf.tar.gz ## Build an archive suitable for the `armv7-unknown-linux-musleabihf triple.
-	@echo "Output to ${<}."
-
-.PHONY: package-arm-unknown-linux-gnueabi
-package-arm-unknown-linux-gnueabi: target/artifacts/vector-${VERSION}-arm-unknown-linux-gnueabi.tar.gz ## Build an archive suitable for the `arm-unknown-linux-gnueabi` triple.
-	@echo "Output to ${<}."
-
-.PHONY: package-arm-unknown-linux-musleabi
-package-arm-unknown-linux-musleabi: target/artifacts/vector-${VERSION}-arm-unknown-linux-musleabi.tar.gz ## Build an archive suitable for the `arm-unknown-linux-musleabi` triple.
-	@echo "Output to ${<}."
-
-# debs
-
-.PHONY: package-deb-x86_64-unknown-linux-gnu
-package-deb-x86_64-unknown-linux-gnu: package-x86_64-unknown-linux-gnu ## Build the x86_64 GNU deb package
-	$(CONTAINER_TOOL) run -v  $(PWD):/git/vectordotdev/vector/ -e TARGET=x86_64-unknown-linux-gnu -e VECTOR_VERSION $(ENVIRONMENT_UPSTREAM) cargo vdev package deb
-
-.PHONY: package-deb-x86_64-unknown-linux-musl
-package-deb-x86_64-unknown-linux-musl: package-x86_64-unknown-linux-musl ## Build the x86_64 GNU deb package
-	$(CONTAINER_TOOL) run -v  $(PWD):/git/vectordotdev/vector/ -e TARGET=x86_64-unknown-linux-musl -e VECTOR_VERSION $(ENVIRONMENT_UPSTREAM) cargo vdev package deb
-
-.PHONY: package-deb-aarch64
-package-deb-aarch64: package-aarch64-unknown-linux-gnu ## Build the aarch64 deb package
-	$(CONTAINER_TOOL) run -v  $(PWD):/git/vectordotdev/vector/ -e TARGET=aarch64-unknown-linux-gnu -e VECTOR_VERSION $(ENVIRONMENT_UPSTREAM) cargo vdev package deb
-
-.PHONY: package-deb-armv7-gnu
-package-deb-armv7-gnu: package-armv7-unknown-linux-gnueabihf ## Build the armv7-unknown-linux-gnueabihf deb package
-	$(CONTAINER_TOOL) run -v  $(PWD):/git/vectordotdev/vector/ -e TARGET=armv7-unknown-linux-gnueabihf -e VECTOR_VERSION $(ENVIRONMENT_UPSTREAM) cargo vdev package deb
-
-.PHONY: package-deb-arm-gnu
-package-deb-arm-gnu: package-arm-unknown-linux-gnueabi ## Build the arm-unknown-linux-gnueabi deb package
-	$(CONTAINER_TOOL) run -v  $(PWD):/git/vectordotdev/vector/ -e TARGET=arm-unknown-linux-gnueabi -e VECTOR_VERSION $(ENVIRONMENT_UPSTREAM) cargo vdev package deb
-
-# rpms
-
-.PHONY: package-rpm-x86_64-unknown-linux-gnu
-package-rpm-x86_64-unknown-linux-gnu: package-x86_64-unknown-linux-gnu ## Build the x86_64 rpm package
-	$(CONTAINER_TOOL) run -v  $(PWD):/git/vectordotdev/vector/ -e TARGET=x86_64-unknown-linux-gnu -e VECTOR_VERSION $(ENVIRONMENT_UPSTREAM) cargo vdev package rpm
-
-.PHONY: package-rpm-x86_64-unknown-linux-musl
-package-rpm-x86_64-unknown-linux-musl: package-x86_64-unknown-linux-musl ## Build the x86_64 musl rpm package
-	$(CONTAINER_TOOL) run -v  $(PWD):/git/vectordotdev/vector/ -e TARGET=x86_64-unknown-linux-musl -e VECTOR_VERSION $(ENVIRONMENT_UPSTREAM) cargo vdev package rpm
-
-.PHONY: package-rpm-aarch64
-package-rpm-aarch64: package-aarch64-unknown-linux-gnu ## Build the aarch64 rpm package
-	$(CONTAINER_TOOL) run -v  $(PWD):/git/vectordotdev/vector/ -e TARGET=aarch64-unknown-linux-gnu -e VECTOR_VERSION $(ENVIRONMENT_UPSTREAM) cargo vdev package rpm
-
-.PHONY: package-rpm-armv7hl-gnu
-package-rpm-armv7hl-gnu: package-armv7-unknown-linux-gnueabihf ## Build the armv7hl-unknown-linux-gnueabihf rpm package
-	$(CONTAINER_TOOL) run -v  $(PWD):/git/vectordotdev/vector/ -e TARGET=armv7-unknown-linux-gnueabihf -e ARCH=armv7hl -e VECTOR_VERSION $(ENVIRONMENT_UPSTREAM) cargo vdev package rpm
-
-##@ Releasing
-
-.PHONY: release
-release: release-prepare generate release-commit ## Release a new Vector version
-
-.PHONY: release-commit
-release-commit: ## Commits release changes
-	@cargo vdev release commit
-
-.PHONY: release-docker
-release-docker: ## Release to Docker Hub
-	@cargo vdev release docker
-
-.PHONY: release-github
-release-github: ## Release to GitHub
-	@cargo vdev release github
-
-.PHONY: release-homebrew
-release-homebrew: ## Release to vectordotdev Homebrew tap
-	@cargo vdev release homebrew
-
-.PHONY: release-prepare
-release-prepare: ## Prepares the release with metadata and highlights
-	@cargo vdev release prepare
-
-.PHONY: release-push
-release-push: ## Push new Vector version
-	@cargo vdev release push
-
-.PHONY: release-s3
-release-s3: ## Release artifacts to S3
-	@cargo vdev release s3
 
 .PHONY: sha256sum
 sha256sum: ## Generate SHA256 checksums of CI artifacts
 	scripts/checksum.sh
-
-##@ Vector Remap Language
-
-.PHONY: test-vrl
-test-vrl: ## Run the VRL test suite
-	@cargo vdev test-vrl
-
-.PHONY: compile-vrl-wasm
-compile-vrl-wasm: ## Compile VRL crates to WASM target
-	cargo vdev build vrl-wasm
 
 ##@ Utility
 
@@ -629,24 +436,9 @@ clean: environment-clean ## Clean everything
 fmt: ## Format code
 	${MAYBE_ENVIRONMENT_EXEC} cargo fmt
 
-.PHONY: generate-kubernetes-manifests
-generate-kubernetes-manifests: ## Generate Kubernetes manifests from latest Helm chart
-	cargo vdev build manifests
-
-.PHONY: generate-component-docs
-generate-component-docs: ## Generate per-component Cue docs from the configuration schema.
-	${MAYBE_ENVIRONMENT_EXEC} cargo build $(if $(findstring true,$(CI)),--quiet,)
-	target/debug/vector generate-schema > /tmp/vector-config-schema.json 2>/dev/null
-	${MAYBE_ENVIRONMENT_EXEC} cargo vdev build component-docs /tmp/vector-config-schema.json \
-		$(if $(findstring true,$(CI)),>/dev/null,)
-
 .PHONY: signoff
 signoff: ## Signsoff all previous commits since branch creation
 	scripts/signoff.sh
-
-.PHONY: version
-version: ## Get the current Vector version
-	@cargo vdev version
 
 .PHONY: git-hooks
 git-hooks: ## Add Vector-local git hooks for commit sign-off
@@ -656,7 +448,3 @@ git-hooks: ## Add Vector-local git hooks for commit sign-off
 cargo-install-%: override TOOL = $(@:cargo-install-%=%)
 cargo-install-%:
 	$(if $(findstring true,$(AUTOINSTALL)),cargo install ${TOOL} --quiet; cargo clean,)
-
-.PHONY: ci-generate-publish-metadata
-ci-generate-publish-metadata: ## Generates the necessary metadata required for building/publishing Vector.
-	cargo vdev build publish-metadata
