@@ -19,7 +19,7 @@ pub use decoding::{
 };
 pub use encoding::{
     BytesEncoder, BytesEncoderConfig, CharacterDelimitedEncoder, CharacterDelimitedEncoderConfig,
-    CsvSerializer, CsvSerializerConfig, JsonSerializer,
+    JsonSerializer,
     JsonSerializerConfig, LengthDelimitedEncoder, LengthDelimitedEncoderConfig, LogfmtSerializer,
     LogfmtSerializerConfig, NativeJsonSerializer, NativeJsonSerializerConfig, NativeSerializer,
     NativeSerializerConfig, NewlineDelimitedEncoder, NewlineDelimitedEncoderConfig,

@@ -8,7 +8,6 @@ publish = false
 [dependencies]
 bytes = { version = "1", default-features = false }
 chrono.workspace = true
-csv-core = { version = "0.1.12", default-features = false }
 derivative = { version = "2", default-features = false }
 dyn-clone = { version = "1", default-features = false }
 flate2.workspace = true

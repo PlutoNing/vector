@@ -110,8 +110,7 @@ impl EncodingConfigWithFraming {
             }
             (
                 None,
-                Serializer::Csv(_)
-                | Serializer::Logfmt(_)
+                Serializer::Logfmt(_)
                 | Serializer::NativeJson(_)
                 | Serializer::RawMessage(_)
                 | Serializer::Text(_), /* host metric到Console是这个路径 */

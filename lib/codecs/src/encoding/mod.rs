@@ -8,7 +8,7 @@ use std::fmt::Debug;
 
 use bytes::BytesMut;
 pub use format::{
-    CsvSerializer, CsvSerializerConfig, JsonSerializer, JsonSerializerConfig, JsonSerializerOptions,
+    JsonSerializer, JsonSerializerConfig, JsonSerializerOptions,
     LogfmtSerializer,TextSerializerConfig,
     LogfmtSerializerConfig, NativeJsonSerializer, NativeJsonSerializerConfig, NativeSerializer,
     NativeSerializerConfig,RawMessageSerializer, RawMessageSerializerConfig, TextSerializer,
@@ -174,12 +174,6 @@ impl tokio_util::codec::Encoder<()> for Framer {
 #[serde(tag = "codec", rename_all = "snake_case")]
 #[configurable(metadata(docs::enum_tag_description = "The codec to use for encoding events."))]
 pub enum SerializerConfig {
-    /// Encodes an event as a CSV message.
-    ///
-    /// This codec must be configured with fields to encode.
-    ///
-    Csv(CsvSerializerConfig),
-
     /// Encodes an event as [JSON][json].
     ///
     /// [json]: https://www.json.org/
@@ -226,12 +220,6 @@ pub enum SerializerConfig {
     Text(TextSerializerConfig),
 }
 
-impl From<CsvSerializerConfig> for SerializerConfig {
-    fn from(config: CsvSerializerConfig) -> Self {
-        Self::Csv(config)
-    }
-}
-
 impl From<JsonSerializerConfig> for SerializerConfig {
     fn from(config: JsonSerializerConfig) -> Self {
         Self::Json(config)
@@ -272,7 +260,6 @@ impl SerializerConfig {
     /// Build the `Serializer` from this configuration.
     pub fn build(&self) -> Result<Serializer, Box<dyn std::error::Error + Send + Sync + 'static>> {
         match self {
-            SerializerConfig::Csv(config) => Ok(Serializer::Csv(config.build()?)),
             SerializerConfig::Json(config) => Ok(Serializer::Json(config.build())),
             SerializerConfig::Logfmt => Ok(Serializer::Logfmt(LogfmtSerializerConfig.build())),
             SerializerConfig::Native => Ok(Serializer::Native(NativeSerializerConfig.build())),
@@ -292,8 +279,7 @@ impl SerializerConfig {
             SerializerConfig::Native => {
                 FramingConfig::LengthDelimited(LengthDelimitedEncoderConfig::default())
             }
-            SerializerConfig::Csv(_)
-            | SerializerConfig::Json(_)
+            SerializerConfig::Json(_)
             | SerializerConfig::Logfmt
             | SerializerConfig::NativeJson
             | SerializerConfig::RawMessage
@@ -304,7 +290,6 @@ impl SerializerConfig {
     /// The data type of events that are accepted by this `Serializer`.
     pub fn input_type(&self) -> DataType {
         match self {
-            SerializerConfig::Csv(config) => config.input_type(),
             SerializerConfig::Json(config) => config.input_type(),
             SerializerConfig::Logfmt => LogfmtSerializerConfig.input_type(),
             SerializerConfig::Native => NativeSerializerConfig.input_type(),
@@ -317,7 +302,6 @@ impl SerializerConfig {
     /// The schema required by the serializer.
     pub fn schema_requirement(&self) -> schema::Requirement {
         match self {
-            SerializerConfig::Csv(config) => config.schema_requirement(),
             SerializerConfig::Json(config) => config.schema_requirement(),
             SerializerConfig::Logfmt => LogfmtSerializerConfig.schema_requirement(),
             SerializerConfig::Native => NativeSerializerConfig.schema_requirement(),
@@ -331,8 +315,6 @@ impl SerializerConfig {
 /// Serialize structured events as bytes.
 #[derive(Debug, Clone)]
 pub enum Serializer {
-    /// Uses a `CsvSerializer` for serialization.
-    Csv(CsvSerializer),
     /// Uses a `JsonSerializer` for serialization.
     Json(JsonSerializer),
     /// Uses a `LogfmtSerializer` for serialization.
@@ -352,8 +334,7 @@ impl Serializer {
     pub fn supports_json(&self) -> bool {
         match self {
             Serializer::Json(_) | Serializer::NativeJson(_) => true,
-            Serializer::Csv(_)
-            | Serializer::Logfmt(_)
+            Serializer::Logfmt(_)
             | Serializer::Text(_)
             | Serializer::Native(_)
             | Serializer::RawMessage(_) => false,
@@ -370,20 +351,13 @@ impl Serializer {
         match self {
             Serializer::Json(serializer) => serializer.to_json_value(event),
             Serializer::NativeJson(serializer) => serializer.to_json_value(event),
-            Serializer::Csv(_)
-            | Serializer::Logfmt(_)
+            Serializer::Logfmt(_)
             | Serializer::Text(_)
             | Serializer::Native(_)
             | Serializer::RawMessage(_) => {
                 panic!("Serializer does not support JSON")
             }
         }
-    }
-}
-
-impl From<CsvSerializer> for Serializer {
-    fn from(serializer: CsvSerializer) -> Self {
-        Self::Csv(serializer)
     }
 }
 
@@ -428,7 +402,6 @@ impl tokio_util::codec::Encoder<Event> for Serializer {
 
     fn encode(&mut self, event: Event, buffer: &mut BytesMut) -> Result<(), Self::Error> {
         match self {
-            Serializer::Csv(serializer) => serializer.encode(event, buffer),
             Serializer::Json(serializer) => serializer.encode(event, buffer),
             Serializer::Logfmt(serializer) => serializer.encode(event, buffer),
             Serializer::Native(serializer) => serializer.encode(event, buffer),

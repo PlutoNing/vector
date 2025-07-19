@@ -4,7 +4,6 @@
 #![deny(missing_docs)]
 
 mod common;
-mod csv;
 mod json;
 mod logfmt;
 mod native;
@@ -14,7 +13,6 @@ mod text;
 
 use std::fmt::Debug;
 
-pub use self::csv::{CsvSerializer, CsvSerializerConfig};
 use dyn_clone::DynClone;
 pub use json::{JsonSerializer, JsonSerializerConfig, JsonSerializerOptions};
 pub use logfmt::{LogfmtSerializer, LogfmtSerializerConfig};

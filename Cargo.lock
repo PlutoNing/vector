@@ -1895,7 +1895,6 @@ version = "0.1.0"
 dependencies = [
  "bytes 1.10.1",
  "chrono",
- "csv-core",
  "derivative",
  "dyn-clone",
  "flate2",
