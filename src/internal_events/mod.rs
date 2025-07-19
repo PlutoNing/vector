@@ -1,5 +1,4 @@
 #![allow(missing_docs)]
-pub mod prelude;
 
 mod adaptive_concurrency;
 mod aggregate;
@@ -12,8 +11,6 @@ mod conditions;
 #[cfg(feature = "sources-demo_logs")]
 mod demo_logs;
 mod encoding_transcode;
-#[cfg(feature = "sources-exec")]
-mod exec;
 mod heartbeat;
 #[cfg(feature = "sources-host_metrics")]
 mod host_metrics;
@@ -42,8 +39,6 @@ mod windows;
 
 #[cfg(feature = "sources-demo_logs")]
 pub(crate) use self::demo_logs::*;
-#[cfg(feature = "sources-exec")]
-pub(crate) use self::exec::*;
 #[cfg(any(
     feature = "sinks-file",
 ))]
