@@ -33,6 +33,15 @@ sinks:
     type: "console"
     encoding:
       codec: "text"
+  my_sink_id:
+    type: file
+    inputs:
+      - my_source_id
+    path: /tmp/vector-%Y-%m-%d.log
+    # compression: gzip
+    compression: none
+    encoding:
+      codec: json
 sources:
   my_source_id:
     type: host_metrics
