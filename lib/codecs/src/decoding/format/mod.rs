@@ -5,21 +5,11 @@
 
 mod bytes;
 mod json;
-mod native;
-mod native_json;
-#[cfg(feature = "syslog")]
-mod syslog;
 
 use ::bytes::Bytes;
 use dyn_clone::DynClone;
 pub use json::{JsonDeserializer, JsonDeserializerConfig, JsonDeserializerOptions};
-pub use native::{NativeDeserializer, NativeDeserializerConfig};
-pub use native_json::{
-    NativeJsonDeserializer, NativeJsonDeserializerConfig, NativeJsonDeserializerOptions,
-};
 use smallvec::SmallVec;
-#[cfg(feature = "syslog")]
-pub use syslog::{SyslogDeserializer, SyslogDeserializerConfig, SyslogDeserializerOptions};
 use vector_core::config::LogNamespace;
 use vector_core::event::Event;
 

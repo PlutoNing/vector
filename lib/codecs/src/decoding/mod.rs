@@ -10,8 +10,6 @@ pub use error::StreamDecodingError;
 pub use format::{
     BoxedDeserializer, BytesDeserializer, BytesDeserializerConfig,
     JsonDeserializer, JsonDeserializerConfig, JsonDeserializerOptions,
-    NativeDeserializer, NativeDeserializerConfig, NativeJsonDeserializer,
-    NativeJsonDeserializerConfig, NativeJsonDeserializerOptions,
 };
 #[cfg(feature = "syslog")]
 pub use format::{SyslogDeserializer, SyslogDeserializerConfig, SyslogDeserializerOptions};
@@ -198,36 +196,6 @@ pub enum DeserializerConfig {
     ///
     /// [json]: https://www.json.org/
     Json(JsonDeserializerConfig),
-
-    #[cfg(feature = "syslog")]
-    /// Decodes the raw bytes as a Syslog message.
-    ///
-    /// Decodes either as the [RFC 3164][rfc3164]-style format ("old" style) or the
-    /// [RFC 5424][rfc5424]-style format ("new" style, includes structured data).
-    ///
-    /// [rfc3164]: https://www.ietf.org/rfc/rfc3164.txt
-    /// [rfc5424]: https://www.ietf.org/rfc/rfc5424.txt
-    Syslog(SyslogDeserializerConfig),
-
-    /// Decodes the raw bytes as [native Protocol Buffers format][vector_native_protobuf].
-    ///
-    /// This decoder can output all types of events (logs, metrics, traces).
-    ///
-    /// This codec is **[experimental][experimental]**.
-    ///
-    /// [vector_native_protobuf]: https://github.com/vectordotdev/vector/blob/master/lib/vector-core/proto/event.proto
-    /// [experimental]: https://vector.dev/highlights/2022-03-31-native-event-codecs
-    Native,
-
-    /// Decodes the raw bytes as [native JSON format][vector_native_json].
-    ///
-    /// This decoder can output all types of events (logs, metrics, traces).
-    ///
-    /// This codec is **[experimental][experimental]**.
-    ///
-    /// [vector_native_json]: https://github.com/vectordotdev/vector/blob/master/lib/codecs/tests/data/native_encoding/schema.cue
-    /// [experimental]: https://vector.dev/highlights/2022-03-31-native-event-codecs
-    NativeJson(NativeJsonDeserializerConfig),
 }
 
 impl From<BytesDeserializerConfig> for DeserializerConfig {
@@ -242,51 +210,22 @@ impl From<JsonDeserializerConfig> for DeserializerConfig {
     }
 }
 
-#[cfg(feature = "syslog")]
-impl From<SyslogDeserializerConfig> for DeserializerConfig {
-    fn from(config: SyslogDeserializerConfig) -> Self {
-        Self::Syslog(config)
-    }
-}
-
-impl From<NativeDeserializerConfig> for DeserializerConfig {
-    fn from(_: NativeDeserializerConfig) -> Self {
-        Self::Native
-    }
-}
-
-impl From<NativeJsonDeserializerConfig> for DeserializerConfig {
-    fn from(config: NativeJsonDeserializerConfig) -> Self {
-        Self::NativeJson(config)
-    }
-}
-
 impl DeserializerConfig {
     /// Build the `Deserializer` from this configuration.
     pub fn build(&self) -> vector_common::Result<Deserializer> {
         match self {
             DeserializerConfig::Bytes => Ok(Deserializer::Bytes(BytesDeserializerConfig.build())),
             DeserializerConfig::Json(config) => Ok(Deserializer::Json(config.build())),
-            #[cfg(feature = "syslog")]
-            DeserializerConfig::Syslog(config) => Ok(Deserializer::Syslog(config.build())),
-            DeserializerConfig::Native => {
-                Ok(Deserializer::Native(NativeDeserializerConfig.build()))
-            }
-            DeserializerConfig::NativeJson(config) => Ok(Deserializer::NativeJson(config.build())),
         }
     }
 
     /// Return an appropriate default framer for the given deserializer
     pub fn default_stream_framing(&self) -> FramingConfig {
         match self {
-            DeserializerConfig::Native => FramingConfig::LengthDelimited(Default::default()),
             DeserializerConfig::Bytes
-            | DeserializerConfig::Json(_)
-            | DeserializerConfig::NativeJson(_) => {
+            | DeserializerConfig::Json(_) => {
                 FramingConfig::NewlineDelimited(Default::default())
             }
-            #[cfg(feature = "syslog")]
-            DeserializerConfig::Syslog(_) => FramingConfig::NewlineDelimited(Default::default()),
         }
     }
 
@@ -302,10 +241,6 @@ impl DeserializerConfig {
         match self {
             DeserializerConfig::Bytes => BytesDeserializerConfig.output_type(),
             DeserializerConfig::Json(config) => config.output_type(),
-            #[cfg(feature = "syslog")]
-            DeserializerConfig::Syslog(config) => config.output_type(),
-            DeserializerConfig::Native => NativeDeserializerConfig.output_type(),
-            DeserializerConfig::NativeJson(config) => config.output_type(),
         }
     }
 
@@ -314,10 +249,6 @@ impl DeserializerConfig {
         match self {
             DeserializerConfig::Bytes => BytesDeserializerConfig.schema_definition(log_namespace),
             DeserializerConfig::Json(config) => config.schema_definition(log_namespace),
-            #[cfg(feature = "syslog")]
-            DeserializerConfig::Syslog(config) => config.schema_definition(log_namespace),
-            DeserializerConfig::Native => NativeDeserializerConfig.schema_definition(log_namespace),
-            DeserializerConfig::NativeJson(config) => config.schema_definition(log_namespace),
         }
     }
 
@@ -325,12 +256,11 @@ impl DeserializerConfig {
     pub const fn content_type(&self, framer: &FramingConfig) -> &'static str {
         match (&self, framer) {
             (
-                DeserializerConfig::Json(_) | DeserializerConfig::NativeJson(_),
+                DeserializerConfig::Json(_),
                 FramingConfig::NewlineDelimited(_),
             ) => "application/x-ndjson",
             (
-                DeserializerConfig::Json(_)
-                | DeserializerConfig::NativeJson(_),
+                DeserializerConfig::Json(_),
                 FramingConfig::CharacterDelimited(CharacterDelimitedDecoderConfig {
                     character_delimited:
                         CharacterDelimitedDecoderOptions {
@@ -339,12 +269,8 @@ impl DeserializerConfig {
                         },
                 }),
             ) => "application/json",
-            (DeserializerConfig::Native, _) => {
-                "application/octet-stream"
-            }
             (
                 DeserializerConfig::Json(_)
-                | DeserializerConfig::NativeJson(_)
                 | DeserializerConfig::Bytes,
                 _,
             ) => "text/plain",
@@ -361,13 +287,6 @@ pub enum Deserializer {
     Bytes(BytesDeserializer),
     /// Uses a `JsonDeserializer` for deserialization.
     Json(JsonDeserializer),
-    #[cfg(feature = "syslog")]
-    /// Uses a `SyslogDeserializer` for deserialization.
-    Syslog(SyslogDeserializer),
-    /// Uses a `NativeDeserializer` for deserialization.
-    Native(NativeDeserializer),
-    /// Uses a `NativeDeserializer` for deserialization.
-    NativeJson(NativeJsonDeserializer),
     /// Uses an opaque `Deserializer` implementation for deserialization.
     Boxed(BoxedDeserializer),
 }
@@ -381,10 +300,6 @@ impl format::Deserializer for Deserializer {
         match self {
             Deserializer::Bytes(deserializer) => deserializer.parse(bytes, log_namespace),
             Deserializer::Json(deserializer) => deserializer.parse(bytes, log_namespace),
-            #[cfg(feature = "syslog")]
-            Deserializer::Syslog(deserializer) => deserializer.parse(bytes, log_namespace),
-            Deserializer::Native(deserializer) => deserializer.parse(bytes, log_namespace),
-            Deserializer::NativeJson(deserializer) => deserializer.parse(bytes, log_namespace),
             Deserializer::Boxed(deserializer) => deserializer.parse(bytes, log_namespace),
         }
     }

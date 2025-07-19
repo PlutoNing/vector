@@ -1,7 +1,7 @@
 use crate::codecs::Transformer;
 use vector_lib::codecs::{
     encoding::{Framer, FramingConfig, Serializer, SerializerConfig},
-    CharacterDelimitedEncoder, LengthDelimitedEncoder, NewlineDelimitedEncoder,
+    CharacterDelimitedEncoder,  NewlineDelimitedEncoder,
 };
 use vector_lib::configurable::configurable_component;
 /* 比如说sink file时, 构建encoder config */
@@ -105,15 +105,8 @@ impl EncodingConfigWithFraming {
                 SinkType::StreamBased => NewlineDelimitedEncoder::default().into(),
                 SinkType::MessageBased => CharacterDelimitedEncoder::new(b',').into(),
             },
-            (None, Serializer::Native(_)) => {
-                LengthDelimitedEncoder::default().into()
-            }
             (
-                None,
-                Serializer::Logfmt(_)
-                | Serializer::NativeJson(_)
-                | Serializer::RawMessage(_)
-                | Serializer::Text(_), /* host metric到Console是这个路径 */
+                None,Serializer::Text(_), /* host metric到Console是这个路径 */
             ) => NewlineDelimitedEncoder::default().into(),
         };
 

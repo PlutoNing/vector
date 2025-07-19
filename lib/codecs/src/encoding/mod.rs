@@ -9,9 +9,7 @@ use std::fmt::Debug;
 use bytes::BytesMut;
 pub use format::{
     JsonSerializer, JsonSerializerConfig, JsonSerializerOptions,
-    LogfmtSerializer,TextSerializerConfig,
-    LogfmtSerializerConfig, NativeJsonSerializer, NativeJsonSerializerConfig, NativeSerializer,
-    NativeSerializerConfig,RawMessageSerializer, RawMessageSerializerConfig, TextSerializer,
+    TextSerializerConfig,TextSerializer,
 };
 pub use framing::{
     BoxedFramer, BoxedFramingError, BytesEncoder, BytesEncoderConfig, CharacterDelimitedEncoder,
@@ -178,37 +176,6 @@ pub enum SerializerConfig {
     ///
     /// [json]: https://www.json.org/
     Json(JsonSerializerConfig),
-
-    /// Encodes an event as a [logfmt][logfmt] message.
-    ///
-    /// [logfmt]: https://brandur.org/logfmt
-    Logfmt,
-
-    /// Encodes an event in the [native Protocol Buffers format][vector_native_protobuf].
-    ///
-    /// This codec is **[experimental][experimental]**.
-    ///
-    /// [vector_native_protobuf]: https://github.com/vectordotdev/vector/blob/master/lib/vector-core/proto/event.proto
-    /// [experimental]: https://vector.dev/highlights/2022-03-31-native-event-codecs
-    Native,
-
-    /// Encodes an event in the [native JSON format][vector_native_json].
-    ///
-    /// This codec is **[experimental][experimental]**.
-    ///
-    /// [vector_native_json]: https://github.com/vectordotdev/vector/blob/master/lib/codecs/tests/data/native_encoding/schema.cue
-    /// [experimental]: https://vector.dev/highlights/2022-03-31-native-event-codecs
-    NativeJson,
-
-    /// No encoding.
-    ///
-    /// This encoding uses the `message` field of a log event.
-    ///
-    /// Be careful if you are modifying your log events (for example, by using a `remap`
-    /// transform) and removing the message field while doing additional parsing on it, as this
-    /// could lead to the encoding emitting empty strings for the given event.
-    RawMessage,
-
     /// Plain text encoding.
     ///
     /// This encoding uses the `message` field of a log event. For metrics, it uses an
@@ -226,30 +193,6 @@ impl From<JsonSerializerConfig> for SerializerConfig {
     }
 }
 
-impl From<LogfmtSerializerConfig> for SerializerConfig {
-    fn from(_: LogfmtSerializerConfig) -> Self {
-        Self::Logfmt
-    }
-}
-
-impl From<NativeSerializerConfig> for SerializerConfig {
-    fn from(_: NativeSerializerConfig) -> Self {
-        Self::Native
-    }
-}
-
-impl From<NativeJsonSerializerConfig> for SerializerConfig {
-    fn from(_: NativeJsonSerializerConfig) -> Self {
-        Self::NativeJson
-    }
-}
-
-impl From<RawMessageSerializerConfig> for SerializerConfig {
-    fn from(_: RawMessageSerializerConfig) -> Self {
-        Self::RawMessage
-    }
-}
-
 impl From<TextSerializerConfig> for SerializerConfig {
     fn from(config: TextSerializerConfig) -> Self {
         Self::Text(config)
@@ -261,14 +204,6 @@ impl SerializerConfig {
     pub fn build(&self) -> Result<Serializer, Box<dyn std::error::Error + Send + Sync + 'static>> {
         match self {
             SerializerConfig::Json(config) => Ok(Serializer::Json(config.build())),
-            SerializerConfig::Logfmt => Ok(Serializer::Logfmt(LogfmtSerializerConfig.build())),
-            SerializerConfig::Native => Ok(Serializer::Native(NativeSerializerConfig.build())),
-            SerializerConfig::NativeJson => {
-                Ok(Serializer::NativeJson(NativeJsonSerializerConfig.build()))
-            }
-            SerializerConfig::RawMessage => {
-                Ok(Serializer::RawMessage(RawMessageSerializerConfig.build()))
-            }
             SerializerConfig::Text(config) => Ok(Serializer::Text(config.build())),
         }
     }
@@ -276,13 +211,7 @@ impl SerializerConfig {
     /// Return an appropriate default framer for the given serializer.
     pub fn default_stream_framing(&self) -> FramingConfig {
         match self {
-            SerializerConfig::Native => {
-                FramingConfig::LengthDelimited(LengthDelimitedEncoderConfig::default())
-            }
             SerializerConfig::Json(_)
-            | SerializerConfig::Logfmt
-            | SerializerConfig::NativeJson
-            | SerializerConfig::RawMessage
             | SerializerConfig::Text(_) => FramingConfig::NewlineDelimited
         }
     }
@@ -291,10 +220,6 @@ impl SerializerConfig {
     pub fn input_type(&self) -> DataType {
         match self {
             SerializerConfig::Json(config) => config.input_type(),/* host to file sink */
-            SerializerConfig::Logfmt => LogfmtSerializerConfig.input_type(),
-            SerializerConfig::Native => NativeSerializerConfig.input_type(),
-            SerializerConfig::NativeJson => NativeJsonSerializerConfig.input_type(),
-            SerializerConfig::RawMessage => RawMessageSerializerConfig.input_type(),
             SerializerConfig::Text(config) => config.input_type(),
         }
     }
@@ -303,10 +228,6 @@ impl SerializerConfig {
     pub fn schema_requirement(&self) -> schema::Requirement {
         match self {
             SerializerConfig::Json(config) => config.schema_requirement(),
-            SerializerConfig::Logfmt => LogfmtSerializerConfig.schema_requirement(),
-            SerializerConfig::Native => NativeSerializerConfig.schema_requirement(),
-            SerializerConfig::NativeJson => NativeJsonSerializerConfig.schema_requirement(),
-            SerializerConfig::RawMessage => RawMessageSerializerConfig.schema_requirement(),
             SerializerConfig::Text(config) => config.schema_requirement(),
         }
     }
@@ -317,14 +238,6 @@ impl SerializerConfig {
 pub enum Serializer {
     /// Uses a `JsonSerializer` for serialization.
     Json(JsonSerializer),
-    /// Uses a `LogfmtSerializer` for serialization.
-    Logfmt(LogfmtSerializer),
-    /// Uses a `NativeSerializer` for serialization.
-    Native(NativeSerializer),
-    /// Uses a `NativeJsonSerializer` for serialization.
-    NativeJson(NativeJsonSerializer),
-    /// Uses a `RawMessageSerializer` for serialization.
-    RawMessage(RawMessageSerializer),
     /// Uses a `TextSerializer` for serialization.
     Text(TextSerializer),
 }
@@ -333,11 +246,8 @@ impl Serializer {
     /// Check if the serializer supports encoding an event to JSON via `Serializer::to_json_value`.
     pub fn supports_json(&self) -> bool {
         match self {
-            Serializer::Json(_) | Serializer::NativeJson(_) => true,
-            Serializer::Logfmt(_)
-            | Serializer::Text(_)
-            | Serializer::Native(_)
-            | Serializer::RawMessage(_) => false,
+            Serializer::Json(_) => true,
+            Serializer::Text(_) => false,
         }
     }
 
@@ -350,11 +260,7 @@ impl Serializer {
     pub fn to_json_value(&self, event: Event) -> Result<serde_json::Value, vector_common::Error> {
         match self {
             Serializer::Json(serializer) => serializer.to_json_value(event),
-            Serializer::NativeJson(serializer) => serializer.to_json_value(event),
-            Serializer::Logfmt(_)
-            | Serializer::Text(_)
-            | Serializer::Native(_)
-            | Serializer::RawMessage(_) => {
+            Serializer::Text(_) => {
                 panic!("Serializer does not support JSON")
             }
         }
@@ -367,29 +273,6 @@ impl From<JsonSerializer> for Serializer {
     }
 }
 
-impl From<LogfmtSerializer> for Serializer {
-    fn from(serializer: LogfmtSerializer) -> Self {
-        Self::Logfmt(serializer)
-    }
-}
-
-impl From<NativeSerializer> for Serializer {
-    fn from(serializer: NativeSerializer) -> Self {
-        Self::Native(serializer)
-    }
-}
-
-impl From<NativeJsonSerializer> for Serializer {
-    fn from(serializer: NativeJsonSerializer) -> Self {
-        Self::NativeJson(serializer)
-    }
-}
-
-impl From<RawMessageSerializer> for Serializer {
-    fn from(serializer: RawMessageSerializer) -> Self {
-        Self::RawMessage(serializer)
-    }
-}
 
 impl From<TextSerializer> for Serializer {
     fn from(serializer: TextSerializer) -> Self {
@@ -403,10 +286,6 @@ impl tokio_util::codec::Encoder<Event> for Serializer {
     fn encode(&mut self, event: Event, buffer: &mut BytesMut) -> Result<(), Self::Error> {
         match self {
             Serializer::Json(serializer) => serializer.encode(event, buffer),
-            Serializer::Logfmt(serializer) => serializer.encode(event, buffer),
-            Serializer::Native(serializer) => serializer.encode(event, buffer),
-            Serializer::NativeJson(serializer) => serializer.encode(event, buffer),
-            Serializer::RawMessage(serializer) => serializer.encode(event, buffer),
             Serializer::Text(serializer) => serializer.encode(event, buffer),
         }
     }

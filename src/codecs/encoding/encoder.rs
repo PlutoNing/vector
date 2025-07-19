@@ -86,7 +86,7 @@ impl Encoder<Framer> {
         match (&self.framer, &self.serializer) {
             (
                 Framer::CharacterDelimited(CharacterDelimitedEncoder { delimiter: b',' }),
-                Serializer::Json(_) | Serializer::NativeJson(_),
+                Serializer::Json(_),
             ) => b"[",
             _ => &[],
         }
@@ -97,7 +97,7 @@ impl Encoder<Framer> {
         match (&self.framer, &self.serializer) {
             (
                 Framer::CharacterDelimited(CharacterDelimitedEncoder { delimiter: b',' }),
-                Serializer::Json(_) | Serializer::NativeJson(_),
+                Serializer::Json(_) ,
             ) => b"]",
             _ => &[],
         }
@@ -106,19 +106,15 @@ impl Encoder<Framer> {
     /// Get the HTTP content type.
     pub const fn content_type(&self) -> &'static str {
         match (&self.serializer, &self.framer) {
-            (Serializer::Json(_) | Serializer::NativeJson(_), Framer::NewlineDelimited(_)) => {
+            (Serializer::Json(_), Framer::NewlineDelimited(_)) => {
                 "application/x-ndjson"
             }
             (
-                Serializer::Json(_) | Serializer::NativeJson(_),
+                Serializer::Json(_),
                 Framer::CharacterDelimited(CharacterDelimitedEncoder { delimiter: b',' }),
             ) => "application/json",
-            (Serializer::Native(_), _) => "application/octet-stream",
             (
                 Serializer::Json(_)
-                | Serializer::Logfmt(_)
-                | Serializer::NativeJson(_)
-                | Serializer::RawMessage(_)
                 | Serializer::Text(_),
                 _,
             ) => "text/plain",

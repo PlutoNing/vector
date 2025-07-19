@@ -12,18 +12,16 @@ pub use decoding::{
     BytesDecoder, BytesDecoderConfig, BytesDeserializer, BytesDeserializerConfig,
     CharacterDelimitedDecoder, CharacterDelimitedDecoderConfig,
     JsonDeserializer, JsonDeserializerConfig, LengthDelimitedDecoder,
-    LengthDelimitedDecoderConfig, NativeDeserializer, NativeDeserializerConfig,
-    NativeJsonDeserializer, NativeJsonDeserializerConfig, NewlineDelimitedDecoder,
+    LengthDelimitedDecoderConfig, NewlineDelimitedDecoder,
     NewlineDelimitedDecoderConfig, OctetCountingDecoder, OctetCountingDecoderConfig,
     StreamDecodingError,
 };
 pub use encoding::{
     BytesEncoder, BytesEncoderConfig, CharacterDelimitedEncoder, CharacterDelimitedEncoderConfig,
     JsonSerializer,
-    JsonSerializerConfig, LengthDelimitedEncoder, LengthDelimitedEncoderConfig, LogfmtSerializer,
-    LogfmtSerializerConfig, NativeJsonSerializer, NativeJsonSerializerConfig, NativeSerializer,
-    NativeSerializerConfig, NewlineDelimitedEncoder, NewlineDelimitedEncoderConfig,
-    RawMessageSerializer, RawMessageSerializerConfig, TextSerializer, TextSerializerConfig,
+    JsonSerializerConfig, LengthDelimitedEncoder, LengthDelimitedEncoderConfig,
+    NewlineDelimitedEncoder, NewlineDelimitedEncoderConfig,
+    TextSerializer, TextSerializerConfig,
 };
 use vector_config_macros::configurable_component;
 
