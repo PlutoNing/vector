@@ -552,7 +552,7 @@ impl<'a> Builder<'a> {
             let healthcheck_timeout = healthcheck.timeout;
             /* 可能是Console */
             let typetag = sink.inner.get_component_name();
-            let input_type = sink.inner.input().data_type();
+            let input_type = sink.inner.input().data_type(); /*  */
 
             let span = error_span!(
                 "sink",
@@ -609,7 +609,7 @@ impl<'a> Builder<'a> {
                 app_name_slug: crate::get_slugified_app_name(),
                 extra_context: self.extra_context.clone(),
             };
-/* 这里的sink就是具体的sink了, 比如到console */
+            /* 这里的sink就是具体的sink了, 比如到console */
             let (sink, healthcheck) = match sink.inner.build(cx).await {
                 Err(error) => {
                     self.errors.push(format!("Sink \"{}\": {}", key, error));
@@ -743,8 +743,8 @@ impl TopologyPieces {/*  */
 
     /// Builds only the new pieces, and doesn't check their topology.
     pub async fn build(
-        config: &super::Config,
-        diff: &ConfigDiff,
+        config: &super::Config, /* 新config */
+        diff: &ConfigDiff, /* 新config产生的diff */
         buffers: HashMap<ComponentKey, BuiltBuffer>,
         extra_context: ExtraContext,
     ) -> Result<Self, Vec<String>> {

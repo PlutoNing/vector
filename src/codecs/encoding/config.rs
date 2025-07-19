@@ -4,13 +4,13 @@ use vector_lib::codecs::{
     CharacterDelimitedEncoder, LengthDelimitedEncoder, NewlineDelimitedEncoder,
 };
 use vector_lib::configurable::configurable_component;
-
+/* 比如说sink file时, 构建encoder config */
 /// Encoding configuration.
 #[configurable_component]
 #[derive(Clone, Debug)]
 /// Configures how events are encoded into raw bytes.
 /// The selected encoding also determines which input types (logs, metrics, traces) are supported.
-pub struct EncodingConfig {
+pub struct EncodingConfig { /* 分别负责序列化和转换 */
     #[serde(flatten)]
     encoding: SerializerConfig,
 
@@ -54,12 +54,12 @@ where
         }
     }
 }
-
+/* file sink config的成员. 应该是负责encode的, 还带有frame功能 */
 /// Encoding configuration.
 #[configurable_component]
 #[derive(Clone, Debug)]
 #[serde(deny_unknown_fields)]
-pub struct EncodingConfigWithFraming {
+pub struct EncodingConfigWithFraming {/* 里面有framer和encoder */
     #[configurable(derived)]
     framing: Option<FramingConfig>,
 

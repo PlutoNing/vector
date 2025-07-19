@@ -40,7 +40,7 @@ use crate::{
 mod bytes_path;
 
 use bytes_path::BytesPath;
-
+/* 输出到文件的时候, 走到这里构建file sink config */
 /// Configuration for the `file` sink.
 #[serde_as]
 #[configurable_component(sink("file", "Output observability events into files."))]
@@ -66,7 +66,7 @@ pub struct FileSinkConfig {
     #[configurable(metadata(docs::examples = 600))]
     #[configurable(metadata(docs::human_name = "Idle Timeout"))]
     pub idle_timeout: Duration,
-
+    /* file sink这个是必须的吗 */
     #[serde(flatten)]
     pub encoding: EncodingConfigWithFraming,
 
@@ -178,7 +178,7 @@ impl OutFile {
         self.sync_all().await
     }
 }
-
+/* 输出到文件的时候走到这里 */
 #[async_trait::async_trait]
 #[typetag::serde(name = "file")]
 impl SinkConfig for FileSinkConfig {
@@ -186,9 +186,9 @@ impl SinkConfig for FileSinkConfig {
         &self,
         cx: SinkContext,
     ) -> crate::Result<(super::VectorSink, super::Healthcheck)> {
-        let sink = FileSink::new(self, cx)?;
+        let sink = FileSink::new(self, cx)?;/* 这里构建filesink的各种成员实例 */
         Ok((
-            super::VectorSink::from_event_streamsink(sink),
+            super::VectorSink::from_event_streamsink(sink), /* 从FileSink到vectorSink */
             future::ok(()).boxed(),
         ))
     }
@@ -213,10 +213,10 @@ pub struct FileSink {
     include_file_metric_tag: bool,
 }
 
-impl FileSink {
+impl FileSink {/* 新建一个file sink */
     pub fn new(config: &FileSinkConfig, cx: SinkContext) -> crate::Result<Self> {
         let transformer = config.encoding.transformer();
-        let (framer, serializer) = config.encoding.build(SinkType::StreamBased)?;
+        let (framer, serializer) = config.encoding.build(SinkType::StreamBased)?;/* 构建这个config.encoding的framer和encoder */
         let encoder = Encoder::<Framer>::new(framer, serializer);
 
         let offset = config

@@ -288,7 +288,7 @@ fn merge_with_value(res: &mut Table, name: String, value: toml::Value) -> Result
     }
     Ok(())
 }
-
+/* 运行的时候从配置文件解析出编解码相关配置? */
 /// Deserialize a TOML `Table` into a `T`.
 pub(super) fn deserialize_table<T: serde::de::DeserializeOwned>(
     table: Table,

@@ -69,7 +69,7 @@ impl VectorSink {
     pub fn from_event_sink(sink: impl Sink<Event, Error = ()> + Send + Unpin + 'static) -> Self {
         VectorSink::Sink(Box::new(EventSink::new(sink)))
     }
-    /* 可以拿来构建一个输出到stdout的console */
+    /* 参数是具体的sink实现(实现指定的接口就行), 这里统一转为vectorsink */
     /// Converts an event stream into a `VectorSink`
     pub fn from_event_streamsink(sink: impl StreamSink<Event> + Send + 'static) -> Self {
         let sink = Box::new(sink);
@@ -165,7 +165,7 @@ impl<S: Sink<Event> + Send + Unpin> Sink<EventArray> for EventSink<S> {
         self.sink.poll_close_unpin(cx)
     }
 }
-
+/* 包装了一个具体的sink实现, 比如box<filesink> */
 /// Wrapper for sinks implementing `StreamSink<Event>` to implement `StreamSink<EventArray>`
 struct EventStream<T> {
     sink: Box<T>,

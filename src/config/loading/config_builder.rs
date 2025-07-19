@@ -60,7 +60,7 @@ impl Process for ConfigBuilderLoader {
                         .into_iter()
                         .map(|(_, test)| test),
                 );
-            }
+            } /* 涉及反序列化, 编解码等走到这里? 20250719155859什么时候走上面 */
             None => { /* 把解析出的配置项吸收到自己config里面 */
                 self.builder.append(deserialize_table(table)?)?;
             }

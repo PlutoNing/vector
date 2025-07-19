@@ -345,7 +345,7 @@ impl BufferConfig {
     /// Gets all of the configured stages for this buffer.
     pub fn stages(&self) -> &[BufferType] {
         match self {
-            Self::Single(stage) => slice::from_ref(stage),
+            Self::Single(stage) => slice::from_ref(stage),/* file sink这里 */
             Self::Chained(stages) => stages.as_slice(),
         }
     }
@@ -371,7 +371,7 @@ impl BufferConfig {
     ) -> Result<(BufferSender<T>, BufferReceiver<T>), BufferBuildError>
     where
         T: Bufferable + Clone + Finalizable,
-    {
+    {/* 构建sink的时候构建一个buffer */
         let mut builder = TopologyBuilder::default();
         /* stage是个buffer type的指针 */
         for stage in self.stages() { /* 把自己新建一个,塞到builder的stage里面 */

@@ -60,7 +60,7 @@ impl ApplicationConfig { /* vector::app::ApplicationConfig::from_opts vector::ap
         opts: &RootOpts,
         signal_handler: &mut SignalHandler,
         extra_context: ExtraContext,
-    ) -> Result<Self, ExitCode> {
+    ) -> Result<Self, ExitCode> { /* 从prepare_from_opts来到这里 */
         let config_paths = opts.config_paths_with_formats();
 
         let graceful_shutdown_duration = (!opts.no_graceful_shutdown_limit)
@@ -145,7 +145,7 @@ impl Application {
             _ = error.print();
             exitcode::USAGE
         })?;
-
+/* 程序刚运行时一直来到这里 */
         Self::prepare_from_opts(opts, extra_context)
     }
     /* main->run->prepare_start->prepare->prepare_from_opts */
@@ -457,7 +457,7 @@ pub fn build_runtime(threads: Option<usize>, thread_name: &str) -> Result<Runtim
     debug!(messaged = "Building runtime.", worker_threads = threads);
     Ok(rt_builder.build().expect("Unable to create async runtime"))
 }
-/* 加载配置  20250717152203, 读取配置文件, 解析, 存入config结构体 */
+/*运行后来到这里, 加载配置  20250717152203, 读取配置文件, 解析, 存入config结构体 */
 pub async fn load_configs(
     config_paths: &[ConfigPath], /* 里面是搜索的可能的conf路径? */
     watcher_conf: Option<config::watcher::WatcherConfig>,

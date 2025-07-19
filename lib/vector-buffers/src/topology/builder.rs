@@ -142,7 +142,7 @@ impl<T: Bufferable> TopologyBuilder<T> {
                 .into_buffer_parts(usage_handle.clone())
                 .await
                 .context(FailedToBuildStageSnafu { stage_idx })?;
-/* buffer还有sender和receiver? */
+            /* buffer还有sender和receiver? */
             let (mut sender, mut receiver) = match current_stage.take() {
                 None => (
                     BufferSender::new(sender, stage.when_full),

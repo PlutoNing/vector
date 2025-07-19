@@ -47,7 +47,7 @@ impl<T: SinkConfig + 'static> From<T> for BoxedSink {
         Box::new(value)
     }
 }
-
+/* 用来构建一个sink */
 /// Fully resolved sink component.
 #[configurable_component]
 #[configurable(metadata(docs::component_base_type = "sink"))]
@@ -84,7 +84,7 @@ where
 
     #[serde(flatten)]
     #[configurable(metadata(docs::hidden))]
-    pub inner: BoxedSink,
+    pub inner: BoxedSink, /* 比如可能是个file sink config */
 }
 
 impl<T> SinkOuter<T>

@@ -32,7 +32,7 @@ pub struct Transformer {
     #[serde(default, skip_serializing_if = "is_default")]
     timestamp_format: Option<TimestampFormat>,
 }
-
+/* transform也要实现反序列化接口?  sink file会走到这里*/
 impl<'de> Deserialize<'de> for Transformer {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -48,7 +48,7 @@ impl<'de> Deserialize<'de> for Transformer {
             #[serde(default)]
             timestamp_format: Option<TimestampFormat>,
         }
-
+        /* 构建一个transformer */
         let inner: TransformerInner = Deserialize::deserialize(deserializer)?;
         Self::new(
             inner
