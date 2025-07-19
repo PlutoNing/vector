@@ -18,7 +18,7 @@ pub use source::*;
 use vector_lib::configurable::NamedComponent;
 
 use super::{
-    builder::ConfigBuilder, format, validation, vars, Config, ConfigPath, Format, FormatHint,
+    builder::ConfigBuilder, format, vars, Config, ConfigPath, Format, FormatHint,
 };
 use crate::{config::ProviderConfig, signal};
 
@@ -140,7 +140,6 @@ pub async fn load_from_paths_with_provider_and_secrets(
     /* 现在builder包含了配置项 */
     builder.allow_empty = allow_empty;
 
-    validation::check_provider(&builder)?;
     signal_handler.clear();
 
     // If there's a provider, overwrite the existing config builder with the remote variant.
@@ -150,8 +149,6 @@ pub async fn load_from_paths_with_provider_and_secrets(
     }
     /* 这里构建一个config */
     let (new_config, build_warnings) = builder.build_with_warnings()?;
-
-    validation::check_buffer_preconditions(&new_config).await?;
 
     for warning in build_warnings {
         warn!("{}", warning);

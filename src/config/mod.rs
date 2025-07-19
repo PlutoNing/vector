@@ -41,7 +41,6 @@ pub mod schema;
 mod sink;
 mod source;
 mod transform;
-mod validation;
 mod vars;
 pub mod watcher;
 
@@ -61,7 +60,6 @@ pub use source::{BoxedSource, SourceConfig, SourceContext, SourceOuter};
 pub use transform::{
     get_transform_output_ids, BoxedTransform, TransformConfig, TransformContext, TransformOuter,
 };
-pub use validation::warnings;
 pub use vars::{interpolate, ENVIRONMENT_VARIABLE_INTERPOLATION_REGEX};
 pub use vector_lib::{
     config::{

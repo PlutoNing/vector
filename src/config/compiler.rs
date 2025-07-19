@@ -1,5 +1,6 @@
 use super::{
-    builder::ConfigBuilder, graph::Graph, transform::get_transform_output_ids, validation, Config,
+    builder::ConfigBuilder, graph::Graph, transform::get_transform_output_ids,
+    Config,
     OutputId,
 };
 
@@ -9,32 +10,7 @@ use vector_lib::id::Inputs;
 pub fn compile(mut builder: ConfigBuilder) -> Result<(Config, Vec<String>), Vec<String>> {
     let mut errors = Vec::new();
 
-    // component names should not have dots in the configuration file
-    // but components can expand (like route) to have components with a dot
-    // so this check should be done before expanding components
-    if let Err(name_errors) = validation::check_names(
-        builder
-            .transforms
-            .keys()
-            .chain(builder.sources.keys())
-            .chain(builder.sinks.keys()),
-    ) {
-        errors.extend(name_errors);
-    }
-
     expand_globs(&mut builder);
-
-    if let Err(type_errors) = validation::check_shape(&builder) {
-        errors.extend(type_errors);
-    }
-
-    if let Err(type_errors) = validation::check_resources(&builder) {
-        errors.extend(type_errors);
-    }
-
-    if let Err(output_errors) = validation::check_outputs(&builder) {
-        errors.extend(output_errors);
-    }
 
     let ConfigBuilder {
         global,
@@ -134,7 +110,7 @@ pub fn compile(mut builder: ConfigBuilder) -> Result<(Config, Vec<String>), Vec<
 
         config.propagate_acknowledgements()?;
 
-        let warnings = validation::warnings(&config);
+        let warnings = vec![];
 
         Ok((config, warnings))
     } else {
