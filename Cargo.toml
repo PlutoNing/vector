@@ -417,7 +417,7 @@ default-no-api-client = [ "sinks", "sources",  "transforms", "unix"]
 default-no-vrl-cli = [ "sinks", "sources",  "transforms", "unix"]
 tokio-console = ["dep:console-subscriber", "tokio/tracing"]
 
-all-logs = ["sinks-logs", "sources-logs",  "transforms-logs"]
+all-logs = ["sinks-logs", "transforms-logs"]
 all-metrics = ["sinks-metrics", "sources-metrics", "transforms-metrics"]
 
 # Target specific release features.
@@ -443,10 +443,8 @@ unix = ["tikv-jemallocator"]
 docker = ["dep:bollard", "dep:dirs-next"]
 
 # Sources
-sources = ["sources-logs", "sources-metrics"]
-sources-logs = [
+sources = ["sources-metrics"]
 
-]
 sources-metrics = [
   "dep:prost",
   "sources-host_metrics",
