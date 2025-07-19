@@ -3,8 +3,6 @@ use snafu::Snafu;
 
 #[cfg(feature = "sources-host_metrics")]
 pub mod host_metrics;
-#[cfg(feature = "sources-static_metrics")]
-pub mod static_metrics;
 
 pub mod util;
 

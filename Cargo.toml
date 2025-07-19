@@ -448,11 +448,9 @@ sources = ["sources-metrics"]
 sources-metrics = [
   "dep:prost",
   "sources-host_metrics",
-  "sources-static_metrics",
 ]
 
 sources-host_metrics = ["heim/cpu", "heim/host", "heim/memory", "heim/net"]
-sources-static_metrics = []
 
 # Transforms
 transforms = ["transforms-logs", "transforms-metrics"]
