@@ -31,8 +31,6 @@ use crate::{
 
 #[cfg(all(unix, feature = "sources-file_descriptor"))]
 pub mod file_descriptor;
-#[cfg(feature = "sources-stdin")]
-pub mod stdin;
 
 pub trait FileDescriptorConfig: NamedComponent {
     fn host_key(&self) -> Option<OptionalValuePath>;

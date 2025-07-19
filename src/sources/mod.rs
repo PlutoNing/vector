@@ -8,7 +8,6 @@ pub mod exec;
 #[cfg(feature = "sources-file")]
 pub mod file;
 #[cfg(any(
-    feature = "sources-stdin",
     all(unix, feature = "sources-file_descriptor")
 ))]
 pub mod file_descriptors;

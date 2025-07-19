@@ -449,7 +449,6 @@ sources-logs = [
   "sources-exec",
   "sources-file",
   "sources-file_descriptor",
-  "sources-stdin",
 ]
 sources-metrics = [
   "dep:prost",
@@ -463,7 +462,6 @@ sources-file = ["vector-lib/file-source"]
 sources-file_descriptor = ["tokio-util/io"]
 sources-host_metrics = ["heim/cpu", "heim/host", "heim/memory", "heim/net"]
 sources-static_metrics = []
-sources-stdin = ["tokio-util/io"]
 
 # Transforms
 transforms = ["transforms-logs", "transforms-metrics"]
