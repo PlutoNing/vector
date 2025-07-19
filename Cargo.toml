@@ -445,7 +445,7 @@ docker = ["dep:bollard", "dep:dirs-next"]
 # Sources
 sources = ["sources-logs", "sources-metrics"]
 sources-logs = [
-  "sources-demo_logs",
+
 ]
 sources-metrics = [
   "dep:prost",
@@ -453,7 +453,6 @@ sources-metrics = [
   "sources-static_metrics",
 ]
 
-sources-demo_logs = ["dep:fakedata"]
 sources-host_metrics = ["heim/cpu", "heim/host", "heim/memory", "heim/net"]
 sources-static_metrics = []
 
@@ -504,7 +503,6 @@ all-integration-tests = [
 
 disable-resolv-conf = []
 vector-unit-test-tests = [
-  "sources-demo_logs",
   "sinks-console"
 ]
 

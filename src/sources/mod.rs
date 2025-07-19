@@ -1,8 +1,6 @@
 #![allow(missing_docs)]
 use snafu::Snafu;
 
-#[cfg(feature = "sources-demo_logs")]
-pub mod demo_logs;
 #[cfg(feature = "sources-host_metrics")]
 pub mod host_metrics;
 #[cfg(feature = "sources-static_metrics")]

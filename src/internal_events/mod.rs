@@ -8,8 +8,6 @@ pub mod codecs;
 mod common;
 mod conditions;
 
-#[cfg(feature = "sources-demo_logs")]
-mod demo_logs;
 mod encoding_transcode;
 mod heartbeat;
 #[cfg(feature = "sources-host_metrics")]
@@ -37,8 +35,6 @@ mod unix;
 mod file;
 mod windows;
 
-#[cfg(feature = "sources-demo_logs")]
-pub(crate) use self::demo_logs::*;
 #[cfg(any(
     feature = "sinks-file",
 ))]
