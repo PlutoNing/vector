@@ -456,15 +456,12 @@ sources-host_metrics = ["heim/cpu", "heim/host", "heim/memory", "heim/net"]
 transforms = ["transforms-logs", "transforms-metrics"]
 transforms-logs = [
 
-  "transforms-sample",
 ]
 transforms-metrics = [
 
   "transforms-tag_cardinality_limit",
 ]
 
-
-transforms-sample = ["transforms-impl-sample"]
 transforms-tag_cardinality_limit = ["dep:bloomy", "dep:hashbrown"]
 
 # Implementations of transforms
