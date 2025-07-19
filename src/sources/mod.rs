@@ -5,8 +5,6 @@ use snafu::Snafu;
 pub mod demo_logs;
 #[cfg(feature = "sources-exec")]
 pub mod exec;
-#[cfg(feature = "sources-file")]
-pub mod file;
 #[cfg(feature = "sources-host_metrics")]
 pub mod host_metrics;
 #[cfg(feature = "sources-static_metrics")]

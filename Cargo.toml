@@ -447,7 +447,6 @@ sources = ["sources-logs", "sources-metrics"]
 sources-logs = [
   "sources-demo_logs",
   "sources-exec",
-  "sources-file",
 ]
 sources-metrics = [
   "dep:prost",
@@ -457,7 +456,6 @@ sources-metrics = [
 
 sources-demo_logs = ["dep:fakedata"]
 sources-exec = []
-sources-file = ["vector-lib/file-source"]
 sources-host_metrics = ["heim/cpu", "heim/host", "heim/memory", "heim/net"]
 sources-static_metrics = []
 

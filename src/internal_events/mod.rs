@@ -35,7 +35,6 @@ mod udp;
 mod unix;
 
 #[cfg(any(
-    feature = "sources-file",
     feature = "sinks-file",
 ))]
 mod file;
@@ -46,7 +45,6 @@ pub(crate) use self::demo_logs::*;
 #[cfg(feature = "sources-exec")]
 pub(crate) use self::exec::*;
 #[cfg(any(
-    feature = "sources-file",
     feature = "sinks-file",
 ))]
 pub(crate) use self::file::*;
