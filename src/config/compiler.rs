@@ -20,7 +20,6 @@ pub fn compile(mut builder: ConfigBuilder) -> Result<(Config, Vec<String>), Vec<
         sources,
         sinks,
         transforms,
-        tests,
         provider: _,
         graceful_shutdown_duration,
         allow_empty: _,
@@ -90,10 +89,6 @@ pub fn compile(mut builder: ConfigBuilder) -> Result<(Config, Vec<String>), Vec<
             (key, table.with_inputs(inputs))
         })
         .collect();
-    let tests = tests
-        .into_iter()
-        .map(|test| test.resolve_outputs(&graph))
-        .collect::<Result<Vec<_>, Vec<_>>>()?;
         /* 再建一个新的config返回 */
     if errors.is_empty() {
         let mut config = Config {
@@ -104,7 +99,6 @@ pub fn compile(mut builder: ConfigBuilder) -> Result<(Config, Vec<String>), Vec<
             sources,
             sinks,
             transforms,
-            tests,
             graceful_shutdown_duration,
         };
 

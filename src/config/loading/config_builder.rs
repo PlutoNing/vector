@@ -6,7 +6,7 @@ use toml::value::Table;
 use super::{deserialize_table, loader, prepare_input};
 use super::{ComponentHint, Process};
 use crate::config::{
-    ComponentKey, ConfigBuilder, EnrichmentTableOuter, SinkOuter, SourceOuter, TestDefinition,
+    ComponentKey, ConfigBuilder, EnrichmentTableOuter, SinkOuter, SourceOuter,
     TransformOuter,
 };
 
@@ -32,6 +32,7 @@ impl Process for ConfigBuilderLoader {
     /// Merge a TOML `Table` with a `ConfigBuilder`. Component types extend specific keys.
     fn merge(&mut self, table: Table, hint: Option<ComponentHint>) -> Result<(), Vec<String>> {
         match hint {
+            /* 这里switch的是config的成员 */
             Some(ComponentHint::Source) => {
                 self.builder.sources.extend(deserialize_table::<
                     IndexMap<ComponentKey, SourceOuter>,
@@ -52,15 +53,7 @@ impl Process for ConfigBuilderLoader {
                     IndexMap<ComponentKey, EnrichmentTableOuter<_>>,
                 >(table)?);
             }
-            Some(ComponentHint::Test) => {
-                // This serializes to a `Vec<TestDefinition<_>>`, so we need to first expand
-                // it to an ordered map, and then pull out the value, ignoring the keys.
-                self.builder.tests.extend(
-                    deserialize_table::<IndexMap<String, TestDefinition<String>>>(table)?
-                        .into_iter()
-                        .map(|(_, test)| test),
-                );
-            } /* 涉及反序列化, 编解码等走到这里? 20250719155859什么时候走上面 */
+            /* 涉及反序列化, 编解码等走到这里? 20250719155859什么时候走上面 */
             None => { /* 把解析出的配置项吸收到自己config里面 */
                 self.builder.append(deserialize_table(table)?)?;
             }

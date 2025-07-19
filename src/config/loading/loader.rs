@@ -13,7 +13,6 @@ pub enum ComponentHint {
     Source,
     Transform,
     Sink,
-    Test,
     EnrichmentTable,
 }
 
@@ -25,7 +24,6 @@ impl ComponentHint {
             ComponentHint::Source => "sources",
             ComponentHint::Transform => "transforms",
             ComponentHint::Sink => "sinks",
-            ComponentHint::Test => "tests",
             ComponentHint::EnrichmentTable => "enrichment_tables",
         }
     }
@@ -233,7 +231,6 @@ where
             ComponentHint::Source,
             ComponentHint::Transform,
             ComponentHint::Sink,
-            ComponentHint::Test,
             ComponentHint::EnrichmentTable,
         ];
         let paths = hints

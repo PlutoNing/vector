@@ -8,7 +8,7 @@ use crate::{enrichment_tables::EnrichmentTables, providers::Providers};
 
 use super::{
     compiler, schema, BoxedSink, BoxedSource, BoxedTransform, ComponentKey, Config,
-    EnrichmentTableOuter, HealthcheckOptions, SinkOuter, SourceOuter, TestDefinition,
+    EnrichmentTableOuter, HealthcheckOptions, SinkOuter, SourceOuter, 
     TransformOuter,
 };
 
@@ -45,10 +45,6 @@ pub struct ConfigBuilder {
     #[serde(default)]
     pub transforms: IndexMap<ComponentKey, TransformOuter<String>>,
 
-    /// All configured unit tests.
-    #[serde(default)]
-    pub tests: Vec<TestDefinition<String>>,
-
     /// Optional configuration provider to use.
     ///
     /// Configuration providers allow sourcing configuration information from a source other than
@@ -79,8 +75,6 @@ impl From<Config> for ConfigBuilder {
             sources,
             sinks,
             transforms,
-            tests,
-
             graceful_shutdown_duration,
         } = config;
 
@@ -99,8 +93,6 @@ impl From<Config> for ConfigBuilder {
             .map(|(key, table)| (key, table.map_inputs(ToString::to_string)))
             .collect();
 
-        let tests = tests.into_iter().map(TestDefinition::stringify).collect();
-
         ConfigBuilder {
             global,
             schema,
@@ -110,7 +102,6 @@ impl From<Config> for ConfigBuilder {
             sinks,
             transforms,
             provider: None,
-            tests,
             graceful_shutdown_duration,
             allow_empty: false,
         }
@@ -230,11 +221,6 @@ impl ConfigBuilder {
                 errors.push(format!("duplicate transform id found: {}", k));
             }
         });
-        with.tests.iter().for_each(|wt| {
-            if self.tests.iter().any(|t| t.name == wt.name) {
-                errors.push(format!("duplicate test name found: {}", wt.name));
-            }
-        });
         if !errors.is_empty() {
             return Err(errors);
         }
@@ -244,7 +230,6 @@ impl ConfigBuilder {
         self.sinks.extend(with.sinks);
         info!("sinks: {:?}", self.sinks);
         self.transforms.extend(with.transforms);
-        self.tests.extend(with.tests);
 
         Ok(())
     }
