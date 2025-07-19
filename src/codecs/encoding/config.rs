@@ -108,11 +108,6 @@ impl EncodingConfigWithFraming {
             (None, Serializer::Native(_)) => {
                 LengthDelimitedEncoder::default().into()
             }
-            (None, Serializer::Protobuf(_)) => {
-                // Protobuf uses length-delimited messages, see:
-                // https://developers.google.com/protocol-buffers/docs/techniques#streaming
-                LengthDelimitedEncoder::default().into()
-            }
             (
                 None,
                 Serializer::Csv(_)

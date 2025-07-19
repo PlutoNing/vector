@@ -7,7 +7,6 @@ mod bytes;
 mod json;
 mod native;
 mod native_json;
-mod protobuf;
 #[cfg(feature = "syslog")]
 mod syslog;
 mod vrl;
@@ -19,7 +18,6 @@ pub use native::{NativeDeserializer, NativeDeserializerConfig};
 pub use native_json::{
     NativeJsonDeserializer, NativeJsonDeserializerConfig, NativeJsonDeserializerOptions,
 };
-pub use protobuf::{ProtobufDeserializer, ProtobufDeserializerConfig, ProtobufDeserializerOptions};
 use smallvec::SmallVec;
 #[cfg(feature = "syslog")]
 pub use syslog::{SyslogDeserializer, SyslogDeserializerConfig, SyslogDeserializerOptions};
