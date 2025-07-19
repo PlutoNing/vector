@@ -15,12 +15,11 @@ use glob::glob;
 use loader::process::Process;
 pub use loader::*;
 pub use source::*;
-use vector_lib::configurable::NamedComponent;
 
 use super::{
     builder::ConfigBuilder, format, vars, Config, ConfigPath, Format, FormatHint,
 };
-use crate::{config::ProviderConfig, signal};
+use crate::{signal};
 
 pub static CONFIG_PATHS: Mutex<Vec<ConfigPath>> = Mutex::new(Vec::new());
 
@@ -142,11 +141,6 @@ pub async fn load_from_paths_with_provider_and_secrets(
 
     signal_handler.clear();
 
-    // If there's a provider, overwrite the existing config builder with the remote variant.
-    if let Some(mut provider) = builder.provider { /* 一般是空的 */
-        builder = provider.build(signal_handler).await?;
-        debug!(message = "Provider configured.", provider = ?provider.get_component_name());
-    }
     /* 这里构建一个config */
     let (new_config, build_warnings) = builder.build_with_warnings()?;
 

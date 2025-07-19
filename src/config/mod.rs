@@ -48,7 +48,6 @@ pub use loading::{
     load_from_str, load_source_from_paths, merge_path_lists, process_paths,
     CONFIG_PATHS,
 };
-pub use provider::ProviderConfig;
 pub use sink::{BoxedSink, SinkConfig, SinkContext, SinkHealthcheckOptions, SinkOuter};
 pub use source::{BoxedSource, SourceConfig, SourceContext, SourceOuter};
 pub use transform::{

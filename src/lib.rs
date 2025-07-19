@@ -61,7 +61,6 @@ pub mod line_agg;
 pub mod net;
 #[allow(unreachable_pub)]
 pub(crate) mod proto;
-pub mod providers;
 pub mod serde;
 #[cfg(windows)]
 pub mod service;

@@ -20,7 +20,6 @@ pub fn compile(mut builder: ConfigBuilder) -> Result<(Config, Vec<String>), Vec<
         sources,
         sinks,
         transforms,
-        provider: _,
         graceful_shutdown_duration,
         allow_empty: _,
     } = builder;

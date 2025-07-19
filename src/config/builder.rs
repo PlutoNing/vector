@@ -4,7 +4,7 @@ use indexmap::IndexMap;
 use vector_lib::config::GlobalOptions;
 use vector_lib::configurable::configurable_component;
 
-use crate::{enrichment_tables::EnrichmentTables, providers::Providers};
+use crate::{enrichment_tables::EnrichmentTables};
 
 use super::{
     compiler, schema, BoxedSink, BoxedSource, BoxedTransform, ComponentKey, Config,
@@ -44,13 +44,6 @@ pub struct ConfigBuilder {
     /// All configured transforms.
     #[serde(default)]
     pub transforms: IndexMap<ComponentKey, TransformOuter<String>>,
-
-    /// Optional configuration provider to use.
-    ///
-    /// Configuration providers allow sourcing configuration information from a source other than
-    /// the typical configuration files that must be passed to Vector.
-    pub provider: Option<Providers>,
-
 
     /// The duration in seconds to wait for graceful shutdown after SIGINT or SIGTERM are received.
     /// After the duration has passed, Vector will force shutdown. Default value is 60 seconds. This
@@ -101,7 +94,6 @@ impl From<Config> for ConfigBuilder {
             sources,
             sinks,
             transforms,
-            provider: None,
             graceful_shutdown_duration,
             allow_empty: false,
         }
@@ -186,8 +178,6 @@ impl ConfigBuilder {
 /* 处理配置文件选项? 把配置项附加到自己的各个配置成员里面 */
     pub fn append(&mut self, with: Self) -> Result<(), Vec<String>> {
         let mut errors = Vec::new();
-
-        self.provider = with.provider;
 
         match self.global.merge(with.global) {
             Err(errs) => errors.extend(errs),
