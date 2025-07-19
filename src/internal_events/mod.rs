@@ -14,8 +14,6 @@ mod demo_logs;
 mod encoding_transcode;
 #[cfg(feature = "sources-exec")]
 mod exec;
-#[cfg(any(feature = "sources-file_descriptor"))]
-mod file_descriptor;
 mod heartbeat;
 #[cfg(feature = "sources-host_metrics")]
 mod host_metrics;
@@ -52,8 +50,6 @@ pub(crate) use self::exec::*;
     feature = "sinks-file",
 ))]
 pub(crate) use self::file::*;
-#[cfg(any(feature = "sources-file_descriptor"))]
-pub(crate) use self::file_descriptor::*;
 #[cfg(feature = "sources-host_metrics")]
 pub(crate) use self::host_metrics::*;
 #[allow(unused_imports)]

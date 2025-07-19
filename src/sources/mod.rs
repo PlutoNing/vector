@@ -7,10 +7,6 @@ pub mod demo_logs;
 pub mod exec;
 #[cfg(feature = "sources-file")]
 pub mod file;
-#[cfg(any(
-    all(unix, feature = "sources-file_descriptor")
-))]
-pub mod file_descriptors;
 #[cfg(feature = "sources-host_metrics")]
 pub mod host_metrics;
 #[cfg(feature = "sources-static_metrics")]
