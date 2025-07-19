@@ -19,7 +19,6 @@ use tokio_stream::wrappers::BroadcastStream;
 use tracing::{Event, Subscriber};
 use tracing_limit::RateLimitedLayer;
 use tracing_subscriber::{
-    filter::LevelFilter,
     layer::{Context, SubscriberExt},
     registry::LookupSpan,
     util::SubscriberInitExt,
@@ -79,14 +78,6 @@ pub fn init(color: bool, json: bool, levels: &str, internal_log_rate_limit: u64)
             .spawn();
 
         subscriber.with(console_layer)
-    };
-
-    #[cfg(feature = "allocation-tracing")]
-    let subscriber = {
-        let allocation_layer = crate::internal_telemetry::allocations::AllocationLayer::new()
-            .with_filter(LevelFilter::ERROR);
-
-        subscriber.with(allocation_layer)
     };
 
     if json {

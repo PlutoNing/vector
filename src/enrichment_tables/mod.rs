@@ -9,15 +9,6 @@ use crate::config::{
 
 pub mod file;
 
-#[cfg(feature = "enrichment-tables-memory")]
-pub mod memory;
-
-#[cfg(feature = "enrichment-tables-geoip")]
-pub mod geoip;
-
-#[cfg(feature = "enrichment-tables-mmdb")]
-pub mod mmdb;
-
 /// Configuration options for an [enrichment table](https://vector.dev/docs/reference/glossary/#enrichment-tables) to be used in a
 /// [`remap`](https://vector.dev/docs/reference/configuration/transforms/remap/) transform. Currently supported are:
 ///
@@ -45,24 +36,6 @@ pub mod mmdb;
 pub enum EnrichmentTables {
     /// Exposes data from a static file as an enrichment table.
     File(file::FileConfig),
-
-    /// Exposes data from a memory cache as an enrichment table. The cache can be written to using
-    /// a sink.
-    #[cfg(feature = "enrichment-tables-memory")]
-    Memory(memory::MemoryConfig),
-
-    /// Exposes data from a [MaxMind][maxmind] [GeoIP2][geoip2] database as an enrichment table.
-    ///
-    /// [maxmind]: https://www.maxmind.com/
-    /// [geoip2]: https://www.maxmind.com/en/geoip2-databases
-    #[cfg(feature = "enrichment-tables-geoip")]
-    Geoip(geoip::GeoipConfig),
-
-    /// Exposes data from a [MaxMind][maxmind] database as an enrichment table.
-    ///
-    /// [maxmind]: https://www.maxmind.com/
-    #[cfg(feature = "enrichment-tables-mmdb")]
-    Mmdb(mmdb::MmdbConfig),
 }
 
 impl GenerateConfig for EnrichmentTables {

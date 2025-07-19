@@ -114,51 +114,6 @@ fn main() {
     #[cfg(not(feature = "nightly"))]
     println!("cargo:rerun-if-changed=.git/HEAD");
 
-    #[cfg(feature = "protobuf-build")]
-    {
-        println!("cargo:rerun-if-changed=proto/third-party/google/pubsub/v1/pubsub.proto");
-        println!("cargo:rerun-if-changed=proto/third-party/google/rpc/status.proto");
-        println!("cargo:rerun-if-changed=proto/vector/dd_metric.proto");
-        println!("cargo:rerun-if-changed=proto/vector/dd_trace.proto");
-        println!("cargo:rerun-if-changed=proto/vector/ddsketch_full.proto");
-        println!("cargo:rerun-if-changed=proto/vector/vector.proto");
-
-        // Create and store the "file descriptor set" from the compiled Protocol Buffers packages.
-        //
-        // This allows us to use runtime reflection to manually build Protocol Buffers payloads
-        // in a type-safe way, which is necessary for incrementally building certain payloads, like
-        // the ones generated in the `datadog_metrics` sink.
-        let protobuf_fds_path =
-            Path::new(&std::env::var("OUT_DIR").expect("OUT_DIR environment variable not set"))
-                .join("protobuf-fds.bin");
-
-        let mut prost_build = prost_build::Config::new();
-        prost_build
-            .btree_map(["."])
-            .file_descriptor_set_path(protobuf_fds_path);
-
-        tonic_build::configure()
-            .protoc_arg("--experimental_allow_proto3_optional")
-            .compile_with_config(
-                prost_build,
-                &[
-                    "lib/vector-core/proto/event.proto",
-                    "proto/vector/ddsketch_full.proto",
-                    "proto/vector/dd_metric.proto",
-                    "proto/vector/dd_trace.proto",
-                    "proto/third-party/google/pubsub/v1/pubsub.proto",
-                    "proto/third-party/google/rpc/status.proto",
-                    "proto/vector/vector.proto",
-                ],
-                &[
-                    "proto/third-party",
-                    "proto/vector",
-                    "lib/vector-core/proto/",
-                ],
-            )
-            .unwrap();
-    }
-
     // We keep track of which environment variables we slurp in, and then emit stanzas at the end to
     // inform Cargo when it needs to rerun this build script.  This allows us to avoid rerunning it
     // every single time unless something _actually_ changes.

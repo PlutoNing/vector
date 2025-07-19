@@ -183,22 +183,6 @@ pub struct RootOpts {
     )]
     pub no_graceful_shutdown_limit: bool,
 
-    /// Set runtime allocation tracing
-    #[cfg(feature = "allocation-tracing")]
-    #[arg(long, env = "ALLOCATION_TRACING", default_value = "false")]
-    pub allocation_tracing: bool,
-
-    /// Set allocation tracing reporting rate in milliseconds.
-    #[cfg(feature = "allocation-tracing")]
-    #[arg(
-        long,
-        env = "ALLOCATION_TRACING_REPORTING_INTERVAL_MS",
-        default_value = "5000"
-    )]
-    pub allocation_tracing_reporting_interval_ms: u64,
-
-
-
     /// Allow the configuration to run without any components. This is useful for loading in an
     /// empty stub config that will later be replaced with actual components. Note that this is
     /// likely not useful without also watching for config file changes as described in

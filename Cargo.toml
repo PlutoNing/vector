@@ -404,16 +404,16 @@ ntapi = { git = "https://github.com/MSxDOS/ntapi.git", rev = "24fc1e47677fc9f6e3
 
 [features]
 # Default features for *-unknown-linux-gnu and *-apple-darwin
-default = [ "enrichment-tables", "sinks", "sources",  "transforms", "unix"]
+default = [  "sinks", "sources",  "transforms", "unix"]
 # Default features for `cargo docs`. The same as `default` but without `rdkafka?/gssapi-vendored` which would require installing libsasl in our doc build environment.
-docs = [ "enrichment-tables", "sinks", "sources",  "transforms", "unix"]
+docs = [  "sinks", "sources",  "transforms", "unix"]
 # Default features for *-unknown-linux-* which make use of `cmake` for dependencies
-default-cmake = [ "enrichment-tables","sinks", "sources",  "transforms", "unix"]
+default-cmake = [ "sinks", "sources",  "transforms", "unix"]
 # Default features for *-pc-windows-msvc
 # TODO: Enable SASL https://github.com/vectordotdev/vector/pull/3081#issuecomment-659298042
-default-msvc = [ "enrichment-tables", "sinks", "sources", "transforms"]
-default-musl = [ "enrichment-tables", "sinks", "sources",  "transforms", "unix"]
-default-no-api-client = ["enrichment-tables", "sinks", "sources",  "transforms", "unix"]
+default-msvc = [  "sinks", "sources", "transforms"]
+default-musl = [  "sinks", "sources",  "transforms", "unix"]
+default-no-api-client = [ "sinks", "sources",  "transforms", "unix"]
 default-no-vrl-cli = [ "sinks", "sources",  "transforms", "unix"]
 tokio-console = ["dep:console-subscriber", "tokio/tracing"]
 
@@ -423,52 +423,24 @@ all-metrics = ["sinks-metrics", "sources-metrics", "transforms-metrics"]
 # Target specific release features.
 # The `make` tasks will select this according to the appropriate triple.
 # Use this section to turn off or on specific features for specific triples.
-target-aarch64-unknown-linux-gnu = [ "enrichment-tables",  "sinks", "sources",  "transforms", "unix"]
-target-aarch64-unknown-linux-musl = [ "enrichment-tables",  "sinks", "sources",  "transforms", "unix"]
-target-armv7-unknown-linux-gnueabihf = [ "enrichment-tables",  "sinks", "sources", "transforms", "unix"]
-target-armv7-unknown-linux-musleabihf = [ "enrichment-tables", "sinks", "sources",  "transforms"]
-target-arm-unknown-linux-gnueabi = [ "enrichment-tables", "sinks", "sources",  "transforms", "unix"]
-target-arm-unknown-linux-musleabi = [  "enrichment-tables", "sinks", "sources",  "transforms"]
-target-x86_64-unknown-linux-gnu = [ "enrichment-tables", "sinks", "sources",  "transforms", "unix"]
-target-x86_64-unknown-linux-musl = [ "enrichment-tables", "sinks", "sources", "transforms", "unix"]
+target-aarch64-unknown-linux-gnu = [   "sinks", "sources",  "transforms", "unix"]
+target-aarch64-unknown-linux-musl = [   "sinks", "sources",  "transforms", "unix"]
+target-armv7-unknown-linux-gnueabihf = [   "sinks", "sources", "transforms", "unix"]
+target-armv7-unknown-linux-musleabihf = [  "sinks", "sources",  "transforms"]
+target-arm-unknown-linux-gnueabi = [  "sinks", "sources",  "transforms", "unix"]
+target-arm-unknown-linux-musleabi = [   "sinks", "sources",  "transforms"]
+target-x86_64-unknown-linux-gnu = [  "sinks", "sources",  "transforms", "unix"]
+target-x86_64-unknown-linux-musl = [  "sinks", "sources", "transforms", "unix"]
 # Does not currently build
-target-powerpc64le-unknown-linux-gnu = [ "enrichment-tables", "sinks", "sources", "transforms", "unix"]
+target-powerpc64le-unknown-linux-gnu = [  "sinks", "sources", "transforms", "unix"]
 # Currently doesn't build due to lack of support for 64-bit atomics
-target-powerpc-unknown-linux-gnu = [ "enrichment-tables", "sinks", "sources", "transforms", "unix"]
+target-powerpc-unknown-linux-gnu = [  "sinks", "sources", "transforms", "unix"]
 
 # Enables features that work only on systems providing `cfg(unix)`
-unix = ["tikv-jemallocator", "allocation-tracing"]
-allocation-tracing = []
+unix = ["tikv-jemallocator"]
 
 
 docker = ["dep:bollard", "dep:dirs-next"]
-
-aws-core = [
-  "aws-runtime",
-  "aws-config",
-  "dep:aws-credential-types",
-  "dep:aws-sigv4",
-  "dep:aws-types",
-  "dep:aws-smithy-async",
-  "dep:aws-smithy-http",
-  "dep:aws-smithy-types",
-  "dep:aws-smithy-runtime",
-  "dep:aws-smithy-runtime-api",
-  "dep:aws-sdk-sts",
-]
-
-# Anything that requires Protocol Buffers.
-protobuf-build = ["dep:tonic-build", "dep:prost-build"]
-
-# Enrichment Tables
-# maybe essential
-enrichment-tables = ["enrichment-tables-geoip", "enrichment-tables-mmdb", "enrichment-tables-memory"]
-enrichment-tables-geoip = ["dep:maxminddb"]
-enrichment-tables-mmdb = ["dep:maxminddb"]
-enrichment-tables-memory = ["dep:evmap", "dep:evmap-derive", "dep:thread_local"]
-
-# Codecs
-codecs-syslog = ["vector-lib/syslog"]
 
 # Sources
 sources = ["sources-logs", "sources-metrics"]

@@ -7,36 +7,6 @@ use std::process::ExitCode;
 /* 项目主函数 */
 #[cfg(unix)]
 fn main() -> ExitCode {
-    #[cfg(feature = "allocation-tracing")]
-    {
-        use crate::vector::internal_telemetry::allocations::{
-            init_allocation_tracing, REPORTING_INTERVAL_MS, TRACK_ALLOCATIONS,
-        };
-        use std::sync::atomic::Ordering; /* 获取命令行选项 */
-        let opts = vector::cli::Opts::get_matches()
-            .map_err(|error| {
-                // Printing to stdout/err can itself fail; ignore it.
-                _ = error.print();
-                exitcode::USAGE
-            })
-            .unwrap_or_else(|code| {
-                std::process::exit(code);
-            });
-        let allocation_tracing = opts.root.allocation_tracing;
-        REPORTING_INTERVAL_MS.store(
-            opts.root.allocation_tracing_reporting_interval_ms,
-            Ordering::Relaxed,
-        );
-        drop(opts);
-        // At this point, we make the following assumption:
-        // The heap does not contain any allocations that have a shorter lifetime than the program.
-        if allocation_tracing {
-            // Start tracking allocations
-            TRACK_ALLOCATIONS.store(true, Ordering::Relaxed);
-            init_allocation_tracing();
-        }
-    }/* 刚刚生成了opts */
-
     let exit_code = Application::run(ExtraContext::default())
         .code()/* 如果 Application::run 返回一个实现了 Termination trait 的类型，code()提取退出码 */
         .unwrap_or(exitcode::UNAVAILABLE) as u8;
