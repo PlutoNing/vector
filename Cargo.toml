@@ -464,17 +464,14 @@ transforms-metrics = [
 # Sinks
 sinks = ["sinks-logs", "sinks-metrics"]
 sinks-logs = [
-  "sinks-blackhole",
   "sinks-console",
   "sinks-file",
   "sinks-postgres",
 ]
 sinks-metrics = [
-  "sinks-blackhole",
   "sinks-console",
 ]
 
-sinks-blackhole = []
 sinks-console = []
 sinks-file = ["dep:async-compression"]
 sinks-postgres = ["dep:sqlx"]

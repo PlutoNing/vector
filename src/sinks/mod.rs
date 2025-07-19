@@ -5,8 +5,6 @@ use snafu::Snafu;
 pub mod prelude;
 pub mod util;
 
-#[cfg(feature = "sinks-blackhole")]
-pub mod blackhole;
 #[cfg(feature = "sinks-console")]
 pub mod console;
 #[cfg(feature = "sinks-file")] 
