@@ -12,8 +12,6 @@ mod encoding_transcode;
 mod heartbeat;
 #[cfg(feature = "sources-host_metrics")]
 mod host_metrics;
-mod http;
-pub mod http_client;
 mod open;
 mod parser;
 mod process;
@@ -41,5 +39,5 @@ pub(crate) use self::parser::*;
 pub(crate) use self::windows::*;
 pub use self::{
     adaptive_concurrency::*, batch::*, common::*, conditions::*, encoding_transcode::*,
-    heartbeat::*, http::*, open::*, process::*, socket::*, template::*,
+    heartbeat::*, open::*, process::*, socket::*, template::*,
 };
