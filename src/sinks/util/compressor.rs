@@ -1,19 +1,17 @@
 use std::{io, io::BufWriter};
 
 use bytes::{BufMut, BytesMut};
-use flate2::write::{GzEncoder, ZlibEncoder};
+use flate2::write::{GzEncoder};
 
 use super::{Compression};
 
 const GZIP_INPUT_BUFFER_CAPACITY: usize = 4_096;
-const ZLIB_INPUT_BUFFER_CAPACITY: usize = 4_096;
 
 const OUTPUT_BUFFER_CAPACITY: usize = 1_024;
 
 enum Writer {
     Plain(bytes::buf::Writer<BytesMut>),
     Gzip(BufWriter<GzEncoder<bytes::buf::Writer<BytesMut>>>),
-    Zlib(BufWriter<ZlibEncoder<bytes::buf::Writer<BytesMut>>>),
 }
 
 impl Writer {
@@ -21,7 +19,6 @@ impl Writer {
         match self {
             Writer::Plain(inner) => inner.get_ref(),
             Writer::Gzip(inner) => inner.get_ref().get_ref().get_ref(),
-            Writer::Zlib(inner) => inner.get_ref().get_ref().get_ref(),
         }
     }
 
@@ -33,11 +30,6 @@ impl Writer {
                 .expect("BufWriter writer should not fail to finish")
                 .finish()
                 .expect("gzip writer should not fail to finish"),
-            Writer::Zlib(writer) => writer
-                .into_inner()
-                .expect("BufWriter writer should not fail to finish")
-                .finish()
-                .expect("zlib writer should not fail to finish"),
         }
         .into_inner()
     }
@@ -46,7 +38,6 @@ impl Writer {
         let buf = match self {
             Writer::Plain(writer) => writer,
             Writer::Gzip(writer) => writer.into_inner()?.finish()?,
-            Writer::Zlib(writer) => writer.into_inner()?.finish()?,
         }
         .into_inner();
 
@@ -66,13 +57,6 @@ impl From<Compression> for Writer {
                 GZIP_INPUT_BUFFER_CAPACITY,
                 GzEncoder::new(writer, level.as_flate2()),
             )),
-            // Buffering writes to the underlying Encoder writer
-            // to avoid Vec-trashing and expensive memset syscalls.
-            // https://github.com/rust-lang/flate2-rs/issues/395#issuecomment-1975088152
-            Compression::Zlib(level) => Writer::Zlib(BufWriter::with_capacity(
-                ZLIB_INPUT_BUFFER_CAPACITY,
-                ZlibEncoder::new(writer, level.as_flate2()),
-            )),
         }
     }
 }
@@ -83,7 +67,6 @@ impl io::Write for Writer {
         match self {
             Writer::Plain(inner_buf) => inner_buf.write(buf),
             Writer::Gzip(writer) => writer.write(buf),
-            Writer::Zlib(writer) => writer.write(buf),
         }
     }
 
@@ -91,7 +74,6 @@ impl io::Write for Writer {
         match self {
             Writer::Plain(writer) => writer.flush(),
             Writer::Gzip(writer) => writer.flush(),
-            Writer::Zlib(writer) => writer.flush(),
         }
     }
 }

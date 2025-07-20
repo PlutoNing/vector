@@ -25,11 +25,6 @@ pub enum Compression {
     ///
     /// [gzip]: https://www.gzip.org/
     Gzip(CompressionLevel),
-
-    /// [Zlib][zlib] compression.
-    ///
-    /// [zlib]: https://zlib.net/
-    Zlib(CompressionLevel),
 }
 
 impl Compression {
@@ -49,22 +44,17 @@ impl Compression {
         Compression::Gzip(CompressionLevel::const_default())
     }
 
-    pub const fn zlib_default() -> Compression {
-        Compression::Zlib(CompressionLevel::const_default())
-    }
 
     pub const fn content_encoding(self) -> Option<&'static str> {
         match self {
             Self::None => None,
             Self::Gzip(_) => Some("gzip"),
-            Self::Zlib(_) => Some("deflate"),
         }
     }
 
     pub const fn accept_encoding(self) -> Option<&'static str> {
         match self {
             Self::Gzip(_) => Some("gzip"),
-            Self::Zlib(_) => Some("deflate"),
             _ => None,
         }
     }
@@ -73,7 +63,6 @@ impl Compression {
         match self {
             Self::None => "log",
             Self::Gzip(_) => "log.gz",
-            Self::Zlib(_) => "log.zz",
         }
     }
 
@@ -81,14 +70,13 @@ impl Compression {
         match self {
             Compression::None => 0,
             Compression::Gzip(_) => 9,
-            Compression::Zlib(_) => 9,
         }
     }
 
     pub const fn compression_level(self) -> CompressionLevel {
         match self {
             Self::None => CompressionLevel::None,
-            Self::Gzip(level) | Self::Zlib(level) => level,
+            Self::Gzip(level) => level,
         }
     }
 }
@@ -98,7 +86,6 @@ impl fmt::Display for Compression {
         match *self {
             Compression::None => write!(f, "none"),
             Compression::Gzip(ref level) => write!(f, "gzip({})", level.as_flate2().level()),
-            Compression::Zlib(ref level) => write!(f, "zlib({})", level.as_flate2().level()),
         }
     }
 }
@@ -124,10 +111,9 @@ impl<'de> de::Deserialize<'de> for Compression {
                 match s {
                     "none" => Ok(Compression::None),
                     "gzip" => Ok(Compression::gzip_default()),
-                    "zlib" => Ok(Compression::zlib_default()),
                     _ => Err(de::Error::invalid_value(
                         de::Unexpected::Str(s),
-                        &r#""none" or "gzip" or "zlib" or "zstd""#,
+                        &r#""none" or "gzip" or "zstd""#,
                     )),
                 }
             }
@@ -166,10 +152,9 @@ impl<'de> de::Deserialize<'de> for Compression {
                         None => Ok(Compression::None),
                     },
                     "gzip" => Ok(Compression::Gzip(level.unwrap_or_default())),
-                    "zlib" => Ok(Compression::Zlib(level.unwrap_or_default())),
                     algorithm => Err(de::Error::unknown_variant(
                         algorithm,
-                        &["none", "gzip", "zlib", "zstd"],
+                        &["none", "gzip"],
                     )),
                 }?;
 
@@ -210,16 +195,6 @@ impl ser::Serialize for Compression {
                     map.end()
                 } else {
                     serializer.serialize_str("gzip")
-                }
-            }
-            Compression::Zlib(zlib_level) => {
-                if *zlib_level != CompressionLevel::Default {
-                    let mut map = serializer.serialize_map(None)?;
-                    map.serialize_entry("algorithm", "zlib")?;
-                    map.serialize_entry("level", &zlib_level)?;
-                    map.end()
-                } else {
-                    serializer.serialize_str("zlib")
                 }
             }
         }
@@ -273,16 +248,10 @@ impl Configurable for Compression {
             Some("[Gzip][gzip] compression."),
             "[gzip]: https://www.gzip.org/",
         );
-        let zlib_string_subschema = generate_string_schema(
-            "Zlib",
-            Some("[Zlib][zlib] compression."),
-            "[zlib]: https://zlib.net/",
-        );
 
         let mut all_string_oneof_subschema = generate_one_of_schema(&[
             none_string_subschema,
             gzip_string_subschema,
-            zlib_string_subschema,
         ]);
         apply_base_metadata(&mut all_string_oneof_subschema, string_metadata);
 
