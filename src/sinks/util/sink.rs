@@ -94,33 +94,25 @@ where
         (),
     >,
 }
-
+/* 实现了一个装饰器模式
+=========
+这里实现batch sink的new方法 */
 impl<S, B> BatchSink<S, B>
 where
-    S: Service<B::Output>,
+    S: Service<B::Output>, /* `S` 必须实现 `Service` trait，处理 `B::Output` 类型的请求 */
     S::Future: Send + 'static,
     S::Error: Into<crate::Error> + Send + 'static,
     S::Response: Response + Send + 'static,
-    B: Batch,
+    B: Batch, /* `B` 必须实现 `Batch` trait */
 {
     pub fn new(service: S, batch: B, timeout: Duration) -> Self {
         let service = ServiceBuilder::new()
             .map(|req: PartitionInnerBuffer<B::Output, ()>| req.into_parts().0)
             .service(service);
         let batch = PartitionBuffer::new(batch);
+        /* 创建内部的 `PartitionBatchSink` 实例 */
         let inner = PartitionBatchSink::new(service, batch, timeout);
         Self { inner }
-    }
-}
-
-#[cfg(test)]
-impl<S, B> BatchSink<S, B>
-where
-    S: Service<B::Output>,
-    B: Batch,
-{
-    pub const fn get_ref(&self) -> &S {
-        &self.inner.service.service.inner
     }
 }
 
