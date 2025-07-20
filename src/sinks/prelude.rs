@@ -37,7 +37,7 @@ pub use crate::{
             retries::{RetryAction, RetryLogic},
             service::{ServiceBuilderExt, Svc},
             BatchConfig, Compression, Concurrency, NoDefaultsBatchSettings, RequestBuilder,
-            SinkBatchSettings, TowerRequestConfig,
+            SinkBatchSettings,
         },
     },
     template::{Template, TemplateParseError, UnsignedIntTemplate},
