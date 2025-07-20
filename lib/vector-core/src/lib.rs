@@ -37,7 +37,6 @@ pub mod schema;
 pub mod serde;
 pub mod sink;
 pub mod source;
-pub mod tcp;
 pub mod time;
 pub mod transform;
 #[cfg(feature = "vrl")]
