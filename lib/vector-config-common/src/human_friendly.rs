@@ -29,7 +29,6 @@ static WELL_KNOWN_REPLACEMENTS: LazyLock<HashMap<String, &'static str>> = LazyLo
         ("dir", "Directory"),
         ("ids", "IDs"),
         ("ips", "IPs"),
-        ("grpc", "gRPC"),
         ("oauth2", "OAuth2"),
     ];
 
