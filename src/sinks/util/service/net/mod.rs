@@ -1,4 +1,3 @@
-mod tcp;
 mod udp;
 
 #[cfg(unix)]
