@@ -34,15 +34,15 @@ pub use buffer::{
     vec::{EncodedLength, VecBuffer},
     Buffer, Compression, PartitionBuffer, PartitionInnerBuffer,
 };
-pub use builder::SinkBuilderExt;
+
 pub use compressor::Compressor;
 pub use normalizer::Normalizer;
 pub use request_builder::{IncrementalRequestBuilder, RequestBuilder};
 pub use service::{
-    Concurrency, ServiceBuilderExt, TowerPartitionSink,
-    TowerRequestLayer, TowerRequestSettings,
+    Concurrency,
+
 };
-pub use sink::{BatchSink, PartitionBatchSink, StreamSink};
+pub use sink::{PartitionBatchSink, StreamSink};
 use snafu::Snafu;
 pub use uri::UriSerde;
 use vector_lib::{json_size::JsonSize, TimeZone};

@@ -46,7 +46,7 @@ use tokio::{
     sync::oneshot,
     time::{sleep, Duration, Sleep},
 };
-use tower::{Service, ServiceBuilder};
+use tower::{Service};
 use tracing::Instrument;
 use vector_lib::internal_event::{
     CallError, CountByteSize, EventsSent, InternalEventHandle as _, Output,
@@ -56,94 +56,11 @@ pub use vector_lib::sink::StreamSink;
 
 use super::{
     batch::{Batch, EncodedBatch, FinalizersBatch, PushResult, StatefulBatch},
-    buffer::{Partition, PartitionBuffer, PartitionInnerBuffer},
-    service::{Map, ServiceBuilderExt},
+    buffer::{Partition},
+
     EncodedEvent,
 };
 use crate::event::EventStatus;
-
-// === BatchSink ===
-
-/// A `Sink` interface that wraps a `Service` and a
-/// `Batch`.
-///
-/// Provided a batching scheme, a service and batch settings
-/// this type will handle buffering events via the batching scheme
-/// and dispatching requests via the service based on either the size
-/// of the batch or a batch linger timeout.
-///
-/// # Acking
-///
-/// Service based acking will only ack events when all prior request
-/// batches have been acked. This means if sequential requests r1, r2,
-/// and r3 are dispatched and r2 and r3 complete, all events contained
-/// in all requests will not be acked until r1 has completed.
-///
-/// Note: This has been deprecated, please do not use when creating new Sinks.
-#[pin_project]
-#[derive(Debug)]
-pub struct BatchSink<S, B>
-where
-    S: Service<B::Output>,
-    B: Batch,
-{
-    #[pin]
-    inner: PartitionBatchSink<
-        Map<S, PartitionInnerBuffer<B::Output, ()>, B::Output>,
-        PartitionBuffer<B, ()>,
-        (),
-    >,
-}
-/* 实现了一个装饰器模式
-=========
-这里实现batch sink的new方法 */
-impl<S, B> BatchSink<S, B>
-where
-    S: Service<B::Output>, /* `S` 必须实现 `Service` trait，处理 `B::Output` 类型的请求 */
-    S::Future: Send + 'static,
-    S::Error: Into<crate::Error> + Send + 'static,
-    S::Response: Response + Send + 'static,
-    B: Batch, /* `B` 必须实现 `Batch` trait */
-{
-    pub fn new(service: S, batch: B, timeout: Duration) -> Self {
-        let service = ServiceBuilder::new()
-            .map(|req: PartitionInnerBuffer<B::Output, ()>| req.into_parts().0)
-            .service(service);
-        let batch = PartitionBuffer::new(batch);
-        /* 创建内部的 `PartitionBatchSink` 实例 */
-        let inner = PartitionBatchSink::new(service, batch, timeout);
-        Self { inner }
-    }
-}
-
-impl<S, B> Sink<EncodedEvent<B::Input>> for BatchSink<S, B>
-where
-    S: Service<B::Output>,
-    S::Future: Send + 'static,
-    S::Error: Into<crate::Error> + Send + 'static,
-    S::Response: Response + Send + 'static,
-    B: Batch,
-{
-    type Error = crate::Error;
-
-    fn poll_ready(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        self.project().inner.poll_ready(cx)
-    }
-
-    fn start_send(self: Pin<&mut Self>, item: EncodedEvent<B::Input>) -> Result<(), Self::Error> {
-        self.project()
-            .inner
-            .start_send(item.map(|item| PartitionInnerBuffer::new(item, ())))
-    }
-
-    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        self.project().inner.poll_flush(cx)
-    }
-
-    fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        self.project().inner.poll_close(cx)
-    }
-}
 
 // === PartitionBatchSink ===
 

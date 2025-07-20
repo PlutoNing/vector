@@ -7,13 +7,9 @@ mod semaphore;
 mod service;
 
 
-pub(crate) use layer::AdaptiveConcurrencyLimitLayer;
-pub(crate) use service::AdaptiveConcurrencyLimit;
-use vector_lib::configurable::configurable_component;
 
-fn instant_now() -> std::time::Instant {
-    tokio::time::Instant::now().into()
-}
+
+use vector_lib::configurable::configurable_component;
 
 /// Configuration of adaptive concurrency parameters.
 ///

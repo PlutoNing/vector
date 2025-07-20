@@ -4,32 +4,7 @@ use std::{
     task::{Context, Poll},
 };
 
-use tower::{Layer, Service};
-
-pub struct MapLayer<R1, R2> {
-    f: Arc<dyn Fn(R1) -> R2 + Send + Sync + 'static>,
-}
-
-impl<R1, R2> MapLayer<R1, R2> {
-    pub(crate) fn new(f: Arc<dyn Fn(R1) -> R2 + Send + Sync + 'static>) -> Self {
-        Self { f }
-    }
-}
-
-impl<S, R1, R2> Layer<S> for MapLayer<R1, R2>
-where
-    S: Service<R2>,
-{
-    type Service = Map<S, R1, R2>;
-
-    fn layer(&self, inner: S) -> Self::Service {
-        Map {
-            f: Arc::clone(&self.f),
-            inner,
-        }
-    }
-}
-
+use tower::{Service};
 pub struct Map<S, R1, R2> {
     f: Arc<dyn Fn(R1) -> R2 + Send + Sync + 'static>,
     pub(crate) inner: S,

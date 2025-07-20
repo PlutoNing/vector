@@ -18,9 +18,6 @@ mod futures_unordered_count;
 mod partitioned_batcher;
 
 pub use concurrent_map::ConcurrentMap;
-pub use driver::{Driver, DriverResponse};
-use futures_unordered_count::FuturesUnorderedCount;
-pub use partitioned_batcher::{BatcherSettings, ExpirationQueue, PartitionedBatcher};
 
-#[macro_use]
-extern crate tracing;
+
+pub use partitioned_batcher::{BatcherSettings, ExpirationQueue, PartitionedBatcher};

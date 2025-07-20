@@ -6,7 +6,7 @@ pub use futures::{future, future::BoxFuture, stream::BoxStream, FutureExt, Strea
 pub use tower::{Service, ServiceBuilder};
 pub use vector_lib::buffers::EventCount;
 pub use vector_lib::configurable::configurable_component;
-pub use vector_lib::stream::{BatcherSettings, DriverResponse};
+pub use vector_lib::stream::{BatcherSettings};
 pub use vector_lib::{
     config::{telemetry, AcknowledgementsConfig, Input},
     event::Value,
@@ -30,12 +30,12 @@ pub use crate::{
     internal_events::{SinkRequestBuildError, TemplateRenderingError},
     sinks::{
         util::{
-            builder::SinkBuilderExt,
+
             encoding::{self, write_all},
             metadata::RequestMetadataBuilder,
             request_builder::{default_request_builder_concurrency_limit, EncodeResult},
             retries::{RetryAction, RetryLogic},
-            service::{ServiceBuilderExt, Svc},
+
             BatchConfig, Compression, Concurrency, NoDefaultsBatchSettings, RequestBuilder,
             SinkBatchSettings,
         },
