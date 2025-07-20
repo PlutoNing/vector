@@ -5,7 +5,7 @@ use flate2::write::{GzEncoder, ZlibEncoder};
 
 use super::{
     batch::{err_event_too_large, Batch, BatchSize, PushResult},
-    snappy::SnappyEncoder,
+
     zstd::ZstdEncoder,
 };
 
@@ -33,7 +33,6 @@ pub enum InnerBuffer {
     Gzip(GzEncoder<bytes::buf::Writer<BytesMut>>),
     Zlib(ZlibEncoder<bytes::buf::Writer<BytesMut>>),
     Zstd(ZstdEncoder<bytes::buf::Writer<BytesMut>>),
-    Snappy(SnappyEncoder<bytes::buf::Writer<BytesMut>>),
 }
 
 impl Buffer {
@@ -64,7 +63,6 @@ impl Buffer {
                     ZstdEncoder::new(writer, level.into())
                         .expect("Zstd encoder should not fail on init."),
                 ),
-                Compression::Snappy => InnerBuffer::Snappy(SnappyEncoder::new(writer)),
             }
         })
     }
@@ -84,7 +82,6 @@ impl Buffer {
             InnerBuffer::Zstd(inner) => {
                 inner.write_all(input).unwrap();
             }
-            InnerBuffer::Snappy(inner) => inner.write_all(input).unwrap(),
         }
     }
 
@@ -96,7 +93,6 @@ impl Buffer {
                 InnerBuffer::Gzip(inner) => inner.get_ref().get_ref().is_empty(),
                 InnerBuffer::Zlib(inner) => inner.get_ref().get_ref().is_empty(),
                 InnerBuffer::Zstd(inner) => inner.get_ref().get_ref().is_empty(),
-                InnerBuffer::Snappy(inner) => inner.is_empty(),
             })
             .unwrap_or(true)
     }
@@ -144,10 +140,6 @@ impl Batch for Buffer {
                 .expect("This can't fail because the inner writer is a Vec")
                 .into_inner(),
             Some(InnerBuffer::Zstd(inner)) => inner
-                .finish()
-                .expect("This can't fail because the inner writer is a Vec")
-                .into_inner(),
-            Some(InnerBuffer::Snappy(inner)) => inner
                 .finish()
                 .expect("This can't fail because the inner writer is a Vec")
                 .into_inner(),

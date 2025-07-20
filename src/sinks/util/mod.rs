@@ -15,7 +15,6 @@ pub mod request_builder;
 pub mod retries;
 pub mod service;
 pub mod sink;
-pub mod snappy;
 pub mod statistic;
 pub mod zstd;
 

@@ -3,7 +3,7 @@ use std::{io, io::BufWriter};
 use bytes::{BufMut, BytesMut};
 use flate2::write::{GzEncoder, ZlibEncoder};
 
-use super::{snappy::SnappyEncoder, zstd::ZstdEncoder, Compression};
+use super::{zstd::ZstdEncoder, Compression};
 
 const GZIP_INPUT_BUFFER_CAPACITY: usize = 4_096;
 const ZLIB_INPUT_BUFFER_CAPACITY: usize = 4_096;
@@ -15,7 +15,6 @@ enum Writer {
     Gzip(BufWriter<GzEncoder<bytes::buf::Writer<BytesMut>>>),
     Zlib(BufWriter<ZlibEncoder<bytes::buf::Writer<BytesMut>>>),
     Zstd(ZstdEncoder<bytes::buf::Writer<BytesMut>>),
-    Snappy(SnappyEncoder<bytes::buf::Writer<BytesMut>>),
 }
 
 impl Writer {
@@ -25,7 +24,6 @@ impl Writer {
             Writer::Gzip(inner) => inner.get_ref().get_ref().get_ref(),
             Writer::Zlib(inner) => inner.get_ref().get_ref().get_ref(),
             Writer::Zstd(inner) => inner.get_ref().get_ref(),
-            Writer::Snappy(inner) => inner.get_ref().get_ref(),
         }
     }
 
@@ -45,9 +43,6 @@ impl Writer {
             Writer::Zstd(writer) => writer
                 .finish()
                 .expect("zstd writer should not fail to finish"),
-            Writer::Snappy(writer) => writer
-                .finish()
-                .expect("snappy writer should not fail to finish"),
         }
         .into_inner()
     }
@@ -58,7 +53,6 @@ impl Writer {
             Writer::Gzip(writer) => writer.into_inner()?.finish()?,
             Writer::Zlib(writer) => writer.into_inner()?.finish()?,
             Writer::Zstd(writer) => writer.finish()?,
-            Writer::Snappy(writer) => writer.finish()?,
         }
         .into_inner();
 
@@ -90,7 +84,6 @@ impl From<Compression> for Writer {
                     .expect("Zstd encoder should not fail on init.");
                 Writer::Zstd(encoder)
             }
-            Compression::Snappy => Writer::Snappy(SnappyEncoder::new(writer)),
         }
     }
 }
@@ -103,7 +96,6 @@ impl io::Write for Writer {
             Writer::Gzip(writer) => writer.write(buf),
             Writer::Zlib(writer) => writer.write(buf),
             Writer::Zstd(writer) => writer.write(buf),
-            Writer::Snappy(writer) => writer.write(buf),
         }
     }
 
@@ -113,7 +105,6 @@ impl io::Write for Writer {
             Writer::Gzip(writer) => writer.flush(),
             Writer::Zlib(writer) => writer.flush(),
             Writer::Zstd(writer) => writer.flush(),
-            Writer::Snappy(writer) => writer.flush(),
         }
     }
 }
