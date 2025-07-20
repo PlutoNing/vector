@@ -9,7 +9,7 @@ pub(crate) mod is_metric;
 pub(crate) mod is_trace;
 mod vrl;
 
-pub use self::vrl::VrlConfig;
+
 use self::{
     is_log::{check_is_log},
     is_metric::{check_is_metric},
@@ -86,21 +86,17 @@ pub enum ConditionConfig {
     /// Matches an event if it is a trace.
     #[configurable(metadata(docs::hidden))]
     IsTrace,
-
-    /// Matches an event with a [Vector Remap Language](https://vector.dev/docs/reference/vrl) (VRL) [boolean expression](https://vector.dev/docs/reference/vrl#boolean-expressions).
-    Vrl(VrlConfig),
 }
 
 impl ConditionConfig {
     pub fn build(
         &self,
-        enrichment_tables: &vector_lib::enrichment::TableRegistry,
+        _enrichment_tables: &vector_lib::enrichment::TableRegistry,
     ) -> crate::Result<Condition> {
         match self {
             ConditionConfig::IsLog => Ok(Condition::IsLog),
             ConditionConfig::IsMetric => Ok(Condition::IsMetric),
             ConditionConfig::IsTrace => Ok(Condition::IsTrace),
-            ConditionConfig::Vrl(x) => x.build(enrichment_tables),
         }
     }
 }
