@@ -6,7 +6,7 @@ use ordered_float::NotNan;
 use uuid::Uuid;
 
 use super::{MetricTags, WithMetadata};
-use crate::{event, metrics::AgentDDSketch};
+use crate::{event};
 
 #[allow(warnings, clippy::all, clippy::pedantic)]
 mod proto_event {
@@ -17,7 +17,7 @@ pub use metric::Value as MetricValue;
 pub use proto_event::*;
 use vrl::value::{ObjectMap, Value as VrlValue};
 
-use super::{array, metric::MetricSketch, EventMetadata};
+use super::{array, EventMetadata};
 
 impl event_array::Events {
     // We can't use the standard `From` traits here because the actual
@@ -194,11 +194,7 @@ impl From<MetricValue> for super::MetricValue {
                 count: summary.count,
                 sum: summary.sum,
             },
-            MetricValue::Sketch(sketch) => match sketch.sketch.unwrap() {
-                sketch::Sketch::AgentDdSketch(ddsketch) => Self::Sketch {
-                    sketch: ddsketch.into(),
-                },
-            },
+            MetricValue::Sketch(_sketch) => Self::Counter { value: 0.0 },
         }
     }
 }
@@ -373,44 +369,16 @@ impl From<super::MetricValue> for MetricValue {
                     .into(),
                 })
             }
-            super::MetricValue::AggregatedHistogram {
-                buckets,
-                count,
-                sum,
-            } => Self::AggregatedHistogram3(AggregatedHistogram3 {
+            super::MetricValue::AggregatedHistogram {buckets,count,sum,} => Self::AggregatedHistogram3(AggregatedHistogram3 {
                 buckets: buckets.into_iter().map(Into::into).collect(),
                 count,
                 sum,
             }),
-            super::MetricValue::AggregatedSummary {
-                quantiles,
-                count,
-                sum,
-            } => Self::AggregatedSummary3(AggregatedSummary3 {
+            super::MetricValue::AggregatedSummary {quantiles, count, sum,} => Self::AggregatedSummary3(AggregatedSummary3 {
                 quantiles: quantiles.into_iter().map(Into::into).collect(),
                 count,
                 sum,
             }),
-            super::MetricValue::Sketch { sketch } => match sketch {
-                MetricSketch::AgentDDSketch(ddsketch) => {
-                    let bin_map = ddsketch.bin_map();
-                    let (keys, counts) = bin_map.into_parts();
-                    let keys = keys.into_iter().map(i32::from).collect();
-                    let counts = counts.into_iter().map(u32::from).collect();
-
-                    Self::Sketch(Sketch {
-                        sketch: Some(sketch::Sketch::AgentDdSketch(sketch::AgentDdSketch {
-                            count: ddsketch.count(),
-                            min: ddsketch.min().unwrap_or(f64::MAX),
-                            max: ddsketch.max().unwrap_or(f64::MIN),
-                            sum: ddsketch.sum().unwrap_or(0.0),
-                            avg: ddsketch.avg().unwrap_or(0.0),
-                            k: keys,
-                            n: counts,
-                        })),
-                    })
-                }
-            },
         }
     }
 }
@@ -507,58 +475,6 @@ impl From<super::Event> for EventWrapper {
 impl From<super::Event> for WithMetadata<EventWrapper> {
     fn from(event: super::Event) -> Self {
         WithMetadata::<Event>::from(event).into()
-    }
-}
-
-impl From<AgentDDSketch> for Sketch {
-    fn from(ddsketch: AgentDDSketch) -> Self {
-        let bin_map = ddsketch.bin_map();
-        let (keys, counts) = bin_map.into_parts();
-        let ddsketch = sketch::AgentDdSketch {
-            count: ddsketch.count(),
-            min: ddsketch.min().unwrap_or(f64::MAX),
-            max: ddsketch.max().unwrap_or(f64::MIN),
-            sum: ddsketch.sum().unwrap_or(0.0),
-            avg: ddsketch.avg().unwrap_or(0.0),
-            k: keys.into_iter().map(i32::from).collect(),
-            n: counts.into_iter().map(u32::from).collect(),
-        };
-        Sketch {
-            sketch: Some(sketch::Sketch::AgentDdSketch(ddsketch)),
-        }
-    }
-}
-
-impl From<sketch::AgentDdSketch> for MetricSketch {
-    fn from(sketch: sketch::AgentDdSketch) -> Self {
-        // These safe conversions are annoying because the Datadog Agent internally uses i16/u16,
-        // but the proto definition uses i32/u32, so we have to jump through these hoops.
-        let keys = sketch
-            .k
-            .into_iter()
-            .map(|k| (k, k > 0))
-            .map(|(k, pos)| {
-                k.try_into()
-                    .unwrap_or(if pos { i16::MAX } else { i16::MIN })
-            })
-            .collect::<Vec<_>>();
-        let counts = sketch
-            .n
-            .into_iter()
-            .map(|n| n.try_into().unwrap_or(u16::MAX))
-            .collect::<Vec<_>>();
-        MetricSketch::AgentDDSketch(
-            AgentDDSketch::from_raw(
-                sketch.count,
-                sketch.min,
-                sketch.max,
-                sketch.sum,
-                sketch.avg,
-                &keys,
-                &counts,
-            )
-            .expect("keys/counts were unexpectedly mismatched"),
-        )
     }
 }
 

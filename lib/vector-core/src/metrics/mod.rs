@@ -1,4 +1,4 @@
-mod ddsketch;
+
 mod label_filter;
 mod metric_matcher;
 mod recency;
@@ -14,7 +14,7 @@ use metrics::Key;
 
 use snafu::Snafu;
 
-pub use self::ddsketch::{AgentDDSketch, BinMap, Config};
+
 use self::{recorder::Registry, recorder::VectorRecorder};
 use crate::{
     config::metrics_expiration::PerMetricSetExpiration,

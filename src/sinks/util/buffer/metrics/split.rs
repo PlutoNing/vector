@@ -119,7 +119,7 @@ impl MetricSplit for AggregatedSummarySplitter {
             | MetricValue::Set { .. }
             | MetricValue::Distribution { .. }
             | MetricValue::AggregatedHistogram { .. }
-            | MetricValue::Sketch { .. } => {
+             => {
                 SplitIterator::single(Metric::from_parts(series, data, metadata))
             }
             MetricValue::AggregatedSummary { .. } => {
