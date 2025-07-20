@@ -18,7 +18,6 @@ vector-stream = { path = "../vector-stream" }
 vrl = { workspace = true, optional = true }
 
 [features]
-lua = ["vector-core/lua"]
 file-source = ["dep:file-source"]
 proptest = []
 syslog = ["codecs/syslog"]

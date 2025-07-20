@@ -18,9 +18,6 @@ use crate::{
     schema,
 };
 
-#[cfg(feature = "lua")]
-pub mod runtime_transform;
-
 /// Transforms come in two variants. Functions, or tasks.
 ///
 /// While function transforms can be run out of order, or concurrently, task
