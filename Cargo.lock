@@ -9752,7 +9752,6 @@ dependencies = [
  "vector-core",
  "vector-lookup",
  "vector-stream",
- "vector-tap",
  "vrl",
 ]
 
@@ -9784,30 +9783,6 @@ dependencies = [
  "tower 0.5.2",
  "tracing 0.1.41",
  "twox-hash 2.1.1",
- "vector-common",
- "vector-core",
-]
-
-[[package]]
-name = "vector-tap"
-version = "0.1.0"
-dependencies = [
- "async-graphql",
- "chrono",
- "colored",
- "futures 0.3.31",
- "futures-util",
- "glob",
- "portpicker",
- "serde_json",
- "serde_yaml",
- "tokio",
- "tokio-stream",
- "tokio-tungstenite 0.20.1",
- "tracing 0.1.41",
- "url",
- "uuid",
- "vector-buffers",
  "vector-common",
  "vector-core",
 ]

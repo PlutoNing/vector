@@ -24,11 +24,10 @@ use crate::{
 use futures::{future, Future, FutureExt};
 use stream_cancel::Trigger;
 use tokio::{
-    sync::{mpsc, watch},
+    sync::{mpsc},
     time::{interval, sleep_until, Duration, Instant},
 };
 use tracing::Instrument;
-use vector_lib::tap::topology::{TapOutput, TapResource, WatchRx, WatchTx};
 use vector_lib::trigger::DisabledTrigger;
 use vector_lib::{buffers::topology::channel::BufferSender, shutdown::ShutdownSignal};
 
@@ -37,16 +36,13 @@ pub type ShutdownErrorReceiver = mpsc::UnboundedReceiver<ShutdownError>;
 #[allow(dead_code)]
 pub struct RunningTopology {
     inputs: HashMap<ComponentKey, BufferSender<EventArray>>,
-    inputs_tap_metadata: HashMap<ComponentKey, Inputs<OutputId>>,
     outputs: HashMap<OutputId, ControlChannel>,
-    outputs_tap_metadata: HashMap<ComponentKey, (&'static str, String)>,
     source_tasks: HashMap<ComponentKey, TaskHandle>,
     tasks: HashMap<ComponentKey, TaskHandle>,
     shutdown_coordinator: SourceShutdownCoordinator,
     detach_triggers: HashMap<ComponentKey, DisabledTrigger>,
     pub(crate) config: Config,
     pub(crate) abort_tx: mpsc::UnboundedSender<ShutdownError>,
-    watch: (WatchTx, WatchRx),
     pub(crate) running: Arc<AtomicBool>,
     graceful_shutdown_duration: Option<Duration>,
     utilization_task: Option<TaskHandle>,
@@ -58,15 +54,12 @@ impl RunningTopology {
     pub fn new(config: Config, abort_tx: mpsc::UnboundedSender<ShutdownError>) -> Self {
         Self {
             inputs: HashMap::new(),
-            inputs_tap_metadata: HashMap::new(),
             outputs: HashMap::new(),
-            outputs_tap_metadata: HashMap::new(),
             shutdown_coordinator: SourceShutdownCoordinator::default(),
             detach_triggers: HashMap::new(),
             source_tasks: HashMap::new(),
             tasks: HashMap::new(),
             abort_tx,
-            watch: watch::channel(TapResource::default()),
             running: Arc::new(AtomicBool::new(true)),
             graceful_shutdown_duration: config.graceful_shutdown_duration,
             config,
@@ -88,13 +81,6 @@ impl RunningTopology {
             None => self.pending_reload = Some(new_set.clone()),
             Some(existing) => existing.extend(new_set),
         }
-    }
-
-    /// Creates a subscription to topology changes.
-    ///
-    /// This is used by the tap API to observe configuration changes, and re-wire tap sinks.
-    pub fn watch(&self) -> watch::Receiver<TapResource> {
-        self.watch.1.clone()
     }
 
     /// Signal that all sources in this topology are ended.
@@ -608,55 +594,6 @@ impl RunningTopology {
     ) {
         debug!("Connecting changed/added component(s).");
 
-        // Update tap metadata
-        if !self.watch.0.is_closed() {
-            for key in &diff.sources.to_remove {
-                // Sources only have outputs
-                self.outputs_tap_metadata.remove(key);
-            }
-
-            for key in &diff.transforms.to_remove {
-                // Transforms can have both inputs and outputs
-                self.outputs_tap_metadata.remove(key);
-                self.inputs_tap_metadata.remove(key);
-            }
-
-            for key in &diff.sinks.to_remove {
-                // Sinks only have inputs
-                self.inputs_tap_metadata.remove(key);
-            }
-
-            let removed_sinks = diff.enrichment_tables.to_remove.iter().filter(|key| {
-                self.config
-                    .enrichment_table(key)
-                    .and_then(|t| t.as_sink(key))
-                    .is_some()
-            });
-            for key in removed_sinks {
-                // Sinks only have inputs
-                self.inputs_tap_metadata.remove(key);
-            }
-
-            for key in diff.sources.changed_and_added() {
-                if let Some(task) = new_pieces.tasks.get(key) {
-                    self.outputs_tap_metadata
-                        .insert(key.clone(), ("source", task.typetag().to_string()));
-                }
-            }
-
-            for key in diff.transforms.changed_and_added() {
-                if let Some(task) = new_pieces.tasks.get(key) {
-                    self.outputs_tap_metadata
-                        .insert(key.clone(), ("transform", task.typetag().to_string()));
-                }
-            }
-
-            for (key, input) in &new_pieces.inputs {
-                self.inputs_tap_metadata
-                    .insert(key.clone(), input.1.clone());
-            }
-        }
-
         // We configure the outputs of any changed/added sources first, so they're available to any
         // transforms and sinks that come afterwards.
         for key in diff.sources.changed_and_added() {
@@ -714,52 +651,6 @@ impl RunningTopology {
         // connect components backwards i.e. transforms to sources/transforms, and sinks to
         // sources/transforms, to ensure we're connecting components in order.
         self.reattach_severed_inputs(diff);
-
-        // Broadcast any topology changes to subscribers.
-        if !self.watch.0.is_closed() {
-            let outputs = self
-                .outputs
-                .clone()
-                .into_iter()
-                .flat_map(|(output_id, control_tx)| {
-                    self.outputs_tap_metadata.get(&output_id.component).map(
-                        |(component_kind, component_type)| {
-                            (
-                                TapOutput {
-                                    output_id,
-                                    component_kind,
-                                    component_type: component_type.clone(),
-                                },
-                                control_tx,
-                            )
-                        },
-                    )
-                })
-                .collect::<HashMap<_, _>>();
-
-            let mut removals = diff.sources.to_remove.clone();
-            removals.extend(diff.transforms.to_remove.iter().cloned());
-            self.watch
-                .0
-                .send(TapResource {
-                    outputs,
-                    inputs: self.inputs_tap_metadata.clone(),
-                    source_keys: diff
-                        .sources
-                        .changed_and_added()
-                        .map(|key| key.to_string())
-                        .collect(),
-                    sink_keys: diff
-                        .sinks
-                        .changed_and_added()
-                        .map(|key| key.to_string())
-                        .collect(),
-                    // Note, only sources and transforms are relevant. Sinks do
-                    // not have outputs to tap.
-                    removals,
-                })
-                .expect("Couldn't broadcast config changes.");
-        }
     }
 
     async fn setup_outputs(
