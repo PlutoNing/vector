@@ -9804,22 +9804,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "vector-vrl-tests"
-version = "0.1.0"
-dependencies = [
- "chrono-tz",
- "clap",
- "enrichment",
- "glob",
- "serde",
- "serde_json",
- "tikv-jemallocator",
- "tracing-subscriber",
- "vector-vrl-functions",
- "vrl",
-]
-
-[[package]]
 name = "vector-vrl-web-playground"
 version = "0.1.0"
 dependencies = [
