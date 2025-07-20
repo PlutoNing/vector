@@ -1,4 +1,4 @@
-use futures::{future, FutureExt};
+
 use tokio::io;
 use vector_lib::codecs::{
     encoding::{Framer, FramingConfig},
@@ -9,7 +9,7 @@ use vector_lib::configurable::configurable_component;
 use crate::{
     codecs::{Encoder, EncodingConfigWithFraming, SinkType},
     config::{AcknowledgementsConfig, GenerateConfig, Input, SinkConfig, SinkContext},
-    sinks::{console::sink::WriterSink, Healthcheck, VectorSink},
+    sinks::{console::sink::WriterSink, VectorSink},
 };
 
 /// The [standard stream][standard_streams] to write to.
@@ -76,7 +76,7 @@ impl GenerateConfig for ConsoleSinkConfig {
 #[typetag::serde(name = "console")]
 impl SinkConfig for ConsoleSinkConfig {
     /* 构建指定的sink */
-    async fn build(&self, _cx: SinkContext) -> crate::Result<(VectorSink, Healthcheck)> {
+    async fn build(&self, _cx: SinkContext) -> crate::Result<VectorSink> {
         let transformer = self.encoding.transformer();
         /* Result<(Framer, Serializer)可能分别是字符分割编码器,和文本序列化器 */
         let (framer, serializer) = self.encoding.build(SinkType::StreamBased)?; 
@@ -96,7 +96,7 @@ impl SinkConfig for ConsoleSinkConfig {
             }),
         };
 
-        Ok((sink, future::ok(()).boxed()))
+        Ok(sink)
     }
 
     fn input(&self) -> Input {

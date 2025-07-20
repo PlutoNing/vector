@@ -9,12 +9,12 @@ use std::{
 use super::{
     builder::{self, TopologyPieces},
     fanout::{ControlChannel, ControlMessage},
-    handle_errors, retain, take_healthchecks,
+    handle_errors, retain,
     task::{Task, TaskOutput},
     BuiltBuffer, TaskHandle,
 };
 use crate::{
-    config::{ComponentKey, Config, ConfigDiff, HealthcheckOptions, Inputs, OutputId, Resource},
+    config::{ComponentKey, Config, ConfigDiff, Inputs, OutputId, Resource},
     event::EventArray,
     extra_context::ExtraContext,
     shutdown::SourceShutdownCoordinator,
@@ -290,21 +290,14 @@ impl RunningTopology {
         )
         .await
         {
-            // If healthchecks are configured for any of the changing/new components, try running
-            // them before moving forward with connecting and spawning.  In some cases, healthchecks
-            // failing may be configured as a non-blocking issue and so we'll still continue on.
-            if self
-                .run_healthchecks(&diff, &mut new_pieces, new_config.healthchecks)
-                .await
-            {
-                self.connect_diff(&diff, &mut new_pieces).await;
-                self.spawn_diff(&diff, new_pieces);
-                self.config = new_config;
+            self.connect_diff(&diff, &mut new_pieces).await;
+            self.spawn_diff(&diff, new_pieces);
+            self.config = new_config;
 
-                info!("New configuration loaded successfully.");
+            info!("New configuration loaded successfully.");
 
-                return Ok(true);
-            }
+            return Ok(true);
+    
         }
 
         // We failed to build, connect, and spawn all of the changed/new components, so we flip
@@ -317,54 +310,18 @@ impl RunningTopology {
             TopologyPieces::build_or_log_errors(&self.config, &diff, buffers, extra_context.clone())
                 .await
         {
-            if self
-                .run_healthchecks(&diff, &mut new_pieces, self.config.healthchecks)
-                .await
-            {
-                self.connect_diff(&diff, &mut new_pieces).await;
-                self.spawn_diff(&diff, new_pieces);
+            self.connect_diff(&diff, &mut new_pieces).await;
+            self.spawn_diff(&diff, new_pieces);
 
-                info!("Old configuration restored successfully.");
+            info!("Old configuration restored successfully.");
 
-                return Ok(false);
-            }
+            return Ok(false);
+
         }
 
         error!("Failed to restore old configuration.");
 
         Err(())
-    }
-
-    pub(crate) async fn run_healthchecks(
-        &mut self,
-        diff: &ConfigDiff,
-        pieces: &mut TopologyPieces,
-        options: HealthcheckOptions,
-    ) -> bool {
-        if options.enabled {
-            let healthchecks = take_healthchecks(diff, pieces)
-                .into_iter()
-                .map(|(_, task)| task);
-            let healthchecks = future::try_join_all(healthchecks);
-
-            info!("Running healthchecks.");
-            if options.require_healthy {
-                let success = healthchecks.await;
-
-                if success.is_ok() {
-                    info!("All healthchecks passed.");
-                    true
-                } else {
-                    error!("Sinks unhealthy.");
-                    false
-                }
-            } else {
-                tokio::spawn(healthchecks);
-                true
-            }
-        } else {
-            true
-        }
     }
 
     /// Shuts down any changed/removed component in the given configuration diff.
@@ -1190,12 +1147,6 @@ impl RunningTopology {
             .expect("Topology is missing the utilization metric emitter!");
         let mut running_topology = Self::new(config, abort_tx);
 
-        if !running_topology
-            .run_healthchecks(&diff, &mut pieces, running_topology.config.healthchecks)
-            .await
-        {
-            return None;
-        }
         running_topology.connect_diff(&diff, &mut pieces).await;
         running_topology.spawn_diff(&diff, pieces);
 

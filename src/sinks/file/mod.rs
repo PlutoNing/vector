@@ -5,9 +5,9 @@ use async_compression::tokio::write::{GzipEncoder, ZstdEncoder};
 use async_trait::async_trait;
 use bytes::{Bytes, BytesMut};
 use futures::{
-    future,
+
     stream::{BoxStream, StreamExt},
-    FutureExt,
+
 };
 use serde_with::serde_as;
 use tokio::{
@@ -185,12 +185,12 @@ impl SinkConfig for FileSinkConfig {
     async fn build(
         &self,
         cx: SinkContext,
-    ) -> crate::Result<(super::VectorSink, super::Healthcheck)> {
+    ) -> crate::Result<super::VectorSink> {
         let sink = FileSink::new(self, cx)?;/* 这里构建filesink的各种成员实例 */
-        Ok((
-            super::VectorSink::from_event_streamsink(sink), /* 从FileSink到vectorSink */
-            future::ok(()).boxed(),
-        ))
+        Ok(
+            super::VectorSink::from_event_streamsink(sink) /* 从FileSink到vectorSink */
+      
+        )
     }
 
     fn input(&self) -> Input {

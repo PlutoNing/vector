@@ -1,10 +1,7 @@
 use std::cell::RefCell;
-use std::time::Duration;
-
 use async_trait::async_trait;
 use dyn_clone::DynClone;
 use serde::Serialize;
-use serde_with::serde_as;
 use std::path::PathBuf;
 use vector_lib::buffers::{BufferConfig, BufferType};
 use vector_lib::configurable::attributes::CustomAttribute;
@@ -20,7 +17,7 @@ use vector_lib::{
 
 use super::{dot_graph::GraphConfig, schema, ComponentKey, ProxyConfig, Resource};
 use crate::extra_context::ExtraContext;
-use crate::sinks::{util::UriSerde, Healthcheck};
+
 
 pub type BoxedSink = Box<dyn SinkConfig>;
 
@@ -63,17 +60,6 @@ where
     #[configurable(derived)]
     pub inputs: Inputs<T>,
 
-    /// The full URI to make HTTP healthcheck requests to.
-    ///
-    /// This must be a valid URI, which requires at least the scheme and host. All other
-    /// components -- port, path, etc -- are allowed as well.
-    #[configurable(deprecated, metadata(docs::hidden), validation(format = "uri"))]
-    pub healthcheck_uri: Option<UriSerde>,
-
-    #[configurable(derived, metadata(docs::advanced))]
-    #[serde(default, deserialize_with = "crate::serde::bool_or_struct")]
-    pub healthcheck: SinkHealthcheckOptions,
-
     #[configurable(derived)]
     #[serde(default, skip_serializing_if = "vector_lib::serde::is_default")]
     pub buffer: BufferConfig,
@@ -99,8 +85,6 @@ where
         SinkOuter {
             inputs: Inputs::from_iter(inputs),
             buffer: Default::default(),
-            healthcheck: SinkHealthcheckOptions::default(),
-            healthcheck_uri: None,
             inner: inner.into(),
             proxy: Default::default(),
             graph: Default::default(),
@@ -116,24 +100,6 @@ where
             }
         }
         resources
-    }
-
-    pub fn healthcheck(&self) -> SinkHealthcheckOptions {
-        if self.healthcheck_uri.is_some() && self.healthcheck.uri.is_some() {
-            warn!("Both `healthcheck.uri` and `healthcheck_uri` options are specified. Using value of `healthcheck.uri`.")
-        } else if self.healthcheck_uri.is_some() {
-            warn!(
-                "The `healthcheck_uri` option has been deprecated, use `healthcheck.uri` instead."
-            )
-        }
-        SinkHealthcheckOptions {
-            uri: self
-                .healthcheck
-                .uri
-                .clone()
-                .or_else(|| self.healthcheck_uri.clone()),
-            ..self.healthcheck.clone()
-        }
     }
 
     pub const fn proxy(&self) -> &ProxyConfig {
@@ -157,74 +123,12 @@ where
             inputs: Inputs::from_iter(inputs),
             inner: self.inner,
             buffer: self.buffer,
-            healthcheck: self.healthcheck,
-            healthcheck_uri: self.healthcheck_uri,
             proxy: self.proxy,
             graph: self.graph,
         }
     }
 }
 
-/// Healthcheck configuration.
-#[serde_as]
-#[configurable_component]
-#[derive(Clone, Debug)]
-#[serde(default)]
-pub struct SinkHealthcheckOptions {
-    /// Whether or not to check the health of the sink when Vector starts up.
-    pub enabled: bool,
-
-    /// Timeout duration for healthcheck in seconds.
-    #[serde_as(as = "serde_with::DurationSecondsWithFrac<f64>")]
-    #[serde(
-        default = "default_healthcheck_timeout",
-        skip_serializing_if = "is_default_healthcheck_timeout"
-    )]
-    pub timeout: Duration,
-
-    /// The full URI to make HTTP healthcheck requests to.
-    ///
-    /// This must be a valid URI, which requires at least the scheme and host. All other
-    /// components -- port, path, etc -- are allowed as well.
-    #[configurable(validation(format = "uri"))]
-    pub uri: Option<UriSerde>,
-}
-
-const fn default_healthcheck_timeout() -> Duration {
-    Duration::from_secs(10)
-}
-
-fn is_default_healthcheck_timeout(timeout: &Duration) -> bool {
-    timeout == &default_healthcheck_timeout()
-}
-
-impl Default for SinkHealthcheckOptions {
-    fn default() -> Self {
-        Self {
-            enabled: true,
-            uri: None,
-            timeout: default_healthcheck_timeout(),
-        }
-    }
-}
-
-impl From<bool> for SinkHealthcheckOptions {
-    fn from(enabled: bool) -> Self {
-        Self {
-            enabled,
-            ..Default::default()
-        }
-    }
-}
-
-impl From<UriSerde> for SinkHealthcheckOptions {
-    fn from(uri: UriSerde) -> Self {
-        Self {
-            uri: Some(uri),
-            ..Default::default()
-        }
-    }
-}
 
 /// Generalized interface for describing and building sink components.
 #[async_trait]
@@ -239,7 +143,7 @@ pub trait SinkConfig: DynClone + NamedComponent + core::fmt::Debug + Send + Sync
     ///
     /// If an error occurs while building the sink, an error variant explaining the issue is
     /// returned.
-    async fn build(&self, cx: SinkContext) -> crate::Result<(VectorSink, Healthcheck)>;
+    async fn build(&self, cx: SinkContext) -> crate::Result<VectorSink>;
 
     /// Gets the input configuration for this sink.
     fn input(&self) -> Input;
@@ -268,7 +172,6 @@ dyn_clone::clone_trait_object!(SinkConfig);
 
 #[derive(Clone)]
 pub struct SinkContext {
-    pub healthcheck: SinkHealthcheckOptions,
     pub globals: GlobalOptions,
     pub enrichment_tables: vector_lib::enrichment::TableRegistry,
     pub proxy: ProxyConfig,
@@ -284,7 +187,6 @@ pub struct SinkContext {
 impl Default for SinkContext {
     fn default() -> Self {
         Self {
-            healthcheck: Default::default(),
             globals: Default::default(),
             enrichment_tables: Default::default(),
             proxy: Default::default(),

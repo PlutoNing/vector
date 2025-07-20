@@ -30,9 +30,9 @@ pub use self::builder::TopologyPieces;
 pub use self::controller::{ReloadOutcome, SharedTopologyController, TopologyController};
 pub use self::running::{RunningTopology, ShutdownErrorReceiver};
 
-use self::task::{Task, TaskError, TaskResult};
+use self::task::{TaskError, TaskResult};
 use crate::{
-    config::{ComponentKey, Config, ConfigDiff},
+    config::{Config, ConfigDiff},
     event::EventArray,
     signal::ShutdownError,
 };
@@ -43,16 +43,6 @@ type BuiltBuffer = (
     BufferSender<EventArray>,
     Arc<Mutex<Option<BufferReceiverStream<EventArray>>>>,
 );
-
-pub(super) fn take_healthchecks(
-    diff: &ConfigDiff,
-    pieces: &mut TopologyPieces,
-) -> Vec<(ComponentKey, Task)> {
-    (&diff.sinks.to_change | &diff.sinks.to_add)
-        .into_iter()
-        .filter_map(|id| pieces.healthchecks.remove(&id).map(move |task| (id, task)))
-        .collect()
-}
 
 async fn handle_errors(
     task: impl Future<Output = TaskResult>,

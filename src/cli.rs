@@ -100,10 +100,6 @@ pub struct RootOpts {
     )]
     pub config_paths_yaml: Vec<PathBuf>,
 
-    /// Exit on startup if any sinks fail healthchecks
-    #[arg(short, long, env = "VECTOR_REQUIRE_HEALTHY")]
-    pub require_healthy: Option<bool>,
-
     /// 线程数量
     #[arg(short, long, env = "VECTOR_THREADS")]
     pub threads: Option<usize>,

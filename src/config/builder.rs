@@ -8,7 +8,7 @@ use crate::{enrichment_tables::EnrichmentTables};
 
 use super::{
     compiler, schema, BoxedSink, BoxedSource, BoxedTransform, ComponentKey, Config,
-    EnrichmentTableOuter, HealthcheckOptions, SinkOuter, SourceOuter, 
+    EnrichmentTableOuter, SinkOuter, SourceOuter, 
     TransformOuter,
 };
 
@@ -24,10 +24,6 @@ pub struct ConfigBuilder {
     #[configurable(metadata(docs::hidden))]
     #[serde(default)]
     pub schema: schema::Options,
-
-    #[configurable(derived)]
-    #[serde(default)]
-    pub healthchecks: HealthcheckOptions,
 
     /// All configured enrichment tables.
     #[serde(default)]
@@ -63,7 +59,6 @@ impl From<Config> for ConfigBuilder {
         let Config {
             global,
             schema,
-            healthchecks,
             enrichment_tables,
             sources,
             sinks,
@@ -89,7 +84,6 @@ impl From<Config> for ConfigBuilder {
         ConfigBuilder {
             global,
             schema,
-            healthchecks,
             enrichment_tables,
             sources,
             sinks,
@@ -187,8 +181,6 @@ impl ConfigBuilder {
         self.schema.append(with.schema, &mut errors);
 
         self.schema.log_namespace = self.schema.log_namespace.or(with.schema.log_namespace);
-
-        self.healthchecks.merge(with.healthchecks);
 
         with.enrichment_tables.keys().for_each(|k| {
             if self.enrichment_tables.contains_key(k) {

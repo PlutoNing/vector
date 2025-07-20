@@ -31,7 +31,7 @@ impl SharedTopologyController {
 pub struct TopologyController {
     pub topology: RunningTopology,
     pub config_paths: Vec<config::ConfigPath>,
-    pub require_healthy: Option<bool>,
+
     pub extra_context: ExtraContext,
 }
 
@@ -39,7 +39,7 @@ impl std::fmt::Debug for TopologyController {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("TopologyController")
             .field("config_paths", &self.config_paths)
-            .field("require_healthy", &self.require_healthy)
+
             .finish()
     }
 }
@@ -53,11 +53,7 @@ pub enum ReloadOutcome {
 }
 
 impl TopologyController {
-    pub async fn reload(&mut self, mut new_config: config::Config) -> ReloadOutcome {
-        new_config
-            .healthchecks
-            .set_require_healthy(self.require_healthy);
-
+    pub async fn reload(&mut self, new_config: config::Config) -> ReloadOutcome {
         match self
             .topology
             .reload_config_and_respawn(new_config, self.extra_context.clone())

@@ -1,5 +1,5 @@
 #![allow(missing_docs)]
-use futures::future::BoxFuture;
+
 use snafu::Snafu;
 
 pub mod prelude;
@@ -11,8 +11,6 @@ pub mod console;
 pub mod file;
 
 pub use vector_lib::{config::Input, sink::VectorSink};
-
-pub type Healthcheck = BoxFuture<'static, crate::Result<()>>;
 
 /// Common build errors
 #[derive(Debug, Snafu)]
@@ -27,11 +25,4 @@ pub enum BuildError {
     UriParseError { source: ::http::uri::InvalidUri },
     #[snafu(display("HTTP request build error: {}", source))]
     HTTPRequestBuilderError { source: ::http::Error },
-}
-
-/// Common healthcheck errors
-#[derive(Debug, Snafu)]
-pub enum HealthcheckError {
-    #[snafu(display("Unexpected status: {}", status))]
-    UnexpectedStatus { status: ::http::StatusCode },
 }

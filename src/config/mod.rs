@@ -12,7 +12,6 @@ use std::{
 use indexmap::IndexMap;
 use serde::Serialize;
 
-use vector_config::configurable_component;
 pub use vector_lib::config::{
     AcknowledgementsConfig, DataType, GlobalOptions, Input, LogNamespace,
     SourceAcknowledgementsConfig, SourceOutput, TransformOutput, WildcardMatching,
@@ -48,7 +47,7 @@ pub use loading::{
     load_from_str, load_source_from_paths, merge_path_lists, process_paths,
     CONFIG_PATHS,
 };
-pub use sink::{BoxedSink, SinkConfig, SinkContext, SinkHealthcheckOptions, SinkOuter};
+pub use sink::{BoxedSink, SinkConfig, SinkContext, SinkOuter};
 pub use source::{BoxedSource, SourceConfig, SourceContext, SourceOuter};
 pub use transform::{
     get_transform_output_ids, BoxedTransform, TransformConfig, TransformContext, TransformOuter,
@@ -117,7 +116,6 @@ impl ConfigPath {
 pub struct Config {
     pub schema: schema::Options,
     pub global: GlobalOptions,
-    pub healthchecks: HealthcheckOptions,
     sources: IndexMap<ComponentKey, SourceOuter>,
     sinks: IndexMap<ComponentKey, SinkOuter<OutputId>>,
     transforms: IndexMap<ComponentKey, TransformOuter<OutputId>>,
@@ -217,46 +215,6 @@ impl Config {
                     .collect();
                 self.propagate_acks_rec(inputs);
             }
-        }
-    }
-}
-/* 作为config.healthchecks */
-/// Healthcheck options.
-#[configurable_component]
-#[derive(Clone, Copy, Debug)]
-#[serde(default)]
-pub struct HealthcheckOptions {
-    /// Whether or not healthchecks are enabled for all sinks.
-    ///
-    /// Can be overridden on a per-sink basis.
-    pub enabled: bool,
-
-    /// Whether or not to require a sink to report as being healthy during startup.
-    ///
-    /// When enabled and a sink reports not being healthy, Vector will exit during start-up.
-    ///
-    /// Can be alternatively set, and overridden by, the `--require-healthy` command-line flag.
-    pub require_healthy: bool,
-}
-
-impl HealthcheckOptions {
-    pub fn set_require_healthy(&mut self, require_healthy: impl Into<Option<bool>>) {
-        if let Some(require_healthy) = require_healthy.into() {
-            self.require_healthy = require_healthy;
-        }
-    }
-
-    const fn merge(&mut self, other: Self) {
-        self.enabled &= other.enabled;
-        self.require_healthy |= other.require_healthy;
-    }
-}
-
-impl Default for HealthcheckOptions {
-    fn default() -> Self {
-        Self {
-            enabled: true,
-            require_healthy: false,
         }
     }
 }

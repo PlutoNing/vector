@@ -13,7 +13,7 @@ use stream_cancel::{StreamExt as StreamCancelExt, Trigger, Tripwire};
 use tokio::{
     select,
     sync::{mpsc::UnboundedSender, oneshot},
-    time::timeout,
+
 };
 use tracing::Instrument;
 use vector_lib::config::LogNamespace;
@@ -82,7 +82,6 @@ struct Builder<'a> {
     tasks: HashMap<ComponentKey, Task>, /* 好像是source或者output的一个task, sink的也在这 */
     buffers: HashMap<ComponentKey, BuiltBuffer>,
     inputs: HashMap<ComponentKey, (BufferSender<EventArray>, Inputs<OutputId>)>,/* buffer的tx */
-    healthchecks: HashMap<ComponentKey, Task>, /* healthcheck的进程 */
     detach_triggers: HashMap<ComponentKey, Trigger>,
     extra_context: ExtraContext,
     utilization_emitter: UtilizationEmitter,
@@ -104,7 +103,6 @@ impl<'a> Builder<'a> {
             outputs: HashMap::new(),
             tasks: HashMap::new(),
             inputs: HashMap::new(),
-            healthchecks: HashMap::new(),
             detach_triggers: HashMap::new(),
             extra_context,
             utilization_emitter: UtilizationEmitter::new(),
@@ -128,7 +126,6 @@ impl<'a> Builder<'a> {
                 outputs: Self::finalize_outputs(self.outputs),
                 tasks: self.tasks,
                 source_tasks,
-                healthchecks: self.healthchecks,
                 shutdown_coordinator: self.shutdown_coordinator,
                 detach_triggers: self.detach_triggers,
                 utilization_emitter: Some(self.utilization_emitter),
@@ -547,9 +544,6 @@ impl<'a> Builder<'a> {
             debug!(component = %key, "Building new sink.");
 
             let sink_inputs = &sink.inputs;
-            let healthcheck = sink.healthcheck();
-            let enable_healthcheck = healthcheck.enabled && self.config.healthchecks.enabled;
-            let healthcheck_timeout = healthcheck.timeout;
             /* 可能是Console */
             let typetag = sink.inner.get_component_name();
             let input_type = sink.inner.input().data_type(); /*  */
@@ -600,7 +594,6 @@ impl<'a> Builder<'a> {
             };
 
             let cx = SinkContext {
-                healthcheck,
                 globals: self.config.global.clone(),
                 enrichment_tables: enrichment_tables.clone(),
                 proxy: ProxyConfig::merge_with_env(&self.config.global.proxy, sink.proxy()),
@@ -610,7 +603,7 @@ impl<'a> Builder<'a> {
                 extra_context: self.extra_context.clone(),
             };
             /* 这里的sink就是具体的sink了, 比如到console */
-            let (sink, healthcheck) = match sink.inner.build(cx).await {
+            let sink = match sink.inner.build(cx).await {
                 Err(error) => {
                     self.errors.push(format!("Sink \"{}\": {}", key, error));
                     continue;
@@ -666,46 +659,10 @@ impl<'a> Builder<'a> {
             /* 像是开启一个task, 运行上面这个siink */
             let task = Task::new(key.clone(), typetag, sink);
 
-            let component_key = key.clone();
-            let healthcheck_task = async move {
-                if enable_healthcheck {
-                    timeout(healthcheck_timeout, healthcheck)
-                        .map(|result| match result {
-                            Ok(Ok(_)) => {
-                                info!("Healthcheck passed.");
-                                Ok(TaskOutput::Healthcheck)
-                            }
-                            Ok(Err(error)) => {
-                                error!(
-                                    msg = "Healthcheck failed.",
-                                    %error,
-                                    component_kind = "sink",
-                                    component_type = typetag,
-                                    component_id = %component_key.id(),
-                                );
-                                Err(TaskError::wrapped(error))
-                            }
-                            Err(e) => {
-                                error!(
-                                    msg = "Healthcheck timed out.",
-                                    component_kind = "sink",
-                                    component_type = typetag,
-                                    component_id = %component_key.id(),
-                                );
-                                Err(TaskError::wrapped(Box::new(e)))
-                            }
-                        })
-                        .await
-                } else {
-                    info!("Healthcheck disabled.");
-                    Ok(TaskOutput::Healthcheck)
-                }
-            };
 
-            let healthcheck_task = Task::new(key.clone(), typetag, healthcheck_task);
+
 /* key是sink的id */
             self.inputs.insert(key.clone(), (tx, sink_inputs.clone()));
-            self.healthchecks.insert(key.clone(), healthcheck_task); /* health任务塞进去 */
             self.tasks.insert(key.clone(), task); /* 把sink task塞进去 */
             self.detach_triggers.insert(key.clone(), trigger);
         }
@@ -717,7 +674,6 @@ pub struct TopologyPieces {
     pub(crate) outputs: HashMap<ComponentKey, HashMap<Option<String>, fanout::ControlChannel>>, /*  */
     pub(super) tasks: HashMap<ComponentKey, Task>, /* source，output,sink等的task */
     pub(crate) source_tasks: HashMap<ComponentKey, Task>, /* source的task */
-    pub(super) healthchecks: HashMap<ComponentKey, Task>, /*  */
     pub(crate) shutdown_coordinator: SourceShutdownCoordinator, /*  */
     pub(crate) detach_triggers: HashMap<ComponentKey, Trigger>, /*  */
     pub(crate) utilization_emitter: Option<UtilizationEmitter>, /*  */

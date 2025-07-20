@@ -64,8 +64,6 @@ where
                 SinkOuter {
                     graph: self.graph.clone(),
                     inputs: self.inputs.clone(),
-                    healthcheck_uri: None,
-                    healthcheck: Default::default(),
                     buffer: Default::default(),
                     proxy: Default::default(),
                     inner: sink,

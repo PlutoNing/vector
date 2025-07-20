@@ -78,7 +78,7 @@ impl ApplicationConfig { /* vector::app::ApplicationConfig::from_opts vector::ap
         let config = load_configs(
             &config_paths,
             watcher_conf,
-            opts.require_healthy,
+
             opts.allow_empty_config,
             graceful_shutdown_duration,
             signal_handler,
@@ -209,7 +209,7 @@ impl Application {
         let topology_controller = SharedTopologyController::new(TopologyController {
             topology: config.topology, /* 构建的拓扑 */
             config_paths: config.config_paths.clone(), /* 配置文件路径 */
-            require_healthy: root_opts.require_healthy,
+
             extra_context: config.extra_context,
         });
 
@@ -461,7 +461,7 @@ pub fn build_runtime(threads: Option<usize>, thread_name: &str) -> Result<Runtim
 pub async fn load_configs(
     config_paths: &[ConfigPath], /* 里面是搜索的可能的conf路径? */
     watcher_conf: Option<config::watcher::WatcherConfig>,
-    require_healthy: Option<bool>,
+
     allow_empty_config: bool,
     graceful_shutdown_duration: Option<Duration>,
     signal_handler: &mut SignalHandler,
@@ -529,10 +529,6 @@ pub async fn load_configs(
     config::init_log_schema(config.global.log_schema.clone(), true);/* 这里是初始化这两个字段 */
     config::init_telemetry(config.global.telemetry.clone(), true);
 
-    if !config.healthchecks.enabled {
-        info!("Health checks are disabled.");
-    }
-    config.healthchecks.set_require_healthy(require_healthy);
     config.graceful_shutdown_duration = graceful_shutdown_duration;
 
     Ok(config)

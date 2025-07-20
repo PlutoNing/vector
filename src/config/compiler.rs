@@ -15,7 +15,6 @@ pub fn compile(mut builder: ConfigBuilder) -> Result<(Config, Vec<String>), Vec<
     let ConfigBuilder {
         global,
         schema,
-        healthchecks,
         enrichment_tables,
         sources,
         sinks,
@@ -93,7 +92,6 @@ pub fn compile(mut builder: ConfigBuilder) -> Result<(Config, Vec<String>), Vec<
         let mut config = Config {
             global,
             schema,
-            healthchecks,
             enrichment_tables,
             sources,
             sinks,

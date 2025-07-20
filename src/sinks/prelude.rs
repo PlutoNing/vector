@@ -39,7 +39,6 @@ pub use crate::{
             BatchConfig, Compression, Concurrency, NoDefaultsBatchSettings, RequestBuilder,
             SinkBatchSettings, TowerRequestConfig,
         },
-        Healthcheck, HealthcheckError,
     },
     template::{Template, TemplateParseError, UnsignedIntTemplate},
     tls::TlsConfig,
