@@ -17,7 +17,6 @@ pub mod service;
 pub mod sink;
 pub mod snappy;
 pub mod statistic;
-pub mod uri;
 pub mod zstd;
 
 use std::borrow::Cow;
@@ -43,7 +42,7 @@ pub use service::{
 };
 pub use sink::{PartitionBatchSink, StreamSink};
 use snafu::Snafu;
-pub use uri::UriSerde;
+
 use vector_lib::{json_size::JsonSize, TimeZone};
 
 use crate::event::EventFinalizers;
