@@ -13,8 +13,6 @@ use vector_lib::configurable::{
     Configurable, GenerateError, Metadata, ToValue,
 };
 
-use crate::sinks::util::zstd::ZstdCompressionLevel;
-
 /// Compression configuration.
 #[derive(Copy, Clone, Debug, Derivative, Eq, PartialEq)]
 #[derivative(Default)]
@@ -32,11 +30,6 @@ pub enum Compression {
     ///
     /// [zlib]: https://zlib.net/
     Zlib(CompressionLevel),
-
-    /// [Zstandard][zstd] compression.
-    ///
-    /// [zstd]: https://facebook.github.io/zstd/
-    Zstd(CompressionLevel),
 }
 
 impl Compression {
@@ -60,16 +53,11 @@ impl Compression {
         Compression::Zlib(CompressionLevel::const_default())
     }
 
-    pub const fn zstd_default() -> Compression {
-        Compression::Zstd(CompressionLevel::const_default())
-    }
-
     pub const fn content_encoding(self) -> Option<&'static str> {
         match self {
             Self::None => None,
             Self::Gzip(_) => Some("gzip"),
             Self::Zlib(_) => Some("deflate"),
-            Self::Zstd(_) => Some("zstd"),
         }
     }
 
@@ -77,7 +65,6 @@ impl Compression {
         match self {
             Self::Gzip(_) => Some("gzip"),
             Self::Zlib(_) => Some("deflate"),
-            Self::Zstd(_) => Some("zstd"),
             _ => None,
         }
     }
@@ -87,7 +74,6 @@ impl Compression {
             Self::None => "log",
             Self::Gzip(_) => "log.gz",
             Self::Zlib(_) => "log.zz",
-            Self::Zstd(_) => "log.zst",
         }
     }
 
@@ -96,14 +82,13 @@ impl Compression {
             Compression::None => 0,
             Compression::Gzip(_) => 9,
             Compression::Zlib(_) => 9,
-            Compression::Zstd(_) => 21,
         }
     }
 
     pub const fn compression_level(self) -> CompressionLevel {
         match self {
             Self::None => CompressionLevel::None,
-            Self::Gzip(level) | Self::Zlib(level) | Self::Zstd(level) => level,
+            Self::Gzip(level) | Self::Zlib(level) => level,
         }
     }
 }
@@ -114,9 +99,6 @@ impl fmt::Display for Compression {
             Compression::None => write!(f, "none"),
             Compression::Gzip(ref level) => write!(f, "gzip({})", level.as_flate2().level()),
             Compression::Zlib(ref level) => write!(f, "zlib({})", level.as_flate2().level()),
-            Compression::Zstd(ref level) => {
-                write!(f, "zstd({})", ZstdCompressionLevel::from(*level))
-            }
         }
     }
 }
@@ -143,7 +125,6 @@ impl<'de> de::Deserialize<'de> for Compression {
                     "none" => Ok(Compression::None),
                     "gzip" => Ok(Compression::gzip_default()),
                     "zlib" => Ok(Compression::zlib_default()),
-                    "zstd" => Ok(Compression::zstd_default()),
                     _ => Err(de::Error::invalid_value(
                         de::Unexpected::Str(s),
                         &r#""none" or "gzip" or "zlib" or "zstd""#,
@@ -186,7 +167,6 @@ impl<'de> de::Deserialize<'de> for Compression {
                     },
                     "gzip" => Ok(Compression::Gzip(level.unwrap_or_default())),
                     "zlib" => Ok(Compression::Zlib(level.unwrap_or_default())),
-                    "zstd" => Ok(Compression::Zstd(level.unwrap_or_default())),
                     algorithm => Err(de::Error::unknown_variant(
                         algorithm,
                         &["none", "gzip", "zlib", "zstd"],
@@ -240,16 +220,6 @@ impl ser::Serialize for Compression {
                     map.end()
                 } else {
                     serializer.serialize_str("zlib")
-                }
-            }
-            Compression::Zstd(zstd_level) => {
-                if *zstd_level != CompressionLevel::Default {
-                    let mut map = serializer.serialize_map(None)?;
-                    map.serialize_entry("algorithm", "zstd")?;
-                    map.serialize_entry("level", &zstd_level)?;
-                    map.end()
-                } else {
-                    serializer.serialize_str("zstd")
                 }
             }
         }
@@ -309,17 +279,10 @@ impl Configurable for Compression {
             "[zlib]: https://zlib.net/",
         );
 
-        let zstd_string_subschema = generate_string_schema(
-            "Zstd",
-            Some("[Zstandard][zstd] compression."),
-            "[zstd]: https://facebook.github.io/zstd/",
-        );
-
         let mut all_string_oneof_subschema = generate_one_of_schema(&[
             none_string_subschema,
             gzip_string_subschema,
             zlib_string_subschema,
-            zstd_string_subschema,
         ]);
         apply_base_metadata(&mut all_string_oneof_subschema, string_metadata);
 

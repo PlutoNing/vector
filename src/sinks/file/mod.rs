@@ -1,7 +1,7 @@
 use std::convert::TryFrom;
 use std::time::{Duration, Instant};
 
-use async_compression::tokio::write::{GzipEncoder, ZstdEncoder};
+use async_compression::tokio::write::{GzipEncoder};
 use async_trait::async_trait;
 use bytes::{Bytes, BytesMut};
 use futures::{
@@ -112,7 +112,6 @@ const fn default_idle_timeout() -> Duration {
 
 /// Compression configuration.
 // TODO: Why doesn't this already use `crate::sinks::util::Compression`
-// `crate::sinks::util::Compression` doesn't support zstd yet
 #[configurable_component]
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 #[serde(rename_all = "snake_case")]
@@ -122,11 +121,6 @@ pub enum Compression {
     /// [gzip]: https://www.gzip.org/
     Gzip,
 
-    /// [Zstandard][zstd] compression.
-    ///
-    /// [zstd]: https://facebook.github.io/zstd/
-    Zstd,
-
     /// No compression.
     #[default]
     None,
@@ -135,7 +129,6 @@ pub enum Compression {
 enum OutFile {
     Regular(File),
     Gzip(GzipEncoder<File>),
-    Zstd(ZstdEncoder<File>),
 }
 
 impl OutFile {
@@ -143,7 +136,6 @@ impl OutFile {
         match compression {
             Compression::None => OutFile::Regular(file),
             Compression::Gzip => OutFile::Gzip(GzipEncoder::new(file)),
-            Compression::Zstd => OutFile::Zstd(ZstdEncoder::new(file)),
         }
     }
 
@@ -151,7 +143,6 @@ impl OutFile {
         match self {
             OutFile::Regular(file) => file.sync_all().await,
             OutFile::Gzip(gzip) => gzip.get_mut().sync_all().await,
-            OutFile::Zstd(zstd) => zstd.get_mut().sync_all().await,
         }
     }
 
@@ -159,7 +150,6 @@ impl OutFile {
         match self {
             OutFile::Regular(file) => file.shutdown().await,
             OutFile::Gzip(gzip) => gzip.shutdown().await,
-            OutFile::Zstd(zstd) => zstd.shutdown().await,
         }
     }
 
@@ -167,7 +157,6 @@ impl OutFile {
         match self {
             OutFile::Regular(file) => file.write_all(src).await,
             OutFile::Gzip(gzip) => gzip.write_all(src).await,
-            OutFile::Zstd(zstd) => zstd.write_all(src).await,
         }
     }
 

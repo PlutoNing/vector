@@ -16,7 +16,6 @@ pub mod retries;
 pub mod service;
 pub mod sink;
 pub mod statistic;
-pub mod zstd;
 
 use std::borrow::Cow;
 

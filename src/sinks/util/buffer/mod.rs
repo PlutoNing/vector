@@ -6,7 +6,7 @@ use flate2::write::{GzEncoder, ZlibEncoder};
 use super::{
     batch::{err_event_too_large, Batch, BatchSize, PushResult},
 
-    zstd::ZstdEncoder,
+
 };
 
 pub mod compression;
@@ -32,7 +32,6 @@ pub enum InnerBuffer {
     Plain(bytes::buf::Writer<BytesMut>),
     Gzip(GzEncoder<bytes::buf::Writer<BytesMut>>),
     Zlib(ZlibEncoder<bytes::buf::Writer<BytesMut>>),
-    Zstd(ZstdEncoder<bytes::buf::Writer<BytesMut>>),
 }
 
 impl Buffer {
@@ -59,10 +58,6 @@ impl Buffer {
                 Compression::Zlib(level) => {
                     InnerBuffer::Zlib(ZlibEncoder::new(writer, level.as_flate2()))
                 }
-                Compression::Zstd(level) => InnerBuffer::Zstd(
-                    ZstdEncoder::new(writer, level.into())
-                        .expect("Zstd encoder should not fail on init."),
-                ),
             }
         })
     }
@@ -79,9 +74,6 @@ impl Buffer {
             InnerBuffer::Zlib(inner) => {
                 inner.write_all(input).unwrap();
             }
-            InnerBuffer::Zstd(inner) => {
-                inner.write_all(input).unwrap();
-            }
         }
     }
 
@@ -92,7 +84,6 @@ impl Buffer {
                 InnerBuffer::Plain(inner) => inner.get_ref().is_empty(),
                 InnerBuffer::Gzip(inner) => inner.get_ref().get_ref().is_empty(),
                 InnerBuffer::Zlib(inner) => inner.get_ref().get_ref().is_empty(),
-                InnerBuffer::Zstd(inner) => inner.get_ref().get_ref().is_empty(),
             })
             .unwrap_or(true)
     }
@@ -136,10 +127,6 @@ impl Batch for Buffer {
                 .expect("This can't fail because the inner writer is a Vec")
                 .into_inner(),
             Some(InnerBuffer::Zlib(inner)) => inner
-                .finish()
-                .expect("This can't fail because the inner writer is a Vec")
-                .into_inner(),
-            Some(InnerBuffer::Zstd(inner)) => inner
                 .finish()
                 .expect("This can't fail because the inner writer is a Vec")
                 .into_inner(),

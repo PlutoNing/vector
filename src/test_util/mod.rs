@@ -40,8 +40,6 @@ use vector_lib::{
     buffers::topology::channel::LimitedReceiver,
     event::{Metric, MetricKind},
 };
-#[cfg(test)]
-use zstd::Decoder as ZstdDecoder;
 
 use crate::{
     config::{Config, GenerateConfig},
