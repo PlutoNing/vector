@@ -2,8 +2,8 @@
 use futures::future::BoxFuture;
 use headers::{Authorization, HeaderMapExt};
 use http::{
-    header::HeaderValue, request::Builder, uri::InvalidUri, HeaderMap, Request, Response, Uri,
-    Version,
+    header::HeaderValue, request::Builder, uri::InvalidUri, HeaderMap, Request,
+
 };
 use hyper::{
     body::{Body, HttpBody},
@@ -12,23 +12,23 @@ use hyper::{
 };
 use hyper_openssl::HttpsConnector;
 use hyper_proxy::ProxyConnector;
-use rand::Rng;
-use serde_with::serde_as;
+
+
 use snafu::{ResultExt, Snafu};
 use std::{
-    collections::HashMap,
+
     fmt,
-    net::SocketAddr,
+
     task::{Context, Poll},
-    time::Duration,
+
 };
-use tokio::time::Instant;
-use tower::{Layer, Service};
-use tower_http::{
-    classify::{ServerErrorsAsFailures, SharedClassifier},
-    trace::TraceLayer,
-};
-use tracing::{Instrument, Span};
+
+use tower::{Service};
+
+
+
+
+use tracing::{Instrument};
 use vector_lib::configurable::configurable_component;
 use vector_lib::sensitive_string::SensitiveString;
 
@@ -36,7 +36,7 @@ use vector_lib::sensitive_string::SensitiveString;
 
 use crate::{
     config::ProxyConfig,
-    internal_events::{http_client, HttpServerRequestReceived, HttpServerResponseSent},
+    internal_events::{http_client},
     tls::{tls_connector_builder, MaybeTlsSettings, TlsError},
 };
 
@@ -340,328 +340,3 @@ impl Auth {
         }
     }
 }
-
-pub fn get_http_scheme_from_uri(uri: &Uri) -> &'static str {
-    // If there's no scheme, we just use "http" since it provides the most semantic relevance without inadvertently
-    // implying things it can't know i.e. returning "https" when we're not actually sure HTTPS was used.
-    uri.scheme_str().map_or("http", |scheme| match scheme {
-        "http" => "http",
-        "https" => "https",
-        // `http::Uri` ensures that we always get "http" or "https" if the URI is created with a well-formed scheme, but
-        // it also supports arbitrary schemes, which is where we bomb out down here, since we can't generate a static
-        // string for an arbitrary input string... and anything other than "http" and "https" makes no sense for an HTTP
-        // client anyways.
-        s => panic!("invalid URI scheme for HTTP client: {}", s),
-    })
-}
-
-/// Builds a [TraceLayer] configured for a HTTP server.
-///
-/// This layer emits HTTP specific telemetry for requests received, responses sent, and handler duration.
-pub fn build_http_trace_layer<T, U>(
-    span: Span,
-) -> TraceLayer<
-    SharedClassifier<ServerErrorsAsFailures>,
-    impl Fn(&Request<T>) -> Span + Clone,
-    impl Fn(&Request<T>, &Span) + Clone,
-    impl Fn(&Response<U>, Duration, &Span) + Clone,
-    (),
-    (),
-    (),
-> {
-    TraceLayer::new_for_http()
-        .make_span_with(move |request: &Request<T>| {
-            // This is an error span so that the labels are always present for metrics.
-            error_span!(
-               parent: &span,
-               "http-request",
-               method = %request.method(),
-               path = %request.uri().path(),
-            )
-        })
-        .on_request(Box::new(|_request: &Request<T>, _span: &Span| {
-            emit!(HttpServerRequestReceived);
-        }))
-        .on_response(|response: &Response<U>, latency: Duration, _span: &Span| {
-            emit!(HttpServerResponseSent { response, latency });
-        })
-        .on_failure(())
-        .on_body_chunk(())
-        .on_eos(())
-}
-
-/// Configuration of HTTP server keepalive parameters.
-#[serde_as]
-#[configurable_component]
-#[derive(Clone, Debug, PartialEq)]
-#[serde(deny_unknown_fields)]
-pub struct KeepaliveConfig {
-    /// The maximum amount of time a connection may exist before it is closed by sending
-    /// a `Connection: close` header on the HTTP response. Set this to a large value like
-    /// `100000000` to "disable" this feature
-    ///
-    ///
-    /// Only applies to HTTP/0.9, HTTP/1.0, and HTTP/1.1 requests.
-    ///
-    /// A random jitter configured by `max_connection_age_jitter_factor` is added
-    /// to the specified duration to spread out connection storms.
-    #[serde(default = "default_max_connection_age")]
-    #[configurable(metadata(docs::examples = 600))]
-    #[configurable(metadata(docs::type_unit = "seconds"))]
-    #[configurable(metadata(docs::human_name = "Maximum Connection Age"))]
-    pub max_connection_age_secs: Option<u64>,
-
-    /// The factor by which to jitter the `max_connection_age_secs` value.
-    ///
-    /// A value of 0.1 means that the actual duration will be between 90% and 110% of the
-    /// specified maximum duration.
-    #[serde(default = "default_max_connection_age_jitter_factor")]
-    #[configurable(validation(range(min = 0.0, max = 1.0)))]
-    pub max_connection_age_jitter_factor: f64,
-}
-
-const fn default_max_connection_age() -> Option<u64> {
-    Some(300) // 5 minutes
-}
-
-const fn default_max_connection_age_jitter_factor() -> f64 {
-    0.1
-}
-
-impl Default for KeepaliveConfig {
-    fn default() -> Self {
-        Self {
-            max_connection_age_secs: default_max_connection_age(),
-            max_connection_age_jitter_factor: default_max_connection_age_jitter_factor(),
-        }
-    }
-}
-
-/// A layer that limits the maximum duration of a client connection. It does so by adding a
-/// `Connection: close` header to the response if `max_connection_duration` time has elapsed
-/// since `start_reference`.
-///
-/// **Notes:**
-/// - This is intended to be used in a Hyper server (or similar) that will automatically close
-///   the connection after a response with a `Connection: close` header is sent.
-/// - This layer assumes that it is instantiated once per connection, which is true within the
-///   Hyper framework.
-pub struct MaxConnectionAgeLayer {
-    start_reference: Instant,
-    max_connection_age: Duration,
-    peer_addr: SocketAddr,
-}
-
-impl MaxConnectionAgeLayer {
-    pub fn new(max_connection_age: Duration, jitter_factor: f64, peer_addr: SocketAddr) -> Self {
-        Self {
-            start_reference: Instant::now(),
-            max_connection_age: Self::jittered_duration(max_connection_age, jitter_factor),
-            peer_addr,
-        }
-    }
-
-    fn jittered_duration(duration: Duration, jitter_factor: f64) -> Duration {
-        // Ensure the jitter_factor is between 0.0 and 1.0
-        let jitter_factor = jitter_factor.clamp(0.0, 1.0);
-        // Generate a random jitter factor between `1 - jitter_factor`` and `1 + jitter_factor`.
-        let mut rng = rand::rng();
-        let random_jitter_factor = rng.random_range(-jitter_factor..=jitter_factor) + 1.;
-        duration.mul_f64(random_jitter_factor)
-    }
-}
-
-impl<S> Layer<S> for MaxConnectionAgeLayer
-where
-    S: Service<Request<Body>, Response = Response<Body>> + Clone + Send + 'static,
-    S::Future: Send + 'static,
-{
-    type Service = MaxConnectionAgeService<S>;
-
-    fn layer(&self, service: S) -> Self::Service {
-        MaxConnectionAgeService {
-            service,
-            start_reference: self.start_reference,
-            max_connection_age: self.max_connection_age,
-            peer_addr: self.peer_addr,
-        }
-    }
-}
-
-/// A service that limits the maximum age of a client connection. It does so by adding a
-/// `Connection: close` header to the response if `max_connection_age` time has elapsed
-/// since `start_reference`.
-///
-/// **Notes:**
-/// - This is intended to be used in a Hyper server (or similar) that will automatically close
-///   the connection after a response with a `Connection: close` header is sent.
-/// - This service assumes that it is instantiated once per connection, which is true within the
-///   Hyper framework.
-#[derive(Clone)]
-pub struct MaxConnectionAgeService<S> {
-    service: S,
-    start_reference: Instant,
-    max_connection_age: Duration,
-    peer_addr: SocketAddr,
-}
-
-impl<S, E> Service<Request<Body>> for MaxConnectionAgeService<S>
-where
-    S: Service<Request<Body>, Response = Response<Body>, Error = E> + Clone + Send + 'static,
-    S::Future: Send + 'static,
-{
-    type Response = S::Response;
-    type Error = E;
-    type Future = BoxFuture<'static, Result<Self::Response, E>>;
-
-    fn poll_ready(
-        &mut self,
-        cx: &mut std::task::Context<'_>,
-    ) -> std::task::Poll<Result<(), Self::Error>> {
-        self.service.poll_ready(cx)
-    }
-
-    fn call(&mut self, req: Request<Body>) -> Self::Future {
-        let start_reference = self.start_reference;
-        let max_connection_age = self.max_connection_age;
-        let peer_addr = self.peer_addr;
-        let version = req.version();
-        let future = self.service.call(req);
-        Box::pin(async move {
-            let mut response = future.await?;
-            match version {
-                Version::HTTP_09 | Version::HTTP_10 | Version::HTTP_11 => {
-                    if start_reference.elapsed() >= max_connection_age {
-                        debug!(
-                            message = "Closing connection due to max connection age.",
-                            ?max_connection_age,
-                            connection_age = ?start_reference.elapsed(),
-                            ?peer_addr,
-                        );
-                        // Tell the client to close this connection.
-                        // Hyper will automatically close the connection after the response is sent.
-                        response.headers_mut().insert(
-                            hyper::header::CONNECTION,
-                            hyper::header::HeaderValue::from_static("close"),
-                        );
-                    }
-                }
-                // TODO need to send GOAWAY frame
-                Version::HTTP_2 => (),
-                // TODO need to send GOAWAY frame
-                Version::HTTP_3 => (),
-                _ => (),
-            }
-            Ok(response)
-        })
-    }
-}
-
-/// The type of a query parameter's value, determines if it's treated as a plain string or a VRL expression.
-#[configurable_component]
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
-#[serde(rename_all = "snake_case")]
-pub enum ParamType {
-    /// The parameter value is a plain string.
-    #[default]
-    String,
-    /// The parameter value is a VRL expression that will be evaluated before each request.
-    Vrl,
-}
-
-impl ParamType {
-    fn is_default(&self) -> bool {
-        *self == Self::default()
-    }
-}
-
-/// Represents a query parameter value, which can be a simple string or a typed object
-/// indicating whether the value is a string or a VRL expression.
-#[configurable_component]
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[serde(untagged)]
-pub enum ParameterValue {
-    /// A simple string value. For backwards compatibility.
-    String(String),
-    /// A value with an explicit type.
-    Typed {
-        /// The raw value of the parameter.
-        value: String,
-        /// The type of the parameter, indicating how the `value` should be treated.
-        #[serde(
-            default,
-            skip_serializing_if = "ParamType::is_default",
-            rename = "type"
-        )]
-        r#type: ParamType,
-    },
-}
-
-impl ParameterValue {
-    /// Returns true if the parameter is a VRL expression.
-    pub const fn is_vrl(&self) -> bool {
-        match self {
-            ParameterValue::String(_) => false,
-            ParameterValue::Typed { r#type, .. } => matches!(r#type, ParamType::Vrl),
-        }
-    }
-
-    /// Returns the raw string value of the parameter.
-    #[allow(clippy::missing_const_for_fn)]
-    pub fn value(&self) -> &str {
-        match self {
-            ParameterValue::String(s) => s,
-            ParameterValue::Typed { value, .. } => value,
-        }
-    }
-
-    /// Consumes the `ParameterValue` and returns the owned raw string value.
-    pub fn into_value(self) -> String {
-        match self {
-            ParameterValue::String(s) => s,
-            ParameterValue::Typed { value, .. } => value,
-        }
-    }
-}
-
-/// Configuration of the query parameter value for HTTP requests.
-#[configurable_component]
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[serde(untagged)]
-#[configurable(metadata(docs::enum_tag_description = "Query parameter value"))]
-pub enum QueryParameterValue {
-    /// Query parameter with single value
-    SingleParam(ParameterValue),
-    /// Query parameter with multiple values
-    MultiParams(Vec<ParameterValue>),
-}
-
-impl QueryParameterValue {
-    /// Returns an iterator over the contained `ParameterValue`s.
-    pub fn iter(&self) -> impl Iterator<Item = &ParameterValue> {
-        match self {
-            QueryParameterValue::SingleParam(param) => std::slice::from_ref(param).iter(),
-            QueryParameterValue::MultiParams(params) => params.iter(),
-        }
-    }
-
-    /// Convert to `Vec<ParameterValue>` for owned iteration.
-    fn into_vec(self) -> Vec<ParameterValue> {
-        match self {
-            QueryParameterValue::SingleParam(param) => vec![param],
-            QueryParameterValue::MultiParams(params) => params,
-        }
-    }
-}
-
-// Implement IntoIterator for owned QueryParameterValue
-impl IntoIterator for QueryParameterValue {
-    type Item = ParameterValue;
-    type IntoIter = std::vec::IntoIter<ParameterValue>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.into_vec().into_iter()
-    }
-}
-
-pub type QueryParameters = HashMap<String, QueryParameterValue>;
