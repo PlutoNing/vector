@@ -21,10 +21,7 @@ mod process;
 mod remap;
 mod socket;
 
-mod tcp;
 mod template;
-mod udp;
-mod unix;
 
 #[cfg(any(
     feature = "sinks-file",
@@ -40,11 +37,9 @@ pub(crate) use self::file::*;
 pub(crate) use self::host_metrics::*;
 #[allow(unused_imports)]
 pub(crate) use self::parser::*;
-#[cfg(unix)]
-pub(crate) use self::unix::*;
 #[cfg(windows)]
 pub(crate) use self::windows::*;
 pub use self::{
     adaptive_concurrency::*, batch::*, common::*, conditions::*, encoding_transcode::*,
-    heartbeat::*, http::*, open::*, process::*, socket::*, tcp::*, template::*, udp::*,
+    heartbeat::*, http::*, open::*, process::*, socket::*, template::*,
 };

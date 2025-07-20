@@ -4,7 +4,6 @@ use std::path::PathBuf;
 use bytes::BytesMut;
 use futures::{stream::BoxStream, StreamExt};
 use futures_util::stream::Peekable;
-use tokio::net::UdpSocket;
 #[cfg(unix)]
 use tokio::net::UnixDatagram;
 use tokio_util::codec::Encoder;
@@ -15,14 +14,10 @@ use vector_lib::EstimatedJsonEncodedSizeOf;
 use crate::{
     codecs::Transformer,
     event::{Event, EventStatus, Finalizable},
-    internal_events::{SocketEventsSent, SocketMode, SocketSendError, UdpSendIncompleteError},
+    internal_events::{SocketEventsSent, SocketMode},
 };
 
-#[cfg(unix)]
-use crate::internal_events::{UnixSendIncompleteError, UnixSocketSendError};
-
 pub enum DatagramSocket {
-    Udp(UdpSocket),
     #[cfg(unix)]
     Unix(UnixDatagram, PathBuf),
 }
@@ -51,7 +46,6 @@ pub async fn send_datagrams<E: Encoder<Event, Error = vector_lib::codecs::encodi
             Ok(()) => {
                 emit!(SocketEventsSent {
                     mode: match socket {
-                        DatagramSocket::Udp(_) => SocketMode::Udp,
                         #[cfg(unix)]
                         DatagramSocket::Unix(..) => SocketMode::Unix,
                     },
@@ -62,20 +56,7 @@ pub async fn send_datagrams<E: Encoder<Event, Error = vector_lib::codecs::encodi
                 bytes_sent.emit(ByteSize(bytes.len()));
                 finalizers.update_status(EventStatus::Delivered);
             }
-            Err(error) => {
-                match socket {
-                    DatagramSocket::Udp(_) => emit!(SocketSendError {
-                        mode: SocketMode::Udp,
-                        error
-                    }),
-                    #[cfg(unix)]
-                    DatagramSocket::Unix(_, path) => {
-                        emit!(UnixSocketSendError {
-                            path: path.as_path(),
-                            error: &error
-                        })
-                    }
-                };
+            Err(_error) => {
                 finalizers.update_status(EventStatus::Errored);
                 return;
             }
@@ -84,23 +65,9 @@ pub async fn send_datagrams<E: Encoder<Event, Error = vector_lib::codecs::encodi
 }
 
 async fn send_datagram(socket: &mut DatagramSocket, buf: &[u8]) -> tokio::io::Result<()> {
-    let sent = match socket {
-        DatagramSocket::Udp(udp) => udp.send(buf).await,
+    let _sent = match socket {
         #[cfg(unix)]
         DatagramSocket::Unix(uds, _) => uds.send(buf).await,
     }?;
-    if sent != buf.len() {
-        match socket {
-            DatagramSocket::Udp(_) => emit!(UdpSendIncompleteError {
-                data_size: buf.len(),
-                sent,
-            }),
-            #[cfg(unix)]
-            DatagramSocket::Unix(..) => emit!(UnixSendIncompleteError {
-                data_size: buf.len(),
-                sent,
-            }),
-        }
-    }
     Ok(())
 }

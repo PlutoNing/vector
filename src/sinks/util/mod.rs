@@ -17,12 +17,9 @@ pub mod retries;
 pub mod service;
 pub mod sink;
 pub mod snappy;
-pub mod socket_bytes_sink;
 pub mod statistic;
 pub mod tcp;
 pub mod udp;
-#[cfg(unix)]
-pub mod unix;
 pub mod uri;
 pub mod zstd;
 

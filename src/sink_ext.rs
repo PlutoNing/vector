@@ -33,26 +33,6 @@ use std::{
 
 use futures::{stream::Peekable, Sink, SinkExt, Stream, StreamExt};
 
-impl<T: ?Sized, Item> VecSinkExt<Item> for T where T: Sink<Item> {}
-
-pub(crate) trait VecSinkExt<Item>: Sink<Item> {
-    /// A future that completes after the given stream has been fully processed
-    /// into the sink, including flushing.
-    /// Compare to `SinkExt::send_all` this future accept `Peekable` stream and
-    /// do not have own buffer.
-    fn send_all_peekable<'a, St>(
-        &'a mut self,
-        stream: &'a mut Peekable<St>,
-    ) -> SendAll<'a, Self, St>
-    where
-        St: Stream<Item = Item> + Sized,
-        Self: Sized,
-    {
-        SendAll { sink: self, stream }
-    }
-}
-
-/// Future for the [`send_all_peekable`](VecSinkExt::send_all_peekable) method.
 pub(crate) struct SendAll<'a, Si, St>
 where
     St: Stream,

@@ -35,7 +35,6 @@ use crate::{
 mod concurrency;
 mod health;
 mod map;
-pub mod net;
 
 pub type Svc<S, L> =
     RateLimit<AdaptiveConcurrencyLimit<Retry<FibonacciRetryPolicy<L>, Timeout<S>>, L>>;
