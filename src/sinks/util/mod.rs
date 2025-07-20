@@ -18,8 +18,6 @@ pub mod service;
 pub mod sink;
 pub mod snappy;
 pub mod statistic;
-pub mod tcp;
-pub mod udp;
 pub mod uri;
 pub mod zstd;
 
