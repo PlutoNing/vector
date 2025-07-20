@@ -122,7 +122,7 @@ impl RunningTopology {
     /// dropped then everything from this RunningTopology instance is fully
     /// dropped.
     pub fn stop(self) -> impl Future<Output = ()> {
-        // Update the API's health endpoint to signal shutdown
+        // 更新API的健康检查端点以发出关闭信号
         self.running.store(false, Ordering::Relaxed);
         // Create handy handles collections of all tasks for the subsequent
         // operations.

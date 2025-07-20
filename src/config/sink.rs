@@ -137,7 +137,7 @@ pub trait SinkConfig: DynClone + NamedComponent + core::fmt::Debug + Send + Sync
     /// Builds the sink with the given context.
     ///
     /// If the sink is built successfully, `Ok(...)` is returned containing the sink and the sink's
-    /// healthcheck.
+    ///
     ///
     /// # Errors
     ///

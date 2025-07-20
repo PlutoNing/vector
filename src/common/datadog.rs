@@ -101,9 +101,6 @@ pub(crate) fn get_api_base_endpoint(endpoint: Option<&str>, site: &str) -> Strin
 /// This scans the given endpoint for the common Datadog domain names; and, if found, rewrites the
 /// endpoint string using the standard API URI. If not found, the endpoint is used as-is.
 fn compute_api_endpoint(endpoint: &str) -> String {
-    // This mechanism is derived from the forwarder health check in the Datadog Agent:
-    // https://github.com/DataDog/datadog-agent/blob/cdcf0fc809b9ac1cd6e08057b4971c7dbb8dbe30/comp/forwarder/defaultforwarder/forwarder_health.go#L45-L47
-    // https://github.com/DataDog/datadog-agent/blob/cdcf0fc809b9ac1cd6e08057b4971c7dbb8dbe30/comp/forwarder/defaultforwarder/forwarder_health.go#L188-L190
     static DOMAIN_REGEX: LazyLock<Regex> = LazyLock::new(|| {
         Regex::new(r"(?:[a-z]{2}\d\.)?(datadoghq\.[a-z]+|ddog-gov\.com)/*$")
             .expect("Could not build Datadog domain regex")

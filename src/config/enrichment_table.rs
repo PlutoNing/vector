@@ -45,18 +45,15 @@ where
         }
     }
 
-    // Components are currently built in a way that they match exactly one of the roles (source,
-    // transform, sink, enrichment table). Due to specific requirements of the "memory" enrichment
-    // table, it has to fulfill 2 of these roles (sink and enrichment table). To reduce the impact
-    // of this very specific requirement, any enrichment table can now be optionally mapped into a
-    // sink, but this will only work for a "memory" enrichment table, since other tables will not
-    // have a "sink_config" present.
-    // This is also not ideal, since `SinkOuter` is not meant to represent the actual configuration,
-    // but it should just be a representation of that config used for deserialization.
-    // In the future, if more such components come up, it would be good to limit such "Outer"
-    // components to deserialization and build up the components and the topology in a more granular
-    // way, with each having "modules" for inputs (making them valid as sinks), for healthchecks,
-    // for providing outputs, etc.
+// 组件目前的设计方式是它们严格匹配其中一个角色（source、transform、sink、enrichment table）。
+// 由于"memory" enrichment table 的特殊需求，它需要同时承担2个角色（sink和enrichment table）。
+// 为了减少这个非常特殊需求的影响，现在任何enrichment table都可以选择性地映射为一个sink，
+// 但这只适用于"memory" enrichment table，因为其他表不会有"sink_config"存在。
+// 这也不是理想的方案，因为`SinkOuter`本不打算表示实际的配置，
+// 它应该只是用于反序列化的配置表示。
+// 在未来，如果出现更多这样的组件，最好将这些"Outer"组件限制为仅用于反序列化，
+// 并以更细粒度的方式构建组件和拓扑结构，每个组件都有用于输入的"模块"（使其作为sink有效）、
+// 用于健康检查、用于提供输出等。
     pub fn as_sink(&self, default_key: &ComponentKey) -> Option<(ComponentKey, SinkOuter<T>)> {
         self.inner.sink_config(default_key).map(|(key, sink)| {
             (

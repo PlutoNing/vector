@@ -11,8 +11,6 @@ pub fn is_default<E: Default + PartialEq>(e: &E) -> bool {
 /// Enables deserializing from a value that could be a bool or a struct.
 ///
 /// Example:
-/// healthcheck: bool
-/// healthcheck.enabled: bool
 /// Both are accepted.
 ///
 /// # Errors
