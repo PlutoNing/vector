@@ -1,4 +1,3 @@
-pub mod adaptive_concurrency;
 pub mod auth;
 // https://github.com/mcarton/rust-derivative/issues/112
 #[allow(clippy::non_canonical_clone_impl)]

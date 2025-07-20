@@ -41,7 +41,6 @@ pub mod config;
 pub mod cli;
 
 pub mod conditions;
-pub mod dns;
 pub mod expiring_hash_map;
 #[macro_use]
 #[allow(unreachable_pub)]

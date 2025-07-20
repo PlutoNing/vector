@@ -17,12 +17,13 @@ pub use vector_lib::{config::Input, sink::VectorSink};
 pub enum BuildError {
     #[snafu(display("Unable to resolve DNS for {:?}", address))]
     DnsFailure { address: String },
-    #[snafu(display("DNS errored {}", source))]
-    DnsError { source: crate::dns::DnsError },
+
     #[snafu(display("Socket address problem: {}", source))]
     SocketAddressError { source: std::io::Error },
+
     #[snafu(display("URI parse error: {}", source))]
     UriParseError { source: ::http::uri::InvalidUri },
+
     #[snafu(display("HTTP request build error: {}", source))]
     HTTPRequestBuilderError { source: ::http::Error },
 }
