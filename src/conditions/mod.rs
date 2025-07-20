@@ -3,13 +3,12 @@ use vector_lib::configurable::configurable_component;
 
 use crate::event::Event;
 
-mod datadog_search;
+
 pub(crate) mod is_log;
 pub(crate) mod is_metric;
 pub(crate) mod is_trace;
 mod vrl;
 
-pub use self::datadog_search::{DatadogSearchConfig, DatadogSearchRunner};
 pub use self::vrl::VrlConfig;
 use self::{
     is_log::{check_is_log},
@@ -33,9 +32,6 @@ pub enum Condition {
     /// Matches an event with a [Vector Remap Language](https://vector.dev/docs/reference/vrl) (VRL) [boolean expression](https://vector.dev/docs/reference/vrl#boolean-expressions).
     Vrl(Vrl),
 
-    /// Matches an event with a [Datadog Search](https://docs.datadoghq.com/logs/explorer/search_syntax/) query.
-    DatadogSearch(DatadogSearchRunner),
-
     /// Matches any event.
     ///
     /// Used only for internal testing.
@@ -58,7 +54,6 @@ impl Condition {
             Condition::IsMetric => check_is_metric(e),
             Condition::IsTrace => check_is_trace(e),
             Condition::Vrl(x) => x.check(e),
-            Condition::DatadogSearch(x) => x.check(e),
             Condition::AlwaysPass => (true, e),
             Condition::AlwaysFail => (false, e),
         }
@@ -94,9 +89,6 @@ pub enum ConditionConfig {
 
     /// Matches an event with a [Vector Remap Language](https://vector.dev/docs/reference/vrl) (VRL) [boolean expression](https://vector.dev/docs/reference/vrl#boolean-expressions).
     Vrl(VrlConfig),
-
-    /// Matches an event with a [Datadog Search](https://docs.datadoghq.com/logs/explorer/search_syntax/) query.
-    DatadogSearch(DatadogSearchConfig),
 }
 
 impl ConditionConfig {
@@ -109,7 +101,6 @@ impl ConditionConfig {
             ConditionConfig::IsMetric => Ok(Condition::IsMetric),
             ConditionConfig::IsTrace => Ok(Condition::IsTrace),
             ConditionConfig::Vrl(x) => x.build(enrichment_tables),
-            ConditionConfig::DatadogSearch(x) => x.build(enrichment_tables),
         }
     }
 }
