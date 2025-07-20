@@ -6,7 +6,6 @@ mod unix;
 
 use std::{
     io,
-    net::SocketAddr,
     task::{ready, Context, Poll},
     time::Duration,
 };
@@ -16,7 +15,7 @@ use {crate::sinks::util::unix::UnixEither, std::path::PathBuf};
 
 use crate::{
     internal_events::{
-        SocketOutgoingConnectionError, TcpSocketConnectionEstablished, UdpSendIncompleteError,
+        SocketOutgoingConnectionError, UdpSendIncompleteError,
     },
     sinks::{util::retries::ExponentialBackoff, Healthcheck},
 };
@@ -24,13 +23,11 @@ use crate::{
 #[cfg(unix)]
 use crate::internal_events::{UnixSendIncompleteError, UnixSocketConnectionEstablished};
 
-pub use self::tcp::TcpConnectorConfig;
 pub use self::udp::UdpConnectorConfig;
 
 #[cfg(unix)]
 pub use self::unix::{UnixConnectorConfig, UnixMode};
 
-use self::tcp::TcpConnector;
 use self::udp::UdpConnector;
 #[cfg(unix)]
 use self::unix::UnixConnector;
@@ -38,14 +35,13 @@ use self::unix::UnixConnector;
 use futures_util::{future::BoxFuture, FutureExt};
 use snafu::{ResultExt, Snafu};
 use tokio::{
-    io::AsyncWriteExt,
-    net::{TcpStream, UdpSocket},
+    net::{UdpSocket},
     sync::oneshot,
     time::sleep,
 };
 use tower::Service;
 use vector_lib::configurable::configurable_component;
-use vector_lib::tls::{MaybeTlsStream, TlsError};
+use vector_lib::tls::{TlsError};
 
 /// Hostname and port tuple.
 ///
@@ -140,7 +136,6 @@ enum NetworkServiceState {
 }
 
 enum NetworkConnection {
-    Tcp(MaybeTlsStream<TcpStream>),
     Udp(UdpSocket),
     #[cfg(unix)]
     Unix(UnixEither),
@@ -151,7 +146,6 @@ impl NetworkConnection {
         match self {
             // Can't "successfully" partially send with TCP: it either all eventually sends or the
             // socket has an I/O error that kills the connection entirely.
-            Self::Tcp(_) => {}
             Self::Udp(_) => {
                 emit!(UdpSendIncompleteError { data_size, sent });
             }
@@ -164,7 +158,6 @@ impl NetworkConnection {
 
     async fn send(&mut self, buf: &[u8]) -> io::Result<usize> {
         match self {
-            Self::Tcp(stream) => stream.write_all(buf).await.map(|()| buf.len()),
             Self::Udp(socket) => socket.send(buf).await,
             #[cfg(unix)]
             Self::Unix(socket) => socket.send(buf).await,
@@ -173,9 +166,6 @@ impl NetworkConnection {
 }
 
 enum ConnectionMetadata {
-    Tcp {
-        peer_addr: SocketAddr,
-    },
     #[cfg(unix)]
     Unix {
         path: PathBuf,
@@ -184,7 +174,6 @@ enum ConnectionMetadata {
 
 #[derive(Clone)]
 enum ConnectorType {
-    Tcp(TcpConnector),
     Udp(UdpConnector),
     #[cfg(unix)]
     Unix(UnixConnector),
@@ -201,11 +190,6 @@ pub struct NetworkConnector {
 impl NetworkConnector {
     fn on_connected(&self, metadata: ConnectionMetadata) {
         match metadata {
-            ConnectionMetadata::Tcp { peer_addr } => {
-                emit!(TcpSocketConnectionEstablished {
-                    peer_addr: Some(peer_addr)
-                });
-            }
             #[cfg(unix)]
             ConnectionMetadata::Unix { path } => {
                 emit!(UnixSocketConnectionEstablished { path: &path });
@@ -219,14 +203,6 @@ impl NetworkConnector {
 
     async fn connect(&self) -> Result<(NetworkConnection, Option<ConnectionMetadata>), NetError> {
         match &self.inner {
-            ConnectorType::Tcp(connector) => {
-                let (peer_addr, stream) = connector.connect().await?;
-
-                Ok((
-                    NetworkConnection::Tcp(stream),
-                    Some(ConnectionMetadata::Tcp { peer_addr }),
-                ))
-            }
             ConnectorType::Udp(connector) => {
                 let socket = connector.connect().await?;
 
