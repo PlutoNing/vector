@@ -9,8 +9,6 @@ pub mod util;
 pub mod console;
 #[cfg(feature = "sinks-file")] 
 pub mod file;
-#[cfg(feature = "sinks-postgres")]
-pub mod postgres;
 
 pub use vector_lib::{config::Input, sink::VectorSink};
 

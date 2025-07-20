@@ -457,7 +457,6 @@ sinks = ["sinks-logs", "sinks-metrics"]
 sinks-logs = [
   "sinks-console",
   "sinks-file",
-  "sinks-postgres",
 ]
 sinks-metrics = [
   "sinks-console",
@@ -465,7 +464,6 @@ sinks-metrics = [
 
 sinks-console = []
 sinks-file = ["dep:async-compression"]
-sinks-postgres = ["dep:sqlx"]
 
 # Identifies that the build is a nightly build
 nightly = []
