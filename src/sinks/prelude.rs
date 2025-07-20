@@ -13,7 +13,7 @@ pub use vector_lib::{
     partition::Partitioner,
     schema::Requirement,
     sink::{StreamSink, VectorSink},
-    tls::TlsSettings,
+
     ByteSizeOf, EstimatedJsonEncodedSizeOf,
 };
 pub use vector_lib::{
@@ -41,5 +41,4 @@ pub use crate::{
         },
     },
     template::{Template, TemplateParseError, UnsignedIntTemplate},
-    tls::TlsConfig,
 };

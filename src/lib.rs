@@ -86,7 +86,7 @@ pub(crate) mod utilization;
 pub mod vector_windows;
 
 pub use source_sender::SourceSender;
-pub use vector_lib::{event, metrics, schema, tcp, tls};
+pub use vector_lib::{event, metrics, schema, tcp};
 pub use vector_lib::{shutdown, Error, Result};
 
 static APP_NAME_SLUG: std::sync::OnceLock<String> = std::sync::OnceLock::new();

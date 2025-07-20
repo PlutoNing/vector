@@ -39,7 +39,6 @@ pub mod sink;
 pub mod source;
 pub mod tcp;
 pub mod time;
-pub mod tls;
 pub mod transform;
 #[cfg(feature = "vrl")]
 pub mod vrl;

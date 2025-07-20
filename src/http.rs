@@ -8,8 +8,6 @@ use snafu::Snafu;
 use vector_lib::configurable::configurable_component;
 use vector_lib::sensitive_string::SensitiveString;
 
-use crate::tls::TlsError;
-
 pub mod status {
     pub const FORBIDDEN: u16 = 403;
     pub const NOT_FOUND: u16 = 404;
@@ -20,8 +18,7 @@ pub mod status {
 #[snafu(visibility(pub(crate)))]
 pub enum HttpError {
     #[snafu(display("Failed to build TLS connector: {}", source))]
-    BuildTlsConnector { source: TlsError },
-    #[snafu(display("Failed to build HTTPS connector: {}", source))]
+
     MakeHttpsConnector { source: openssl::error::ErrorStack },
     #[snafu(display("Failed to build Proxy connector: {}", source))]
     MakeProxyConnector { source: InvalidUri },
@@ -36,7 +33,6 @@ impl HttpError {
         match self {
             HttpError::BuildRequest { .. } | HttpError::MakeProxyConnector { .. } => false,
             HttpError::CallRequest { .. }
-            | HttpError::BuildTlsConnector { .. }
             | HttpError::MakeHttpsConnector { .. } => true,
         }
     }
