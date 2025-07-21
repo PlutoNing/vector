@@ -10,10 +10,8 @@ pub mod encoding;
 
 pub use decoding::{
     BytesDecoder, BytesDecoderConfig,
-    CharacterDelimitedDecoder, CharacterDelimitedDecoderConfig,
     JsonDeserializer, JsonDeserializerConfig, LengthDelimitedDecoder,
-    LengthDelimitedDecoderConfig, NewlineDelimitedDecoder,
-    NewlineDelimitedDecoderConfig, OctetCountingDecoder, OctetCountingDecoderConfig,
+    LengthDelimitedDecoderConfig, OctetCountingDecoder, OctetCountingDecoderConfig,
     StreamDecodingError,
 };
 pub use encoding::{

@@ -14,11 +14,9 @@ pub use format::{
 #[cfg(feature = "syslog")]
 pub use format::{SyslogDeserializer, SyslogDeserializerConfig, SyslogDeserializerOptions};
 pub use framing::{
-    BoxedFramer, BoxedFramingError, BytesDecoder, BytesDecoderConfig, CharacterDelimitedDecoder,
-    CharacterDelimitedDecoderConfig, CharacterDelimitedDecoderOptions,
+    BoxedFramer, BoxedFramingError, BytesDecoder, BytesDecoderConfig,
     FramingError, LengthDelimitedDecoder,
-    LengthDelimitedDecoderConfig, NewlineDelimitedDecoder, NewlineDelimitedDecoderConfig,
-    NewlineDelimitedDecoderOptions, OctetCountingDecoder, OctetCountingDecoderConfig,
+    LengthDelimitedDecoderConfig, OctetCountingDecoder, OctetCountingDecoderConfig,
     OctetCountingDecoderOptions,
 };
 use smallvec::SmallVec;
@@ -80,15 +78,8 @@ pub enum FramingConfig {
     /// Byte frames are passed through as-is according to the underlying I/O boundaries (for example, split between messages or stream segments).
     Bytes,
 
-    /// Byte frames which are delimited by a chosen character.
-    CharacterDelimited(CharacterDelimitedDecoderConfig),
-
     /// Byte frames which are prefixed by an unsigned big-endian 32-bit integer indicating the length.
     LengthDelimited(LengthDelimitedDecoderConfig),
-
-    /// Byte frames which are delimited by a newline character.
-    NewlineDelimited(NewlineDelimitedDecoderConfig),
-
     /// Byte frames according to the [octet counting][octet_counting] format.
     ///
     /// [octet_counting]: https://tools.ietf.org/html/rfc6587#section-3.4.1
@@ -101,21 +92,9 @@ impl From<BytesDecoderConfig> for FramingConfig {
     }
 }
 
-impl From<CharacterDelimitedDecoderConfig> for FramingConfig {
-    fn from(config: CharacterDelimitedDecoderConfig) -> Self {
-        Self::CharacterDelimited(config)
-    }
-}
-
 impl From<LengthDelimitedDecoderConfig> for FramingConfig {
     fn from(config: LengthDelimitedDecoderConfig) -> Self {
         Self::LengthDelimited(config)
-    }
-}
-
-impl From<NewlineDelimitedDecoderConfig> for FramingConfig {
-    fn from(config: NewlineDelimitedDecoderConfig) -> Self {
-        Self::NewlineDelimited(config)
     }
 }
 
@@ -130,9 +109,7 @@ impl FramingConfig {
     pub fn build(&self) -> Framer {
         match self {
             FramingConfig::Bytes => Framer::Bytes(BytesDecoderConfig.build()),
-            FramingConfig::CharacterDelimited(config) => Framer::CharacterDelimited(config.build()),
             FramingConfig::LengthDelimited(config) => Framer::LengthDelimited(config.build()),
-            FramingConfig::NewlineDelimited(config) => Framer::NewlineDelimited(config.build()),
             FramingConfig::OctetCounting(config) => Framer::OctetCounting(config.build()),
         }
     }
@@ -143,12 +120,8 @@ impl FramingConfig {
 pub enum Framer {
     /// Uses a `BytesDecoder` for framing.
     Bytes(BytesDecoder),
-    /// Uses a `CharacterDelimitedDecoder` for framing.
-    CharacterDelimited(CharacterDelimitedDecoder),
     /// Uses a `LengthDelimitedDecoder` for framing.
     LengthDelimited(LengthDelimitedDecoder),
-    /// Uses a `NewlineDelimitedDecoder` for framing.
-    NewlineDelimited(NewlineDelimitedDecoder),
     /// Uses a `OctetCountingDecoder` for framing.
     OctetCounting(OctetCountingDecoder),
     /// Uses an opaque `Framer` implementation for framing.
@@ -162,9 +135,7 @@ impl tokio_util::codec::Decoder for Framer {
     fn decode(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
         match self {
             Framer::Bytes(framer) => framer.decode(src),
-            Framer::CharacterDelimited(framer) => framer.decode(src),
             Framer::LengthDelimited(framer) => framer.decode(src),
-            Framer::NewlineDelimited(framer) => framer.decode(src),
             Framer::OctetCounting(framer) => framer.decode(src),
             Framer::Boxed(framer) => framer.decode(src),
         }
@@ -173,9 +144,7 @@ impl tokio_util::codec::Decoder for Framer {
     fn decode_eof(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
         match self {
             Framer::Bytes(framer) => framer.decode_eof(src),
-            Framer::CharacterDelimited(framer) => framer.decode_eof(src),
             Framer::LengthDelimited(framer) => framer.decode_eof(src),
-            Framer::NewlineDelimited(framer) => framer.decode_eof(src),
             Framer::OctetCounting(framer) => framer.decode_eof(src),
             Framer::Boxed(framer) => framer.decode_eof(src),
         }
@@ -209,14 +178,7 @@ impl DeserializerConfig {
         }
     }
 
-    /// Return an appropriate default framer for the given deserializer
-    pub fn default_stream_framing(&self) -> FramingConfig {
-        match self {
-            DeserializerConfig::Json(_) => {
-                FramingConfig::NewlineDelimited(Default::default())
-            }
-        }
-    }
+
 
     /// Returns an appropriate default framing config for the given deserializer with message based inputs.
     pub fn default_message_based_framing(&self) -> FramingConfig {
@@ -242,20 +204,6 @@ impl DeserializerConfig {
     /// Get the HTTP content type.
     pub const fn content_type(&self, framer: &FramingConfig) -> &'static str {
         match (&self, framer) {
-            (
-                DeserializerConfig::Json(_),
-                FramingConfig::NewlineDelimited(_),
-            ) => "application/x-ndjson",
-            (
-                DeserializerConfig::Json(_),
-                FramingConfig::CharacterDelimited(CharacterDelimitedDecoderConfig {
-                    character_delimited:
-                        CharacterDelimitedDecoderOptions {
-                            delimiter: b',',
-                            max_length: Some(usize::MAX),
-                        },
-                }),
-            ) => "application/json",
             (
                 DeserializerConfig::Json(_),
                 _,

@@ -1,8 +1,7 @@
 use bytes::{Bytes, BytesMut};
 use smallvec::SmallVec;
 use vector_lib::codecs::decoding::{
-    format::Deserializer as _, BoxedFramingError, JsonDeserializer, Deserializer, Error, Framer,
-    NewlineDelimitedDecoder,
+    format::Deserializer as _, BoxedFramingError, JsonDeserializer,BytesDecoder, Deserializer, Error, Framer,
 };
 use vector_lib::config::LogNamespace;
 
@@ -26,7 +25,7 @@ pub struct Decoder {
 impl Default for Decoder {
     fn default() -> Self {
         Self {
-            framer: Framer::NewlineDelimited(NewlineDelimitedDecoder::new()),
+            framer: Framer::Bytes(BytesDecoder::default()),
             // deserializer: Deserializer::Bytes(BytesDeserializer),
             deserializer: Deserializer::Json(JsonDeserializer::default()),
             log_namespace: LogNamespace::Legacy,

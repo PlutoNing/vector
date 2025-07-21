@@ -4,22 +4,14 @@
 #![deny(missing_docs)]
 
 mod bytes;
-mod character_delimited;
 mod length_delimited;
-mod newline_delimited;
 mod octet_counting;
 
 use std::{any::Any, fmt::Debug};
 
 use ::bytes::Bytes;
-pub use character_delimited::{
-    CharacterDelimitedDecoder, CharacterDelimitedDecoderConfig, CharacterDelimitedDecoderOptions,
-};
 use dyn_clone::DynClone;
 pub use length_delimited::{LengthDelimitedDecoder, LengthDelimitedDecoderConfig};
-pub use newline_delimited::{
-    NewlineDelimitedDecoder, NewlineDelimitedDecoderConfig, NewlineDelimitedDecoderOptions,
-};
 pub use octet_counting::{
     OctetCountingDecoder, OctetCountingDecoderConfig, OctetCountingDecoderOptions,
 };
