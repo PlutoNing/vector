@@ -573,7 +573,6 @@ impl<'a> Builder<'a> {
             } else {
                 let buffer_type = match sink.buffer.stages().first().expect("cant ever be empty") {
                     BufferType::Memory { .. } => "memory",
-                    BufferType::DiskV2 { .. } => "disk",
                 };
                 let buffer_span = error_span!("sink", buffer_type);
                 let buffer = sink

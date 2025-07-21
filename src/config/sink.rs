@@ -91,12 +91,11 @@ where
         }
     }
 
-    pub fn resources(&self, id: &ComponentKey) -> Vec<Resource> {
-        let mut resources = self.inner.resources();
+    pub fn resources(&self, _id: &ComponentKey) -> Vec<Resource> {
+        let resources = self.inner.resources();
         for stage in self.buffer.stages() {
             match stage {
                 BufferType::Memory { .. } => {}
-                BufferType::DiskV2 { .. } => resources.push(Resource::DiskBuffer(id.to_string())),
             }
         }
         resources

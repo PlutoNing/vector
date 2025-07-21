@@ -8,12 +8,12 @@ use async_recursion::async_recursion;
 use futures::Stream;
 use tokio::select;
 use tokio_util::sync::ReusableBoxFuture;
-use vector_common::internal_event::emit;
+
 
 use super::limited_queue::LimitedReceiver;
 use crate::{
     buffer_usage_data::BufferUsageHandle,
-    variants::disk_v2::{self, ProductionFilesystem},
+
     Bufferable,
 };
 
@@ -22,20 +22,11 @@ use crate::{
 pub enum ReceiverAdapter<T: Bufferable> {
     /// The in-memory channel buffer.
     InMemory(LimitedReceiver<T>),
-
-    /// The disk v2 buffer.
-    DiskV2(disk_v2::BufferReader<T, ProductionFilesystem>),
 }
 
 impl<T: Bufferable> From<LimitedReceiver<T>> for ReceiverAdapter<T> {
     fn from(v: LimitedReceiver<T>) -> Self {
         Self::InMemory(v)
-    }
-}
-
-impl<T: Bufferable> From<disk_v2::BufferReader<T, ProductionFilesystem>> for ReceiverAdapter<T> {
-    fn from(v: disk_v2::BufferReader<T, ProductionFilesystem>) -> Self {
-        Self::DiskV2(v)
     }
 }
 
@@ -46,19 +37,6 @@ where
     pub(crate) async fn next(&mut self) -> Option<T> {
         match self {
             ReceiverAdapter::InMemory(rx) => rx.next().await,
-            ReceiverAdapter::DiskV2(reader) => loop {
-                match reader.next().await {
-                    Ok(result) => break result,
-                    Err(e) => match e.as_recoverable_error() {
-                        Some(re) => {
-                            // If we've hit a recoverable error, we'll emit an event to indicate as much but we'll still
-                            // keep trying to read the next available record.
-                            emit(re);
-                        }
-                        None => panic!("Reader encountered unrecoverable error: {e:?}"),
-                    },
-                }
-            },
         }
     }
 }

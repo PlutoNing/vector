@@ -16,7 +16,7 @@ use crate::{
         builder::{TopologyBuilder, TopologyError},
         channel::{BufferReceiver, BufferSender},
     },
-    variants::{DiskV2Buffer, MemoryBuffer},
+    variants::{MemoryBuffer},
     Bufferable, WhenFull,
 };
 
@@ -34,8 +34,6 @@ pub enum BufferBuildError {
 enum BufferTypeKind {
     #[serde(rename = "memory")]
     Memory,
-    #[serde(rename = "disk")]
-    DiskV2,
 }
 
 const ALL_FIELDS: [&str; 4] = ["type", "max_events", "max_size", "when_full"];
@@ -94,18 +92,6 @@ impl BufferTypeVisitor {
                 }
                 Ok(BufferType::Memory {
                     max_events: max_events.unwrap_or_else(memory_buffer_default_max_events),
-                    when_full,
-                })
-            }
-            BufferTypeKind::DiskV2 => {
-                if max_events.is_some() {
-                    return Err(de::Error::unknown_field(
-                        "max_events",
-                        &["type", "max_size", "when_full"],
-                    ));
-                }
-                Ok(BufferType::DiskV2 {
-                    max_size: max_size.ok_or_else(|| de::Error::missing_field("max_size"))?,
                     when_full,
                 })
             }
@@ -196,29 +182,6 @@ pub enum BufferType {
         #[serde(default)]
         when_full: WhenFull,
     },
-
-    /// A buffer stage backed by disk.
-    ///
-    /// This is less performant, but more durable. Data that has been synchronized to disk will not
-    /// be lost if Vector is restarted forcefully or crashes.
-    ///
-    /// Data is synchronized to disk every 500ms.
-    #[configurable(title = "Events are buffered on disk.")]
-    #[serde(rename = "disk")]
-    DiskV2 {
-        /// The maximum size of the buffer on disk.
-        ///
-        /// Must be at least ~256 megabytes (268435488 bytes).
-        #[configurable(
-            validation(range(min = 268435488)),
-            metadata(docs::type_unit = "bytes")
-        )]
-        max_size: NonZeroU64,
-
-        #[configurable(derived)]
-        #[serde(default)]
-        when_full: WhenFull,
-    },
 }
 /* 指内存,硬盘什么的 */
 impl BufferType {
@@ -231,7 +194,7 @@ impl BufferType {
     pub fn disk_usage(
         &self,
         global_data_dir: Option<PathBuf>,
-        id: &ComponentKey,
+        _id: &ComponentKey,
     ) -> Option<DiskUsage> {
         // All disk-backed buffers require the global data directory to be specified, and
         // non-disk-backed buffers do not require it to be set... so if it's not set here, we ignore
@@ -247,16 +210,8 @@ impl BufferType {
         // aspect.
         match global_data_dir {
             None => None,
-            Some(global_data_dir) => match self {
+            Some(_global_data_dir) => match self {
                 Self::Memory { .. } => None,
-                Self::DiskV2 { max_size, .. } => {
-                    let data_dir = crate::variants::disk_v2::get_disk_v2_data_dir_path(
-                        &global_data_dir,
-                        id.id(),
-                    );
-
-                    Some(DiskUsage::new(id.clone(), data_dir, *max_size))
-                }
             },
         }
     }
@@ -270,8 +225,8 @@ impl BufferType {
     pub fn add_to_builder<T>(
         &self,
         builder: &mut TopologyBuilder<T>,
-        data_dir: Option<PathBuf>,
-        id: String,
+        _data_dir: Option<PathBuf>,
+        _id: String,
     ) -> Result<(), BufferBuildError>
     where
         T: Bufferable + Clone + Finalizable,
@@ -282,13 +237,6 @@ impl BufferType {
                 max_events,
             } => {/* 新建一个mem buffer塞进去 */
                 builder.stage(MemoryBuffer::new(max_events), when_full);
-            }
-            BufferType::DiskV2 {
-                when_full,
-                max_size,
-            } => {
-                let data_dir = data_dir.ok_or(BufferBuildError::RequiresDataDir)?;
-                builder.stage(DiskV2Buffer::new(id, data_dir, max_size), when_full);
             }
         }
 

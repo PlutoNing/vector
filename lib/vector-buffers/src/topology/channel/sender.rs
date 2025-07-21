@@ -1,8 +1,8 @@
-use std::{sync::Arc, time::Instant};
+use std::{time::Instant};
 
 use async_recursion::async_recursion;
 use derivative::Derivative;
-use tokio::sync::Mutex;
+
 use tracing::Span;
 use vector_common::internal_event::{register, InternalEventHandle, Registered};
 
@@ -10,7 +10,7 @@ use super::limited_queue::LimitedSender;
 use crate::{
     buffer_usage_data::BufferUsageHandle,
     internal_events::BufferSendDuration,
-    variants::disk_v2::{self, ProductionFilesystem},
+
     Bufferable, WhenFull,
 };
 
@@ -19,20 +19,11 @@ use crate::{
 pub enum SenderAdapter<T: Bufferable> {
     /// The in-memory channel buffer.
     InMemory(LimitedSender<T>),
-
-    /// The disk v2 buffer.
-    DiskV2(Arc<Mutex<disk_v2::BufferWriter<T, ProductionFilesystem>>>),
 }
 
 impl<T: Bufferable> From<LimitedSender<T>> for SenderAdapter<T> {
     fn from(v: LimitedSender<T>) -> Self {
         Self::InMemory(v)
-    }
-}
-
-impl<T: Bufferable> From<disk_v2::BufferWriter<T, ProductionFilesystem>> for SenderAdapter<T> {
-    fn from(v: disk_v2::BufferWriter<T, ProductionFilesystem>) -> Self {
-        Self::DiskV2(Arc::new(Mutex::new(v)))
     }
 }
 
@@ -43,20 +34,6 @@ where
     pub(crate) async fn send(&mut self, item: T) -> crate::Result<()> {
         match self {
             Self::InMemory(tx) => tx.send(item).await.map_err(Into::into),
-            Self::DiskV2(writer) => {
-                let mut writer = writer.lock().await;
-
-                writer.write_record(item).await.map(|_| ()).map_err(|e| {
-                    // TODO: Could some errors be handled and not be unrecoverable? Right now,
-                    // encoding should theoretically be recoverable -- encoded value was too big, or
-                    // error during encoding -- but the traits don't allow for recovering the
-                    // original event value because we have to consume it to do the encoding... but
-                    // that might not always be the case.
-                    error!("Disk buffer writer has encountered an unrecoverable error.");
-
-                    e.into()
-                })
-            }
         }
     }
 
@@ -66,42 +43,18 @@ where
                 .try_send(item)
                 .map(|()| None)
                 .or_else(|e| Ok(Some(e.into_inner()))),
-            Self::DiskV2(writer) => {
-                let mut writer = writer.lock().await;
-
-                writer.try_write_record(item).await.map_err(|e| {
-                    // TODO: Could some errors be handled and not be unrecoverable? Right now,
-                    // encoding should theoretically be recoverable -- encoded value was too big, or
-                    // error during encoding -- but the traits don't allow for recovering the
-                    // original event value because we have to consume it to do the encoding... but
-                    // that might not always be the case.
-                    error!("Disk buffer writer has encountered an unrecoverable error.");
-
-                    e.into()
-                })
-            }
         }
     }
 
     pub(crate) async fn flush(&mut self) -> crate::Result<()> {
         match self {
             Self::InMemory(_) => Ok(()),
-            Self::DiskV2(writer) => {
-                let mut writer = writer.lock().await;
-                writer.flush().await.map_err(|e| {
-                    // Errors on the I/O path, which is all that flushing touches, are never recoverable.
-                    error!("Disk buffer writer has encountered an unrecoverable error.");
-
-                    e.into()
-                })
-            }
         }
     }
 
     pub fn capacity(&self) -> Option<usize> {
         match self {
             Self::InMemory(tx) => Some(tx.available_capacity()),
-            Self::DiskV2(_) => None,
         }
     }
 }
