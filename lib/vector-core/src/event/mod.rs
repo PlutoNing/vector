@@ -25,7 +25,6 @@ use crate::config::LogNamespace;
 use crate::config::OutputId;
 
 pub mod array;
-pub mod discriminant;
 mod estimated_json_encoded_size_of;
 mod log_event;
 mod metadata;
