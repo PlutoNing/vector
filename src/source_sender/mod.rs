@@ -10,7 +10,6 @@ use vector_lib::buffers::EventCount;
 use vector_lib::event::array::EventArrayIntoIter;
 #[cfg(any(test))]
 use vector_lib::event::{into_event_stream, EventStatus};
-use vector_lib::finalization::{AddBatchNotifier, BatchNotifier};
 use vector_lib::internal_event::{ComponentEventsDropped, UNINTENTIONAL};
 use vector_lib::json_size::JsonSize;
 use vector_lib::{
@@ -48,12 +47,6 @@ pub struct SourceSenderItem {
     pub events: EventArray,
     /// Reference instant used to calculate send duration.
     pub send_reference: Instant,
-}
-
-impl AddBatchNotifier for SourceSenderItem {
-    fn add_batch_notifier(&mut self, notifier: BatchNotifier) {
-        self.events.add_batch_notifier(notifier)
-    }
 }
 
 impl ByteSizeOf for SourceSenderItem {

@@ -9,12 +9,12 @@ use vector_buffers::EventCount;
 use vector_common::{
     byte_size_of::ByteSizeOf,
     config::ComponentKey,
-    finalization::{AddBatchNotifier, BatchNotifier, EventFinalizers, Finalizable},
+    finalization::{EventFinalizers, Finalizable},
     json_size::JsonSize,
 };
 
 use super::{
-    EstimatedJsonEncodedSizeOf, Event, EventDataEq, EventFinalizer, EventMutRef, EventRef,
+    EstimatedJsonEncodedSizeOf, Event, EventDataEq, EventMutRef, EventRef,
     LogEvent, Metric, TraceEvent,
 };
 
@@ -234,22 +234,6 @@ impl From<LogArray> for EventArray {
 impl From<MetricArray> for EventArray {
     fn from(array: MetricArray) -> Self {
         Self::Metrics(array)
-    }
-}
-
-impl AddBatchNotifier for EventArray {
-    fn add_batch_notifier(&mut self, batch: BatchNotifier) {
-        match self {
-            Self::Logs(array) => array
-                .iter_mut()
-                .for_each(|item| item.add_finalizer(EventFinalizer::new(batch.clone()))),
-            Self::Metrics(array) => array
-                .iter_mut()
-                .for_each(|item| item.add_finalizer(EventFinalizer::new(batch.clone()))),
-            Self::Traces(array) => array
-                .iter_mut()
-                .for_each(|item| item.add_finalizer(EventFinalizer::new(batch.clone()))),
-        }
     }
 }
 

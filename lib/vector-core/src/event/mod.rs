@@ -367,17 +367,6 @@ impl EventDataEq for Event {
     }
 }
 
-impl finalization::AddBatchNotifier for Event {
-    fn add_batch_notifier(&mut self, batch: BatchNotifier) {
-        let finalizer = EventFinalizer::new(batch);
-        match self {
-            Self::Log(log) => log.add_finalizer(finalizer),
-            Self::Metric(metric) => metric.add_finalizer(finalizer),
-            Self::Trace(trace) => trace.add_finalizer(finalizer),
-        }
-    }
-}
-
 impl TryInto<serde_json::Value> for Event {
     type Error = serde_json::Error;
 

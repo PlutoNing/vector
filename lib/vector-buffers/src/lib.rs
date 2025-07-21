@@ -33,7 +33,7 @@ pub(crate) mod variants;
 
 use std::fmt::Debug;
 
-use vector_common::{byte_size_of::ByteSizeOf, finalization::AddBatchNotifier};
+use vector_common::{byte_size_of::ByteSizeOf};
 
 /// Event handling behavior when a buffer is full.
 #[configurable_component]
@@ -73,13 +73,13 @@ pub enum WhenFull {
 /// It is a relaxed version of `Bufferable` that allows for items that are not `Encodable` (e.g., `Instant`),
 /// which is an unnecessary constraint for memory buffers.
 pub trait InMemoryBufferable:
-    AddBatchNotifier + ByteSizeOf + EventCount + Debug + Send + Sync + Unpin + Sized + 'static
+    ByteSizeOf + EventCount + Debug + Send + Sync + Unpin + Sized + 'static
 {
 }
 
 // Blanket implementation for anything that is already in-memory bufferable.
 impl<T> InMemoryBufferable for T where
-    T: AddBatchNotifier + ByteSizeOf + EventCount + Debug + Send + Sync + Unpin + Sized + 'static
+    T: ByteSizeOf + EventCount + Debug + Send + Sync + Unpin + Sized + 'static
 {
 }
 
