@@ -1,0 +1,30 @@
+---
+# Vector SQLite Sink Example Configuration
+# This configuration demonstrates how to use the SQLite sink
+
+sources:
+  demo_logs:
+    type: demo_logs
+    format: json
+    interval: 1.0
+
+transforms:
+  add_metadata:
+    inputs:
+      - demo_logs
+    type: remap
+    source: |
+      .timestamp = now()
+      .level = "info"
+      .source = "demo"
+
+sinks:
+  sqlite_logs:
+    type: sqlite
+    inputs:
+      - add_metadata
+    path: "/tmp/vector_logs.db"
+    table: "application_logs"
+    encoding:
+      codec: json
+    idle_timeout_secs: 300

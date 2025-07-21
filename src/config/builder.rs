@@ -169,7 +169,7 @@ impl ConfigBuilder {
     pub fn set_data_dir(&mut self, path: &Path) {
         self.global.data_dir = Some(path.to_owned());
     }
-/* 处理配置文件选项? 把配置项附加到自己的各个配置成员里面 */
+/* 处理配置文件选项? 把配置项附加到自己的各个配置成员里面. with是新配置文件 */
     pub fn append(&mut self, with: Self) -> Result<(), Vec<String>> {
         let mut errors = Vec::new();
 
@@ -177,32 +177,42 @@ impl ConfigBuilder {
             Err(errs) => errors.extend(errs),
             Ok(new_global) => self.global = new_global,
         }
+        info!("global: {:?}", self.global);
 
         self.schema.append(with.schema, &mut errors);
-
         self.schema.log_namespace = self.schema.log_namespace.or(with.schema.log_namespace);
+        info!("schema: {:?}", self.schema);
 
         with.enrichment_tables.keys().for_each(|k| {
             if self.enrichment_tables.contains_key(k) {
                 errors.push(format!("duplicate enrichment_table name found: {}", k));
             }
         });
+        info!("enrichment_tables: {:?}", self.enrichment_tables);
+
         with.sources.keys().for_each(|k| {
             if self.sources.contains_key(k) {
                 errors.push(format!("duplicate source id found: {}", k));
             }
         });
+        info!("sources: {:?}", self.sources);
+
         with.sinks.keys().for_each(|k| {
+            info!("with.sinks.key {:?}", k);
             if self.sinks.contains_key(k) {
                 errors.push(format!("duplicate sink id found: {}", k));
             }
         });
         info!("sinks: {:?}", self.sinks);
+        self.sinks.keys().for_each(|k|{
+            info!("self.sinks.key {:?}", k);
+        });
         with.transforms.keys().for_each(|k| {
             if self.transforms.contains_key(k) {
                 errors.push(format!("duplicate transform id found: {}", k));
             }
         });
+        info!("transforms: {:?}", self.transforms);
         if !errors.is_empty() {
             return Err(errors);
         }
