@@ -717,55 +717,6 @@ impl Serialize for LogEvent {
     }
 }
 
-// Tracing owned target paths used for tracing to log event conversions.
-struct TracingTargetPaths {
-    pub(crate) timestamp: OwnedTargetPath,
-    pub(crate) kind: OwnedTargetPath,
-    pub(crate) module_path: OwnedTargetPath,
-    pub(crate) level: OwnedTargetPath,
-    pub(crate) target: OwnedTargetPath,
-}
-
-/// Lazily initialized singleton.
-static TRACING_TARGET_PATHS: LazyLock<TracingTargetPaths> = LazyLock::new(|| TracingTargetPaths {
-    timestamp: OwnedTargetPath::event(owned_value_path!("timestamp")),
-    kind: OwnedTargetPath::event(owned_value_path!("metadata", "kind")),
-    level: OwnedTargetPath::event(owned_value_path!("metadata", "level")),
-    module_path: OwnedTargetPath::event(owned_value_path!("metadata", "module_path")),
-    target: OwnedTargetPath::event(owned_value_path!("metadata", "target")),
-});
-
-impl From<&tracing::Event<'_>> for LogEvent {
-    fn from(event: &tracing::Event<'_>) -> Self {
-        let now = chrono::Utc::now();
-        let mut maker = LogEvent::default();
-        event.record(&mut maker);
-
-        let mut log = maker;
-        log.insert(&TRACING_TARGET_PATHS.timestamp, now);
-
-        let meta = event.metadata();
-        log.insert(
-            &TRACING_TARGET_PATHS.kind,
-            if meta.is_event() {
-                Value::Bytes("event".to_string().into())
-            } else if meta.is_span() {
-                Value::Bytes("span".to_string().into())
-            } else {
-                Value::Null
-            },
-        );
-        log.insert(&TRACING_TARGET_PATHS.level, meta.level().to_string());
-        log.insert(
-            &TRACING_TARGET_PATHS.module_path,
-            meta.module_path()
-                .map_or(Value::Null, |mp| Value::Bytes(mp.to_string().into())),
-        );
-        log.insert(&TRACING_TARGET_PATHS.target, meta.target().to_string());
-        log
-    }
-}
-
 /// Note that `tracing::field::Field` containing dots and other special characters will be treated as a single segment.
 impl tracing::field::Visit for LogEvent {
     fn record_str(&mut self, field: &tracing::field::Field, value: &str) {
