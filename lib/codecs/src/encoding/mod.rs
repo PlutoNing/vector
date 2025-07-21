@@ -13,8 +13,8 @@ pub use format::{
 };
 pub use framing::{
     BoxedFramer, BoxedFramingError, CharacterDelimitedEncoder,
-    CharacterDelimitedEncoderConfig, CharacterDelimitedEncoderOptions, LengthDelimitedEncoder,
-    LengthDelimitedEncoderConfig, NewlineDelimitedEncoder, NewlineDelimitedEncoderConfig,
+    CharacterDelimitedEncoderConfig, CharacterDelimitedEncoderOptions,
+    NewlineDelimitedEncoder, NewlineDelimitedEncoderConfig,
 };
 use vector_config::configurable_component;
 use vector_core::{config::DataType, event::Event, schema};
@@ -56,12 +56,6 @@ impl From<std::io::Error> for Error {
 pub enum FramingConfig {
     /// Event data is delimited by a single ASCII (7-bit) character.
     CharacterDelimited(CharacterDelimitedEncoderConfig),
-
-    /// Event data is prefixed with its length in bytes.
-    ///
-    /// The prefix is a 32-bit unsigned integer, little endian.
-    LengthDelimited(LengthDelimitedEncoderConfig),
-
     /// Event data is delimited by a newline (LF) character.
     NewlineDelimited,
 }
@@ -69,12 +63,6 @@ pub enum FramingConfig {
 impl From<CharacterDelimitedEncoderConfig> for FramingConfig {
     fn from(config: CharacterDelimitedEncoderConfig) -> Self {
         Self::CharacterDelimited(config)
-    }
-}
-
-impl From<LengthDelimitedEncoderConfig> for FramingConfig {
-    fn from(config: LengthDelimitedEncoderConfig) -> Self {
-        Self::LengthDelimited(config)
     }
 }
 
@@ -89,7 +77,6 @@ impl FramingConfig {
     pub fn build(&self) -> Framer {
         match self {
             FramingConfig::CharacterDelimited(config) => Framer::CharacterDelimited(config.build()),
-            FramingConfig::LengthDelimited(config) => Framer::LengthDelimited(config.build()),
             FramingConfig::NewlineDelimited => {
                 Framer::NewlineDelimited(NewlineDelimitedEncoderConfig.build())
             }
@@ -102,8 +89,6 @@ impl FramingConfig {
 pub enum Framer {
     /// Uses a `CharacterDelimitedEncoder` for framing.
     CharacterDelimited(CharacterDelimitedEncoder),
-    /// Uses a `LengthDelimitedEncoder` for framing.
-    LengthDelimited(LengthDelimitedEncoder),
     /// Uses a `NewlineDelimitedEncoder` for framing.
     NewlineDelimited(NewlineDelimitedEncoder),
     /// Uses an opaque `Encoder` implementation for framing.
@@ -113,12 +98,6 @@ pub enum Framer {
 impl From<CharacterDelimitedEncoder> for Framer {
     fn from(encoder: CharacterDelimitedEncoder) -> Self {
         Self::CharacterDelimited(encoder)
-    }
-}
-
-impl From<LengthDelimitedEncoder> for Framer {
-    fn from(encoder: LengthDelimitedEncoder) -> Self {
-        Self::LengthDelimited(encoder)
     }
 }
 
@@ -140,7 +119,6 @@ impl tokio_util::codec::Encoder<()> for Framer {
     fn encode(&mut self, _: (), buffer: &mut BytesMut) -> Result<(), Self::Error> {
         match self {
             Framer::CharacterDelimited(framer) => framer.encode((), buffer),
-            Framer::LengthDelimited(framer) => framer.encode((), buffer),
             Framer::NewlineDelimited(framer) => framer.encode((), buffer),
             Framer::Boxed(framer) => framer.encode((), buffer),
         }

@@ -19,7 +19,7 @@ pub use decoding::{
 pub use encoding::{
     CharacterDelimitedEncoder, CharacterDelimitedEncoderConfig,
     JsonSerializer,
-    JsonSerializerConfig, LengthDelimitedEncoder, LengthDelimitedEncoderConfig,
+    JsonSerializerConfig,
     NewlineDelimitedEncoder, NewlineDelimitedEncoderConfig,
     TextSerializer, TextSerializerConfig,
 };

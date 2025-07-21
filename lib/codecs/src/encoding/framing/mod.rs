@@ -4,7 +4,6 @@
 #![deny(missing_docs)]
 
 mod character_delimited;
-mod length_delimited;
 mod newline_delimited;
 
 use std::fmt::Debug;
@@ -13,7 +12,6 @@ pub use character_delimited::{
     CharacterDelimitedEncoder, CharacterDelimitedEncoderConfig, CharacterDelimitedEncoderOptions,
 };
 use dyn_clone::DynClone;
-pub use length_delimited::{LengthDelimitedEncoder, LengthDelimitedEncoderConfig};
 pub use newline_delimited::{NewlineDelimitedEncoder, NewlineDelimitedEncoderConfig};
 use tokio_util::codec::LinesCodecError;
 
