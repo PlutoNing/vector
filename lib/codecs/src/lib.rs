@@ -9,7 +9,7 @@ pub mod decoding;
 pub mod encoding;
 
 pub use decoding::{
-    BytesDecoder, BytesDecoderConfig, BytesDeserializer, BytesDeserializerConfig,
+    BytesDecoder, BytesDecoderConfig,
     CharacterDelimitedDecoder, CharacterDelimitedDecoderConfig,
     JsonDeserializer, JsonDeserializerConfig, LengthDelimitedDecoder,
     LengthDelimitedDecoderConfig, NewlineDelimitedDecoder,

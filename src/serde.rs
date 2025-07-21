@@ -2,8 +2,9 @@
 use indexmap::map::IndexMap;
 use serde::{Deserialize, Serialize};
 use vector_lib::codecs::{
-    decoding::{DeserializerConfig, FramingConfig},
-    BytesDecoderConfig, BytesDeserializerConfig,
+    decoding::{
+    FramingConfig},
+    BytesDecoderConfig,
 };
 use vector_lib::configurable::configurable_component;
 pub use vector_lib::serde::{bool_or_struct, is_default};
@@ -25,10 +26,6 @@ pub fn default_max_length() -> usize {
 
 pub fn default_framing_message_based() -> FramingConfig {
     BytesDecoderConfig::new().into()
-}
-
-pub fn default_decoding() -> DeserializerConfig {
-    BytesDeserializerConfig::new().into()
 }
 
 /// Utilities for the `serde_json` crate.

@@ -8,7 +8,7 @@ pub mod framing;
 use bytes::{Bytes, BytesMut};
 pub use error::StreamDecodingError;
 pub use format::{
-    BoxedDeserializer, BytesDeserializer, BytesDeserializerConfig,
+    BoxedDeserializer,
     JsonDeserializer, JsonDeserializerConfig, JsonDeserializerOptions,
 };
 #[cfg(feature = "syslog")]
@@ -189,19 +189,10 @@ impl tokio_util::codec::Decoder for Framer {
 #[serde(tag = "codec", rename_all = "snake_case")]
 #[configurable(metadata(docs::enum_tag_description = "The codec to use for decoding events."))]
 pub enum DeserializerConfig {
-    /// Uses the raw bytes as-is.
-    Bytes,
-
     /// Decodes the raw bytes as [JSON][json].
     ///
     /// [json]: https://www.json.org/
     Json(JsonDeserializerConfig),
-}
-
-impl From<BytesDeserializerConfig> for DeserializerConfig {
-    fn from(_: BytesDeserializerConfig) -> Self {
-        Self::Bytes
-    }
 }
 
 impl From<JsonDeserializerConfig> for DeserializerConfig {
@@ -214,7 +205,6 @@ impl DeserializerConfig {
     /// Build the `Deserializer` from this configuration.
     pub fn build(&self) -> vector_common::Result<Deserializer> {
         match self {
-            DeserializerConfig::Bytes => Ok(Deserializer::Bytes(BytesDeserializerConfig.build())),
             DeserializerConfig::Json(config) => Ok(Deserializer::Json(config.build())),
         }
     }
@@ -222,8 +212,7 @@ impl DeserializerConfig {
     /// Return an appropriate default framer for the given deserializer
     pub fn default_stream_framing(&self) -> FramingConfig {
         match self {
-            DeserializerConfig::Bytes
-            | DeserializerConfig::Json(_) => {
+            DeserializerConfig::Json(_) => {
                 FramingConfig::NewlineDelimited(Default::default())
             }
         }
@@ -239,7 +228,6 @@ impl DeserializerConfig {
     /// Return the type of event build by this deserializer.
     pub fn output_type(&self) -> DataType {
         match self {
-            DeserializerConfig::Bytes => BytesDeserializerConfig.output_type(),
             DeserializerConfig::Json(config) => config.output_type(),
         }
     }
@@ -247,7 +235,6 @@ impl DeserializerConfig {
     /// The schema produced by the deserializer.
     pub fn schema_definition(&self, log_namespace: LogNamespace) -> schema::Definition {
         match self {
-            DeserializerConfig::Bytes => BytesDeserializerConfig.schema_definition(log_namespace),
             DeserializerConfig::Json(config) => config.schema_definition(log_namespace),
         }
     }
@@ -270,8 +257,7 @@ impl DeserializerConfig {
                 }),
             ) => "application/json",
             (
-                DeserializerConfig::Json(_)
-                | DeserializerConfig::Bytes,
+                DeserializerConfig::Json(_),
                 _,
             ) => "text/plain",
             #[cfg(feature = "syslog")]
@@ -283,8 +269,6 @@ impl DeserializerConfig {
 /// Parse structured events from bytes.
 #[derive(Clone)]
 pub enum Deserializer {
-    /// Uses a `BytesDeserializer` for deserialization.
-    Bytes(BytesDeserializer),
     /// Uses a `JsonDeserializer` for deserialization.
     Json(JsonDeserializer),
     /// Uses an opaque `Deserializer` implementation for deserialization.
@@ -298,7 +282,6 @@ impl format::Deserializer for Deserializer {
         log_namespace: LogNamespace,
     ) -> vector_common::Result<SmallVec<[Event; 1]>> {
         match self {
-            Deserializer::Bytes(deserializer) => deserializer.parse(bytes, log_namespace),
             Deserializer::Json(deserializer) => deserializer.parse(bytes, log_namespace),
             Deserializer::Boxed(deserializer) => deserializer.parse(bytes, log_namespace),
         }

@@ -3,7 +3,6 @@
 
 #![deny(missing_docs)]
 
-mod bytes;
 mod json;
 
 use ::bytes::Bytes;
@@ -13,7 +12,7 @@ use smallvec::SmallVec;
 use vector_core::config::LogNamespace;
 use vector_core::event::Event;
 
-pub use self::bytes::{BytesDeserializer, BytesDeserializerConfig};
+
 
 /// Parse structured events from bytes.
 pub trait Deserializer: DynClone + Send + Sync {
