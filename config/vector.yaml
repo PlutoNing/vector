@@ -42,6 +42,15 @@ sinks:
     compression: none
     encoding:
       codec: json
+  # sqlite_logs:
+  #   type: sqlite
+  #   inputs:
+  #     - my_source_id
+  #   path: "/tmp/vector_logs.db"
+  #   table: "application_logs"
+  #   encoding:
+  #     codec: json
+  #   idle_timeout_secs: 300
 sources:
   my_source_id:
     type: host_metrics
