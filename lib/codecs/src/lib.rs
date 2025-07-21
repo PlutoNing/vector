@@ -17,7 +17,7 @@ pub use decoding::{
     StreamDecodingError,
 };
 pub use encoding::{
-    BytesEncoder, BytesEncoderConfig, CharacterDelimitedEncoder, CharacterDelimitedEncoderConfig,
+    CharacterDelimitedEncoder, CharacterDelimitedEncoderConfig,
     JsonSerializer,
     JsonSerializerConfig, LengthDelimitedEncoder, LengthDelimitedEncoderConfig,
     NewlineDelimitedEncoder, NewlineDelimitedEncoderConfig,

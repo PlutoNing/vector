@@ -3,7 +3,6 @@
 
 #![deny(missing_docs)]
 
-mod bytes;
 mod character_delimited;
 mod length_delimited;
 mod newline_delimited;
@@ -17,8 +16,6 @@ use dyn_clone::DynClone;
 pub use length_delimited::{LengthDelimitedEncoder, LengthDelimitedEncoderConfig};
 pub use newline_delimited::{NewlineDelimitedEncoder, NewlineDelimitedEncoderConfig};
 use tokio_util::codec::LinesCodecError;
-
-pub use self::bytes::{BytesEncoder, BytesEncoderConfig};
 
 /// An error that occurred while framing bytes.
 pub trait FramingError: std::error::Error + Send + Sync {}

@@ -12,7 +12,7 @@ pub use format::{
     TextSerializerConfig,TextSerializer,
 };
 pub use framing::{
-    BoxedFramer, BoxedFramingError, BytesEncoder, BytesEncoderConfig, CharacterDelimitedEncoder,
+    BoxedFramer, BoxedFramingError, CharacterDelimitedEncoder,
     CharacterDelimitedEncoderConfig, CharacterDelimitedEncoderOptions, LengthDelimitedEncoder,
     LengthDelimitedEncoderConfig, NewlineDelimitedEncoder, NewlineDelimitedEncoderConfig,
 };
@@ -54,9 +54,6 @@ impl From<std::io::Error> for Error {
 #[serde(tag = "method", rename_all = "snake_case")]
 #[configurable(metadata(docs::enum_tag_description = "The framing method."))]
 pub enum FramingConfig {
-    /// Event data is not delimited at all.
-    Bytes,
-
     /// Event data is delimited by a single ASCII (7-bit) character.
     CharacterDelimited(CharacterDelimitedEncoderConfig),
 
@@ -67,12 +64,6 @@ pub enum FramingConfig {
 
     /// Event data is delimited by a newline (LF) character.
     NewlineDelimited,
-}
-
-impl From<BytesEncoderConfig> for FramingConfig {
-    fn from(_: BytesEncoderConfig) -> Self {
-        Self::Bytes
-    }
 }
 
 impl From<CharacterDelimitedEncoderConfig> for FramingConfig {
@@ -97,7 +88,6 @@ impl FramingConfig {
     /// Build the `Framer` from this configuration.
     pub fn build(&self) -> Framer {
         match self {
-            FramingConfig::Bytes => Framer::Bytes(BytesEncoderConfig.build()),
             FramingConfig::CharacterDelimited(config) => Framer::CharacterDelimited(config.build()),
             FramingConfig::LengthDelimited(config) => Framer::LengthDelimited(config.build()),
             FramingConfig::NewlineDelimited => {
@@ -110,8 +100,6 @@ impl FramingConfig {
 /// Produce a byte stream from byte frames.
 #[derive(Debug, Clone)]
 pub enum Framer {
-    /// Uses a `BytesEncoder` for framing.
-    Bytes(BytesEncoder),
     /// Uses a `CharacterDelimitedEncoder` for framing.
     CharacterDelimited(CharacterDelimitedEncoder),
     /// Uses a `LengthDelimitedEncoder` for framing.
@@ -120,12 +108,6 @@ pub enum Framer {
     NewlineDelimited(NewlineDelimitedEncoder),
     /// Uses an opaque `Encoder` implementation for framing.
     Boxed(BoxedFramer),
-}
-
-impl From<BytesEncoder> for Framer {
-    fn from(encoder: BytesEncoder) -> Self {
-        Self::Bytes(encoder)
-    }
 }
 
 impl From<CharacterDelimitedEncoder> for Framer {
@@ -157,7 +139,6 @@ impl tokio_util::codec::Encoder<()> for Framer {
 
     fn encode(&mut self, _: (), buffer: &mut BytesMut) -> Result<(), Self::Error> {
         match self {
-            Framer::Bytes(framer) => framer.encode((), buffer),
             Framer::CharacterDelimited(framer) => framer.encode((), buffer),
             Framer::LengthDelimited(framer) => framer.encode((), buffer),
             Framer::NewlineDelimited(framer) => framer.encode((), buffer),
