@@ -12,15 +12,8 @@ use tracing_core::{
 };
 use tracing_subscriber::layer::{Context, Layer};
 
-#[cfg(test)]
-#[macro_use]
-extern crate tracing;
-
 #[cfg(not(test))]
 use std::time::Instant;
-
-#[cfg(test)]
-use mock_instant::global::Instant;
 
 const RATE_LIMIT_FIELD: &str = "internal_log_rate_limit";
 const RATE_LIMIT_SECS_FIELD: &str = "internal_log_rate_secs";

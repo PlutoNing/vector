@@ -4,10 +4,12 @@ lib/codecs/src/encoding/framing/character_delimited.rs:<codecs::encoding::framin
 lib/codecs/src/encoding/framing/newline_delimited.rs:<codecs::encoding::framing::newline_delimited::NewlineDelimitedEncoder as tokio_util::codec::encoder::Encoder<()>>::encode
 lib/codecs/src/encoding/mod.rs:<codecs::encoding::Framer as tokio_util::codec::encoder::Encoder<()>>::encode
 lib/codecs/src/encoding/mod.rs:<codecs::encoding::Serializer as tokio_util::codec::encoder::Encoder<vector_core::event::Event>>::encode
+1==========================ok==================================================
 lib/codecs/src/lib.rs:<codecs::MetricTagValues as core::cmp::PartialEq>::eq
 lib/codecs/src/lib.rs:core::slice::raw::from_raw_parts_mut::precondition_check
 lib/codecs/src/lib.rs:<serde_json::ser::Compound<W,F> as serde::ser::SerializeMap>::serialize_key
 lib/codecs/src/lib.rs:serde_json::ser::format_escaped_str
+========================================================================
 lib/tracing-limit/src/lib.rs:<tracing_limit::RateLimitedLayer<S,L> as tracing_subscriber::layer::Layer<S>>::on_enter
 lib/tracing-limit/src/lib.rs:<tracing_limit::RateLimitedLayer<S,L> as tracing_subscriber::layer::Layer<S>>::on_exit
 lib/vector-common/src/byte_size_of.rs:<alloc::collections::btree::map::BTreeMap<K,V> as vector_common::byte_size_of::ByteSizeOf>::allocated_bytes
