@@ -330,12 +330,6 @@ impl<W: AsyncWrite + Unpin> TrackingBufWriter<W> {
         })
     }
 
-    /// Gets a reference to the underlying writer.
-    #[cfg(test)]
-    fn get_ref(&self) -> &W {
-        &self.inner
-    }
-
     /// Gets a mutable reference to the underlying writer.
     fn get_mut(&mut self) -> &mut W {
         &mut self.inner
@@ -418,12 +412,6 @@ where
             max_data_file_size,
             _t: PhantomData,
         }
-    }
-
-    /// Gets a reference to the underlying writer.
-    #[cfg(test)]
-    pub fn get_ref(&self) -> &W {
-        self.writer.get_ref()
     }
 
     /// Whether or not `amount` bytes could be written while obeying the data file size limit.
@@ -561,35 +549,6 @@ where
             event_count,
             serialized_len,
         })
-    }
-
-    /// Writes a record.
-    ///
-    /// If the write is successful, the number of bytes written to the buffer are returned.
-    /// Additionally, if any internal buffers required an implicit flush, the result of that flush
-    /// operation is returned as well.
-    ///
-    /// As we internally buffers write to the underlying data file, to reduce the number of syscalls
-    /// required to pushed serialized records to the data file, we sometimes will write a record
-    /// which would overflow the internal buffer.  Doing so means we have to first flush the buffer
-    /// before continuing with buffering the current write.  As some invariants are based on knowing
-    /// when a record has actually been written to the data file, we return any information of
-    /// implicit flushes so that the writer can be aware of when data has actually made it to the
-    /// data file or not.
-    ///
-    /// # Errors
-    ///
-    /// Errors can occur during the encoding, serialization, or I/O stage.  If an error occurs
-    /// during any of these stages, an appropriate error variant will be returned describing the error.
-    #[instrument(skip(self, record), level = "trace")]
-    #[cfg(test)]
-    pub async fn write_record(
-        &mut self,
-        id: u64,
-        record: T,
-    ) -> Result<(usize, Option<FlushResult>), WriterError<T>> {
-        let token = self.archive_record(id, record)?;
-        self.flush_record(token).await
     }
 
     /// Flushes the previously-archived record.

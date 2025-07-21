@@ -225,14 +225,4 @@ impl ConfigBuilder {
 
         Ok(())
     }
-
-    #[cfg(test)]
-    pub fn from_toml(input: &str) -> Self {
-        crate::config::format::deserialize(input, crate::config::format::Format::Toml).unwrap()
-    }
-
-    #[cfg(test)]
-    pub fn from_json(input: &str) -> Self {
-        crate::config::format::deserialize(input, crate::config::format::Format::Json).unwrap()
-    }
 }

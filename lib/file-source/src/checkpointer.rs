@@ -219,24 +219,6 @@ impl Checkpointer {
         Arc::clone(&self.checkpoints)
     }
 
-    /// Encode a fingerprint to a file name, including legacy Unknown values
-    ///
-    /// For each of the non-legacy variants, prepend an identifier byte that
-    /// falls outside of the hex range used by the legacy implementation. This
-    /// allows them to be differentiated by simply peeking at the first byte.
-    #[cfg(test)]
-    fn encode(&self, fng: FileFingerprint, pos: FilePosition) -> PathBuf {
-        use FileFingerprint::*;
-
-        let path = match fng {
-            BytesChecksum(c) => format!("g{:x}.{}", c, pos),
-            FirstLinesChecksum(c) => format!("h{:x}.{}", c, pos),
-            DevInode(dev, ino) => format!("i{:x}.{:x}.{}", dev, ino, pos),
-            Unknown(x) => format!("{:x}.{}", x, pos),
-        };
-        self.directory.join(path)
-    }
-
     /// Decode a fingerprint from a file name, accounting for unknowns due to the legacy
     /// implementation.
     ///
@@ -268,16 +250,6 @@ impl Checkpointer {
                 (Unknown(c), pos)
             }
         }
-    }
-
-    #[cfg(test)]
-    pub fn update_checkpoint(&mut self, fng: FileFingerprint, pos: FilePosition) {
-        self.checkpoints.update(fng, pos);
-    }
-
-    #[cfg(test)]
-    pub fn get_checkpoint(&self, fng: FileFingerprint) -> Option<FilePosition> {
-        self.checkpoints.get(fng)
     }
 
     /// Scan through a given list of fresh fingerprints to see if any match an existing legacy
@@ -326,18 +298,6 @@ impl Checkpointer {
             *last = Some(current);
         }
 
-        Ok(self.checkpoints.checkpoints.len())
-    }
-
-    /// Write checkpoints to disk in the legacy format. Used for compatibility
-    /// testing only.
-    #[cfg(test)]
-    pub fn write_legacy_checkpoints(&mut self) -> Result<usize, io::Error> {
-        fs::remove_dir_all(&self.directory).ok();
-        fs::create_dir_all(&self.directory)?;
-        for c in self.checkpoints.checkpoints.iter() {
-            fs::File::create(self.encode(*c.key(), *c.value()))?;
-        }
         Ok(self.checkpoints.checkpoints.len())
     }
 

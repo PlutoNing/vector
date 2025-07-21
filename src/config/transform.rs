@@ -164,16 +164,6 @@ impl TransformContext {
         }
     }
 
-    #[cfg(test)]
-    pub fn new_test(
-        schema_definitions: HashMap<Option<String>, HashMap<OutputId, schema::Definition>>,
-    ) -> Self {
-        Self {
-            schema_definitions,
-            ..Default::default()
-        }
-    }
-
     /// Gets the log namespacing to use. The passed in value is from the transform itself
     /// and will override any global default if it's set.
     ///

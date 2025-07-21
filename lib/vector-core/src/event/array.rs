@@ -5,8 +5,6 @@
 use std::{iter, slice, sync::Arc, vec};
 
 use futures::{stream, Stream};
-#[cfg(test)]
-use quickcheck::{Arbitrary, Gen};
 use vector_buffers::EventCount;
 use vector_common::{
     byte_size_of::ByteSizeOf,
@@ -325,38 +323,6 @@ impl Finalizable for EventArray {
         }
     }
 }
-
-#[cfg(test)]
-impl Arbitrary for EventArray {
-    fn arbitrary(g: &mut Gen) -> Self {
-        let len = u8::arbitrary(g) as usize;
-        let choice: u8 = u8::arbitrary(g);
-        // Quickcheck can't derive Arbitrary for enums, see
-        // https://github.com/BurntSushi/quickcheck/issues/98
-        if choice % 2 == 0 {
-            let mut logs = Vec::new();
-            for _ in 0..len {
-                logs.push(LogEvent::arbitrary(g));
-            }
-            EventArray::Logs(logs)
-        } else {
-            let mut metrics = Vec::new();
-            for _ in 0..len {
-                metrics.push(Metric::arbitrary(g));
-            }
-            EventArray::Metrics(metrics)
-        }
-    }
-
-    fn shrink(&self) -> Box<dyn Iterator<Item = Self>> {
-        match self {
-            EventArray::Logs(logs) => Box::new(logs.shrink().map(EventArray::Logs)),
-            EventArray::Metrics(metrics) => Box::new(metrics.shrink().map(EventArray::Metrics)),
-            EventArray::Traces(traces) => Box::new(traces.shrink().map(EventArray::Traces)),
-        }
-    }
-}
-
 /// The iterator type for `EventArray::iter_events`.
 #[derive(Debug)]
 pub enum EventArrayIter<'a> {

@@ -1,6 +1,3 @@
-#[cfg(test)]
-use std::borrow::Borrow;
-
 use std::borrow::Cow;
 use std::collections::{hash_map::DefaultHasher, BTreeMap};
 use std::fmt::Display;
@@ -190,19 +187,6 @@ impl TagValueSet {
             Self::Empty => 0,
             Self::Single(_) => 1,
             Self::Set(set) => set.len(),
-        }
-    }
-
-    #[cfg(test)]
-    fn contains<T>(&self, value: &T) -> bool
-    where
-        T: Eq + Hash + PartialEq<TagValue>,
-        TagValue: Borrow<T>,
-    {
-        match self {
-            Self::Empty => false,
-            Self::Single(tag) => value == tag,
-            Self::Set(set) => set.contains(value),
         }
     }
 
@@ -603,36 +587,5 @@ impl FromIterator<(String, TagValue)> for MetricTags {
 impl ByteSizeOf for MetricTags {
     fn allocated_bytes(&self) -> usize {
         self.0.allocated_bytes()
-    }
-}
-
-#[cfg(test)]
-mod test_support {
-    use std::collections::HashSet;
-
-    use quickcheck::{Arbitrary, Gen};
-
-    use super::*;
-
-    impl Arbitrary for TagValue {
-        fn arbitrary(g: &mut Gen) -> Self {
-            Self::from(Option::<String>::arbitrary(g))
-        }
-    }
-
-    impl Arbitrary for TagValueSet {
-        fn arbitrary(g: &mut Gen) -> Self {
-            HashSet::<TagValue>::arbitrary(g).into_iter().collect()
-        }
-    }
-
-    impl Arbitrary for MetricTags {
-        fn arbitrary(g: &mut Gen) -> Self {
-            Self(BTreeMap::arbitrary(g))
-        }
-
-        fn shrink(&self) -> Box<dyn Iterator<Item = Self>> {
-            Box::new(self.0.shrink().map(Self))
-        }
     }
 }

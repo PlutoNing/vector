@@ -19,15 +19,6 @@ impl ExtraContext {
         [Box::new(value) as _].into_iter().collect()
     }
 
-    #[cfg(test)]
-    /// This is only available for tests due to panic implications of making an Arc
-    /// mutable when there may be multiple references to it.
-    fn insert<T: Any + Send + Sync>(&mut self, value: T) {
-        Arc::get_mut(&mut self.0)
-            .expect("only insert into extra context when there is a single reference to it")
-            .insert(value.type_id(), Box::new(value));
-    }
-
     /// Get an object from the context.
     pub fn get<T: 'static>(&self) -> Option<&T> {
         self.0

@@ -167,38 +167,6 @@ impl ArchivedLedgerState {
     pub(super) fn increment_last_reader_record_id(&self, amount: u64) {
         self.reader_last_record.fetch_add(amount, Ordering::AcqRel);
     }
-
-    #[cfg(test)]
-    pub unsafe fn unsafe_set_writer_next_record_id(&self, id: u64) {
-        // UNSAFETY:
-        // The atomic operation itself is inherently safe, but adjusting the record IDs manually is
-        // _unsafe_ because it messes with the continuity of record IDs from the perspective of the
-        // reader.
-        //
-        // This is exclusively used under test to make it possible to check certain edge cases, as
-        // writing enough records to actually increment it to the maximum value would take longer
-        // than any of us will be alive.
-        //
-        // Despite it being test-only, we're really amping up the "this is only for testing!" factor
-        // by making it an actual `unsafe` function, and putting "unsafe" in the name. :)
-        self.writer_next_record.store(id, Ordering::Release);
-    }
-
-    #[cfg(test)]
-    pub unsafe fn unsafe_set_reader_last_record_id(&self, id: u64) {
-        // UNSAFETY:
-        // The atomic operation itself is inherently safe, but adjusting the record IDs manually is
-        // _unsafe_ because it messes with the continuity of record IDs from the perspective of the
-        // reader.
-        //
-        // This is exclusively used under test to make it possible to check certain edge cases, as
-        // writing enough records to actually increment it to the maximum value would take longer
-        // than any of us will be alive.
-        //
-        // Despite it being test-only, we're really amping up the "this is only for testing!" factor
-        // by making it an actual `unsafe` function, and putting "unsafe" in the name. :)
-        self.reader_last_record.store(id, Ordering::Release);
-    }
 }
 
 /// Tracks the internal state of the buffer.
@@ -308,15 +276,6 @@ where
     /// Gets the current writer file ID.
     pub fn get_current_writer_file_id(&self) -> u16 {
         self.state().get_current_writer_file_id()
-    }
-
-    /// Gets the next writer file ID.
-    ///
-    /// This is purely a future-looking operation i.e. what would the file ID be if it was
-    /// incremented from its current value.  It does not alter the current writer file ID.
-    #[cfg(test)]
-    pub fn get_next_writer_file_id(&self) -> u16 {
-        self.state().get_next_writer_file_id()
     }
 
     /// Gets the current reader and writer file IDs.

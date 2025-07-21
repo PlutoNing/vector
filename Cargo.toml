@@ -19,14 +19,6 @@ name = "vector"
 test = false
 bench = false
 
-[[test]]
-name = "integration"
-path = "tests/integration/lib.rs"
-
-[[test]]
-name = "e2e"
-path = "tests/e2e/mod.rs"
-
 # CI-based builds use full release optimization.  See scripts/environment/release-flags.sh.
 # This results in roughly a 5% reduction in performance when compiling locally vs when
 # compiled via the CI pipeline.

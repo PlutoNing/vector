@@ -33,8 +33,6 @@ pub(crate) mod variants;
 
 use std::fmt::Debug;
 
-#[cfg(test)]
-use quickcheck::{Arbitrary, Gen};
 use vector_common::{byte_size_of::ByteSizeOf, finalization::AddBatchNotifier};
 
 /// Event handling behavior when a buffer is full.
@@ -67,20 +65,6 @@ pub enum WhenFull {
     /// This mode can only be used when two or more buffer stages are configured.
     #[configurable(metadata(docs::hidden))]
     Overflow,
-}
-
-#[cfg(test)]
-impl Arbitrary for WhenFull {
-    fn arbitrary(g: &mut Gen) -> Self {
-        // TODO: We explicitly avoid generating "overflow" as a possible value because nothing yet
-        // supports handling it, and will be defaulted to using "block" if they encounter
-        // "overflow".  Thus, there's no reason to emit it here... yet.
-        if bool::arbitrary(g) {
-            WhenFull::Block
-        } else {
-            WhenFull::DropNewest
-        }
-    }
 }
 
 /// An item that can be buffered in memory.

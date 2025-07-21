@@ -225,28 +225,6 @@ where
     }
 }
 
-#[cfg(test)]
-impl<St, Prt, KT, C, F, B> PartitionedBatcher<St, Prt, KT, C, F, B>
-where
-    St: Stream<Item = Prt::Item>,
-    Prt: Partitioner + Unpin,
-    Prt::Key: Eq + Hash + Clone,
-    Prt::Item: ByteSizeOf,
-    C: BatchConfig<Prt::Item>,
-    F: Fn() -> C + Send,
-{
-    pub fn with_timer(stream: St, partitioner: Prt, timer: KT, settings: F) -> Self {
-        Self {
-            state: settings,
-            batches: HashMap::default(),
-            closed_batches: Vec::default(),
-            timer,
-            partitioner,
-            stream: stream.fuse(),
-        }
-    }
-}
-
 impl<St, Prt, KT, C, F, B> Stream for PartitionedBatcher<St, Prt, KT, C, F, B>
 where
     St: Stream<Item = Prt::Item>,

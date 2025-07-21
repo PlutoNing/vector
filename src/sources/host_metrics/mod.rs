@@ -609,13 +609,6 @@ impl FilterList {
     fn contains_path(&self, value: Option<&Path>) -> bool {
         self.contains(&value, |pattern, path| pattern.matches_path(path))
     }
-
-    #[cfg(test)]
-    fn contains_test(&self, value: Option<&str>) -> bool {
-        let result = self.contains_str(value);
-        assert_eq!(result, self.contains_path(value.map(std::path::Path::new)));
-        result
-    }
 }
 
 /// A compiled Unix shell-style pattern.

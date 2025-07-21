@@ -41,8 +41,6 @@ pub const DEFAULT_WRITE_BUFFER_SIZE: usize = 256 * 1024;
 // waiting to open file that reader is still on".
 #[cfg(not(test))]
 pub const MAX_FILE_ID: u16 = u16::MAX;
-#[cfg(test)]
-pub const MAX_FILE_ID: u16 = 6;
 
 // The alignment used by the record serializer.
 const SERIALIZER_ALIGNMENT: usize = 16;

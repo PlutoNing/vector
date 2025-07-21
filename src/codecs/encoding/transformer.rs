@@ -82,12 +82,6 @@ impl Transformer {
         })
     }
 
-    /// Get the `Transformer`'s `only_fields`.
-    #[cfg(test)]
-    pub const fn only_fields(&self) -> &Option<Vec<ConfigValuePath>> {
-        &self.only_fields
-    }
-
     /// Get the `Transformer`'s `except_fields`.
     pub const fn except_fields(&self) -> &Option<Vec<ConfigValuePath>> {
         &self.except_fields
@@ -222,20 +216,6 @@ impl Transformer {
                 TimestampFormat::Rfc3339 => (),
             }
         }
-    }
-
-    /// Set the `except_fields` value.
-    ///
-    /// Returns `Err` if the new `except_fields` fail validation, i.e. are not mutually exclusive
-    /// with `only_fields`.
-    #[cfg(test)]
-    pub fn set_except_fields(
-        &mut self,
-        except_fields: Option<Vec<ConfigValuePath>>,
-    ) -> crate::Result<()> {
-        Self::validate_fields(self.only_fields.as_ref(), except_fields.as_ref())?;
-        self.except_fields = except_fields;
-        Ok(())
     }
 }
 

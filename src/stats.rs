@@ -76,16 +76,6 @@ impl EwmaVar {
         self.state
     }
 
-    #[cfg(test)]
-    pub fn average(&self) -> Option<f64> {
-        self.state.map(|state| state.mean)
-    }
-
-    #[cfg(test)]
-    pub fn variance(&self) -> Option<f64> {
-        self.state.map(|state| state.variance)
-    }
-
     /// Update the current average and variance, and return them for convenience
     pub fn update(&mut self, point: f64) -> MeanVariance {
         let (mean, variance) = match self.state {

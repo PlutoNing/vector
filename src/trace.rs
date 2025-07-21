@@ -62,10 +62,6 @@ pub fn init(color: bool, _json: bool, levels: &str, _internal_log_rate_limit: u6
         .init();
 }
 
-#[cfg(test)]
-pub fn reset_early_buffer() -> Option<Vec<LogEvent>> {
-    get_early_buffer().replace(Vec::new())
-}
 /* 获取早期的buffer的event */
 /// Gets a  mutable reference to the early buffer.
 fn get_early_buffer() -> MutexGuard<'static, Option<Vec<LogEvent>>> {

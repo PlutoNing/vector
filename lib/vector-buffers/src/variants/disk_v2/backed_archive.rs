@@ -1,6 +1,4 @@
 use std::marker::PhantomData;
-#[cfg(test)]
-use std::pin::Pin;
 
 use bytecheck::CheckBytes;
 use rkyv::{
@@ -132,14 +130,5 @@ where
             backing,
             _archive: PhantomData,
         })
-    }
-
-    /// Gets a reference to the archived value.
-    #[cfg(test)]
-    pub fn get_archive_mut(&mut self) -> Pin<&mut T::Archived> {
-        use rkyv::archived_root_mut;
-
-        let pinned = Pin::new(self.backing.as_mut());
-        unsafe { archived_root_mut::<T>(pinned) }
     }
 }

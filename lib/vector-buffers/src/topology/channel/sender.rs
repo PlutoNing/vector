@@ -162,16 +162,6 @@ impl<T: Bufferable> BufferSender<T> {
         }
     }
 
-    /// Converts this sender into an overflowing sender using the given `BufferSender<T>`.
-    ///
-    /// Note: this resets the internal state of this sender, and so this should not be called except
-    /// when initially constructing `BufferSender<T>`.
-    #[cfg(test)]
-    pub fn switch_to_overflow(&mut self, overflow: BufferSender<T>) {
-        self.overflow = Some(Box::new(overflow));
-        self.when_full = WhenFull::Overflow;
-    }
-
     /// Configures this sender to instrument the items passing through it.
     pub fn with_usage_instrumentation(&mut self, handle: BufferUsageHandle) {
         self.instrumentation = Some(handle);
@@ -185,16 +175,6 @@ impl<T: Bufferable> BufferSender<T> {
 }
 
 impl<T: Bufferable> BufferSender<T> {
-    #[cfg(test)]
-    pub(crate) fn get_base_ref(&self) -> &SenderAdapter<T> {
-        &self.base
-    }
-
-    #[cfg(test)]
-    pub(crate) fn get_overflow_ref(&self) -> Option<&BufferSender<T>> {
-        self.overflow.as_ref().map(AsRef::as_ref)
-    }
-
     #[async_recursion]
     pub async fn send(&mut self, item: T, send_reference: Option<Instant>) -> crate::Result<()> {
         let item_sizing = self
