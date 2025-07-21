@@ -10,13 +10,6 @@ use tokio::sync::Notify;
 
 use crate::finalization::{BatchStatus, BatchStatusReceiver};
 use crate::shutdown::ShutdownSignal;
-
-/// The `OrderedFinalizer` framework produces a stream of acknowledged
-/// event batch identifiers from a source in a single background task
-/// *in the order they are received from the source*, using
-/// `FinalizerSet`.
-pub type OrderedFinalizer<T> = FinalizerSet<T, FuturesOrdered<FinalizerFuture<T>>>;
-
 /// The `FinalizerSet` framework here is a mechanism for creating a
 /// stream of acknowledged (finalized) event batch identifiers from a
 /// source as done in a single background task. It does this by
