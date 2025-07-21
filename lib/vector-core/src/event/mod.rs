@@ -28,7 +28,6 @@ pub mod array;
 pub mod discriminant;
 mod estimated_json_encoded_size_of;
 mod log_event;
-pub mod merge_state;
 mod metadata;
 pub mod metric;
 pub mod proto;
