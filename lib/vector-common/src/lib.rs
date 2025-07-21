@@ -42,7 +42,6 @@ pub use event_data_eq::EventDataEq;
 
 pub mod finalization;
 pub mod finalizer;
-pub use finalizer::EmptyStream;
 
 pub mod id;
 
