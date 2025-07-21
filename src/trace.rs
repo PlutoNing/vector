@@ -1,8 +1,7 @@
 #![allow(missing_docs)]
 use std::{
-    collections::HashMap,
-    marker::PhantomData,
-    str::FromStr,
+
+
     sync::{
         atomic::{AtomicBool, Ordering},
         Mutex, MutexGuard, OnceLock,
@@ -16,17 +15,17 @@ use tokio::sync::{
     oneshot,
 };
 use tokio_stream::wrappers::BroadcastStream;
-use tracing::{Event, Subscriber};
-use tracing_limit::RateLimitedLayer;
-use tracing_subscriber::{
-    layer::{Context, SubscriberExt},
-    registry::LookupSpan,
-    util::SubscriberInitExt,
-    Layer,
-};
+
+
+
+
+
+
+
+
 pub use tracing_tower::{InstrumentableService, InstrumentedService};
-use vector_lib::lookup::event_path;
-use vrl::value::Value;
+
+
 
 use crate::event::LogEvent;
 
@@ -55,56 +54,12 @@ static SENDER: OnceLock<Sender<LogEvent>> = OnceLock::new();
 
 
 
-pub fn init(color: bool, json: bool, levels: &str, internal_log_rate_limit: u64) {
-    let fmt_filter = tracing_subscriber::filter::Targets::from_str(levels).expect(
-        "logging filter targets were not formatted correctly or did not specify a valid level",
-    );
-
-
-
-
-    let broadcast_layer = RateLimitedLayer::new(BroadcastLayer::new())
-        .with_default_limit(internal_log_rate_limit)
-        .with_filter(fmt_filter.clone());
-
-    let subscriber = tracing_subscriber::registry()
-        .with(broadcast_layer);
-
-
-    #[cfg(feature = "tokio-console")]
-    let subscriber = {
-        let console_layer = console_subscriber::ConsoleLayer::builder()
-            .with_default_env()
-            .spawn();
-
-        subscriber.with(console_layer)
-    };
-
-    if json {
-        let formatter = tracing_subscriber::fmt::layer().json().flatten_event(true);
-
-        #[cfg(test)]
-        let formatter = formatter.with_test_writer();
-
-        let rate_limited =
-            RateLimitedLayer::new(formatter).with_default_limit(internal_log_rate_limit);
-        let subscriber = subscriber.with(rate_limited.with_filter(fmt_filter));
-
-        _ = subscriber.try_init();
-    } else {
-        let formatter = tracing_subscriber::fmt::layer()
-            .with_ansi(color)
-            .with_writer(std::io::stderr);
-
-        #[cfg(test)]
-        let formatter = formatter.with_test_writer();
-
-        let rate_limited =
-            RateLimitedLayer::new(formatter).with_default_limit(internal_log_rate_limit);
-        let subscriber = subscriber.with(rate_limited.with_filter(fmt_filter));
-
-        _ = subscriber.try_init();
-    }
+pub fn init(color: bool, _json: bool, levels: &str, _internal_log_rate_limit: u64) {
+    tracing_subscriber::fmt()
+        .with_ansi(color)
+        .with_writer(std::io::stderr)
+        .with_env_filter(levels)
+        .init();
 }
 
 #[cfg(test)]
@@ -119,34 +74,10 @@ fn get_early_buffer() -> MutexGuard<'static, Option<Vec<LogEvent>>> {
         .expect("Couldn't acquire lock on internal logs buffer")
 }
 
-/// Determines whether tracing events should be processed (e.g. converted to log
-/// events) to avoid unnecessary performance overhead.
-///
-/// Checks if [`BUFFER`] is set or if a trace sender exists
-fn should_process_tracing_event() -> bool {
-    get_early_buffer().is_some() || maybe_get_trace_sender().is_some()
-}
 
-/// Attempts to buffer an event into the early buffer.
-fn try_buffer_event(log: &LogEvent) -> bool {
-    if SHOULD_BUFFER.load(Ordering::Acquire) {
-        if let Some(buffer) = get_early_buffer().as_mut() {
-            buffer.push(log.clone());
-            return true;
-        }
-    }
 
-    false
-}
 
-/// Attempts to broadcast an event to subscribers.
-///
-/// If no subscribers are connected, this does nothing.
-fn try_broadcast_event(log: LogEvent) {
-    if let Some(sender) = maybe_get_trace_sender() {
-        _ = sender.send(log);
-    }
-}
+
 /* 获取早期的buffer的event? */
 /// Consumes the early buffered events.
 ///
@@ -164,12 +95,7 @@ fn get_trace_sender() -> &'static broadcast::Sender<LogEvent> {
     SENDER.get_or_init(|| broadcast::channel(99).0)
 }
 
-/// Attempts to get the trace sender for sending internal log events.
-///
-/// If the trace sender has not yet been created, `None` is returned.
-fn maybe_get_trace_sender() -> Option<&'static broadcast::Sender<LogEvent>> {
-    SENDER.get()
-}
+
 
 /// Creates a trace receiver that receives internal log events.
 ///
@@ -273,95 +199,5 @@ impl TraceSubscription {
         // We ignore errors because the only error we get is when the broadcast receiver lags, and there's nothing we
         // can actually do about that so there's no reason to force callers to even deal with it.
         BroadcastStream::new(self.trace_rx).filter_map(|event| ready(event.ok()))
-    }
-}
-
-struct BroadcastLayer<S> {
-    _subscriber: PhantomData<S>,
-}
-
-impl<S> BroadcastLayer<S> {
-    const fn new() -> Self {
-        BroadcastLayer {
-            _subscriber: PhantomData,
-        }
-    }
-}
-
-impl<S> Layer<S> for BroadcastLayer<S>
-where
-    S: Subscriber + 'static + for<'lookup> LookupSpan<'lookup>,
-{
-    fn on_event(&self, event: &Event<'_>, ctx: Context<'_, S>) {
-        if should_process_tracing_event() {
-            let mut log = LogEvent::from(event);
-            // Add span fields if available
-            if let Some(parent_span) = ctx.event_span(event) {
-                for span in parent_span.scope().from_root() {
-                    if let Some(fields) = span.extensions().get::<SpanFields>() {
-                        for (k, v) in &fields.0 {
-                            log.insert(event_path!("vector", *k), v.clone());
-                        }
-                    }
-                }
-            }
-            // Try buffering the event, and if we're not buffering anymore, try to
-            // send it along via the trace sender if it's been established.
-            if !try_buffer_event(&log) {
-                try_broadcast_event(log);
-            }
-        }
-    }
-
-    fn on_new_span(
-        &self,
-        attrs: &tracing_core::span::Attributes<'_>,
-        id: &tracing_core::span::Id,
-        ctx: Context<'_, S>,
-    ) {
-        let span = ctx.span(id).expect("span must already exist!");
-        let mut fields = SpanFields::default();
-        attrs.values().record(&mut fields);
-        span.extensions_mut().insert(fields);
-    }
-}
-
-#[derive(Default, Debug)]
-struct SpanFields(HashMap<&'static str, Value>);
-
-impl SpanFields {
-    fn record(&mut self, field: &tracing_core::Field, value: impl Into<Value>) {
-        let name = field.name();
-        // Filter for span fields such as component_id, component_type, etc.
-        //
-        // This captures all the basic component information provided in the
-        // span that each component is spawned with. We don't capture all fields
-        // to avoid adding unintentional noise and to prevent accidental
-        // security/privacy issues (e.g. leaking sensitive data).
-        if name.starts_with("component_") {
-            self.0.insert(name, value.into());
-        }
-    }
-}
-
-impl tracing::field::Visit for SpanFields {
-    fn record_i64(&mut self, field: &tracing_core::Field, value: i64) {
-        self.record(field, value);
-    }
-
-    fn record_u64(&mut self, field: &tracing_core::Field, value: u64) {
-        self.record(field, value);
-    }
-
-    fn record_bool(&mut self, field: &tracing_core::Field, value: bool) {
-        self.record(field, value);
-    }
-
-    fn record_str(&mut self, field: &tracing_core::Field, value: &str) {
-        self.record(field, value);
-    }
-
-    fn record_debug(&mut self, field: &tracing_core::Field, value: &dyn std::fmt::Debug) {
-        self.record(field, format!("{:?}", value));
     }
 }
