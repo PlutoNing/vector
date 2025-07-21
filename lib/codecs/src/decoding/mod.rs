@@ -15,9 +15,7 @@ pub use format::{
 pub use format::{SyslogDeserializer, SyslogDeserializerConfig, SyslogDeserializerOptions};
 pub use framing::{
     BoxedFramer, BoxedFramingError, BytesDecoder, BytesDecoderConfig,
-    FramingError, LengthDelimitedDecoder,
-    LengthDelimitedDecoderConfig, OctetCountingDecoder, OctetCountingDecoderConfig,
-    OctetCountingDecoderOptions,
+    FramingError,
 };
 use smallvec::SmallVec;
 use std::fmt::Debug;
@@ -77,13 +75,6 @@ impl StreamDecodingError for Error {
 pub enum FramingConfig {
     /// Byte frames are passed through as-is according to the underlying I/O boundaries (for example, split between messages or stream segments).
     Bytes,
-
-    /// Byte frames which are prefixed by an unsigned big-endian 32-bit integer indicating the length.
-    LengthDelimited(LengthDelimitedDecoderConfig),
-    /// Byte frames according to the [octet counting][octet_counting] format.
-    ///
-    /// [octet_counting]: https://tools.ietf.org/html/rfc6587#section-3.4.1
-    OctetCounting(OctetCountingDecoderConfig),
 }
 
 impl From<BytesDecoderConfig> for FramingConfig {
@@ -92,25 +83,11 @@ impl From<BytesDecoderConfig> for FramingConfig {
     }
 }
 
-impl From<LengthDelimitedDecoderConfig> for FramingConfig {
-    fn from(config: LengthDelimitedDecoderConfig) -> Self {
-        Self::LengthDelimited(config)
-    }
-}
-
-impl From<OctetCountingDecoderConfig> for FramingConfig {
-    fn from(config: OctetCountingDecoderConfig) -> Self {
-        Self::OctetCounting(config)
-    }
-}
-
 impl FramingConfig {
     /// Build the `Framer` from this configuration.
     pub fn build(&self) -> Framer {
         match self {
             FramingConfig::Bytes => Framer::Bytes(BytesDecoderConfig.build()),
-            FramingConfig::LengthDelimited(config) => Framer::LengthDelimited(config.build()),
-            FramingConfig::OctetCounting(config) => Framer::OctetCounting(config.build()),
         }
     }
 }
@@ -120,10 +97,6 @@ impl FramingConfig {
 pub enum Framer {
     /// Uses a `BytesDecoder` for framing.
     Bytes(BytesDecoder),
-    /// Uses a `LengthDelimitedDecoder` for framing.
-    LengthDelimited(LengthDelimitedDecoder),
-    /// Uses a `OctetCountingDecoder` for framing.
-    OctetCounting(OctetCountingDecoder),
     /// Uses an opaque `Framer` implementation for framing.
     Boxed(BoxedFramer),
 }
@@ -135,8 +108,6 @@ impl tokio_util::codec::Decoder for Framer {
     fn decode(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
         match self {
             Framer::Bytes(framer) => framer.decode(src),
-            Framer::LengthDelimited(framer) => framer.decode(src),
-            Framer::OctetCounting(framer) => framer.decode(src),
             Framer::Boxed(framer) => framer.decode(src),
         }
     }
@@ -144,8 +115,6 @@ impl tokio_util::codec::Decoder for Framer {
     fn decode_eof(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
         match self {
             Framer::Bytes(framer) => framer.decode_eof(src),
-            Framer::LengthDelimited(framer) => framer.decode_eof(src),
-            Framer::OctetCounting(framer) => framer.decode_eof(src),
             Framer::Boxed(framer) => framer.decode_eof(src),
         }
     }

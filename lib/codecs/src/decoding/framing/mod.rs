@@ -4,17 +4,11 @@
 #![deny(missing_docs)]
 
 mod bytes;
-mod length_delimited;
-mod octet_counting;
 
 use std::{any::Any, fmt::Debug};
 
 use ::bytes::Bytes;
 use dyn_clone::DynClone;
-pub use length_delimited::{LengthDelimitedDecoder, LengthDelimitedDecoderConfig};
-pub use octet_counting::{
-    OctetCountingDecoder, OctetCountingDecoderConfig, OctetCountingDecoderOptions,
-};
 use tokio_util::codec::LinesCodecError;
 
 pub use self::bytes::{BytesDecoder, BytesDecoderConfig};

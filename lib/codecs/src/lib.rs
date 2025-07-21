@@ -3,15 +3,12 @@
 
 #![deny(missing_docs)]
 #![deny(warnings)]
-
-mod common;
 pub mod decoding;
 pub mod encoding;
 
 pub use decoding::{
     BytesDecoder, BytesDecoderConfig,
-    JsonDeserializer, JsonDeserializerConfig, LengthDelimitedDecoder,
-    LengthDelimitedDecoderConfig, OctetCountingDecoder, OctetCountingDecoderConfig,
+    JsonDeserializer, JsonDeserializerConfig,
     StreamDecodingError,
 };
 pub use encoding::{
