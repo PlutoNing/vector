@@ -12,12 +12,14 @@ lib/codecs/src/lib.rs:serde_json::ser::format_escaped_str
 ========================================================================
 lib/tracing-limit/src/lib.rs:<tracing_limit::RateLimitedLayer<S,L> as tracing_subscriber::layer::Layer<S>>::on_enter
 lib/tracing-limit/src/lib.rs:<tracing_limit::RateLimitedLayer<S,L> as tracing_subscriber::layer::Layer<S>>::on_exit
+===================ok==========================================
 lib/vector-common/src/byte_size_of.rs:<alloc::collections::btree::map::BTreeMap<K,V> as vector_common::byte_size_of::ByteSizeOf>::allocated_bytes
 lib/vector-common/src/byte_size_of.rs:<alloc::collections::btree::map::BTreeMap<K,V> as vector_common::byte_size_of::ByteSizeOf>::allocated_bytes::{{closure}}
 lib/vector-common/src/byte_size_of.rs:<alloc::string::String as vector_common::byte_size_of::ByteSizeOf>::allocated_bytes
 lib/vector-common/src/byte_size_of.rs:<core::option::Option<T> as vector_common::byte_size_of::ByteSizeOf>::allocated_bytes
 lib/vector-common/src/byte_size_of.rs:vector_common::byte_size_of::ByteSizeOf::size_of
 lib/vector-common/src/byte_size_of.rs:vector_common::byte_size_of::ByteSizeOf::size_of'2
+===================================
 lib/vector-common/src/finalization.rs:<vector_common::finalization::EventFinalizers as core::clone::Clone>::clone
 lib/vector-common/src/finalization.rs:<vector_common::finalization::EventFinalizers as core::default::Default>::default
 lib/vector-common/src/finalization.rs:<vector_common::finalization::EventFinalizers as vector_common::byte_size_of::ByteSizeOf>::allocated_bytes
