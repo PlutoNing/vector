@@ -2,12 +2,8 @@
 //! structured events.
 
 #![deny(missing_docs)]
-
-mod json;
-
 use ::bytes::Bytes;
 use dyn_clone::DynClone;
-pub use json::{JsonDeserializer, JsonDeserializerConfig, JsonDeserializerOptions};
 use smallvec::SmallVec;
 use vector_core::config::LogNamespace;
 use vector_core::event::Event;
@@ -33,8 +29,3 @@ dyn_clone::clone_trait_object!(Deserializer);
 
 /// A `Box` containing a `Deserializer`.
 pub type BoxedDeserializer = Box<dyn Deserializer>;
-
-/// Default value for the UTF-8 lossy option.
-const fn default_lossy() -> bool {
-    true
-}

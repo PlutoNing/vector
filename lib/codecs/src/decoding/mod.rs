@@ -9,7 +9,6 @@ use bytes::{Bytes, BytesMut};
 pub use error::StreamDecodingError;
 pub use format::{
     BoxedDeserializer,
-    JsonDeserializer, JsonDeserializerConfig, JsonDeserializerOptions,
 };
 #[cfg(feature = "syslog")]
 pub use format::{SyslogDeserializer, SyslogDeserializerConfig, SyslogDeserializerOptions};
@@ -21,9 +20,9 @@ use smallvec::SmallVec;
 use std::fmt::Debug;
 use vector_config::configurable_component;
 use vector_core::{
-    config::{DataType, LogNamespace},
+    config::{LogNamespace},
     event::Event,
-    schema,
+
 };
 
 /// An error that occurred while decoding structured events from a byte stream /
@@ -120,74 +119,9 @@ impl tokio_util::codec::Decoder for Framer {
     }
 }
 
-/// Configures how events are decoded from raw bytes. Note some decoders can also determine the event output
-/// type (log, metric, trace).
-#[configurable_component]
-#[derive(Clone, Debug)]
-#[serde(tag = "codec", rename_all = "snake_case")]
-#[configurable(metadata(docs::enum_tag_description = "The codec to use for decoding events."))]
-pub enum DeserializerConfig {
-    /// Decodes the raw bytes as [JSON][json].
-    ///
-    /// [json]: https://www.json.org/
-    Json(JsonDeserializerConfig),
-}
-
-impl From<JsonDeserializerConfig> for DeserializerConfig {
-    fn from(config: JsonDeserializerConfig) -> Self {
-        Self::Json(config)
-    }
-}
-
-impl DeserializerConfig {
-    /// Build the `Deserializer` from this configuration.
-    pub fn build(&self) -> vector_common::Result<Deserializer> {
-        match self {
-            DeserializerConfig::Json(config) => Ok(Deserializer::Json(config.build())),
-        }
-    }
-
-
-
-    /// Returns an appropriate default framing config for the given deserializer with message based inputs.
-    pub fn default_message_based_framing(&self) -> FramingConfig {
-        match self {
-            _ => FramingConfig::Bytes
-        }
-    }
-
-    /// Return the type of event build by this deserializer.
-    pub fn output_type(&self) -> DataType {
-        match self {
-            DeserializerConfig::Json(config) => config.output_type(),
-        }
-    }
-
-    /// The schema produced by the deserializer.
-    pub fn schema_definition(&self, log_namespace: LogNamespace) -> schema::Definition {
-        match self {
-            DeserializerConfig::Json(config) => config.schema_definition(log_namespace),
-        }
-    }
-
-    /// Get the HTTP content type.
-    pub const fn content_type(&self, framer: &FramingConfig) -> &'static str {
-        match (&self, framer) {
-            (
-                DeserializerConfig::Json(_),
-                _,
-            ) => "text/plain",
-            #[cfg(feature = "syslog")]
-            (DeserializerConfig::Syslog(_), _) => "text/plain",
-        }
-    }
-}
-
 /// Parse structured events from bytes.
 #[derive(Clone)]
 pub enum Deserializer {
-    /// Uses a `JsonDeserializer` for deserialization.
-    Json(JsonDeserializer),
     /// Uses an opaque `Deserializer` implementation for deserialization.
     Boxed(BoxedDeserializer),
 }
@@ -199,7 +133,6 @@ impl format::Deserializer for Deserializer {
         log_namespace: LogNamespace,
     ) -> vector_common::Result<SmallVec<[Event; 1]>> {
         match self {
-            Deserializer::Json(deserializer) => deserializer.parse(bytes, log_namespace),
             Deserializer::Boxed(deserializer) => deserializer.parse(bytes, log_namespace),
         }
     }

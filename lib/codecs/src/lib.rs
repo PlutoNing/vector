@@ -8,7 +8,7 @@ pub mod encoding;
 
 pub use decoding::{
     BytesDecoder, BytesDecoderConfig,
-    JsonDeserializer, JsonDeserializerConfig,
+
     StreamDecodingError,
 };
 pub use encoding::{
