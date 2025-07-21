@@ -1,0 +1,195 @@
+lib/codecs/src/encoding/format/json.rs:<codecs::encoding::format::json::JsonSerializer as tokio_util::codec::encoder::Encoder<vector_core::event::Event>>::encode
+lib/codecs/src/encoding/format/text.rs:<codecs::encoding::format::text::TextSerializer as tokio_util::codec::encoder::Encoder<vector_core::event::Event>>::encode
+lib/codecs/src/encoding/framing/character_delimited.rs:<codecs::encoding::framing::character_delimited::CharacterDelimitedEncoder as tokio_util::codec::encoder::Encoder<()>>::encode
+lib/codecs/src/encoding/framing/newline_delimited.rs:<codecs::encoding::framing::newline_delimited::NewlineDelimitedEncoder as tokio_util::codec::encoder::Encoder<()>>::encode
+lib/codecs/src/encoding/mod.rs:<codecs::encoding::Framer as tokio_util::codec::encoder::Encoder<()>>::encode
+lib/codecs/src/encoding/mod.rs:<codecs::encoding::Serializer as tokio_util::codec::encoder::Encoder<vector_core::event::Event>>::encode
+lib/codecs/src/lib.rs:<codecs::MetricTagValues as core::cmp::PartialEq>::eq
+lib/codecs/src/lib.rs:core::slice::raw::from_raw_parts_mut::precondition_check
+lib/codecs/src/lib.rs:<serde_json::ser::Compound<W,F> as serde::ser::SerializeMap>::serialize_key
+lib/codecs/src/lib.rs:serde_json::ser::format_escaped_str
+lib/tracing-limit/src/lib.rs:<tracing_limit::RateLimitedLayer<S,L> as tracing_subscriber::layer::Layer<S>>::on_enter
+lib/tracing-limit/src/lib.rs:<tracing_limit::RateLimitedLayer<S,L> as tracing_subscriber::layer::Layer<S>>::on_exit
+lib/vector-common/src/byte_size_of.rs:<alloc::collections::btree::map::BTreeMap<K,V> as vector_common::byte_size_of::ByteSizeOf>::allocated_bytes
+lib/vector-common/src/byte_size_of.rs:<alloc::collections::btree::map::BTreeMap<K,V> as vector_common::byte_size_of::ByteSizeOf>::allocated_bytes::{{closure}}
+lib/vector-common/src/byte_size_of.rs:<alloc::string::String as vector_common::byte_size_of::ByteSizeOf>::allocated_bytes
+lib/vector-common/src/byte_size_of.rs:<core::option::Option<T> as vector_common::byte_size_of::ByteSizeOf>::allocated_bytes
+lib/vector-common/src/byte_size_of.rs:vector_common::byte_size_of::ByteSizeOf::size_of
+lib/vector-common/src/byte_size_of.rs:vector_common::byte_size_of::ByteSizeOf::size_of'2
+lib/vector-common/src/finalization.rs:<vector_common::finalization::EventFinalizers as core::clone::Clone>::clone
+lib/vector-common/src/finalization.rs:<vector_common::finalization::EventFinalizers as core::default::Default>::default
+lib/vector-common/src/finalization.rs:<vector_common::finalization::EventFinalizers as vector_common::byte_size_of::ByteSizeOf>::allocated_bytes
+lib/vector-common/src/finalization.rs:vector_common::finalization::EventFinalizers::update_status
+lib/vector-common/src/internal_event/bytes_sent.rs:<vector_common::internal_event::bytes_sent::BytesSentHandle as vector_common::internal_event::InternalEventHandle>::emit
+lib/vector-common/src/internal_event/events_sent.rs:<vector_common::internal_event::events_sent::EventsSentHandle as vector_common::internal_event::InternalEventHandle>::emit
+lib/vector-common/src/internal_event/mod.rs:<vector_common::internal_event::bytes_sent::BytesSentHandle as vector_common::internal_event::InternalEventHandle>::emit
+lib/vector-common/src/internal_event/mod.rs:<vector_common::internal_event::events_sent::EventsSentHandle as vector_common::internal_event::InternalEventHandle>::emit
+lib/vector-common/src/json_size.rs:<vector_common::json_size::JsonSize as core::convert::From<usize>>::from
+lib/vector-common/src/json_size.rs:vector_common::json_size::JsonSize::get
+lib/vector-core/src/config/mod.rs:<vector_core::config::LogNamespace as core::cmp::PartialEq>::eq
+lib/vector-core/src/config/mod.rs:<vector_core::config::LogNamespace as core::cmp::PartialOrd>::partial_cmp
+lib/vector-core/src/event/array.rs:vector_core::event::array::EventArrayBuffer::push
+lib/vector-core/src/event/array.rs:<vector_core::event::array::EventArrayIntoIter as core::iter::traits::iterator::Iterator>::next
+lib/vector-core/src/event/array.rs:<vector_core::event::array::EventArrayIter as core::iter::traits::iterator::Iterator>::next
+lib/vector-core/src/event/array.rs:<vector_core::event::array::EventArrayIterMut as core::iter::traits::iterator::Iterator>::next
+lib/vector-core/src/event/array.rs:vector_core::event::array::EventArray::set_output_id
+lib/vector-core/src/event/array.rs:vector_core::event::array::EventArray::set_source_type
+lib/vector-core/src/event/array.rs:<vector_core::event::array::IntoEventArraysIter<I> as core::iter::traits::iterator::Iterator>::next
+lib/vector-core/src/event/estimated_json_encoded_size_of.rs:<alloc::vec::Vec<V> as vector_core::event::estimated_json_encoded_size_of::EstimatedJsonEncodedSizeOf>::estimated_json_encoded_size_of::{{closure}}
+lib/vector-core/src/event/metadata.rs:vector_core::event::metadata::default_schema_definition
+lib/vector-core/src/event/metadata.rs:<vector_core::event::metadata::EventMetadata as core::default::Default>::default
+lib/vector-core/src/event/metadata.rs:<vector_core::event::metadata::EventMetadata as vector_common::byte_size_of::ByteSizeOf>::allocated_bytes
+lib/vector-core/src/event/metadata.rs:vector_core::event::metadata::EventMetadata::get_mut
+lib/vector-core/src/event/metadata.rs:vector_core::event::metadata::EventMetadata::set_source_id
+lib/vector-core/src/event/metadata.rs:vector_core::event::metadata::EventMetadata::set_source_type
+lib/vector-core/src/event/metadata.rs:vector_core::event::metadata::EventMetadata::set_upstream_id
+lib/vector-core/src/event/metadata.rs:vector_core::event::metadata::EventMetadata::take_finalizers
+lib/vector-core/src/event/metadata.rs:<vector_core::event::metadata::Inner as core::clone::Clone>::clone
+lib/vector-core/src/event/metadata.rs:<vector_core::event::metadata::Inner as core::default::Default>::default
+lib/vector-core/src/event/metadata.rs:<vector_core::event::metadata::Secrets as core::clone::Clone>::clone
+lib/vector-core/src/event/metadata.rs:vector_core::event::metadata::Secrets::new
+lib/vector-core/src/event/metric/data.rs:vector_core::event::metric::data::_::<impl serde::ser::Serialize for vector_core::event::metric::data::MetricData>::serialize
+lib/vector-core/src/event/metric/data.rs:vector_core::event::metric::data::_::<impl serde::ser::Serialize for vector_core::event::metric::data::MetricTime>::serialize
+lib/vector-core/src/event/metric/data.rs:<vector_core::event::metric::data::MetricData as core::clone::Clone>::clone
+lib/vector-core/src/event/metric/data.rs:<vector_core::event::metric::data::MetricData as vector_common::byte_size_of::ByteSizeOf>::allocated_bytes
+lib/vector-core/src/event/metric/mod.rs:vector_core::event::metric::_::<impl serde::ser::Serialize for vector_core::event::metric::MetricKind>::serialize
+lib/vector-core/src/event/metric/mod.rs:vector_core::event::metric::_::<impl serde::ser::Serialize for vector_core::event::metric::Metric>::serialize
+lib/vector-core/src/event/metric/mod.rs:<vector_core::event::metric::Metric as core::clone::Clone>::clone
+lib/vector-core/src/event/metric/mod.rs:<vector_core::event::metric::Metric as core::fmt::Display>::fmt
+lib/vector-core/src/event/metric/mod.rs:<vector_core::event::metric::Metric as vector_common::byte_size_of::ByteSizeOf>::allocated_bytes
+lib/vector-core/src/event/metric/mod.rs:<vector_core::event::metric::Metric as vector_common::finalization::Finalizable>::take_finalizers
+lib/vector-core/src/event/metric/mod.rs:<vector_core::event::metric::Metric as vector_core::event::estimated_json_encoded_size_of::EstimatedJsonEncodedSizeOf>::estimated_json_encoded_size_of
+lib/vector-core/src/event/metric/mod.rs:vector_core::event::metric::Metric::metadata_mut
+lib/vector-core/src/event/metric/mod.rs:vector_core::event::metric::Metric::new
+lib/vector-core/src/event/metric/mod.rs:vector_core::event::metric::Metric::new_with_metadata
+lib/vector-core/src/event/metric/mod.rs:vector_core::event::metric::Metric::reduce_tags_to_single
+lib/vector-core/src/event/metric/mod.rs:vector_core::event::metric::Metric::timestamp
+lib/vector-core/src/event/metric/mod.rs:vector_core::event::metric::Metric::with_namespace
+lib/vector-core/src/event/metric/mod.rs:vector_core::event::metric::Metric::with_tags
+lib/vector-core/src/event/metric/mod.rs:vector_core::event::metric::Metric::with_timestamp
+lib/vector-core/src/event/metric/mod.rs:vector_core::event::metric::write_list
+lib/vector-core/src/event/metric/mod.rs:vector_core::event::metric::write_word
+lib/vector-core/src/event/metric/mod.rs:vector_core::event::metric::write_word::{{closure}}
+lib/vector-core/src/event/metric/series.rs:vector_core::event::metric::series::_::<impl serde::ser::Serialize for vector_core::event::metric::series::MetricName>::serialize
+lib/vector-core/src/event/metric/series.rs:vector_core::event::metric::series::_::<impl serde::ser::Serialize for vector_core::event::metric::series::MetricSeries>::serialize
+lib/vector-core/src/event/metric/series.rs:<vector_core::event::metric::series::MetricName as core::clone::Clone>::clone
+lib/vector-core/src/event/metric/series.rs:<vector_core::event::metric::series::MetricName as vector_common::byte_size_of::ByteSizeOf>::allocated_bytes
+lib/vector-core/src/event/metric/series.rs:<vector_core::event::metric::series::MetricSeries as core::clone::Clone>::clone
+lib/vector-core/src/event/metric/series.rs:<vector_core::event::metric::series::MetricSeries as core::fmt::Display>::fmt
+lib/vector-core/src/event/metric/series.rs:<vector_core::event::metric::series::MetricSeries as core::fmt::Display>::fmt::{{closure}}
+lib/vector-core/src/event/metric/series.rs:<vector_core::event::metric::series::MetricSeries as core::fmt::Display>::fmt::{{closure}}::{{closure}}
+lib/vector-core/src/event/metric/series.rs:<vector_core::event::metric::series::MetricSeries as vector_common::byte_size_of::ByteSizeOf>::allocated_bytes
+lib/vector-core/src/event/metric/tags.rs:vector_core::event::metric::tags::_::<impl serde::ser::Serialize for vector_core::event::metric::tags::MetricTags>::serialize
+lib/vector-core/src/event/metric/tags.rs:<vector_core::event::metric::tags::MetricTags as core::clone::Clone>::clone
+lib/vector-core/src/event/metric/tags.rs:<vector_core::event::metric::tags::MetricTags as core::default::Default>::default
+lib/vector-core/src/event/metric/tags.rs:<vector_core::event::metric::tags::MetricTags as core::iter::traits::collect::FromIterator<(alloc::string::String,vector_core::event::metric::tags::TagValue)>>::from_iter
+lib/vector-core/src/event/metric/tags.rs:<vector_core::event::metric::tags::MetricTags as vector_common::byte_size_of::ByteSizeOf>::allocated_bytes
+lib/vector-core/src/event/metric/tags.rs:vector_core::event::metric::tags::MetricTags::is_empty
+lib/vector-core/src/event/metric/tags.rs:vector_core::event::metric::tags::MetricTags::iter_all
+lib/vector-core/src/event/metric/tags.rs:vector_core::event::metric::tags::MetricTags::iter_all::{{closure}}
+lib/vector-core/src/event/metric/tags.rs:vector_core::event::metric::tags::MetricTags::iter_all::{{closure}}::{{closure}}
+lib/vector-core/src/event/metric/tags.rs:vector_core::event::metric::tags::MetricTags::reduce_to_single
+lib/vector-core/src/event/metric/tags.rs:vector_core::event::metric::tags::MetricTags::reduce_to_single::{{closure}}
+lib/vector-core/src/event/metric/tags.rs:vector_core::event::metric::tags::MetricTags::replace
+lib/vector-core/src/event/metric/tags.rs:vector_core::event::metric::tags::MetricTags::retain
+lib/vector-core/src/event/metric/tags.rs:vector_core::event::metric::tags::MetricTags::retain::{{closure}}
+lib/vector-core/src/event/metric/tags.rs:<vector_core::event::metric::tags::TagValue as core::clone::Clone>::clone
+lib/vector-core/src/event/metric/tags.rs:<vector_core::event::metric::tags::TagValue as core::cmp::PartialEq>::eq
+lib/vector-core/src/event/metric/tags.rs:<vector_core::event::metric::tags::TagValue as core::convert::From<alloc::string::String>>::from
+lib/vector-core/src/event/metric/tags.rs:<vector_core::event::metric::tags::TagValue as core::convert::From<&str>>::from
+lib/vector-core/src/event/metric/tags.rs:vector_core::event::metric::tags::TagValue::as_option
+lib/vector-core/src/event/metric/tags.rs:<vector_core::event::metric::tags::TagValue as vector_common::byte_size_of::ByteSizeOf>::allocated_bytes
+lib/vector-core/src/event/metric/tags.rs:<vector_core::event::metric::tags::TagValueRefIter as core::iter::traits::iterator::Iterator>::next
+lib/vector-core/src/event/metric/tags.rs:<vector_core::event::metric::tags::TagValueSet as core::clone::Clone>::clone
+lib/vector-core/src/event/metric/tags.rs:<vector_core::event::metric::tags::TagValueSet as core::convert::From<[vector_core::event::metric::tags::TagValue; N]>>::from
+lib/vector-core/src/event/metric/tags.rs:<vector_core::event::metric::tags::TagValueSet as core::default::Default>::default
+lib/vector-core/src/event/metric/tags.rs:<vector_core::event::metric::tags::TagValueSet as core::iter::traits::collect::FromIterator<vector_core::event::metric::tags::TagValue>>::from_iter
+lib/vector-core/src/event/metric/tags.rs:<&vector_core::event::metric::tags::TagValueSet as core::iter::traits::collect::IntoIterator>::into_iter
+lib/vector-core/src/event/metric/tags.rs:<vector_core::event::metric::tags::TagValueSet as serde::ser::Serialize>::serialize
+lib/vector-core/src/event/metric/tags.rs:vector_core::event::metric::tags::TagValueSet::as_single
+lib/vector-core/src/event/metric/tags.rs:<vector_core::event::metric::tags::TagValueSet as vector_common::byte_size_of::ByteSizeOf>::allocated_bytes
+lib/vector-core/src/event/metric/tags.rs:vector_core::event::metric::tags::TagValueSet::insert
+lib/vector-core/src/event/metric/tags.rs:vector_core::event::metric::tags::TagValueSet::into_single
+lib/vector-core/src/event/metric/tags.rs:vector_core::event::metric::tags::TagValueSet::is_empty
+lib/vector-core/src/event/metric/tags.rs:vector_core::event::metric::tags::TagValueSet::iter
+lib/vector-core/src/event/metric/tags.rs:vector_core::event::metric::tags::TagValueSet::len
+lib/vector-core/src/event/metric/tags.rs:vector_core::event::metric::tags::TagValueSet::reduce_to_simple
+lib/vector-core/src/event/metric/value.rs:vector_core::event::metric::value::_::<impl serde::ser::Serialize for vector_core::event::metric::value::MetricValue>::serialize
+lib/vector-core/src/event/metric/value.rs:<vector_core::event::metric::value::MetricValue as core::clone::Clone>::clone
+lib/vector-core/src/event/metric/value.rs:<vector_core::event::metric::value::MetricValue as core::fmt::Display>::fmt
+lib/vector-core/src/event/metric/value.rs:<vector_core::event::metric::value::MetricValue as vector_common::byte_size_of::ByteSizeOf>::allocated_bytes
+lib/vector-core/src/event/mod.rs:<vector_core::event::Event as core::convert::From<vector_core::event::metric::Metric>>::from
+lib/vector-core/src/event/mod.rs:<vector_core::event::Event as vector_common::finalization::Finalizable>::take_finalizers
+lib/vector-core/src/event/mod.rs:<vector_core::event::Event as vector_core::event::estimated_json_encoded_size_of::EstimatedJsonEncodedSizeOf>::estimated_json_encoded_size_of
+lib/vector-core/src/event/mod.rs:<vector_core::event::Event as vector_core::event::MaybeAsLogMut>::maybe_as_log_mut
+lib/vector-core/src/event/ref.rs:<vector_core::event::ref::EventMutRef as core::convert::From<&mut vector_core::event::metric::Metric>>::from
+lib/vector-core/src/event/ref.rs:vector_core::event::ref::EventMutRef::metadata_mut
+lib/vector-core/src/event/ref.rs:<vector_core::event::ref::EventRef as core::convert::From<&vector_core::event::Event>>::from
+lib/vector-core/src/event/ref.rs:<vector_core::event::ref::EventRef as core::convert::From<&vector_core::event::metric::Metric>>::from
+lib/vector-core/src/lib.rs:<alloc::collections::btree::dedup_sorted_iter::DedupSortedIter<K,V,I> as core::iter::traits::iterator::Iterator>::next
+lib/vector-core/src/lib.rs:alloc::collections::btree::navigate::<impl alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Dying,K,V,alloc::collections::btree::node::marker::Leaf>,alloc::collections::btree::node::marker::Edge>>::deallocating_next
+lib/vector-core/src/lib.rs:alloc::collections::btree::navigate::<impl alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<BorrowType,K,V,alloc::collections::btree::node::marker::Leaf>,alloc::collections::btree::node::marker::Edge>>::next_kv
+lib/vector-core/src/lib.rs:alloc::collections::btree::search::<impl alloc::collections::btree::node::NodeRef<BorrowType,K,V,Type>>::find_key_index
+lib/vector-core/src/lib.rs:core::intrinsics::copy_nonoverlapping::precondition_check
+lib/vector-core/src/lib.rs:core::intrinsics::copy::precondition_check
+lib/vector-core/src/lib.rs:<core::iter::adapters::flatten::FlattenCompat<I,U> as core::iter::traits::iterator::Iterator>::next
+lib/vector-core/src/lib.rs:core::slice::raw::from_raw_parts::precondition_check
+lib/vector-core/src/lib.rs:core::str::pattern::Searcher::next_match
+lib/vector-core/src/metrics/recency.rs:<vector_core::metrics::recency::Generational<T> as core::clone::Clone>::clone
+lib/vector-core/src/metrics/recency.rs:<vector_core::metrics::recency::Generational<T> as metrics::handles::CounterFn>::increment
+lib/vector-core/src/metrics/recency.rs:<vector_core::metrics::recency::Generational<T> as metrics::handles::CounterFn>::increment::{{closure}}
+lib/vector-core/src/metrics/recency.rs:<vector_core::metrics::recency::Generational<T> as metrics::handles::HistogramFn>::record
+lib/vector-core/src/metrics/recency.rs:<vector_core::metrics::recency::Generational<T> as metrics::handles::HistogramFn>::record::{{closure}}
+lib/vector-core/src/metrics/recency.rs:vector_core::metrics::recency::Generational<T>::with_increment
+lib/vector-core/src/metrics/recency.rs:vector_core::metrics::recency::<impl core::convert::From<vector_core::metrics::recency::Generational<T>> for metrics::handles::Counter>::from
+lib/vector-core/src/metrics/recorder.rs:vector_core::metrics::recorder::Registry::get_counter::{{closure}}
+lib/vector-core/src/metrics/recorder.rs:<vector_core::metrics::recorder::VectorRecorder as metrics::recorder::Recorder>::register_counter::{{closure}}
+lib/vector-core/src/metrics/recorder.rs:vector_core::metrics::recorder::VectorRecorder::with_registry
+lib/vector-core/src/metrics/storage.rs:vector_core::metrics::storage::AtomicF64::fetch_update
+lib/vector-core/src/metrics/storage.rs:vector_core::metrics::storage::AtomicF64::fetch_update::{{closure}}
+lib/vector-core/src/metrics/storage.rs:<vector_core::metrics::storage::Histogram as metrics::handles::HistogramFn>::record
+lib/vector-core/src/metrics/storage.rs:vector_core::metrics::storage::Histogram::bucket_index
+lib/vector-core/src/schema/definition.rs:vector_core::schema::definition::Definition::new_with_default_metadata
+lib/vector-core/src/sink.rs:<vector_core::sink::EventStream<T> as vector_core::sink::StreamSink<vector_core::event::array::EventArray>>::run::{{closure}}
+lib/vector-core/src/sink.rs:vector_core::sink::VectorSink::run::{{closure}}
+src/sinks/console/sink.rs:<vector::sinks::console::sink::WriterSink<T> as vector_core::sink::StreamSink<vector_core::event::Event>>::run::{{closure}}
+src/sinks/file/mod.rs:<vector::sinks::file::FileSink as vector_core::sink::StreamSink<vector_core::event::Event>>::run::{{closure}}
+src/sinks/file/mod.rs:vector::sinks::file::FileSink::deadline_at
+src/sinks/file/mod.rs:vector::sinks::file::FileSink::partition_event
+src/sinks/file/mod.rs:vector::sinks::file::FileSink::process_event
+src/sinks/file/mod.rs:vector::sinks::file::FileSink::process_event::{{closure}}
+src/sinks/file/mod.rs:vector::sinks::file::FileSink::run::{{closure}}
+src/sinks/file/mod.rs:vector::sinks::file::OutFile::write_all::{{closure}}
+src/sinks/file/mod.rs:vector::sinks::file::write_event_to_file
+src/sinks/file/mod.rs:vector::sinks::file::write_event_to_file::{{closure}}
+src/source_sender/mod.rs:vector::source_sender::Output::emit_lag_time
+src/source_sender/mod.rs:vector::source_sender::Output::send::{{closure}}::{{closure}}
+src/sources/host_metrics/cgroups.rs:vector::sources::host_metrics::cgroups::CGroup::children::{{closure}}
+src/sources/host_metrics/cgroups.rs:vector::sources::host_metrics::cgroups::CGroup::open_read::{{closure}}
+src/sources/host_metrics/cgroups.rs:vector::sources::host_metrics::cgroups::CGroup::open_read_parse::{{closure}}
+src/sources/host_metrics/cgroups.rs:vector::sources::host_metrics::cgroups::CGroupRecurser::load_cpu::{{closure}}
+src/sources/host_metrics/cgroups.rs:vector::sources::host_metrics::cgroups::CGroupRecurser::load_memory::{{closure}}
+src/sources/host_metrics/cgroups.rs:vector::sources::host_metrics::cgroups::CGroupRecurser::recurse::{{closure}}
+src/sources/host_metrics/cgroups.rs:vector::sources::host_metrics::cgroups::CGroupRecurser::recurse::{{closure}}'2
+src/sources/host_metrics/cgroups.rs:vector::sources::host_metrics::cgroups::CGroupRecurser::scan_modern::{{closure}}
+src/sources/host_metrics/cgroups.rs:<vector::sources::host_metrics::cgroups::CpuStat as core::str::traits::FromStr>::from_str
+src/sources/host_metrics/cgroups.rs:vector::sources::host_metrics::cgroups::<impl vector::sources::host_metrics::HostMetrics>::cgroups_metrics::{{closure}}
+src/sources/host_metrics/cgroups.rs:vector::sources::host_metrics::cgroups::is_dir
+src/sources/host_metrics/cgroups.rs:vector::sources::host_metrics::cgroups::is_dir::{{closure}}
+src/sources/host_metrics/cgroups.rs:<vector::sources::host_metrics::cgroups::MemoryStat as core::str::traits::FromStr>::from_str
+src/sources/host_metrics/mod.rs:vector::sources::host_metrics::FilterList::contains
+src/sources/host_metrics/mod.rs:vector::sources::host_metrics::HostMetrics::capture_metrics::{{closure}}
+src/sources/host_metrics/mod.rs:vector::sources::host_metrics::HostMetricsConfig::run::{{closure}}
+src/sources/host_metrics/mod.rs:vector::sources::host_metrics::MetricsBuffer::counter
+src/sources/host_metrics/mod.rs:vector::sources::host_metrics::MetricsBuffer::gauge
+src/sources/host_metrics/mod.rs:vector::sources::host_metrics::MetricsBuffer::tags
+src/sources/host_metrics/process.rs:vector::sources::host_metrics::process::<impl vector::sources::host_metrics::HostMetrics>::process_metrics::{{closure}}
+src/sources/host_metrics/process.rs:vector::sources::host_metrics::process::<impl vector::sources::host_metrics::HostMetrics>::process_metrics::{{closure}}::{{closure}}
+src/template.rs:vector::template::render_timestamp
+src/template.rs:vector::template::Template::render
+src/template.rs:vector::template::Template::render_event
+src/template.rs:vector::template::Template::render_string
+src/topology/builder.rs:vector::topology::builder::Builder::build_sinks::{{closure}}::{{closure}}
+src/topology/builder.rs:vector::topology::builder::Builder::build_sources::{{closure}}::{{closure}}
+src/topology/mod.rs:vector::topology::handle_errors::{{closure}}
+src/topology/task.rs:<vector::topology::task::Task as core::future::future::Future>::poll
