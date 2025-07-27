@@ -5,9 +5,7 @@ use async_compression::tokio::write::{GzipEncoder};
 use async_trait::async_trait;
 use bytes::{Bytes, BytesMut};
 use futures::{
-
     stream::{BoxStream, StreamExt},
-
 };
 use serde_with::serde_as;
 use tokio::{
@@ -15,6 +13,7 @@ use tokio::{
     io::AsyncWriteExt,
 };
 use tokio_util::codec::Encoder as _;
+use tracing::{debug, error, trace};
 use vector_lib::codecs::{
     encoding::{Framer, FramingConfig},
     TextSerializerConfig,
@@ -31,7 +30,7 @@ use crate::{
     event::{Event, EventStatus, Finalizable},
     expiring_hash_map::ExpiringHashMap,
     internal_events::{
-        FileBytesSent, FileInternalMetricsConfig, FileIoError, FileOpen,
+        FileBytesSent, FileInternalMetricsConfig, FileOpen,
     },
     sinks::util::{timezone_to_offset, StreamSink},
     template::Template,
@@ -257,13 +256,7 @@ impl FileSink {/* 新建一个file sink */
                             debug!(message = "Closing all the open files.");
                             for (path, file) in self.files.iter_mut() {
                                 if let Err(error) = file.close().await {
-                                    emit!(FileIoError {
-                                        error,
-                                        code: "failed_closing_file",
-                                        message: "Failed to close file.",
-                                        path,
-                                        dropped_events: 0,
-                                    });
+                                    error!("Failed to close file: {:?}, error: {}", path, error);
                                 } else{
                                     trace!(message = "Successfully closed file.", path = ?path);
                                 }
@@ -286,13 +279,7 @@ impl FileSink {/* 新建一个file sink */
                             // We got an expired file. All we really want is to
                             // flush and close it.
                             if let Err(error) = expired_file.close().await {
-                                emit!(FileIoError {
-                                    error,
-                                    code: "failed_closing_file",
-                                    message: "Failed to close file.",
-                                    path: &path,
-                                    dropped_events: 0,
-                                });
+                                error!("Failed to close expired file: {:?}, error: {}", path, error);
                             }
                             drop(expired_file); // ignore close error
                             emit!(FileOpen {
@@ -334,13 +321,7 @@ impl FileSink {/* 新建一个file sink */
                     // We couldn't open the file for this event.
                     // Maybe other events will work though! Just log
                     // the error and skip this event.
-                    emit!(FileIoError {
-                        code: "failed_opening_file",
-                        message: "Unable to open the file.",
-                        error,
-                        path: &path,
-                        dropped_events: 1,
-                    });
+                    error!("Failed to open file: {:?}, error: {}", path, error);
                     event.metadata().update_status(EventStatus::Errored);
                     return;
                 }
@@ -370,13 +351,7 @@ impl FileSink {/* 新建一个file sink */
             }
             Err(error) => {
                 finalizers.update_status(EventStatus::Errored);
-                emit!(FileIoError {
-                    code: "failed_writing_file",
-                    message: "Failed to write the file.",
-                    error,
-                    path: &path,
-                    dropped_events: 1,
-                });
+                error!("Failed to write file: {:?}, error: {}", path, error);
             }
         }
     }
