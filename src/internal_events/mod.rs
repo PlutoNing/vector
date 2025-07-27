@@ -2,7 +2,6 @@
 
 mod adaptive_concurrency;
 mod aggregate;
-
 mod batch;
 pub mod codecs;
 mod common;
@@ -15,9 +14,7 @@ mod host_metrics;
 mod open;
 mod parser;
 mod process;
-
 mod remap;
-mod socket;
 
 #[cfg(any(
     feature = "sinks-file",
@@ -37,5 +34,5 @@ pub(crate) use self::parser::*;
 pub(crate) use self::windows::*;
 pub use self::{
     adaptive_concurrency::*, batch::*, common::*, conditions::*, encoding_transcode::*,
-    heartbeat::*, open::*, process::*, socket::*,
+    heartbeat::*, open::*, process::*,
 };
