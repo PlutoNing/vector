@@ -1,4 +1,3 @@
-use crate::internal_events::{HostMetricsScrapeDetailError, HostMetricsScrapeError};
 use futures::StreamExt;
 #[cfg(target_os = "linux")]
 use heim::cpu::os::linux::CpuTimeExt;
@@ -42,35 +41,27 @@ impl HostMetrics {
                 }
             }
             Err(error) => {
-                emit!(HostMetricsScrapeDetailError {
-                    message: "Failed to load CPU times.",
-                    error,
-                });
+                error!("Failed to load CPU times: {}", error);
+
             }
         }
         // adds the logical cpu count gauge
         match heim::cpu::logical_count().await {
             Ok(count) => output.gauge(LOGICAL_CPUS, count as f64, MetricTags::default()),
             Err(error) => {
-                emit!(HostMetricsScrapeDetailError {
-                    message: "Failed to load logical CPU count.",
-                    error,
-                });
+                error!("Failed to load logical CPU count: {}", error);
+
             }
         }
         // adds the physical cpu count gauge
         match heim::cpu::physical_count().await {
             Ok(Some(count)) => output.gauge(PHYSICAL_CPUS, count as f64, MetricTags::default()),
             Ok(None) => {
-                emit!(HostMetricsScrapeError {
-                    message: "Unable to determine physical CPU count.",
-                });
+               error!("Unable to determine physical CPU count");
+
             }
             Err(error) => {
-                emit!(HostMetricsScrapeDetailError {
-                    message: "Failed to load physical CPU count.",
-                    error,
-                });
+                error!("Failed to load physical CPU count: {}", error);
             }
         }
     }

@@ -2,10 +2,6 @@
 use bytes::{Bytes, BytesMut};
 use encoding_rs::{CoderResult, Encoding};
 
-use crate::internal_events::{
-    DecoderBomRemoval, DecoderMalformedReplacement, EncoderUnmappableReplacement,
-};
-
 const BUFFER_SIZE: usize = 4096;
 
 // BOM unicode character (U+FEFF) expressed in utf-8
@@ -67,9 +63,8 @@ impl Decoder {
         }
 
         if total_had_errors {
-            emit!(DecoderMalformedReplacement {
-                from_encoding: self.inner.encoding().name()
-            });
+            debug!("Decoder: replaced malformed characters from {} encoding", self.inner.encoding().name());
+
         }
 
         let output = self.output.split().freeze();
@@ -85,9 +80,8 @@ impl Decoder {
         // any more use for us, since the source encoding is already pre-identified
         // as part of decoder initialization.
         if output.get(..BOM_UTF8_LEN) == Some(BOM_UTF8) {
-            emit!(DecoderBomRemoval {
-                from_encoding: self.inner.encoding().name()
-            });
+           debug!("Decoder: removed BOM from {} encoding", self.inner.encoding().name());
+  
             output.slice(BOM_UTF8_LEN..)
         } else {
             output
@@ -172,9 +166,8 @@ impl Encoder {
         }
 
         if total_had_errors {
-            emit!(EncoderUnmappableReplacement {
-                to_encoding: self.inner.encoding().name()
-            });
+             debug!("Encoder: replaced unmappable characters to {} encoding", self.inner.encoding().name());
+
         }
 
         self.output.split().freeze()

@@ -7,7 +7,6 @@ use vector_lib::config::LogNamespace;
 
 use crate::{
     event::Event,
-    internal_events::codecs::{DecoderDeserializeError, DecoderFramingError},
 };
 
 /// A decoder that can decode structured events from a byte stream / byte
@@ -49,7 +48,7 @@ impl Decoder {
         frame: Result<Option<Bytes>, BoxedFramingError>,
     ) -> Result<Option<(SmallVec<[Event; 1]>, usize)>, Error> {
         let frame = frame.map_err(|error| {
-            emit!(DecoderFramingError { error: &error });
+            error!("Failed to decode frame: {}", error);
             Error::FramingError(error)
         })?;
 
@@ -67,7 +66,8 @@ impl Decoder {
             .parse(frame, self.log_namespace)
             .map(|events| (events, byte_size))
             .map_err(|error| {
-                emit!(DecoderDeserializeError { error: &error });
+                error!("Failed to parse frame: {}", error);
+ 
                 Error::ParsingError(error)
             })
     }

@@ -1,5 +1,5 @@
 
-use vector_lib::{emit, TimeZone};
+use vector_lib::{TimeZone};
 use vrl::compiler::runtime::{Runtime, RuntimeResult, Terminate};
 use vrl::compiler::{Program};
 use vrl::diagnostic::Formatter;
@@ -10,7 +10,6 @@ use crate::event::TargetEvents;
 use crate::{
     conditions::{Conditional},
     event::{Event, VrlTarget},
-    internal_events::VrlConditionExecutionError,
 };
 
 #[derive(Debug, Clone)]
@@ -48,9 +47,8 @@ impl Conditional for Vrl {
                 _ => panic!("VRL condition did not return a boolean type"),
             })
             .unwrap_or_else(|err| {
-                emit!(VrlConditionExecutionError {
-                    error: err.to_string().as_ref()
-                });
+               error!("VRL condition execution failed: {}", err);
+   
                 false
             });
         (result, event)

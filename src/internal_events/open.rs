@@ -6,31 +6,6 @@ use std::{
     },
 };
 
-use metrics::gauge;
-use vector_lib::internal_event::InternalEvent;
-
-#[derive(Debug)]
-pub struct ConnectionOpen {
-    pub count: usize,
-}
-
-impl InternalEvent for ConnectionOpen {
-    fn emit(self) {
-        gauge!("open_connections").set(self.count as f64);
-    }
-}
-
-#[derive(Debug)]
-pub struct EndpointsActive {
-    pub count: usize,
-}
-
-impl InternalEvent for EndpointsActive {
-    fn emit(self) {
-        gauge!("active_endpoints").set(self.count as f64);
-    }
-}
-
 #[derive(Clone)]
 pub struct OpenGauge {
     gauge: Arc<AtomicUsize>,

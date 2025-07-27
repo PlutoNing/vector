@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use crate::extra_context::ExtraContext;
-use crate::internal_events::{VectorRecoveryError, VectorReloadError, VectorReloaded};
 use futures_util::FutureExt as _;
 use tokio::sync::{Mutex, MutexGuard};
 
@@ -60,19 +59,19 @@ impl TopologyController {
             .await
         {
             Ok(true) => {
-                emit!(VectorReloaded {
-                    config_paths: &self.config_paths
-                });
+                info!(target: "vector", "Vector has reloaded. Config paths: {:?}", self.config_paths);
+
                 ReloadOutcome::Success
             }
             Ok(false) => {
-                emit!(VectorReloadError);
+                error!("Reload was not successful.");
+
                 ReloadOutcome::RolledBack
             }
             // Trigger graceful shutdown for what remains of the topology
             Err(()) => {
-                emit!(VectorReloadError);
-                emit!(VectorRecoveryError);
+                error!("Reload was not successful.");
+                error!("Vector has failed to recover from a failed reload.");
                 ReloadOutcome::FatalError(ShutdownError::ReloadFailedToRestore)
             }
         }

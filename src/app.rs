@@ -18,7 +18,6 @@ use crate::{
     cli::{handle_config_errors, LogFormat, Opts, RootOpts, WatchConfigMethod},
     config::{self, ComponentConfig, Config, ConfigPath},
     heartbeat,
-    internal_events::{VectorConfigLoadError, VectorQuit, VectorStarted, VectorStopped},
     signal::{SignalHandler, SignalPair, SignalRx, SignalTo},
     topology::{
         ReloadOutcome, RunningTopology, SharedTopologyController, ShutdownErrorReceiver,
@@ -197,7 +196,7 @@ impl Application {
         // early buffer by this point and set up a subscriber.
         crate::trace::stop_early_buffering();
 
-        emit!(VectorStarted);
+        info!("Vector has started.");
         handle.spawn(heartbeat::heartbeat());
 
         let Self {
@@ -355,7 +354,8 @@ async fn reload_config_from_result(
         },
         Err(errors) => {
             handle_config_errors(errors);
-            emit!(VectorConfigLoadError);
+            error!("Failed to load config files, reload aborted.");
+
             None
         }
     }
@@ -398,7 +398,7 @@ impl FinishedApplication {
     }
 
     async fn stop(topology_controller: TopologyController, mut signal_rx: SignalRx) -> ExitStatus {
-        emit!(VectorStopped);
+        info!("Vector has stopped.");
         tokio::select! {
             _ = topology_controller.stop() => ExitStatus::from_raw({
                 #[cfg(windows)]
@@ -414,7 +414,7 @@ impl FinishedApplication {
 
     fn quit() -> ExitStatus {
         // It is highly unlikely that this event will exit from topology.
-        emit!(VectorQuit);
+        info!("Vector has quit.");
         ExitStatus::from_raw({
             #[cfg(windows)]
             {

@@ -4,9 +4,6 @@ use heim::units::information::byte;
 use heim::units::ratio::ratio;
 use vector_lib::configurable::configurable_component;
 use vector_lib::metric_tags;
-
-use crate::internal_events::{HostMetricsScrapeDetailError, HostMetricsScrapeFilesystemError};
-
 use super::{default_all_devices, example_devices, filter_result, FilterList, HostMetrics};
 
 /// Options for the filesystem metrics collector.
@@ -87,15 +84,11 @@ impl HostMetrics {
                         heim::disk::usage(partition.mount_point())
                             .await
                             .map_err(|error| {
-                                emit!(HostMetricsScrapeFilesystemError {
-                                    message: "Failed to load partitions info.",
-                                    mount_point: partition
-                                        .mount_point()
-                                        .to_str()
-                                        .unwrap_or("unknown")
-                                        .to_string(),
-                                    error,
-                                })
+                                error!(
+    "Failed to load partitions info for mount point {}: {}", 
+    partition.mount_point().to_str().unwrap_or("unknown"),
+    error
+);
                             })
                             .map(|usage| (partition, usage))
                             .ok()
@@ -135,10 +128,7 @@ impl HostMetrics {
                 }
             }
             Err(error) => {
-                emit!(HostMetricsScrapeDetailError {
-                    message: "Failed to load partitions info.",
-                    error,
-                });
+                error!("Failed to load partitions info: {}", error);
             }
         }
     }

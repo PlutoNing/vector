@@ -27,6 +27,5 @@ pub(crate) use self::host_metrics::*;
 #[cfg(windows)]
 pub(crate) use self::windows::*;
 pub use self::{
-    common::*, conditions::*, encoding_transcode::*,
-    heartbeat::*, open::*, process::*,
+    common::*, open::*, process::*,
 };

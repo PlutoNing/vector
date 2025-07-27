@@ -15,10 +15,10 @@ use serde_with::serde_as;
 use stream_cancel::{Trigger, Tripwire};
 use tokio::time::{sleep, Duration};
 use tower::Service;
-use vector_lib::{configurable::configurable_component, emit};
+use vector_lib::{configurable::configurable_component};
 
 use crate::{
-    internal_events::{EndpointsActive, OpenGauge},
+    internal_events::{ OpenGauge},
     sinks::util::retries::ExponentialBackoff,
 };
 
@@ -307,5 +307,5 @@ struct HealthSnapshot {
 }
 
 fn emit_active_endpoints(count: usize) {
-    emit!(EndpointsActive { count });
+    debug!("Active endpoints count: {}", count);
 }

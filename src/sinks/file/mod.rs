@@ -30,7 +30,7 @@ use crate::{
     event::{Event, EventStatus, Finalizable},
     expiring_hash_map::ExpiringHashMap,
     internal_events::{
-        FileBytesSent, FileInternalMetricsConfig, FileOpen,
+        FileInternalMetricsConfig,
     },
     sinks::util::{timezone_to_offset, StreamSink},
     template::Template,
@@ -198,7 +198,6 @@ pub struct FileSink {
     files: ExpiringHashMap<Bytes, OutFile>,
     compression: Compression,
     events_sent: Registered<EventsSent>,
-    include_file_metric_tag: bool,
 }
 
 impl FileSink {/* 新建一个file sink */
@@ -220,7 +219,6 @@ impl FileSink {/* 新建一个file sink */
             files: ExpiringHashMap::default(),
             compression: config.compression,
             events_sent: register!(EventsSent::from(Output(None))),
-            include_file_metric_tag: config.internal_metrics.include_file_tag,
         })
     }
 
@@ -262,9 +260,8 @@ impl FileSink {/* 新建一个file sink */
                                 }
                             }
 
-                            emit!(FileOpen {
-                                count: 0
-                            });
+                           debug!("All files closed, total open files: 0");
+
 
                             break;
                         }
@@ -282,9 +279,8 @@ impl FileSink {/* 新建一个file sink */
                                 error!("Failed to close expired file: {:?}, error: {}", path, error);
                             }
                             drop(expired_file); // ignore close error
-                            emit!(FileOpen {
-                                count: self.files.len()
-                            });
+                            debug!("File operation completed, total open files: {}", self.files.len());
+
                         }
                     }
                 }
@@ -330,9 +326,8 @@ impl FileSink {/* 新建一个file sink */
             let outfile = OutFile::new(file, self.compression);
 
             self.files.insert_at(path.clone(), outfile, next_deadline);
-            emit!(FileOpen {
-                count: self.files.len()
-            });
+            debug!("File operation completed, total open files: {}", self.files.len());
+
             self.files.get_mut(&path).unwrap()
         };
 
@@ -343,11 +338,7 @@ impl FileSink {/* 新建一个file sink */
             Ok(byte_size) => {
                 finalizers.update_status(EventStatus::Delivered);
                 self.events_sent.emit(CountByteSize(1, event_size));
-                emit!(FileBytesSent {
-                    byte_size,
-                    file: String::from_utf8_lossy(&path),
-                    include_file_metric_tag: self.include_file_metric_tag,
-                });
+                debug!("Sent {} bytes to file: {}", byte_size, String::from_utf8_lossy(&path));
             }
             Err(error) => {
                 finalizers.update_status(EventStatus::Errored);
