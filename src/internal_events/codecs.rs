@@ -80,33 +80,6 @@ impl InternalEvent for EncoderFramingError<'_> {
 }
 
 #[derive(Debug)]
-pub struct EncoderSerializeError<'a> {
-    pub error: &'a crate::Error,
-}
-
-impl InternalEvent for EncoderSerializeError<'_> {
-    fn emit(self) {
-        let reason = "Failed serializing frame.";
-        error!(
-            message = reason,
-            error = %self.error,
-            error_code = "encoder_serialize",
-            error_type = error_type::ENCODER_FAILED,
-            stage = error_stage::SENDING,
-
-        );
-        counter!(
-            "component_errors_total",
-            "error_code" => "encoder_serialize",
-            "error_type" => error_type::ENCODER_FAILED,
-            "stage" => error_stage::SENDING,
-        )
-        .increment(1);
-        emit!(ComponentEventsDropped::<UNINTENTIONAL> { count: 1, reason });
-    }
-}
-
-#[derive(Debug)]
 pub struct EncoderWriteError<'a, E> {
     pub error: &'a E,
     pub count: usize,

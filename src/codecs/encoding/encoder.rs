@@ -7,7 +7,7 @@ use vector_lib::codecs::{
 
 use crate::{
     event::Event,
-    internal_events::codecs::{EncoderFramingError, EncoderSerializeError},
+    internal_events::codecs::{EncoderFramingError},
 };
 
 #[derive(Debug, Clone)]
@@ -57,7 +57,7 @@ where
     /// Serialize the event without applying framing, at the start of the provided buffer.
     fn serialize_at_start(&mut self, event: Event, buffer: &mut BytesMut) -> Result<(), Error> {
         self.serializer.encode(event, buffer).map_err(|error| {
-            emit!(EncoderSerializeError { error: &error });
+            error!("Failed to serialize event: {}", error);
             Error::SerializingError(error)
         })
     }
