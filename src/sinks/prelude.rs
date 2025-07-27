@@ -30,7 +30,7 @@ pub use crate::{
     sinks::{
         util::{
 
-            encoding::{self, write_all},
+            encoding::{self},
             request_builder::{default_request_builder_concurrency_limit},
             retries::{RetryAction, RetryLogic},
 
