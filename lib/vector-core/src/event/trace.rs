@@ -4,8 +4,7 @@ use lookup::lookup_v2::TargetPath;
 use serde::{Deserialize, Serialize};
 use vector_buffers::EventCount;
 use vector_common::{
-    byte_size_of::ByteSizeOf, internal_event::TaggedEventsSent, json_size::JsonSize,
-    request_metadata::GetEventCountTags, EventDataEq,
+    byte_size_of::ByteSizeOf, json_size::JsonSize, EventDataEq,
 };
 use vrl::path::PathParseError;
 
@@ -169,11 +168,5 @@ impl AsRef<LogEvent> for TraceEvent {
 impl AsMut<LogEvent> for TraceEvent {
     fn as_mut(&mut self) -> &mut LogEvent {
         &mut self.0
-    }
-}
-
-impl GetEventCountTags for TraceEvent {
-    fn get_tags(&self) -> TaggedEventsSent {
-        self.0.get_tags()
     }
 }

@@ -55,7 +55,7 @@ pub use transform::{
 pub use vars::{interpolate, ENVIRONMENT_VARIABLE_INTERPOLATION_REGEX};
 pub use vector_lib::{
     config::{
-        init_log_schema, init_telemetry, log_schema, proxy::ProxyConfig, telemetry, ComponentKey,
+        init_log_schema, log_schema, proxy::ProxyConfig, ComponentKey,
         LogSchema, OutputId,
     },
     id::Inputs,

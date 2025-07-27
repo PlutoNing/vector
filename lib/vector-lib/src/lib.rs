@@ -26,9 +26,9 @@ pub use vrl;
 pub mod config {
     pub use vector_common::config::ComponentKey;
     pub use vector_core::config::{
-        clone_input_definitions, init_log_schema, init_telemetry, log_schema, proxy, telemetry,
+        clone_input_definitions, init_log_schema, log_schema, proxy,
         AcknowledgementsConfig, DataType, GlobalOptions, Input, LegacyKey, LogNamespace, LogSchema,
-        OutputId, SourceAcknowledgementsConfig, SourceOutput, Tags, Telemetry, TransformOutput,
+        OutputId, SourceAcknowledgementsConfig, SourceOutput, TransformOutput,
         WildcardMatching, MEMORY_BUFFER_DEFAULT_MAX_EVENTS,
     };
 }

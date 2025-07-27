@@ -6,7 +6,6 @@ use vector_config::{configurable_component, impl_generate_config_from_default};
 
 use super::super::default_data_dir;
 use super::metrics_expiration::PerMetricSetExpiration;
-use super::Telemetry;
 use super::{proxy::ProxyConfig, AcknowledgementsConfig, LogSchema};
 use crate::serde::bool_or_struct;
 
@@ -76,14 +75,6 @@ pub struct GlobalOptions {
     #[serde(default, skip_serializing_if = "crate::serde::is_default")]
     #[configurable(metadata(docs::common = false, docs::required = false))]
     pub log_schema: LogSchema,
-
-    /// Telemetry options.
-    ///
-    /// Determines whether `source` and `service` tags should be emitted with the
-    /// `component_sent_*` and `component_received_*` events.
-    #[serde(default, skip_serializing_if = "crate::serde::is_default")]
-    #[configurable(metadata(docs::common = false, docs::required = false))]
-    pub telemetry: Telemetry,
 
     /// The name of the time zone to apply to timestamp conversions that do not contain an explicit time zone.
     ///
@@ -262,9 +253,6 @@ impl GlobalOptions {
             errors.extend(merge_errors);
         }
 
-        let mut telemetry = self.telemetry.clone();
-        telemetry.merge(&with.telemetry);
-
         let merged_expire_metrics_per_metric_set = match (
             &self.expire_metrics_per_metric_set,
             &with.expire_metrics_per_metric_set,
@@ -280,7 +268,6 @@ impl GlobalOptions {
                 data_dir,
                 wildcard_matching: self.wildcard_matching.or(with.wildcard_matching),
                 log_schema,
-                telemetry,
                 acknowledgements: self.acknowledgements.merge_default(&with.acknowledgements),
                 timezone: self.timezone.or(with.timezone),
                 proxy: self.proxy.merge(&with.proxy),

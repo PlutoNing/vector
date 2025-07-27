@@ -17,9 +17,9 @@ use lookup::{lookup_v2::TargetPath, metadata_path, path, PathPrefix};
 use serde::{Deserialize, Serialize, Serializer};
 use vector_common::{
     byte_size_of::ByteSizeOf,
-    internal_event::{OptionalTag, TaggedEventsSent},
+
     json_size::{JsonSize, NonZeroJsonSize},
-    request_metadata::GetEventCountTags,
+
     EventDataEq,
 };
 use vrl::path::{parse_target_path, OwnedTargetPath, PathParseError};
@@ -32,7 +32,7 @@ use super::{
     util, EventFinalizers, Finalizable, KeyString, ObjectMap, Value,
 };
 use crate::config::LogNamespace;
-use crate::config::{log_schema, telemetry};
+use crate::config::{log_schema};
 use crate::event::util::log::{all_fields, all_metadata_fields};
 use crate::event::MaybeAsLogMut;
 
@@ -223,26 +223,6 @@ impl Finalizable for LogEvent {
 impl EstimatedJsonEncodedSizeOf for LogEvent {
     fn estimated_json_encoded_size_of(&self) -> JsonSize {
         self.inner.estimated_json_encoded_size_of()
-    }
-}
-/* 没有 */
-impl GetEventCountTags for LogEvent {
-    fn get_tags(&self) -> TaggedEventsSent {
-        let source = if telemetry().tags().emit_source {
-            self.metadata().source_id().cloned().into()
-        } else {
-            OptionalTag::Ignored
-        };
-
-        let service = if telemetry().tags().emit_service {
-            self.get_by_meaning("service")
-                .map(|value| value.to_string_lossy().to_string())
-                .into()
-        } else {
-            OptionalTag::Ignored
-        };
-
-        TaggedEventsSent { source, service }
     }
 }
 

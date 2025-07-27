@@ -527,7 +527,6 @@ pub async fn load_configs(
     }
 /* log schema是什么 */
     config::init_log_schema(config.global.log_schema.clone(), true);/* 这里是初始化这两个字段 */
-    config::init_telemetry(config.global.telemetry.clone(), true);
 
     config.graceful_shutdown_duration = graceful_shutdown_duration;
 
