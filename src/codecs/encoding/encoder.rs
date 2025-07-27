@@ -7,7 +7,6 @@ use vector_lib::codecs::{
 
 use crate::{
     event::Event,
-    internal_events::codecs::{EncoderFramingError},
 };
 
 #[derive(Debug, Clone)]
@@ -149,7 +148,7 @@ impl tokio_util::codec::Encoder<Event> for Encoder<Framer> {
 
         // Frame the serialized event.
         self.framer.encode((), &mut payload).map_err(|error| {
-            emit!(EncoderFramingError { error: &error });
+            error!("Failed to Framing event: {}", error);
             Error::FramingError(error)
         })?;
 

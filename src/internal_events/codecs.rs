@@ -53,33 +53,6 @@ impl InternalEvent for DecoderDeserializeError<'_> {
 }
 
 #[derive(Debug)]
-pub struct EncoderFramingError<'a> {
-    pub error: &'a vector_lib::codecs::encoding::BoxedFramingError,
-}
-
-impl InternalEvent for EncoderFramingError<'_> {
-    fn emit(self) {
-        let reason = "Failed framing bytes.";
-        error!(
-            message = reason,
-            error = %self.error,
-            error_code = "encoder_frame",
-            error_type = error_type::ENCODER_FAILED,
-            stage = error_stage::SENDING,
-
-        );
-        counter!(
-            "component_errors_total",
-            "error_code" => "encoder_frame",
-            "error_type" => error_type::ENCODER_FAILED,
-            "stage" => error_stage::SENDING,
-        )
-        .increment(1);
-        emit!(ComponentEventsDropped::<UNINTENTIONAL> { count: 1, reason });
-    }
-}
-
-#[derive(Debug)]
 pub struct EncoderWriteError<'a, E> {
     pub error: &'a E,
     pub count: usize,
