@@ -8,7 +8,7 @@ use crate::config::ComponentKey;
 use super::{CountByteSize, OptionalTag, Output, SharedString};
 
 pub const DEFAULT_OUTPUT: &str = "_default";
-
+/* 有调用 */
 crate::registered_event!(
     EventsSent {
         output: Option<SharedString>,

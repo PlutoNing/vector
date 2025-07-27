@@ -6,7 +6,6 @@ mod events_received;
 mod events_sent;
 mod optional_tag;
 mod prelude;
-pub mod service;
 
 use std::ops::{Add, AddAssign};
 
@@ -21,7 +20,6 @@ pub use events_received::EventsReceived;
 pub use events_sent::{EventsSent, TaggedEventsSent, DEFAULT_OUTPUT};
 pub use optional_tag::OptionalTag;
 pub use prelude::{error_stage, error_type};
-pub use service::{CallError, PollReadyError};
 
 use crate::json_size::JsonSize;
 

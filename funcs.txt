@@ -25,10 +25,15 @@ lib/vector-common/src/finalization.rs:<vector_common::finalization::EventFinaliz
 lib/vector-common/src/finalization.rs:<vector_common::finalization::EventFinalizers as vector_common::byte_size_of::ByteSizeOf>::allocated_bytes
 lib/vector-common/src/finalization.rs:vector_common::finalization::EventFinalizers::update_status
 =============================================ok==================
-lib/vector-common/src/internal_event/bytes_sent.rs:<vector_common::internal_event::bytes_sent::BytesSentHandle as vector_common::internal_event::InternalEventHandle>::emit
-lib/vector-common/src/internal_event/events_sent.rs:<vector_common::internal_event::events_sent::EventsSentHandle as vector_common::internal_event::InternalEventHandle>::emit
-lib/vector-common/src/internal_event/mod.rs:<vector_common::internal_event::bytes_sent::BytesSentHandle as vector_common::internal_event::InternalEventHandle>::emit
-lib/vector-common/src/internal_event/mod.rs:<vector_common::internal_event::events_sent::EventsSentHandle as vector_common::internal_event::InternalEventHandle>::emit
+lib/vector-common/src/internal_event/bytes_sent.rs:
+<vector_common::internal_event::bytes_sent::BytesSentHandle as vector_common::internal_event::InternalEventHandle>::emit
+lib/vector-common/src/internal_event/events_sent.rs:
+<vector_common::internal_event::events_sent::EventsSentHandle as vector_common::internal_event::InternalEventHandle>::emit
+lib/vector-common/src/internal_event/mod.rs:
+<vector_common::internal_event::bytes_sent::BytesSentHandle as vector_common::internal_event::InternalEventHandle>::emit
+lib/vector-common/src/internal_event/mod.rs:
+<vector_common::internal_event::events_sent::EventsSentHandle as vector_common::internal_event::InternalEventHandle>::emit
+========================================
 lib/vector-common/src/json_size.rs:<vector_common::json_size::JsonSize as core::convert::From<usize>>::from
 lib/vector-common/src/json_size.rs:vector_common::json_size::JsonSize::get
 lib/vector-core/src/config/mod.rs:<vector_core::config::LogNamespace as core::cmp::PartialEq>::eq

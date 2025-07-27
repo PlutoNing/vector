@@ -2,7 +2,7 @@ use metrics::{counter, histogram, Counter, Histogram};
 use tracing::trace;
 
 use super::CountByteSize;
-
+/* 有调用 */
 crate::registered_event!(
     EventsReceived => {
         events_count: Histogram = histogram!("component_received_events_count"),

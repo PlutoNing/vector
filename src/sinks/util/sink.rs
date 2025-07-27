@@ -49,7 +49,7 @@ use tokio::{
 use tower::{Service};
 use tracing::Instrument;
 use vector_lib::internal_event::{
-    CallError, CountByteSize, EventsSent, InternalEventHandle as _, Output,
+    CountByteSize, EventsSent, InternalEventHandle as _, Output,
 };
 // === StreamSink<Event> ===
 pub use vector_lib::sink::StreamSink;
@@ -363,14 +363,6 @@ where
                         // TODO: Emit a BytesSent event here too
                     }
                     EventStatus::Rejected => {
-                        // Emit the `Error` and `EventsDropped` internal events.
-                        // This scenario occurs after retries have been attempted.
-                        let error = result.err().unwrap_or_else(|| "Response failed.".into());
-                        emit!(CallError {
-                            error,
-                            request_id,
-                            count,
-                        });
                     }
                     _ => {} // do nothing
                 }
