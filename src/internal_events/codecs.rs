@@ -1,6 +1,6 @@
 use metrics::counter;
 use vector_lib::internal_event::InternalEvent;
-use vector_lib::internal_event::{error_stage, error_type, ComponentEventsDropped, UNINTENTIONAL};
+use vector_lib::internal_event::{error_stage, error_type};
 
 #[derive(Debug)]
 pub struct DecoderFramingError<E> {
@@ -49,36 +49,5 @@ impl InternalEvent for DecoderDeserializeError<'_> {
             "stage" => error_stage::PROCESSING,
         )
         .increment(1);
-    }
-}
-
-#[derive(Debug)]
-pub struct EncoderWriteError<'a, E> {
-    pub error: &'a E,
-    pub count: usize,
-}
-
-impl<E: std::fmt::Display> InternalEvent for EncoderWriteError<'_, E> {
-    fn emit(self) {
-        let reason = "Failed writing bytes.";
-        error!(
-            message = reason,
-            error = %self.error,
-            error_type = error_type::IO_FAILED,
-            stage = error_stage::SENDING,
-
-        );
-        counter!(
-            "component_errors_total",
-            "error_type" => error_type::ENCODER_FAILED,
-            "stage" => error_stage::SENDING,
-        )
-        .increment(1);
-        if self.count > 0 {
-            emit!(ComponentEventsDropped::<UNINTENTIONAL> {
-                count: self.count,
-                reason,
-            });
-        }
     }
 }

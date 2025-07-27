@@ -2,7 +2,6 @@
 
 mod adaptive_concurrency;
 mod aggregate;
-mod batch;
 pub mod codecs;
 mod common;
 mod conditions;

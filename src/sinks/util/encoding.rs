@@ -7,7 +7,7 @@ use vector_lib::codecs::encoding::Framer;
 use vector_lib::request_metadata::GroupedCountByteSize;
 use vector_lib::{config::telemetry, EstimatedJsonEncodedSizeOf};
 
-use crate::{codecs::Transformer, event::Event, internal_events::codecs::EncoderWriteError};
+use crate::{codecs::Transformer, event::Event};
 
 pub trait Encoder<T> {
     /// Encodes the input into the provided writer.
@@ -109,10 +109,8 @@ pub fn write_all(
     buf: &[u8],
 ) -> io::Result<()> {
     writer.write_all(buf).inspect_err(|error| {
-        emit!(EncoderWriteError {
-            error,
-            count: n_events_pending,
-        });
+    error!("Failed to write encoded data: {}, dropping {} events",
+    error, n_events_pending);
     })
 }
 
