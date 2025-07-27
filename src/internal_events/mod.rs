@@ -1,6 +1,5 @@
 #![allow(missing_docs)]
 
-mod adaptive_concurrency;
 mod aggregate;
 pub mod codecs;
 mod common;
@@ -28,6 +27,6 @@ pub(crate) use self::host_metrics::*;
 #[cfg(windows)]
 pub(crate) use self::windows::*;
 pub use self::{
-    adaptive_concurrency::*, common::*, conditions::*, encoding_transcode::*,
+    common::*, conditions::*, encoding_transcode::*,
     heartbeat::*, open::*, process::*,
 };
