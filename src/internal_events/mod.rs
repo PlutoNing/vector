@@ -12,7 +12,6 @@ mod heartbeat;
 #[cfg(feature = "sources-host_metrics")]
 mod host_metrics;
 mod open;
-mod parser;
 mod process;
 
 #[cfg(any(
@@ -27,8 +26,6 @@ mod windows;
 pub(crate) use self::file::*;
 #[cfg(feature = "sources-host_metrics")]
 pub(crate) use self::host_metrics::*;
-#[allow(unused_imports)]
-pub(crate) use self::parser::*;
 #[cfg(windows)]
 pub(crate) use self::windows::*;
 pub use self::{
