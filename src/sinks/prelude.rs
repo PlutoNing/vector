@@ -20,7 +20,7 @@ pub use vector_lib::{
     finalization::{EventFinalizers, EventStatus, Finalizable},
     internal_event::{CountByteSize, TaggedEventsSent},
     json_size::JsonSize,
-    request_metadata::{GetEventCountTags, GroupedCountByteSize, MetaDescriptive, RequestMetadata},
+
 };
 
 pub use crate::{

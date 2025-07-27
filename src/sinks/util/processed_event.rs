@@ -4,7 +4,7 @@ use vector_lib::{
     ByteSizeOf, EstimatedJsonEncodedSizeOf,
 };
 use vector_lib::{
-    internal_event::TaggedEventsSent, json_size::JsonSize, request_metadata::GetEventCountTags,
+    json_size::JsonSize,
 };
 
 /// An event alongside metadata from preprocessing. This is useful for sinks
@@ -49,14 +49,5 @@ where
 {
     fn estimated_json_encoded_size_of(&self) -> JsonSize {
         self.event.estimated_json_encoded_size_of()
-    }
-}
-
-impl<E, M> GetEventCountTags for ProcessedEvent<E, M>
-where
-    E: GetEventCountTags,
-{
-    fn get_tags(&self) -> TaggedEventsSent {
-        self.event.get_tags()
     }
 }
