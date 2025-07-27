@@ -1,6 +1,5 @@
 mod bytes_received;
 mod bytes_sent;
-pub mod cached_event;
 mod events_received;
 mod events_sent;
 mod prelude;
@@ -11,8 +10,6 @@ pub use metrics::SharedString;
 
 pub use bytes_received::BytesReceived;
 pub use bytes_sent::BytesSent;
-#[allow(clippy::module_name_repetitions)]
-pub use cached_event::{RegisterTaggedInternalEvent, RegisteredEventCache};
 pub use events_received::EventsReceived;
 pub use events_sent::{EventsSent, TaggedEventsSent, DEFAULT_OUTPUT};
 pub use prelude::{error_stage, error_type};
@@ -243,18 +240,6 @@ macro_rules! registered_event {
                 fn emit(&$slf, $data_name: $data)
                     $emit_body
             }
-
-            $(impl $crate::internal_event::cached_event::RegisterTaggedInternalEvent for $event {
-                type Tags = $tags;
-                type Fixed = $fixed_tags;
-
-                fn register(
-                    $fixed_name: $fixed_tags,
-                    $tags_name: $tags,
-                ) -> <Self as $crate::internal_event::RegisterInternalEvent>::Handle {
-                    $register_body
-                }
-            })?
 
         }
     };
