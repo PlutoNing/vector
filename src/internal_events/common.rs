@@ -3,7 +3,7 @@ use std::time::Instant;
 use metrics::{counter, histogram};
 pub use vector_lib::internal_event::EventsReceived;
 use vector_lib::internal_event::InternalEvent;
-use vector_lib::internal_event::{error_stage, error_type, ComponentEventsDropped, UNINTENTIONAL};
+use vector_lib::internal_event::{error_stage, error_type};
 
 #[derive(Debug)]
 pub struct EndpointBytesReceived<'a> {
@@ -75,35 +75,6 @@ impl<E: std::error::Error> InternalEvent for SocketOutgoingConnectionError<E> {
             "stage" => error_stage::SENDING,
         )
         .increment(1);
-    }
-}
-
-const STREAM_CLOSED: &str = "stream_closed";
-
-#[derive(Debug)]
-pub struct StreamClosedError {
-    pub count: usize,
-}
-
-impl InternalEvent for StreamClosedError {
-    fn emit(self) {
-        error!(
-            message = "Failed to forward event(s), downstream is closed.",
-            error_code = STREAM_CLOSED,
-            error_type = error_type::WRITER_FAILED,
-            stage = error_stage::SENDING,
-        );
-        counter!(
-            "component_errors_total",
-            "error_code" => STREAM_CLOSED,
-            "error_type" => error_type::WRITER_FAILED,
-            "stage" => error_stage::SENDING,
-        )
-        .increment(1);
-        emit!(ComponentEventsDropped::<UNINTENTIONAL> {
-            count: self.count,
-            reason: "Downstream is closed.",
-        });
     }
 }
 

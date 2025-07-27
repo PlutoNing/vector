@@ -23,7 +23,7 @@ use vector_lib::EstimatedJsonEncodedSizeOf;
 use crate::{
     config::{SourceConfig, SourceContext, SourceOutput},
     event::metric::{Metric, MetricKind, MetricTags, MetricValue},
-    internal_events::{EventsReceived, HostMetricsScrapeDetailError, StreamClosedError},
+    internal_events::{EventsReceived, HostMetricsScrapeDetailError},
     shutdown::ShutdownSignal,
     SourceSender,
 };
@@ -332,7 +332,7 @@ impl HostMetricsConfig {
             let metrics = generator.capture_metrics().await; /* 获取指标 */
             let count = metrics.len();
             if (out.send_batch(metrics).await).is_err() {/* 发送出去 */
-                emit!(StreamClosedError { count });
+                error!("Failed to send host metrics batch, stream closed, count: {}", count);
                 return Err(());
             }
         }
