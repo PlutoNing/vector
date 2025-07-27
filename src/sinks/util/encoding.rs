@@ -74,7 +74,7 @@ impl Encoder<Vec<Event>> for (Transformer, crate::codecs::Encoder<Framer>) {
     }
 }
 
-impl Encoder<Event> for (Transformer, crate::codecs::Encoder<()>) {
+impl Encoder<Event> for (Transformer, crate::codecs::Encoder<()>) {/* 没有 */
     fn encode_input(
         &self,
         mut event: Event,

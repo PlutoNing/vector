@@ -146,7 +146,7 @@ impl PartialEq for Inner {
         self.fields.eq(&other.fields)
     }
 }
-
+/* 都没有 */
 #[derive(Clone, Debug, Default, Deserialize, PartialEq)]
 pub struct LogEvent {
     #[serde(flatten)]
@@ -225,7 +225,7 @@ impl EstimatedJsonEncodedSizeOf for LogEvent {
         self.inner.estimated_json_encoded_size_of()
     }
 }
-
+/* 没有 */
 impl GetEventCountTags for LogEvent {
     fn get_tags(&self) -> TaggedEventsSent {
         let source = if telemetry().tags().emit_source {

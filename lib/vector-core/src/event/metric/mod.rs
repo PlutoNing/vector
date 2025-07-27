@@ -69,12 +69,12 @@ pub struct Metric {
     metadata: EventMetadata,
 }
 /* 表示一个指标 */
-impl Metric {
+impl Metric {/* 有调用 */
     /// Creates a new `Metric` with the given `name`, `kind`, and `value`.
     pub fn new<T: Into<String>>(name: T, kind: MetricKind, value: MetricValue) -> Self {
         Self::new_with_metadata(name, kind, value, EventMetadata::default())
     }
-
+/* 有调用 */
     /// Creates a new `Metric` with the given `name`, `kind`, `value`, and `metadata`.
     pub fn new_with_metadata<T: Into<String>>(
         name: T,
@@ -436,7 +436,7 @@ impl Display for Metric {
     /// ```text
     /// 2020-08-12T20:23:37.248661343Z vector_received_bytes_total{component_kind="sink",component_type="blackhole"} = 6391
     /// ```
-    fn fmt(&self, fmt: &mut Formatter<'_>) -> Result<(), fmt::Error> {
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> Result<(), fmt::Error> {/* 有调用 */
         if let Some(timestamp) = &self.data.time.timestamp {
             write!(fmt, "{timestamp:?} ")?;
         }
@@ -449,7 +449,7 @@ impl Display for Metric {
         self.data.value.fmt(fmt)
     }
 }
-
+/* 没有 */
 impl EventDataEq for Metric {
     fn event_data_eq(&self, other: &Self) -> bool {
         self.series == other.series
@@ -458,7 +458,7 @@ impl EventDataEq for Metric {
     }
 }
 
-impl ByteSizeOf for Metric {
+impl ByteSizeOf for Metric {/* 有调用 */
     fn allocated_bytes(&self) -> usize {
         self.series.allocated_bytes()
             + self.data.allocated_bytes()
@@ -466,20 +466,20 @@ impl ByteSizeOf for Metric {
     }
 }
 
-impl EstimatedJsonEncodedSizeOf for Metric {
+impl EstimatedJsonEncodedSizeOf for Metric {/* 有调用 */
     fn estimated_json_encoded_size_of(&self) -> JsonSize {
         // TODO: For now we're using the in-memory representation of the metric, but we'll convert
         // this to actually calculate the JSON encoded size in the near future.
         self.size_of().into()
     }
 }
-
+/* 有调用 */
 impl Finalizable for Metric {
     fn take_finalizers(&mut self) -> EventFinalizers {
         self.metadata.take_finalizers()
     }
 }
-
+/* 没有 */
 impl GetEventCountTags for Metric {
     fn get_tags(&self) -> TaggedEventsSent {
         let source = if telemetry().tags().emit_source {

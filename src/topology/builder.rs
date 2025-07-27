@@ -1,12 +1,12 @@
 use std::{
     collections::HashMap,
     future::ready,
-    num::NonZeroUsize,
+
     sync::{Arc, LazyLock, Mutex},
-    time::Instant,
+
 };
 
-use futures::{stream::FuturesOrdered, FutureExt, StreamExt, TryStreamExt};
+use futures::{StreamExt, TryStreamExt};
 use futures_util::stream::FuturesUnordered;
 use metrics::gauge;
 use stream_cancel::{StreamExt as StreamCancelExt, Trigger, Tripwire};
@@ -16,33 +16,32 @@ use tokio::{
 
 };
 use tracing::Instrument;
-use vector_lib::config::LogNamespace;
+
 use vector_lib::internal_event::{
-    self, CountByteSize, EventsSent, InternalEventHandle as _, Registered,
+    CountByteSize, InternalEventHandle as _,
 };
-use vector_lib::transform::update_runtime_schema_definition;
+
 use vector_lib::{
     buffers::{
         topology::{
-            builder::TopologyBuilder,
-            channel::{BufferReceiver, BufferSender},
+            channel::{BufferSender},
         },
-        BufferType, WhenFull,
+        BufferType,
     },
-    schema::Definition,
+
     EstimatedJsonEncodedSizeOf,
 };
 
 use super::{
     fanout::{self, Fanout},
     schema,
-    task::{Task, TaskOutput, TaskResult},
+    task::{Task, TaskOutput},
     BuiltBuffer, ConfigDiff,
 };
 use crate::{
     config::{
-        ComponentKey, Config, DataType, EnrichmentTableConfig, Input, Inputs, OutputId,
-        ProxyConfig, SinkContext, SourceContext, TransformContext, TransformOuter, TransformOutput,
+        ComponentKey, Config, DataType, EnrichmentTableConfig, Inputs, OutputId,
+        ProxyConfig, SinkContext, SourceContext,
     },
     event::{EventArray, EventContainer},
     extra_context::ExtraContext,
@@ -51,8 +50,8 @@ use crate::{
     source_sender::{SourceSenderItem, CHUNK_SIZE},
     spawn_named,
     topology::task::TaskError,
-    transforms::{SyncTransform, TaskTransform, Transform, TransformOutputs, TransformOutputsBuf},
-    utilization::{wrap, UtilizationComponentSender, UtilizationEmitter},
+    
+    utilization::{wrap, UtilizationEmitter},
     SourceSender,
 };
 
@@ -61,9 +60,6 @@ static ENRICHMENT_TABLES: LazyLock<vector_lib::enrichment::TableRegistry> =
 
 pub(crate) static SOURCE_SENDER_BUFFER_SIZE: LazyLock<usize> =
     LazyLock::new(|| *TRANSFORM_CONCURRENCY_LIMIT * CHUNK_SIZE);
-
-const READY_ARRAY_CAPACITY: NonZeroUsize = NonZeroUsize::new(CHUNK_SIZE * 4).unwrap();
-pub(crate) const TOPOLOGY_BUFFER_SIZE: NonZeroUsize = NonZeroUsize::new(100).unwrap();
 
 static TRANSFORM_CONCURRENCY_LIMIT: LazyLock<usize> = LazyLock::new(|| {
     crate::app::worker_threads()
@@ -419,108 +415,9 @@ impl<'a> Builder<'a> {
 /* 构建完config之后, 构建enrichment, source,然后基于enrichment构建transform */
     async fn build_transforms(
         &mut self,
-        enrichment_tables: &vector_lib::enrichment::TableRegistry,
-    ) {
-        let mut definition_cache = HashMap::default();
+        _enrichment_tables: &vector_lib::enrichment::TableRegistry,
+    ) {/* 有调用 */
 
-        for (key, transform) in self
-            .config
-            .transforms()
-            .filter(|(key, _)| self.diff.transforms.contains_new(key))
-        {
-            debug!(component = %key, "Building new transform.");
-
-            let input_definitions = match schema::input_definitions(
-                &transform.inputs,
-                self.config,
-                enrichment_tables.clone(),
-                &mut definition_cache,
-            ) {
-                Ok(definitions) => definitions,
-                Err(_) => {
-                    // We have received an error whilst retrieving the definitions,
-                    // there is no point in continuing.
-
-                    return;
-                }
-            };
-
-            let merged_definition: Definition = input_definitions
-                .iter()
-                .map(|(_output_id, definition)| definition.clone())
-                .reduce(Definition::merge)
-                // We may not have any definitions if all the inputs are from metrics sources.
-                .unwrap_or_else(Definition::any);
-
-            let span = error_span!(
-                "transform",
-                component_kind = "transform",
-                component_id = %key.id(),
-                component_type = %transform.inner.get_component_name(),
-            );
-
-            // Create a map of the outputs to the list of possible definitions from those outputs.
-            let schema_definitions = transform
-                .inner
-                .outputs(
-                    enrichment_tables.clone(),
-                    &input_definitions,
-                    self.config.schema.log_namespace(),
-                )
-                .into_iter()
-                .map(|output| {
-                    let definitions = output.schema_definitions(self.config.schema.enabled);
-                    (output.port, definitions)
-                })
-                .collect::<HashMap<_, _>>();
-
-            let context = TransformContext {
-                key: Some(key.clone()),
-                globals: self.config.global.clone(),
-                enrichment_tables: enrichment_tables.clone(),
-                schema_definitions,
-                merged_schema_definition: merged_definition.clone(),
-                schema: self.config.schema,
-                extra_context: self.extra_context.clone(),
-            };
-
-            let node = TransformNode::from_parts(
-                key.clone(),
-                enrichment_tables.clone(),
-                transform,
-                &input_definitions,
-                self.config.schema.log_namespace(),
-            );
-
-            let transform = match transform
-                .inner
-                .build(&context)
-                .instrument(span.clone())
-                .await
-            {
-                Err(error) => {
-                    self.errors
-                        .push(format!("Transform \"{}\": {}", key, error));
-                    continue;
-                }
-                Ok(transform) => transform,
-            };
-
-            let (input_tx, input_rx) =
-                TopologyBuilder::standalone_memory(TOPOLOGY_BUFFER_SIZE, WhenFull::Block, &span)
-                    .await;
-
-            self.inputs
-                .insert(key.clone(), (input_tx, node.inputs.clone()));
-
-            let (transform_task, transform_outputs) = {
-                let _span = span.enter();
-                build_transform(transform, node, input_rx, &mut self.utilization_emitter)
-            };
-
-            self.outputs.extend(transform_outputs);
-            self.tasks.insert(key.clone(), transform_task);
-        }
     }
 /* 获取config之后, 构建source, transform, sinks, 这里构建sinks */
     async fn build_sinks(&mut self, enrichment_tables: &vector_lib::enrichment::TableRegistry) {
@@ -715,317 +612,4 @@ const fn filter_events_type(events: &EventArray, data_type: DataType) -> bool {
         EventArray::Metrics(_) => data_type.contains(DataType::Metric),
         EventArray::Traces(_) => data_type.contains(DataType::Trace),
     }
-}
-
-#[derive(Debug, Clone)]
-struct TransformNode {
-    key: ComponentKey,
-    typetag: &'static str,
-    inputs: Inputs<OutputId>,
-    input_details: Input,
-    outputs: Vec<TransformOutput>,
-    enable_concurrency: bool,
-}
-
-impl TransformNode {
-    pub fn from_parts(
-        key: ComponentKey,
-        enrichment_tables: vector_lib::enrichment::TableRegistry,
-        transform: &TransformOuter<OutputId>,
-        schema_definition: &[(OutputId, Definition)],
-        global_log_namespace: LogNamespace,
-    ) -> Self {
-        Self {
-            key,
-            typetag: transform.inner.get_component_name(),
-            inputs: transform.inputs.clone(),
-            input_details: transform.inner.input(),
-            outputs: transform.inner.outputs(
-                enrichment_tables,
-                schema_definition,
-                global_log_namespace,
-            ),
-            enable_concurrency: transform.inner.enable_concurrency(),
-        }
-    }
-}
-
-fn build_transform(
-    transform: Transform,
-    node: TransformNode,
-    input_rx: BufferReceiver<EventArray>,
-    utilization_emitter: &mut UtilizationEmitter,
-) -> (Task, HashMap<OutputId, fanout::ControlChannel>) {
-    match transform {
-        // TODO: avoid the double boxing for function transforms here
-        Transform::Function(t) => {
-            build_sync_transform(Box::new(t), node, input_rx, utilization_emitter)
-        }
-        Transform::Synchronous(t) => build_sync_transform(t, node, input_rx, utilization_emitter),
-        Transform::Task(t) => build_task_transform(
-            t,
-            input_rx,
-            node.input_details.data_type(),
-            node.typetag,
-            &node.key,
-            &node.outputs,
-            utilization_emitter,
-        ),
-    }
-}
-
-fn build_sync_transform(
-    t: Box<dyn SyncTransform>,
-    node: TransformNode,
-    input_rx: BufferReceiver<EventArray>,
-    utilization_emitter: &mut UtilizationEmitter,
-) -> (Task, HashMap<OutputId, fanout::ControlChannel>) {
-    let (outputs, controls) = TransformOutputs::new(node.outputs, &node.key);
-
-    let sender = utilization_emitter.add_component(node.key.clone(), gauge!("utilization"));
-    let runner = Runner::new(t, input_rx, sender, node.input_details.data_type(), outputs);
-    let transform = if node.enable_concurrency {
-        runner.run_concurrently().boxed()
-    } else {
-        runner.run_inline().boxed()
-    };
-
-    let transform = async move {
-        debug!("Synchronous transform starting.");
-
-        match transform.await {
-            Ok(v) => {
-                debug!("Synchronous transform finished normally.");
-                Ok(v)
-            }
-            Err(e) => {
-                debug!("Synchronous transform finished with an error.");
-                Err(e)
-            }
-        }
-    };
-
-    let mut output_controls = HashMap::new();
-    for (name, control) in controls {
-        let id = name
-            .map(|name| OutputId::from((&node.key, name)))
-            .unwrap_or_else(|| OutputId::from(&node.key));
-        output_controls.insert(id, control);
-    }
-
-    let task = Task::new(node.key.clone(), node.typetag, transform);
-
-    (task, output_controls)
-}
-
-struct Runner {
-    transform: Box<dyn SyncTransform>,
-    input_rx: Option<BufferReceiver<EventArray>>,
-    input_type: DataType,
-    outputs: TransformOutputs,
-    timer_tx: UtilizationComponentSender,
-    events_received: Registered<EventsReceived>,
-}
-
-impl Runner {
-    fn new(
-        transform: Box<dyn SyncTransform>,
-        input_rx: BufferReceiver<EventArray>,
-        timer_tx: UtilizationComponentSender,
-        input_type: DataType,
-        outputs: TransformOutputs,
-    ) -> Self {
-        Self {
-            transform,
-            input_rx: Some(input_rx),
-            input_type,
-            outputs,
-            timer_tx,
-            events_received: register!(EventsReceived),
-        }
-    }
-
-    fn on_events_received(&mut self, events: &EventArray) {
-        self.timer_tx.try_send_stop_wait();
-
-        self.events_received.emit(CountByteSize(
-            events.len(),
-            events.estimated_json_encoded_size_of(),
-        ));
-    }
-
-    async fn send_outputs(&mut self, outputs_buf: &mut TransformOutputsBuf) -> crate::Result<()> {
-        self.timer_tx.try_send_start_wait();
-        self.outputs.send(outputs_buf).await
-    }
-
-    async fn run_inline(mut self) -> TaskResult {
-        // 128 is an arbitrary, smallish constant
-        const INLINE_BATCH_SIZE: usize = 128;
-
-        let mut outputs_buf = self.outputs.new_buf_with_capacity(INLINE_BATCH_SIZE);
-
-        let mut input_rx = self
-            .input_rx
-            .take()
-            .expect("can't run runner twice")
-            .into_stream()
-            .filter(move |events| ready(filter_events_type(events, self.input_type)));
-
-        self.timer_tx.try_send_start_wait();
-        while let Some(events) = input_rx.next().await {
-            self.on_events_received(&events);
-            self.transform.transform_all(events, &mut outputs_buf);
-            self.send_outputs(&mut outputs_buf)
-                .await
-                .map_err(TaskError::wrapped)?;
-        }
-
-        Ok(TaskOutput::Transform)
-    }
-
-    async fn run_concurrently(mut self) -> TaskResult {
-        let input_rx = self
-            .input_rx
-            .take()
-            .expect("can't run runner twice")
-            .into_stream()
-            .filter(move |events| ready(filter_events_type(events, self.input_type)));
-
-        let mut input_rx =
-            super::ready_arrays::ReadyArrays::with_capacity(input_rx, READY_ARRAY_CAPACITY);
-
-        let mut in_flight = FuturesOrdered::new();
-        let mut shutting_down = false;
-
-        self.timer_tx.try_send_start_wait();
-        loop {
-            tokio::select! {
-                biased;
-
-                result = in_flight.next(), if !in_flight.is_empty() => {
-                    match result {
-                        Some(Ok(outputs_buf)) => {
-                            let mut outputs_buf: TransformOutputsBuf = outputs_buf;
-                            self.send_outputs(&mut outputs_buf).await
-                                .map_err(TaskError::wrapped)?;
-                        }
-                        _ => unreachable!("join error or bad poll"),
-                    }
-                }
-
-                input_arrays = input_rx.next(), if in_flight.len() < *TRANSFORM_CONCURRENCY_LIMIT && !shutting_down => {
-                    match input_arrays {
-                        Some(input_arrays) => {
-                            let mut len = 0;
-                            for events in &input_arrays {
-                                self.on_events_received(events);
-                                len += events.len();
-                            }
-
-                            let mut t = self.transform.clone();
-                            let mut outputs_buf = self.outputs.new_buf_with_capacity(len);
-                            let task = tokio::spawn(async move {
-                                for events in input_arrays {
-                                    t.transform_all(events, &mut outputs_buf);
-                                }
-                                outputs_buf
-                            }.in_current_span());
-                            in_flight.push_back(task);
-                        }
-                        None => {
-                            shutting_down = true;
-                            continue
-                        }
-                    }
-                }
-
-                else => {
-                    if shutting_down {
-                        break
-                    }
-                }
-            }
-        }
-
-        Ok(TaskOutput::Transform)
-    }
-}
-
-fn build_task_transform(
-    t: Box<dyn TaskTransform<EventArray>>,
-    input_rx: BufferReceiver<EventArray>,
-    input_type: DataType,
-    typetag: &str,
-    key: &ComponentKey,
-    outputs: &[TransformOutput],
-    utilization_emitter: &mut UtilizationEmitter,
-) -> (Task, HashMap<OutputId, fanout::ControlChannel>) {
-    let (mut fanout, control) = Fanout::new();
-
-    let sender = utilization_emitter.add_component(key.clone(), gauge!("utilization"));
-    let input_rx = wrap(sender, key.clone(), input_rx.into_stream());
-
-    let events_received = register!(EventsReceived);
-    let filtered = input_rx
-        .filter(move |events| ready(filter_events_type(events, input_type)))
-        .inspect(move |events| {
-            events_received.emit(CountByteSize(
-                events.len(),
-                events.estimated_json_encoded_size_of(),
-            ))
-        });
-    let events_sent = register!(EventsSent::from(internal_event::Output(None)));
-    let output_id = Arc::new(OutputId {
-        component: key.clone(),
-        port: None,
-    });
-
-    // Task transforms can only write to the default output, so only a single schema def map is needed
-    let schema_definition_map = outputs
-        .iter()
-        .find(|x| x.port.is_none())
-        .expect("output for default port required for task transforms")
-        .log_schema_definitions
-        .clone()
-        .into_iter()
-        .map(|(key, value)| (key, Arc::new(value)))
-        .collect();
-
-    let stream = t
-        .transform(Box::pin(filtered))
-        .map(move |mut events| {
-            for event in events.iter_events_mut() {
-                update_runtime_schema_definition(event, &output_id, &schema_definition_map);
-            }
-            (events, Instant::now())
-        })
-        .inspect(move |(events, _): &(EventArray, Instant)| {
-            events_sent.emit(CountByteSize(
-                events.len(),
-                events.estimated_json_encoded_size_of(),
-            ));
-        });
-    let transform = async move {
-        debug!("Task transform starting.");
-
-        match fanout.send_stream(stream).await {
-            Ok(()) => {
-                debug!("Task transform finished normally.");
-                Ok(TaskOutput::Transform)
-            }
-            Err(e) => {
-                debug!("Task transform finished with an error.");
-                Err(TaskError::wrapped(e))
-            }
-        }
-    }
-    .boxed();
-
-    let mut outputs = HashMap::new();
-    outputs.insert(OutputId::from(key), control);
-
-    let task = Task::new(key.clone(), typetag, transform);
-
-    (task, outputs)
 }

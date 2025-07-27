@@ -1,4 +1,4 @@
-use std::{cmp, num::NonZeroUsize, pin::Pin};
+use std::{cmp, pin::Pin};
 
 use futures::{
     task::{Context, Poll},
@@ -32,20 +32,6 @@ impl<T> ReadyArrays<T>
 where
     T: Stream<Item = EventArray> + Unpin,
 {
-    /// Create a new `ReadyArrays` with a specified capacity.
-    ///
-    /// The specified capacity is on the total number of `Event` instances
-    /// enqueued here at one time. This is a soft limit. Chunks may be returned
-    /// that contain more than that number of items.
-    pub fn with_capacity(inner: T, capacity: NonZeroUsize) -> Self {
-        Self {
-            inner,
-            enqueued: Vec::with_capacity(ARRAY_BUFFER_DEFAULT_SIZE),
-            enqueued_size: 0,
-            enqueued_limit: capacity.get(),
-        }
-    }
-
     fn flush(&mut self) -> Vec<EventArray> {
         // Size the next `enqueued` to the maximum of ARRAY_BUFFER_DEFAULT_SIZE
         // or the current length of `self.enqueued`. This means, in practice,
