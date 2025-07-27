@@ -8,7 +8,7 @@ use vector_lib::json_size::JsonSize;
 use vector_lib::stream::BatcherSettings;
 
 use super::EncodedEvent;
-use crate::{event::EventFinalizers, internal_events::LargeEventDroppedError};
+use crate::{event::EventFinalizers};
 
 // * Provide sensible sink default 10 MB with 1s timeout. Don't allow chaining builder methods on
 //   that.
@@ -320,7 +320,7 @@ impl<B> Default for BatchSettings<B> {
 }
 
 pub(super) fn err_event_too_large<T>(length: usize, max_length: usize) -> PushResult<T> {
-    emit!(LargeEventDroppedError { length, max_length });
+    error!("Event too large, dropping event: length={}, max_length={}", length, max_length);
     PushResult::Ok(false)
 }
 

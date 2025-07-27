@@ -29,6 +29,6 @@ pub(crate) use self::host_metrics::*;
 #[cfg(windows)]
 pub(crate) use self::windows::*;
 pub use self::{
-    adaptive_concurrency::*, batch::*, common::*, conditions::*, encoding_transcode::*,
+    adaptive_concurrency::*, common::*, conditions::*, encoding_transcode::*,
     heartbeat::*, open::*, process::*,
 };
