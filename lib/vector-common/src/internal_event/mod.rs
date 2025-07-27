@@ -4,7 +4,6 @@ pub mod cached_event;
 pub mod component_events_dropped;
 mod events_received;
 mod events_sent;
-mod optional_tag;
 mod prelude;
 
 use std::ops::{Add, AddAssign};
@@ -18,8 +17,22 @@ pub use cached_event::{RegisterTaggedInternalEvent, RegisteredEventCache};
 pub use component_events_dropped::{ComponentEventsDropped, INTENTIONAL, UNINTENTIONAL};
 pub use events_received::EventsReceived;
 pub use events_sent::{EventsSent, TaggedEventsSent, DEFAULT_OUTPUT};
-pub use optional_tag::OptionalTag;
 pub use prelude::{error_stage, error_type};
+
+/// The user can configure whether a tag should be emitted. If they configure it to
+/// be emitted, but the value doesn't exist - we should emit the tag but with a value
+/// of `-`.
+#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Hash)]
+pub enum OptionalTag<T> {
+    Ignored,
+    Specified(Option<T>),
+}
+
+impl<T> From<Option<T>> for OptionalTag<T> {
+    fn from(value: Option<T>) -> Self {
+        Self::Specified(value)
+    }
+}
 
 use crate::json_size::JsonSize;
 
