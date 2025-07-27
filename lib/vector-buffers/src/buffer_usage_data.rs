@@ -8,10 +8,9 @@ use std::{
 
 use tokio::time::interval;
 use tracing::{Instrument, Span};
-use vector_common::internal_event::emit;
 
 use crate::{
-    internal_events::{BufferCreated, BufferEventsDropped, BufferEventsReceived, BufferEventsSent},
+
     spawn_named,
 };
 
@@ -252,53 +251,34 @@ impl BufferUsage {
 
                 for stage in &stages {
                     let max_size = stage.max_size.get();
-                    emit(BufferCreated {
-                        idx: stage.idx,
-                        max_size_bytes: max_size.event_byte_size,
-                        max_size_events: max_size
-                            .event_count
-                            .try_into()
-                            .expect("should never be bigger than `usize`"),
-                    });
+                    debug!("Buffer stage {}: created with max {} bytes and {} events", 
+                        stage.idx, max_size.event_byte_size, max_size.event_count);
+
 
                     let received = stage.received.consume();
                     if received.has_updates() {
-                        emit(BufferEventsReceived {
-                            idx: stage.idx,
-                            count: received.event_count,
-                            byte_size: received.event_byte_size,
-                        });
+                        debug!("Buffer stage {}: received {} events ({} bytes)", 
+       stage.idx, received.event_count, received.event_byte_size);
+
+
                     }
 
                     let sent = stage.sent.consume();
                     if sent.has_updates() {
-                        emit(BufferEventsSent {
-                            idx: stage.idx,
-                            count: sent.event_count,
-                            byte_size: sent.event_byte_size,
-                        });
+                        debug!("Buffer stage {}: sent {} events ({} bytes)", 
+       stage.idx, sent.event_count, sent.event_byte_size);
                     }
 
                     let dropped = stage.dropped.consume();
                     if dropped.has_updates() {
-                        emit(BufferEventsDropped {
-                            idx: stage.idx,
-                            intentional: false,
-                            reason: "corrupted_events",
-                            count: dropped.event_count,
-                            byte_size: dropped.event_byte_size,
-                        });
+                        error!("Buffer stage {}: dropped {} events ({} bytes) due to corruption", 
+                        stage.idx, dropped.event_count, dropped.event_byte_size);
                     }
 
                     let dropped_intentional = stage.dropped_intentional.consume();
                     if dropped_intentional.has_updates() {
-                        emit(BufferEventsDropped {
-                            idx: stage.idx,
-                            intentional: true,
-                            reason: "drop_newest",
-                            count: dropped_intentional.event_count,
-                            byte_size: dropped_intentional.event_byte_size,
-                        });
+                        error!("Buffer stage {}: intentionally dropped {} events ({} bytes) due to buffer full", 
+                        stage.idx, dropped_intentional.event_count, dropped_intentional.event_byte_size);
                     }
                 }
             }
