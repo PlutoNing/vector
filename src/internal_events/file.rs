@@ -2,10 +2,8 @@ use metrics::{counter, gauge};
 use std::borrow::Cow;
 use vector_lib::{
     configurable::configurable_component,
-    internal_event::{ComponentEventsDropped, InternalEvent, UNINTENTIONAL},
+    internal_event::{InternalEvent},
 };
-
-use vector_lib::internal_event::{error_stage, error_type};
 
 /// Configuration of internal metrics for file-based components.
 #[configurable_component]
@@ -59,41 +57,5 @@ impl InternalEvent for FileBytesSent<'_> {
             )
         }
         .increment(self.byte_size as u64);
-    }
-}
-
-#[derive(Debug)]
-pub struct FileIoError<'a, P> {
-    pub error: std::io::Error,
-    pub code: &'static str,
-    pub message: &'static str,
-    pub path: &'a P,
-    pub dropped_events: usize,
-}
-
-impl<P: std::fmt::Debug> InternalEvent for FileIoError<'_, P> {
-    fn emit(self) {
-        error!(
-            message = %self.message,
-            path = ?self.path,
-            error = %self.error,
-            error_code = %self.code,
-            error_type = error_type::IO_FAILED,
-            stage = error_stage::SENDING,
-        );
-        counter!(
-            "component_errors_total",
-            "error_code" => self.code,
-            "error_type" => error_type::IO_FAILED,
-            "stage" => error_stage::SENDING,
-        )
-        .increment(1);
-
-        if self.dropped_events > 0 {
-            emit!(ComponentEventsDropped::<UNINTENTIONAL> {
-                count: self.dropped_events,
-                reason: self.message,
-            });
-        }
     }
 }
