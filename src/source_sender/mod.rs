@@ -1,4 +1,4 @@
-#![allow(missing_docs)]
+#![allow(missing_docs)]::
 use std::{collections::HashMap, fmt, sync::Arc, time::Instant};
 
 use chrono::Utc;
@@ -10,7 +10,6 @@ use vector_lib::buffers::EventCount;
 use vector_lib::event::array::EventArrayIntoIter;
 #[cfg(any(test))]
 use vector_lib::event::{into_event_stream, EventStatus};
-use vector_lib::internal_event::{ComponentEventsDropped, UNINTENTIONAL};
 use vector_lib::json_size::JsonSize;
 use vector_lib::{
     config::{log_schema, SourceOutput},
@@ -345,10 +344,6 @@ impl Drop for UnsentEventCount {
     fn drop(&mut self) {
         if self.count > 0 {
             let _enter = self.span.enter();
-            emit!(ComponentEventsDropped::<UNINTENTIONAL> {
-                count: self.count,
-                reason: "Source send cancelled."
-            });
         }
     }
 }
