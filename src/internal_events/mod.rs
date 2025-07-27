@@ -14,7 +14,6 @@ mod host_metrics;
 mod open;
 mod parser;
 mod process;
-mod remap;
 
 #[cfg(any(
     feature = "sinks-file",
