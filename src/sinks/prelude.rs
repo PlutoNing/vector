@@ -18,7 +18,7 @@ pub use vector_lib::{
 };
 pub use vector_lib::{
     finalization::{EventFinalizers, EventStatus, Finalizable},
-    internal_event::{CountByteSize, TaggedEventsSent},
+    internal_event::{CountByteSize},
     json_size::JsonSize,
 
 };
