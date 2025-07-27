@@ -32,9 +32,6 @@ pub use indoc::indoc;
 #[global_allocator]
 static ALLOC: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 
-#[allow(unreachable_pub)]
-pub mod internal_telemetry;
-
 #[macro_use]
 #[allow(unreachable_pub)]
 pub mod config;
