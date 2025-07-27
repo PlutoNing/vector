@@ -14,8 +14,8 @@ use serde::{Deserialize, Serialize};
 pub use trace::TraceEvent;
 use vector_buffers::EventCount;
 use vector_common::{
-    byte_size_of::ByteSizeOf, config::ComponentKey, finalization, internal_event::TaggedEventsSent,
-    json_size::JsonSize, request_metadata::GetEventCountTags, EventDataEq,
+    byte_size_of::ByteSizeOf, config::ComponentKey, finalization,
+    json_size::JsonSize, EventDataEq,
 };
 pub use vrl::value::{KeyString, ObjectMap, Value};
 #[cfg(feature = "vrl")]
@@ -80,16 +80,6 @@ impl Finalizable for Event {
             Event::Log(log_event) => log_event.take_finalizers(),
             Event::Metric(metric) => metric.take_finalizers(),
             Event::Trace(trace_event) => trace_event.take_finalizers(),
-        }
-    }
-}
-
-impl GetEventCountTags for Event {
-    fn get_tags(&self) -> TaggedEventsSent {
-        match self {
-            Event::Log(log) => log.get_tags(),
-            Event::Metric(metric) => metric.get_tags(),
-            Event::Trace(trace) => trace.get_tags(),
         }
     }
 }
