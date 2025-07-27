@@ -32,7 +32,7 @@ pub use buffer::{
 
 pub use compressor::Compressor;
 pub use normalizer::Normalizer;
-pub use request_builder::{IncrementalRequestBuilder, RequestBuilder};
+pub use request_builder::{IncrementalRequestBuilder};
 pub use service::{
     Concurrency,
 

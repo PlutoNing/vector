@@ -31,11 +31,10 @@ pub use crate::{
         util::{
 
             encoding::{self, write_all},
-            metadata::RequestMetadataBuilder,
-            request_builder::{default_request_builder_concurrency_limit, EncodeResult},
+            request_builder::{default_request_builder_concurrency_limit},
             retries::{RetryAction, RetryLogic},
 
-            BatchConfig, Compression, Concurrency, NoDefaultsBatchSettings, RequestBuilder,
+            BatchConfig, Compression, Concurrency, NoDefaultsBatchSettings,
             SinkBatchSettings,
         },
     },
