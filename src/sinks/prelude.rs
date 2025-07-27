@@ -27,7 +27,7 @@ pub use crate::{
     codecs::{Encoder, EncodingConfig, Transformer},
     config::{DataType, GenerateConfig, SinkConfig, SinkContext},
     event::{Event, LogEvent},
-    internal_events::{SinkRequestBuildError, TemplateRenderingError},
+    internal_events::{SinkRequestBuildError},
     sinks::{
         util::{
 

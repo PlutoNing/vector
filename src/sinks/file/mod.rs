@@ -31,7 +31,7 @@ use crate::{
     event::{Event, EventStatus, Finalizable},
     expiring_hash_map::ExpiringHashMap,
     internal_events::{
-        FileBytesSent, FileInternalMetricsConfig, FileIoError, FileOpen, TemplateRenderingError,
+        FileBytesSent, FileInternalMetricsConfig, FileIoError, FileOpen,
     },
     sinks::util::{timezone_to_offset, StreamSink},
     template::Template,
@@ -228,19 +228,13 @@ impl FileSink {/* 新建一个file sink */
     /// Uses pass the `event` to `self.path` template to obtain the file path
     /// to store the event as.
     fn partition_event(&mut self, event: &Event) -> Option<bytes::Bytes> {
-        let bytes = match self.path.render(event) {
-            Ok(b) => b,
+        match self.path.render(event) {
+            Ok(b) => Some(b),
             Err(error) => {
-                emit!(TemplateRenderingError {
-                    error,
-                    field: Some("path"),
-                    drop_event: true,
-                });
-                return None;
+                error!("Failed to render path template: {}", error);
+                None
             }
-        };
-
-        Some(bytes)
+        }
     }
 
     fn deadline_at(&self) -> Instant {

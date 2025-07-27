@@ -1,6 +1,7 @@
 use vector_lib::{event::Event, partition::Partitioner};
+use tracing::error;
 
-use crate::{internal_events::TemplateRenderingError, template::Template};
+use crate::template::Template;
 
 /// Partitions items based on the generated key for the given event.
 pub struct KeyPartitioner {
@@ -29,18 +30,11 @@ impl Partitioner for KeyPartitioner {
             .render_string(item)
             .or_else(|error| {
                 if let Some(dead_letter_key_prefix) = &self.dead_letter_key_prefix {
-                    emit!(TemplateRenderingError {
-                        error,
-                        field: Some("key_prefix"),
-                        drop_event: false,
-                    });
+                    error!("Failed to render key prefix template: {}, using dead letter key prefix", error);
                     Ok(dead_letter_key_prefix.clone())
                 } else {
-                    Err(emit!(TemplateRenderingError {
-                        error,
-                        field: Some("key_prefix"),
-                        drop_event: true,
-                    }))
+                    error!("Failed to render key prefix template: {}, dropping event", error);
+                    Err(())
                 }
             })
             .ok()

@@ -1,4 +1,4 @@
-#![allow(missing_docs)]::
+#![allow(missing_docs)]
 use std::{collections::HashMap, fmt, sync::Arc, time::Instant};
 
 use chrono::Utc;

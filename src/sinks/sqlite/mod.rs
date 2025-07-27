@@ -24,9 +24,6 @@ use crate::{
     config::{AcknowledgementsConfig, GenerateConfig, Input, SinkConfig, SinkContext},
     event::{Event, EventStatus, Finalizable, Value},
     expiring_hash_map::ExpiringHashMap,
-    internal_events::{
-        TemplateRenderingError,
-    },
     sinks::util::{timezone_to_offset, StreamSink},
     template::Template,
 };
@@ -152,24 +149,14 @@ impl SqliteSink {
     fn partition_event(&mut self, event: &Event) -> Option<(Bytes, Bytes)> {
         let path_bytes = match self.path.render(event) {
             Ok(b) => b,
-            Err(error) => {
-                emit!(TemplateRenderingError {
-                    error,
-                    field: Some("path"),
-                    drop_event: true,
-                });
+            Err(_error) => {
                 return None;
             }
         };
 
         let table_bytes = match self.table.render(event) {
             Ok(b) => b,
-            Err(error) => {
-                emit!(TemplateRenderingError {
-                    error,
-                    field: Some("table"),
-                    drop_event: true,
-                });
+            Err(_error) => {
                 return None;
             }
         };
