@@ -89,7 +89,7 @@ impl SinkConfig for ConsoleSinkConfig {
 
         Ok(sink)
     }
-
+/* 调用 */
     fn input(&self) -> Input {
         Input::new(self.encoding.config().1.input_type())
     }

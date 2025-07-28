@@ -52,15 +52,15 @@ pub struct Input {
     log_schema_requirement: schema::Requirement,
 }
 
-impl Input {
+impl Input {/* 调用 */
     pub fn data_type(&self) -> DataType {
         self.ty
     }
-
+/* 调用 */
     pub fn schema_requirement(&self) -> &schema::Requirement {
         &self.log_schema_requirement
     }
-
+/* 调用 */
     pub fn new(ty: DataType) -> Self {
         Self {
             ty,
@@ -137,7 +137,7 @@ impl SourceOutput {
     ///
     /// Sets the datatype to be [`DataType::Metric`].
     #[must_use]
-    pub fn new_metrics() -> Self {
+    pub fn new_metrics() -> Self {/* 调用 */
         Self {
             port: None,
             ty: DataType::Metric,
@@ -168,7 +168,7 @@ impl SourceOutput {
     #[must_use]
     pub fn schema_definition(&self, schema_enabled: bool) -> Option<schema::Definition> {
         use std::ops::Deref;
-
+/* 调用 */
         self.schema_definition.as_ref().map(|definition| {
             if schema_enabled {
                 definition.deref().clone()

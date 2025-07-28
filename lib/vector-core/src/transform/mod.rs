@@ -1,12 +1,9 @@
-use std::{collections::HashMap, error, pin::Pin, sync::Arc, time::Instant};
+use std::{collections::HashMap, pin::Pin, sync::Arc};
 
 use futures::{Stream, StreamExt};
-use vector_common::internal_event::{
-    self, register, CountByteSize, EventsSent, InternalEventHandle as _, Registered, DEFAULT_OUTPUT,
-};
 use vector_common::{byte_size_of::ByteSizeOf, json_size::JsonSize, EventDataEq};
 
-use crate::config::{ComponentKey, OutputId};
+use crate::config::{OutputId};
 use crate::event::EventMutRef;
 use crate::schema::Definition;
 use crate::{
@@ -14,8 +11,6 @@ use crate::{
     event::{
         into_event_stream, EstimatedJsonEncodedSizeOf, Event, EventArray, EventContainer, EventRef,
     },
-    fanout::{self, Fanout},
-    schema,
 };
 
 /// Transforms come in two variants. Functions, or tasks.
@@ -171,132 +166,6 @@ impl SyncTransform for Box<dyn FunctionTransform> {
             output.primary_buffer.as_mut().expect("no default output"),
             event,
         );
-    }
-}
-
-struct TransformOutput {
-    fanout: Fanout,
-    events_sent: Registered<EventsSent>,
-    log_schema_definitions: HashMap<OutputId, Arc<schema::Definition>>,
-    output_id: Arc<OutputId>,
-}
-
-pub struct TransformOutputs {
-    outputs_spec: Vec<config::TransformOutput>,
-    primary_output: Option<TransformOutput>,
-    named_outputs: HashMap<String, TransformOutput>,
-}
-
-impl TransformOutputs {
-    pub fn new(
-        outputs_in: Vec<config::TransformOutput>,
-        component_key: &ComponentKey,
-    ) -> (Self, HashMap<Option<String>, fanout::ControlChannel>) {
-        let outputs_spec = outputs_in.clone();
-        let mut primary_output = None;
-        let mut named_outputs = HashMap::new();
-        let mut controls = HashMap::new();
-
-        for output in outputs_in {
-            let (fanout, control) = Fanout::new();
-
-            let log_schema_definitions = output
-                .log_schema_definitions
-                .into_iter()
-                .map(|(id, definition)| (id, Arc::new(definition)))
-                .collect();
-
-            match output.port {
-                None => {
-                    primary_output = Some(TransformOutput {
-                        fanout,
-                        events_sent: register(EventsSent::from(internal_event::Output(Some(
-                            DEFAULT_OUTPUT.into(),
-                        )))),
-                        log_schema_definitions,
-                        output_id: Arc::new(OutputId {
-                            component: component_key.clone(),
-                            port: None,
-                        }),
-                    });
-                    controls.insert(None, control);
-                }
-                Some(name) => {
-                    named_outputs.insert(
-                        name.clone(),
-                        TransformOutput {
-                            fanout,
-                            events_sent: register(EventsSent::from(internal_event::Output(Some(
-                                name.clone().into(),
-                            )))),
-                            log_schema_definitions,
-                            output_id: Arc::new(OutputId {
-                                component: component_key.clone(),
-                                port: Some(name.clone()),
-                            }),
-                        },
-                    );
-                    controls.insert(Some(name.clone()), control);
-                }
-            }
-        }
-
-        let me = Self {
-            outputs_spec,
-            primary_output,
-            named_outputs,
-        };
-
-        (me, controls)
-    }
-
-    pub fn new_buf_with_capacity(&self, capacity: usize) -> TransformOutputsBuf {
-        TransformOutputsBuf::new_with_capacity(self.outputs_spec.clone(), capacity)
-    }
-
-    /// Sends the events in the buffer to their respective outputs.
-    ///
-    /// # Errors
-    ///
-    /// If an error occurs while sending events to their respective output, an error variant will be
-    /// returned detailing the cause.
-    pub async fn send(
-        &mut self,
-        buf: &mut TransformOutputsBuf,
-    ) -> Result<(), Box<dyn error::Error + Send + Sync>> {
-        if let Some(primary) = self.primary_output.as_mut() {
-            let buf = buf
-                .primary_buffer
-                .as_mut()
-                .unwrap_or_else(|| unreachable!("mismatched outputs"));
-            Self::send_single_buffer(buf, primary).await?;
-        }
-        for (key, buf) in &mut buf.named_buffers {
-            let output = self
-                .named_outputs
-                .get_mut(key)
-                .unwrap_or_else(|| unreachable!("unknown output"));
-            Self::send_single_buffer(buf, output).await?;
-        }
-        Ok(())
-    }
-
-    async fn send_single_buffer(
-        buf: &mut OutputBuffer,
-        output: &mut TransformOutput,
-    ) -> Result<(), Box<dyn error::Error + Send + Sync>> {
-        for event in buf.events_mut() {
-            update_runtime_schema_definition(
-                event,
-                &output.output_id,
-                &output.log_schema_definitions,
-            );
-        }
-        let count = buf.len();
-        let byte_size = buf.estimated_json_encoded_size_of();
-        buf.send(&mut output.fanout).await?;
-        output.events_sent.emit(CountByteSize(count, byte_size));
-        Ok(())
     }
 }
 
@@ -479,24 +348,8 @@ impl OutputBuffer {
         self.0.drain(..).flat_map(EventArray::into_events)
     }
 
-    async fn send(
-        &mut self,
-        output: &mut Fanout,
-    ) -> Result<(), Box<dyn error::Error + Send + Sync>> {
-        let send_start = Some(Instant::now());
-        for array in std::mem::take(&mut self.0) {
-            output.send(array, send_start).await?;
-        }
-
-        Ok(())
-    }
-
     fn iter_events(&self) -> impl Iterator<Item = EventRef> {
         self.0.iter().flat_map(EventArray::iter_events)
-    }
-
-    fn events_mut(&mut self) -> impl Iterator<Item = EventMutRef> {
-        self.0.iter_mut().flat_map(EventArray::iter_events_mut)
     }
 
     pub fn into_events(self) -> impl Iterator<Item = Event> {
