@@ -207,12 +207,12 @@ impl ConfigBuilder {
         self.sinks.keys().for_each(|k|{
             info!("self.sinks.key {:?}", k);
         });
-        with.transforms.keys().for_each(|k| {
-            if self.transforms.contains_key(k) {
-                errors.push(format!("duplicate transform id found: {}", k));
-            }
-        });
-        info!("transforms: {:?}", self.transforms);
+
+
+
+
+
+
         if !errors.is_empty() {
             return Err(errors);
         }
@@ -221,7 +221,7 @@ impl ConfigBuilder {
         self.sources.extend(with.sources);
         self.sinks.extend(with.sinks);
         info!("sinks: {:?}", self.sinks);
-        self.transforms.extend(with.transforms);
+
 
         Ok(())
     }

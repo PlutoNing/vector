@@ -16,7 +16,7 @@ use tokio_stream::wrappers::UnboundedReceiverStream;
 use crate::extra_context::ExtraContext;
 use crate::{
     cli::{handle_config_errors, LogFormat, Opts, RootOpts, WatchConfigMethod},
-    config::{self, ComponentConfig, Config, ConfigPath},
+    config::{self, Config, ConfigPath},
     heartbeat,
     signal::{SignalHandler, SignalPair, SignalRx, SignalTo},
     topology::{
@@ -460,7 +460,7 @@ pub fn build_runtime(threads: Option<usize>, thread_name: &str) -> Result<Runtim
 /*运行后来到这里, 加载配置  20250717152203, 读取配置文件, 解析, 存入config结构体 */
 pub async fn load_configs(
     config_paths: &[ConfigPath], /* 里面是搜索的可能的conf路径? */
-    watcher_conf: Option<config::watcher::WatcherConfig>,
+    _watcher_conf: Option<config::watcher::WatcherConfig>,
 
     allow_empty_config: bool,
     graceful_shutdown_duration: Option<Duration>,
@@ -486,45 +486,7 @@ pub async fn load_configs(
     .await
     .map_err(handle_config_errors)?;
     /* 刚刚处理了config */
-    let mut watched_component_paths = Vec::new(); /* 内容空 */
 
-    if let Some(watcher_conf) = watcher_conf {/* 无用的块? */
-        for (name, transform) in config.transforms() {
-            let files = transform.inner.files_to_watch();
-            let component_config =
-                ComponentConfig::new(files.into_iter().cloned().collect(), name.clone());
-            watched_component_paths.push(component_config);
-        }
-
-        for (name, sink) in config.sinks() {
-            let files = sink.inner.files_to_watch();
-            let component_config =
-                ComponentConfig::new(files.into_iter().cloned().collect(), name.clone());
-            watched_component_paths.push(component_config);
-        }
-
-        info!(
-            message = "Starting watcher.",
-            paths = ?watched_paths
-        );
-        info!(
-            message = "Components to watch.",
-            paths = ?watched_component_paths
-        );
-
-        // Start listening for config changes.
-        config::watcher::spawn_thread(
-            watcher_conf,
-            signal_handler.clone_tx(),
-            watched_paths,
-            watched_component_paths,
-            None,
-        )
-        .map_err(|error| {
-            error!(message = "Unable to start config watcher.", %error);
-            exitcode::CONFIG
-        })?;
-    }
 /* log schema是什么 */
     config::init_log_schema(config.global.log_schema.clone(), true);/* 这里是初始化这两个字段 */
 
