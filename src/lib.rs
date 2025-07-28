@@ -79,8 +79,6 @@ pub mod transforms;
 pub mod types;
 
 pub(crate) mod utilization;
-#[cfg(windows)]
-pub mod vector_windows;
 
 pub use source_sender::SourceSender;
 pub use vector_lib::{event, metrics, schema};
