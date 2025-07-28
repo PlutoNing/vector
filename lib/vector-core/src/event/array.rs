@@ -184,7 +184,7 @@ impl EventArray {
         match self {
             Self::Logs(array) => EventArrayIterMut::Logs(array.iter_mut()),
             Self::Metrics(array) => EventArrayIterMut::Metrics(array.iter_mut()),
-            Self::Traces(array) => EventArrayIterMut::Traces(array.iter_mut()),
+            Self::Traces(_) => EventArrayIterMut::Metrics([].iter_mut()), // 返回空迭代器
         }
     }
 
@@ -337,8 +337,6 @@ pub enum EventArrayIterMut<'a> {
     Logs(slice::IterMut<'a, LogEvent>),
     /// An iterator over type `Metric`.
     Metrics(slice::IterMut<'a, Metric>),
-    /// An iterator over type `Trace`.
-    Traces(slice::IterMut<'a, TraceEvent>),
 }
 
 impl<'a> Iterator for EventArrayIterMut<'a> {
@@ -348,7 +346,6 @@ impl<'a> Iterator for EventArrayIterMut<'a> {
         match self {
             Self::Logs(i) => i.next().map(EventMutRef::from),
             Self::Metrics(i) => i.next().map(EventMutRef::from),
-            Self::Traces(i) => i.next().map(EventMutRef::from),
         }
     }
 }
