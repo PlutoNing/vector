@@ -1,16 +1,10 @@
 #![allow(missing_docs)]
 
-mod aggregate;
-pub mod codecs;
 mod common;
-mod conditions;
 
-mod encoding_transcode;
-mod heartbeat;
 #[cfg(feature = "sources-host_metrics")]
 mod host_metrics;
 mod open;
-mod process;
 
 #[cfg(any(
     feature = "sinks-file",
