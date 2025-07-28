@@ -7,14 +7,12 @@ use crate::event::Event;
 pub(crate) mod is_log;
 pub(crate) mod is_metric;
 pub(crate) mod is_trace;
-mod vrl;
 
 
 use self::{
     is_log::{check_is_log},
     is_metric::{check_is_metric},
     is_trace::{check_is_trace},
-    vrl::Vrl,
 };
 
 #[derive(Debug, Clone)]
@@ -28,9 +26,6 @@ pub enum Condition {
 
     /// Matches an event if it is a trace.
     IsTrace,
-
-    /// Matches an event with a [Vector Remap Language](https://vector.dev/docs/reference/vrl) (VRL) [boolean expression](https://vector.dev/docs/reference/vrl#boolean-expressions).
-    Vrl(Vrl),
 
     /// Matches any event.
     ///
@@ -53,7 +48,6 @@ impl Condition {
             Condition::IsLog => check_is_log(e),
             Condition::IsMetric => check_is_metric(e),
             Condition::IsTrace => check_is_trace(e),
-            Condition::Vrl(x) => x.check(e),
             Condition::AlwaysPass => (true, e),
             Condition::AlwaysFail => (false, e),
         }

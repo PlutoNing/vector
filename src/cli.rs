@@ -216,9 +216,6 @@ pub enum SubCommand {
     /// Output a provided Vector configuration file/dir as a single JSON object, useful for checking in to version control.
     #[command(hide = true)]
     Config(config::Opts),
-
-    /// Vector Remap Language CLI
-    Vrl(vrl::cli::Opts),
 }
 
 impl SubCommand {
@@ -229,11 +226,6 @@ impl SubCommand {
     ) -> exitcode::ExitCode {
         match self {
             Self::Config(c) => config::cmd(c),
-            Self::Vrl(s) => {
-                let mut functions = vrl::stdlib::all();
-                functions.extend(vector_vrl_functions::all());
-                vrl::cli::cmd::cmd(s, functions)
-            }
         }
     }
 }

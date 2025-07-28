@@ -48,6 +48,7 @@ lib/vector-core/src/event/array.rs:vector_core::event::array::EventArray::set_ou
 lib/vector-core/src/event/array.rs:vector_core::event::array::EventArray::set_source_type
 lib/vector-core/src/event/array.rs:<vector_core::event::array::IntoEventArraysIter<I> as core::iter::traits::iterator::Iterator>::next
 lib/vector-core/src/event/estimated_json_encoded_size_of.rs:<alloc::vec::Vec<V> as vector_core::event::estimated_json_encoded_size_of::EstimatedJsonEncodedSizeOf>::estimated_json_encoded_size_of::{{closure}}
+===============================ok============================================================
 lib/vector-core/src/event/metadata.rs:vector_core::event::metadata::default_schema_definition
 lib/vector-core/src/event/metadata.rs:<vector_core::event::metadata::EventMetadata as core::default::Default>::default
 lib/vector-core/src/event/metadata.rs:<vector_core::event::metadata::EventMetadata as vector_common::byte_size_of::ByteSizeOf>::allocated_bytes
