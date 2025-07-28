@@ -1,4 +1,3 @@
-use crate::internal_events::HostMetricsScrapeDetailError;
 use futures::StreamExt;
 use heim::units::information::byte;
 use vector_lib::configurable::configurable_component;
@@ -63,10 +62,7 @@ impl HostMetrics {
                 }
             }
             Err(error) => {
-                emit!(HostMetricsScrapeDetailError {
-                    message: "Failed to load disk I/O info.",
-                    error,
-                });
+                error!("Failed to load disk I/O info: {}", error);
             }
         }
     }

@@ -7,8 +7,6 @@ use heim::memory::os::SwapExt;
 use heim::units::information::byte;
 use vector_lib::event::MetricTags;
 
-use crate::internal_events::HostMetricsScrapeDetailError;
-
 use super::HostMetrics;
 
 impl HostMetrics {
@@ -75,10 +73,7 @@ impl HostMetrics {
                 );
             }
             Err(error) => {
-                emit!(HostMetricsScrapeDetailError {
-                    message: "Failed to load memory info.",
-                    error,
-                });
+                error!("Failed to load memory info: {}", error);
             }
         }
     }
@@ -116,10 +111,7 @@ impl HostMetrics {
                 );
             }
             Err(error) => {
-                emit!(HostMetricsScrapeDetailError {
-                    message: "Failed to load swap info.",
-                    error,
-                });
+                error!("Failed to load swap info: {}", error);
             }
         }
     }

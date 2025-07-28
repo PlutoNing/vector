@@ -1,4 +1,3 @@
-use crate::sources::host_metrics::HostMetricsScrapeDetailError;
 use byteorder::{ByteOrder, NativeEndian};
 use std::{collections::HashMap, io, path::Path};
 use vector_lib::event::MetricTags;
@@ -24,7 +23,8 @@ const TCP_TX_QUEUED_BYTES_TOTAL: &str = "tcp_tx_queued_bytes_total";
 const TCP_RX_QUEUED_BYTES_TOTAL: &str = "tcp_rx_queued_bytes_total";
 const STATE: &str = "state";
 
-impl HostMetrics {/* 获取tcp的指标 */
+impl HostMetrics {
+    /* 获取tcp的指标 */
     pub async fn tcp_metrics(&self, output: &mut super::MetricsBuffer) {
         match build_tcp_stats().await {
             Ok(stats) => {
@@ -48,10 +48,7 @@ impl HostMetrics {/* 获取tcp的指标 */
                 );
             }
             Err(error) => {
-                emit!(HostMetricsScrapeDetailError {
-                    message: "Failed to load tcp connection info.",
-                    error,
-                });
+                error!("Failed to load tcp connection info: {}", error);
             }
         }
     }

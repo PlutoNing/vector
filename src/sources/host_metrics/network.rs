@@ -7,8 +7,6 @@ use heim::units::information::byte;
 use vector_lib::configurable::configurable_component;
 use vector_lib::metric_tags;
 
-use crate::internal_events::HostMetricsScrapeDetailError;
-
 use super::{default_all_devices, example_devices, filter_result, FilterList, HostMetrics};
 
 /// Options for the network metrics collector.
@@ -87,10 +85,7 @@ impl HostMetrics {
                 }
             }
             Err(error) => {
-                emit!(HostMetricsScrapeDetailError {
-                    message: "Failed to load network I/O counters.",
-                    error,
-                });
+                error!("Failed to load network I/O counters. {}", error);
             }
         }
     }

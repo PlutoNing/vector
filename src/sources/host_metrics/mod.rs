@@ -23,7 +23,7 @@ use vector_lib::EstimatedJsonEncodedSizeOf;
 use crate::{
     config::{SourceConfig, SourceContext, SourceOutput},
     event::metric::{Metric, MetricKind, MetricTags, MetricValue},
-    internal_events::{EventsReceived, HostMetricsScrapeDetailError},
+    internal_events::{EventsReceived},
     shutdown::ShutdownSignal,
     SourceSender,
 };
@@ -95,15 +95,17 @@ struct FilterList {
 
 /// Configuration for the `host_metrics` source.
 #[serde_as] /* 启用 serde_with 的功能，允许在序列化和反序列化时使用自定义的格式。 */
-#[configurable_component(source("host_metrics", "Collect metric data from the local system."))]/* 自定义的属性宏，用于标记这个结构体是一个可配置的组件，类型为 source，并提供描述信息。 */
+#[configurable_component(source("host_metrics", "Collect metric data from the local system."))]
+/* 自定义的属性宏，用于标记这个结构体是一个可配置的组件，类型为 source，并提供描述信息。 */
 #[derive(Clone, Debug, Derivative)]
-#[derivative(Default)]/* 使用 Derivative 宏为结构体实现 Default 特征。 */
-#[serde(deny_unknown_fields)]/* 在反序列化时，如果遇到未知字段，将会导致错误。 */
+#[derivative(Default)] /* 使用 Derivative 宏为结构体实现 Default 特征。 */
+#[serde(deny_unknown_fields)] /* 在反序列化时，如果遇到未知字段，将会导致错误。 */
 pub struct HostMetricsConfig {
     /// The interval between metric gathering, in seconds.
     #[serde_as(as = "serde_with::DurationSeconds<u64>")]
     #[serde(default = "default_scrape_interval")]
-    #[configurable(metadata(docs::human_name = "Scrape Interval"))]/* 为配置生成文档时提供人类可读的名称。 */
+    #[configurable(metadata(docs::human_name = "Scrape Interval"))]
+    /* 为配置生成文档时提供人类可读的名称。 */
     pub scrape_interval_secs: Duration,
 
     /// The list of host metric collector services to use.
@@ -284,7 +286,8 @@ impl_generate_config_from_default!(HostMetricsConfig);
 
 #[async_trait::async_trait]
 #[typetag::serde(name = "host_metrics")]
-impl SourceConfig for HostMetricsConfig {/* source ctx包含了各种东西 */
+impl SourceConfig for HostMetricsConfig {
+    /* source ctx包含了各种东西 */
     /* 构建一些文件系统相关, 运行config的run异步函数 */
     async fn build(&self, cx: SourceContext) -> crate::Result<super::Source> {
         init_roots();
@@ -300,7 +303,7 @@ impl SourceConfig for HostMetricsConfig {/* source ctx包含了各种东西 */
 
         let mut config = self.clone();
         config.namespace = config.namespace.filter(|namespace| !namespace.is_empty());
-/* run是个异步函数 */
+        /* run是个异步函数 */
         Ok(Box::pin(config.run(cx.out, cx.shutdown)))
     }
 
@@ -318,7 +321,7 @@ impl HostMetricsConfig {
     pub fn scrape_interval_secs(&mut self, value: f64) {
         self.scrape_interval_secs = Duration::from_secs_f64(value);
     }
-/*  */
+    /*  */
     async fn run(self, mut out: SourceSender, shutdown: ShutdownSignal) -> Result<(), ()> {
         let duration = self.scrape_interval_secs;
         let mut interval = IntervalStream::new(time::interval(duration)).take_until(shutdown);
@@ -331,8 +334,12 @@ impl HostMetricsConfig {
             bytes_received.emit(ByteSize(0));
             let metrics = generator.capture_metrics().await; /* 获取指标 */
             let count = metrics.len();
-            if (out.send_batch(metrics).await).is_err() {/* 发送出去 */
-                error!("Failed to send host metrics batch, stream closed, count: {}", count);
+            if (out.send_batch(metrics).await).is_err() {
+                /* 发送出去 */
+                error!(
+                    "Failed to send host metrics batch, stream closed, count: {}",
+                    count
+                );
                 return Err(());
             }
         }
@@ -381,7 +388,7 @@ impl HostMetrics {
     pub fn buffer(&self) -> MetricsBuffer {
         MetricsBuffer::new(self.config.namespace.clone())
     }
-/* 获取系统的指标 */
+    /* 获取系统的指标 */
     async fn capture_metrics(&mut self) -> Vec<Metric> {
         let mut buffer = self.buffer();
 
@@ -448,11 +455,10 @@ impl HostMetrics {
                     MetricTags::default(),
                 );
             }
-            Err(error) => {
-                emit!(HostMetricsScrapeDetailError {
-                    message: "Failed to load average info",
-                    error,
-                });
+            Err(_error) => {
+                error!(
+                    "Failed to load average info"
+                );
             }
         }
     }
@@ -461,21 +467,19 @@ impl HostMetrics {
         output.name = "host";
         match heim::host::uptime().await {
             Ok(time) => output.gauge("uptime", time.get::<second>(), MetricTags::default()),
-            Err(error) => {
-                emit!(HostMetricsScrapeDetailError {
-                    message: "Failed to load host uptime info",
-                    error,
-                });
+            Err(_error) => {
+                error!(
+"Failed to load host uptime info"
+                );
             }
         }
 
         match heim::host::boot_time().await {
             Ok(time) => output.gauge("boot_time", time.get::<second>(), MetricTags::default()),
-            Err(error) => {
-                emit!(HostMetricsScrapeDetailError {
-                    message: "Failed to load host boot time info",
-                    error,
-                });
+            Err(_error) => {
+                error!(
+                    "Failed to load host boot time info"
+                );
             }
         }
     }
@@ -517,7 +521,7 @@ impl MetricsBuffer {
                 .with_timestamp(Some(self.timestamp)),
         )
     }
-/* 发送一个指标? */
+    /* 发送一个指标? */
     fn gauge(&mut self, name: &str, value: f64, tags: MetricTags) {
         self.metrics.push(
             Metric::new(name, MetricKind::Absolute, MetricValue::Gauge { value })
@@ -528,12 +532,16 @@ impl MetricsBuffer {
     }
 }
 
-fn filter_result_sync<T, E>(result: Result<T, E>, message: &'static str) -> Option<T>
+fn filter_result_sync<T, E>(result: Result<T, E>, _message: &'static str) -> Option<T>
 where
     E: std::error::Error,
 {
     result
-        .map_err(|error| emit!(HostMetricsScrapeDetailError { message, error }))
+        .map_err(|_error| {
+            error!(
+                "filter_result_sync error"
+            )
+        })
         .ok()
 }
 
