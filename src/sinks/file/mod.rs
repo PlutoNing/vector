@@ -29,9 +29,6 @@ use crate::{
     config::{AcknowledgementsConfig, GenerateConfig, Input, SinkConfig, SinkContext},
     event::{Event, EventStatus, Finalizable},
     expiring_hash_map::ExpiringHashMap,
-    internal_events::{
-        FileInternalMetricsConfig,
-    },
     sinks::util::{timezone_to_offset, StreamSink},
     template::Template,
 };
@@ -83,11 +80,7 @@ pub struct FileSinkConfig {
 
     #[configurable(derived)]
     #[serde(default)]
-    pub timezone: Option<TimeZone>,
-
-    #[configurable(derived)]
-    #[serde(default)]
-    pub internal_metrics: FileInternalMetricsConfig,
+    pub timezone: Option<TimeZone>
 }
 
 impl GenerateConfig for FileSinkConfig {
@@ -99,7 +92,6 @@ impl GenerateConfig for FileSinkConfig {
             compression: Default::default(),
             acknowledgements: Default::default(),
             timezone: Default::default(),
-            internal_metrics: Default::default(),
         })
         .unwrap()
     }
