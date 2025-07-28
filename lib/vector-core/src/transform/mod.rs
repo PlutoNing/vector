@@ -19,7 +19,6 @@ use crate::{
 /// transforms act as a coordination or barrier point.
 pub enum Transform {
     Function(Box<dyn FunctionTransform>),
-    Synchronous(Box<dyn SyncTransform>),
 }
 
 impl Transform {
@@ -32,16 +31,6 @@ impl Transform {
     /// where possible.
     pub fn function(v: impl FunctionTransform + 'static) -> Self {
         Transform::Function(Box::new(v))
-    }
-
-    /// Create a new synchronous transform.
-    ///
-    /// This is a broader trait than the simple [`FunctionTransform`] in that it allows transforms
-    /// to write to multiple outputs. Those outputs must be known in advanced and returned via
-    /// `TransformConfig::outputs`. Attempting to send to any output not registered in advance is
-    /// considered a bug and will cause a panic.
-    pub fn synchronous(v: impl SyncTransform + 'static) -> Self {
-        Transform::Synchronous(Box::new(v))
     }
 }
 
@@ -59,45 +48,7 @@ pub trait FunctionTransform: Send + dyn_clone::DynClone + Sync {
 dyn_clone::clone_trait_object!(FunctionTransform);
 
 
-/// Broader than the simple [`FunctionTransform`], this trait allows transforms to write to
-/// multiple outputs. Those outputs must be known in advanced and returned via
-/// `TransformConfig::outputs`. Attempting to send to any output not registered in advance is
-/// considered a bug and will cause a panic.
-pub trait SyncTransform: Send + dyn_clone::DynClone + Sync {
-    fn transform(&mut self, event: Event, output: &mut TransformOutputsBuf);
 
-    fn transform_all(&mut self, events: EventArray, output: &mut TransformOutputsBuf) {
-        for event in events.into_events() {
-            self.transform(event, output);
-        }
-    }
-}
-
-dyn_clone::clone_trait_object!(SyncTransform);
-
-impl<T> SyncTransform for T
-where
-    T: FunctionTransform,
-{
-    fn transform(&mut self, event: Event, output: &mut TransformOutputsBuf) {
-        FunctionTransform::transform(
-            self,
-            output.primary_buffer.as_mut().expect("no default output"),
-            event,
-        );
-    }
-}
-
-// TODO: this is a bit ugly when we already have the above impl
-impl SyncTransform for Box<dyn FunctionTransform> {
-    fn transform(&mut self, event: Event, output: &mut TransformOutputsBuf) {
-        FunctionTransform::transform(
-            self.as_mut(),
-            output.primary_buffer.as_mut().expect("no default output"),
-            event,
-        );
-    }
-}
 
 #[allow(clippy::implicit_hasher)]
 /// `event`: The event that will be updated
