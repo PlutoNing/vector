@@ -1,6 +1,6 @@
-use std::{collections::HashMap, pin::Pin, sync::Arc};
+use std::{collections::HashMap, sync::Arc};
 
-use futures::{Stream, StreamExt};
+
 use vector_common::{byte_size_of::ByteSizeOf, json_size::JsonSize, EventDataEq};
 
 use crate::config::{OutputId};
@@ -9,7 +9,7 @@ use crate::schema::Definition;
 use crate::{
     config,
     event::{
-        into_event_stream, EstimatedJsonEncodedSizeOf, Event, EventArray, EventContainer, EventRef,
+        EstimatedJsonEncodedSizeOf, Event, EventArray, EventContainer, EventRef,
     },
 };
 
@@ -20,7 +20,6 @@ use crate::{
 pub enum Transform {
     Function(Box<dyn FunctionTransform>),
     Synchronous(Box<dyn SyncTransform>),
-    Task(Box<dyn TaskTransform<EventArray>>),
 }
 
 impl Transform {
@@ -44,46 +43,6 @@ impl Transform {
     pub fn synchronous(v: impl SyncTransform + 'static) -> Self {
         Transform::Synchronous(Box::new(v))
     }
-
-    /// Create a new task transform.
-    ///
-    /// These tasks are coordinated, and map a stream of some `U` to some other
-    /// `T`.
-    ///
-    /// **Note:** You should prefer to implement [`FunctionTransform`] over this
-    /// where possible.
-    pub fn task(v: impl TaskTransform<EventArray> + 'static) -> Self {
-        Transform::Task(Box::new(v))
-    }
-
-    /// Create a new task transform over individual `Event`s.
-    ///
-    /// These tasks are coordinated, and map a stream of some `U` to some other
-    /// `T`.
-    ///
-    /// **Note:** You should prefer to implement [`FunctionTransform`] over this
-    /// where possible.
-    ///
-    /// # Panics
-    ///
-    /// TODO
-    pub fn event_task(v: impl TaskTransform<Event> + 'static) -> Self {
-        Transform::Task(Box::new(WrapEventTask(v)))
-    }
-
-    /// Transmute the inner transform into a task transform.
-    ///
-    /// # Panics
-    ///
-    /// If the transform is a [`FunctionTransform`] this will panic.
-    pub fn into_task(self) -> Box<dyn TaskTransform<EventArray>> {
-        match self {
-            Transform::Task(t) => t,
-            _ => {
-                panic!("Called `Transform::into_task` on something that was not a task variant.")
-            }
-        }
-    }
 }
 
 /// Transforms that are simple, and don't require attention to coordination.
@@ -99,35 +58,6 @@ pub trait FunctionTransform: Send + dyn_clone::DynClone + Sync {
 
 dyn_clone::clone_trait_object!(FunctionTransform);
 
-/// Transforms that tend to be more complicated runtime style components.
-///
-/// These require coordination and map a stream of some `T` to some `U`.
-///
-/// # Invariants
-///
-/// * It is an illegal invariant to implement `FunctionTransform` for a
-///   `TaskTransform` or vice versa.
-pub trait TaskTransform<T: EventContainer + 'static>: Send + 'static {
-    fn transform(
-        self: Box<Self>,
-        task: Pin<Box<dyn Stream<Item = T> + Send>>,
-    ) -> Pin<Box<dyn Stream<Item = T> + Send>>;
-
-    /// Wrap the transform task to process and emit individual
-    /// events. This is used to simplify testing task transforms.
-    fn transform_events(
-        self: Box<Self>,
-        task: Pin<Box<dyn Stream<Item = Event> + Send>>,
-    ) -> Pin<Box<dyn Stream<Item = Event> + Send>>
-    where
-        T: From<Event>,
-        T::IntoIter: Send,
-    {
-        self.transform(task.map(Into::into).boxed())
-            .flat_map(into_event_stream)
-            .boxed()
-    }
-}
 
 /// Broader than the simple [`FunctionTransform`], this trait allows transforms to write to
 /// multiple outputs. Those outputs must be known in advanced and returned via
@@ -391,18 +321,5 @@ impl From<Vec<Event>> for OutputBuffer {
         let mut result = Self::default();
         result.extend(events.into_iter());
         result
-    }
-}
-
-struct WrapEventTask<T>(T);
-
-impl<T: TaskTransform<Event> + Send + 'static> TaskTransform<EventArray> for WrapEventTask<T> {
-    fn transform(
-        self: Box<Self>,
-        stream: Pin<Box<dyn Stream<Item = EventArray> + Send>>,
-    ) -> Pin<Box<dyn Stream<Item = EventArray> + Send>> {
-        // This is an awful lot of boxes
-        let stream = stream.flat_map(into_event_stream).boxed();
-        Box::new(self.0).transform(stream).map(Into::into).boxed()
     }
 }

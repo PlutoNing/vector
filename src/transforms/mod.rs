@@ -3,6 +3,6 @@
 use std::collections::HashSet;
 
 pub use vector_lib::transform::{
-    FunctionTransform, OutputBuffer, SyncTransform, TaskTransform, Transform,
+    FunctionTransform, OutputBuffer, SyncTransform, Transform,
     TransformOutputsBuf,
 };
