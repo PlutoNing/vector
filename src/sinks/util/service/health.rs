@@ -18,7 +18,6 @@ use tower::Service;
 use vector_lib::{configurable::configurable_component};
 
 use crate::{
-    internal_events::{ OpenGauge},
     sinks::util::retries::ExponentialBackoff,
 };
 
@@ -59,13 +58,11 @@ impl HealthConfig {
         &self,
         logic: L,
         inner: S,
-        open: OpenGauge,
         endpoint: String,
     ) -> HealthService<S, L> {
         let counters = Arc::new(HealthCounters::new());
         let snapshot = counters.snapshot();
 
-        open.clone().open(emit_active_endpoints);
         HealthService {
             inner,
             logic,
@@ -73,7 +70,6 @@ impl HealthConfig {
             snapshot,
             endpoint,
             state: CircuitState::Closed,
-            open,
             // An exponential backoff starting from retry_initial_backoff_sec and doubling every time
             // up to retry_max_duration_secs.
             backoff: ExponentialBackoff::from_millis(2)
@@ -116,7 +112,6 @@ pub struct HealthService<S, L> {
     snapshot: HealthSnapshot,
     backoff: ExponentialBackoff,
     state: CircuitState,
-    open: OpenGauge,
     endpoint: String,
 }
 
@@ -164,7 +159,6 @@ where
                         info!(message = "Endpoint is healthy.", endpoint = %&self.endpoint);
 
                         self.backoff.reset();
-                        self.open.clone().open(emit_active_endpoints);
                         CircuitState::Closed
                     } else {
                         debug!(message = "Endpoint failed probation.", endpoint = %&self.endpoint);
@@ -304,8 +298,4 @@ impl HealthCounters {
 struct HealthSnapshot {
     healthy: usize,
     unhealthy: usize,
-}
-
-fn emit_active_endpoints(count: usize) {
-    debug!("Active endpoints count: {}", count);
 }

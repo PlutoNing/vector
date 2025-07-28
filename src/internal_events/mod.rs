@@ -11,5 +11,5 @@ pub(crate) use self::host_metrics::*;
 #[cfg(windows)]
 pub(crate) use self::windows::*;
 pub use self::{
-    common::*, open::*,
+    common::*,
 };
