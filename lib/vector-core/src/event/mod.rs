@@ -18,8 +18,6 @@ use vector_common::{
     json_size::JsonSize, EventDataEq,
 };
 pub use vrl::value::{KeyString, ObjectMap, Value};
-#[cfg(feature = "vrl")]
-pub use vrl_target::{TargetEvents, VrlTarget};
 
 use crate::config::LogNamespace;
 use crate::config::OutputId;
@@ -34,8 +32,6 @@ mod r#ref;
 mod ser;
 mod trace;
 pub mod util;
-#[cfg(feature = "vrl")]
-mod vrl_target;
 
 pub const PARTIAL: &str = "_partial";
 
