@@ -27,7 +27,6 @@ mod estimated_json_encoded_size_of;
 mod log_event;
 mod metadata;
 pub mod metric;
-pub mod proto;
 mod r#ref;
 mod ser;
 mod trace;
@@ -363,77 +362,14 @@ impl TryInto<serde_json::Value> for Event {
     }
 }
 
-impl From<proto::StatisticKind> for StatisticKind {
-    fn from(kind: proto::StatisticKind) -> Self {
-        match kind {
-            proto::StatisticKind::Histogram => StatisticKind::Histogram,
-            proto::StatisticKind::Summary => StatisticKind::Summary,
-        }
-    }
-}
 
-impl From<metric::Sample> for proto::DistributionSample {
-    fn from(sample: metric::Sample) -> Self {
-        Self {
-            value: sample.value,
-            rate: sample.rate,
-        }
-    }
-}
 
-impl From<proto::DistributionSample> for metric::Sample {
-    fn from(sample: proto::DistributionSample) -> Self {
-        Self {
-            value: sample.value,
-            rate: sample.rate,
-        }
-    }
-}
 
-impl From<proto::HistogramBucket> for metric::Bucket {
-    fn from(bucket: proto::HistogramBucket) -> Self {
-        Self {
-            upper_limit: bucket.upper_limit,
-            count: u64::from(bucket.count),
-        }
-    }
-}
 
-impl From<metric::Bucket> for proto::HistogramBucket3 {
-    fn from(bucket: metric::Bucket) -> Self {
-        Self {
-            upper_limit: bucket.upper_limit,
-            count: bucket.count,
-        }
-    }
-}
 
-impl From<proto::HistogramBucket3> for metric::Bucket {
-    fn from(bucket: proto::HistogramBucket3) -> Self {
-        Self {
-            upper_limit: bucket.upper_limit,
-            count: bucket.count,
-        }
-    }
-}
 
-impl From<metric::Quantile> for proto::SummaryQuantile {
-    fn from(quantile: metric::Quantile) -> Self {
-        Self {
-            quantile: quantile.quantile,
-            value: quantile.value,
-        }
-    }
-}
 
-impl From<proto::SummaryQuantile> for metric::Quantile {
-    fn from(quantile: proto::SummaryQuantile) -> Self {
-        Self {
-            quantile: quantile.quantile,
-            value: quantile.value,
-        }
-    }
-}
+
 
 impl From<LogEvent> for Event {
     fn from(log: LogEvent) -> Self {

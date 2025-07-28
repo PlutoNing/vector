@@ -547,42 +547,6 @@ macro_rules! quantiles {
     }
 }
 
-#[inline]
-pub(crate) fn zip_samples(
-    values: impl IntoIterator<Item = f64>,
-    rates: impl IntoIterator<Item = u32>,
-) -> Vec<Sample> {
-    values
-        .into_iter()
-        .zip(rates)
-        .map(|(value, rate)| Sample { value, rate })
-        .collect()
-}
-
-#[inline]
-pub(crate) fn zip_buckets(
-    limits: impl IntoIterator<Item = f64>,
-    counts: impl IntoIterator<Item = u64>,
-) -> Vec<Bucket> {
-    limits
-        .into_iter()
-        .zip(counts)
-        .map(|(upper_limit, count)| Bucket { upper_limit, count })
-        .collect()
-}
-
-#[inline]
-pub(crate) fn zip_quantiles(
-    quantiles: impl IntoIterator<Item = f64>,
-    values: impl IntoIterator<Item = f64>,
-) -> Vec<Quantile> {
-    quantiles
-        .into_iter()
-        .zip(values)
-        .map(|(quantile, value)| Quantile { quantile, value })
-        .collect()
-}
-
 fn write_list<I, T, W>(
     fmt: &mut Formatter<'_>,
     sep: &str,

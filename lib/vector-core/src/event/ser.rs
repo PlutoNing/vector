@@ -1,10 +1,9 @@
 use bytes::{Buf, BufMut};
 use enumflags2::{bitflags, BitFlags, FromBitsError};
-use prost::Message;
 use snafu::Snafu;
 use vector_buffers::encoding::{AsMetadata, Encodable};
 
-use super::{proto, Event, EventArray};
+use super::{EventArray};
 
 #[derive(Debug, Snafu)]
 pub enum EncodeError {
@@ -77,7 +76,6 @@ impl AsMetadata for EventEncodableMetadata {
         EventEncodableMetadata::try_from(value).ok()
     }
 }
-
 impl Encodable for EventArray {
     type Metadata = EventEncodableMetadata;
     type EncodeError = EncodeError;
@@ -91,29 +89,19 @@ impl Encodable for EventArray {
         metadata.contains(EventEncodableMetadataFlags::DiskBufferV1CompatibilityMode)
     }
 
-    fn encode<B>(self, buffer: &mut B) -> Result<(), Self::EncodeError>
+    fn encode<B>(self, _buffer: &mut B) -> Result<(), Self::EncodeError>
     where
         B: BufMut,
     {
-        proto::EventArray::from(self)
-            .encode(buffer)
-            .map_err(|_| EncodeError::BufferTooSmall)
+        Err(EncodeError::BufferTooSmall)
     }
 
-    fn decode<B>(metadata: Self::Metadata, buffer: B) -> Result<Self, Self::DecodeError>
+    fn decode<B>(_metadata: Self::Metadata, _buffer: B) -> Result<Self, Self::DecodeError>
     where
         B: Buf + Clone,
     {
-        if metadata.contains(EventEncodableMetadataFlags::DiskBufferV1CompatibilityMode) {
-            proto::EventArray::decode(buffer.clone())
-                .map(Into::into)
-                .or_else(|_| {
-                    proto::EventWrapper::decode(buffer)
-                        .map(|pe| EventArray::from(Event::from(pe)))
-                        .map_err(|_| DecodeError::InvalidProtobufPayload)
-                })
-        } else {
-            Err(DecodeError::UnsupportedEncodingMetadata)
-        }
+        
+        Err(DecodeError::UnsupportedEncodingMetadata)
+ 
     }
 }
