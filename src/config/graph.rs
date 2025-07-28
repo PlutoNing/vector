@@ -69,7 +69,7 @@ impl Graph {
     ) -> Result<Self, Vec<String>> {
         Self::new_inner(sources, transforms, sinks, false, schema, wildcard_matching)
     }
-
+/* 调用 */
     fn new_inner(
         sources: &IndexMap<ComponentKey, SourceOuter>,
         transforms: &IndexMap<ComponentKey, TransformOuter<String>>,
@@ -91,7 +91,7 @@ impl Graph {
             );
         }
 
-        for (id, transform) in transforms.iter() {
+        for (id, transform) in transforms.iter() {/* 不进来 */
             graph.nodes.insert(
                 id.clone(),
                 Node::Transform {
