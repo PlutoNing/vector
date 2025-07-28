@@ -89,7 +89,7 @@ pub fn compile(mut builder: ConfigBuilder) -> Result<(Config, Vec<String>), Vec<
         .collect();
         /* 再建一个新的config返回 */
     if errors.is_empty() {
-        let mut config = Config {
+        let config = Config {
             global,
             schema,
             enrichment_tables,
@@ -98,8 +98,6 @@ pub fn compile(mut builder: ConfigBuilder) -> Result<(Config, Vec<String>), Vec<
             transforms,
             graceful_shutdown_duration,
         };
-
-        config.propagate_acknowledgements()?;
 
         let warnings = vec![];
 

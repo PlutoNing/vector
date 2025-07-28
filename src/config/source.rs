@@ -9,7 +9,7 @@ use vector_config_common::schema::{SchemaGenerator, SchemaObject};
 use vector_config_macros::configurable_component;
 use vector_lib::{
     config::{
-        AcknowledgementsConfig, GlobalOptions, LogNamespace, SourceAcknowledgementsConfig,
+        GlobalOptions, LogNamespace,
         SourceOutput,
     },
     source::Source,
@@ -57,9 +57,6 @@ pub struct SourceOuter {
     #[serde(default, skip_serializing_if = "vector_lib::serde::is_default")]
     pub graph: GraphConfig,
 
-    #[serde(default, skip)]
-    pub sink_acknowledgements: bool,
-/*  */
     #[configurable(metadata(docs::hidden))]
     #[serde(flatten)]
     pub(crate) inner: BoxedSource,
@@ -70,7 +67,6 @@ impl SourceOuter {
         Self {
             proxy: Default::default(),
             graph: Default::default(),
-            sink_acknowledgements: false,
             inner: inner.into(),
         }
     }
@@ -103,20 +99,6 @@ pub trait SourceConfig: DynClone + NamedComponent + core::fmt::Debug + Send + Sy
     fn resources(&self) -> Vec<Resource> {
         Vec::new()
     }
-
-    /// Whether or not this source can acknowledge the events it emits.
-    ///
-    /// Generally, Vector uses acknowledgements to track when an event has finally been processed,
-    /// either successfully or unsuccessfully. While it is used internally in some areas, such as
-    /// within disk buffers for knowing when a message can be deleted from the buffer, it is
-    /// primarily used to signal back to a source that a message has been successfully (durably)
-    /// processed or not.
-    ///
-    /// By exposing whether or not a source supports acknowledgements, we can avoid situations where
-    /// using acknowledgements would only add processing overhead for no benefit to the source, as
-    /// well as emit contextual warnings when end-to-end acknowledgements are enabled, but the
-    /// topology as configured does not actually support the use of end-to-end acknowledgements.
-    fn can_acknowledge(&self) -> bool;
 }
 
 dyn_clone::clone_trait_object!(SourceConfig);
@@ -128,7 +110,6 @@ pub struct SourceContext {
     pub shutdown: ShutdownSignal,  /* self.shutdown_coordinator里面那个 */
     pub out: SourceSender, /*  是self.default_output那个tx*/
     pub proxy: ProxyConfig,
-    pub acknowledgements: bool,
     pub schema: schema::Options,
 
     /// Tracks the schema IDs assigned to schemas exposed by the source.
@@ -143,21 +124,6 @@ pub struct SourceContext {
 }
 
 impl SourceContext {
-    pub fn do_acknowledgements(&self, config: SourceAcknowledgementsConfig) -> bool {
-        let config = AcknowledgementsConfig::from(config);
-        if config.enabled() {
-            warn!(
-                message = "Enabling `acknowledgements` on sources themselves is deprecated in favor of enabling them in the sink configuration, and will be removed in a future version.",
-                component_id = self.key.id(),
-            );
-        }
-
-        config
-            .merge_default(&self.globals.acknowledgements)
-            .merge_default(&self.acknowledgements.into())
-            .enabled()
-    }
-
     /// Gets the log namespacing to use. The passed in value is from the source itself
     /// and will override any global default if it's set.
     pub fn log_namespace(&self, namespace: Option<bool>) -> LogNamespace {

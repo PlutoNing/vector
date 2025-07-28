@@ -10,7 +10,7 @@ use vector_lib::configurable::{
     configurable_component, Configurable, GenerateError, Metadata, NamedComponent,
 };
 use vector_lib::{
-    config::{AcknowledgementsConfig, GlobalOptions, Input},
+    config::{GlobalOptions, Input},
     id::Inputs,
     sink::VectorSink,
 };
@@ -162,9 +162,6 @@ pub trait SinkConfig: DynClone + NamedComponent + core::fmt::Debug + Send + Sync
     fn resources(&self) -> Vec<Resource> {
         Vec::new()
     }
-
-    /// Gets the acknowledgements configuration for this sink.
-    fn acknowledgements(&self) -> &AcknowledgementsConfig;
 }
 
 dyn_clone::clone_trait_object!(SinkConfig);

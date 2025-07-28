@@ -310,10 +310,6 @@ impl SourceConfig for HostMetricsConfig {
     fn outputs(&self, _global_log_namespace: LogNamespace) -> Vec<SourceOutput> {
         vec![SourceOutput::new_metrics()]
     }
-
-    fn can_acknowledge(&self) -> bool {
-        false
-    }
 }
 /*  */
 impl HostMetricsConfig {

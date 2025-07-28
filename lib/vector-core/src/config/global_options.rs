@@ -6,8 +6,7 @@ use vector_config::{configurable_component, impl_generate_config_from_default};
 
 use super::super::default_data_dir;
 use super::metrics_expiration::PerMetricSetExpiration;
-use super::{proxy::ProxyConfig, AcknowledgementsConfig, LogSchema};
-use crate::serde::bool_or_struct;
+use super::{proxy::ProxyConfig, LogSchema};
 
 #[derive(Debug, Snafu)]
 pub(crate) enum DataDirError {
@@ -92,20 +91,6 @@ pub struct GlobalOptions {
     #[serde(default, skip_serializing_if = "crate::serde::is_default")]
     #[configurable(metadata(docs::common = false, docs::required = false))]
     pub proxy: ProxyConfig,
-
-    /// Controls how acknowledgements are handled for all sinks by default.
-    ///
-    /// See [End-to-end Acknowledgements][e2e_acks] for more information on how Vector handles event
-    /// acknowledgement.
-    ///
-    /// [e2e_acks]: https://vector.dev/docs/architecture/end-to-end-acknowledgements/
-    #[serde(
-        default,
-        deserialize_with = "bool_or_struct",
-        skip_serializing_if = "crate::serde::is_default"
-    )]
-    #[configurable(metadata(docs::common = true, docs::required = false))]
-    pub acknowledgements: AcknowledgementsConfig,
 
     /// The amount of time, in seconds, that internal metrics will persist after having not been
     /// updated before they expire and are removed.
@@ -217,13 +202,6 @@ impl GlobalOptions {
             errors.push("conflicting values for 'timezone' found".to_owned());
         }
 
-        if conflicts(
-            self.acknowledgements.enabled.as_ref(),
-            with.acknowledgements.enabled.as_ref(),
-        ) {
-            errors.push("conflicting values for 'acknowledgements' found".to_owned());
-        }
-
         if conflicts(self.expire_metrics.as_ref(), with.expire_metrics.as_ref()) {
             errors.push("conflicting values for 'expire_metrics' found".to_owned());
         }
@@ -268,7 +246,6 @@ impl GlobalOptions {
                 data_dir,
                 wildcard_matching: self.wildcard_matching.or(with.wildcard_matching),
                 log_schema,
-                acknowledgements: self.acknowledgements.merge_default(&with.acknowledgements),
                 timezone: self.timezone.or(with.timezone),
                 proxy: self.proxy.merge(&with.proxy),
                 expire_metrics: self.expire_metrics.or(with.expire_metrics),

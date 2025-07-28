@@ -8,7 +8,7 @@ pub use vector_lib::buffers::EventCount;
 pub use vector_lib::configurable::configurable_component;
 pub use vector_lib::stream::{BatcherSettings};
 pub use vector_lib::{
-    config::{AcknowledgementsConfig, Input},
+    config::{Input},
     event::Value,
     partition::Partitioner,
     schema::Requirement,

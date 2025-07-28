@@ -36,8 +36,10 @@ lib/vector-common/src/internal_event/mod.rs:
 ========================================
 lib/vector-common/src/json_size.rs:<vector_common::json_size::JsonSize as core::convert::From<usize>>::from
 lib/vector-common/src/json_size.rs:vector_common::json_size::JsonSize::get
+====================================================================================
 lib/vector-core/src/config/mod.rs:<vector_core::config::LogNamespace as core::cmp::PartialEq>::eq
 lib/vector-core/src/config/mod.rs:<vector_core::config::LogNamespace as core::cmp::PartialOrd>::partial_cmp
+======================================================================================
 lib/vector-core/src/event/array.rs:vector_core::event::array::EventArrayBuffer::push
 lib/vector-core/src/event/array.rs:<vector_core::event::array::EventArrayIntoIter as core::iter::traits::iterator::Iterator>::next
 lib/vector-core/src/event/array.rs:<vector_core::event::array::EventArrayIter as core::iter::traits::iterator::Iterator>::next

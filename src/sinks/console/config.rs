@@ -8,7 +8,7 @@ use vector_lib::configurable::configurable_component;
 
 use crate::{
     codecs::{Encoder, EncodingConfigWithFraming, SinkType},
-    config::{AcknowledgementsConfig, GenerateConfig, Input, SinkConfig, SinkContext},
+    config::{GenerateConfig, Input, SinkConfig, SinkContext},
     sinks::{console::sink::WriterSink, VectorSink},
 };
 
@@ -46,14 +46,6 @@ pub struct ConsoleSinkConfig {
 
     #[serde(flatten)]
     pub encoding: EncodingConfigWithFraming, /*  */
-
-    #[configurable(derived)]
-    #[serde(
-        default,
-        deserialize_with = "crate::serde::bool_or_struct",
-        skip_serializing_if = "crate::serde::is_default"
-    )]
-    pub acknowledgements: AcknowledgementsConfig, /* 需要ack? */
 }
 
 const fn default_target() -> Target {
@@ -66,7 +58,6 @@ impl GenerateConfig for ConsoleSinkConfig {
         toml::Value::try_from(Self {
             target: Target::Stdout,
             encoding: (None::<FramingConfig>, JsonSerializerConfig::default()).into(),
-            acknowledgements: Default::default(),
         })
         .unwrap()
     }
@@ -101,9 +92,5 @@ impl SinkConfig for ConsoleSinkConfig {
 
     fn input(&self) -> Input {
         Input::new(self.encoding.config().1.input_type())
-    }
-
-    fn acknowledgements(&self) -> &AcknowledgementsConfig {
-        &self.acknowledgements
     }
 }

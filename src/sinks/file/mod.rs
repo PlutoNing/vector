@@ -26,7 +26,7 @@ use vector_lib::{
 
 use crate::{
     codecs::{Encoder, EncodingConfigWithFraming, SinkType, Transformer},
-    config::{AcknowledgementsConfig, GenerateConfig, Input, SinkConfig, SinkContext},
+    config::{GenerateConfig, Input, SinkConfig, SinkContext},
     event::{Event, EventStatus, Finalizable},
     expiring_hash_map::ExpiringHashMap,
     sinks::util::{timezone_to_offset, StreamSink},
@@ -71,14 +71,6 @@ pub struct FileSinkConfig {
     pub compression: Compression,
 
     #[configurable(derived)]
-    #[serde(
-        default,
-        deserialize_with = "crate::serde::bool_or_struct",
-        skip_serializing_if = "crate::serde::is_default"
-    )]
-    pub acknowledgements: AcknowledgementsConfig,
-
-    #[configurable(derived)]
     #[serde(default)]
     pub timezone: Option<TimeZone>
 }
@@ -90,7 +82,6 @@ impl GenerateConfig for FileSinkConfig {
             idle_timeout: default_idle_timeout(),
             encoding: (None::<FramingConfig>, TextSerializerConfig::default()).into(),
             compression: Default::default(),
-            acknowledgements: Default::default(),
             timezone: Default::default(),
         })
         .unwrap()
@@ -175,10 +166,6 @@ impl SinkConfig for FileSinkConfig {
 
     fn input(&self) -> Input {
         Input::new(self.encoding.config().1.input_type())
-    }
-
-    fn acknowledgements(&self) -> &AcknowledgementsConfig {
-        &self.acknowledgements
     }
 }
 

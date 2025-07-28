@@ -339,7 +339,6 @@ impl<'a> Builder<'a> {
                 shutdown: shutdown_signal, /* self.shutdown_coordinator里面那个 */
                 out: pipeline, /* 是self.default_output那个tx */
                 proxy: ProxyConfig::merge_with_env(&self.config.global.proxy, &source.proxy),
-                acknowledgements: source.sink_acknowledgements,
                 schema_definitions,
                 schema: self.config.schema,
                 extra_context: self.extra_context.clone(),

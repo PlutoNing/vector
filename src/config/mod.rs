@@ -13,8 +13,8 @@ use indexmap::IndexMap;
 use serde::Serialize;
 
 pub use vector_lib::config::{
-    AcknowledgementsConfig, DataType, GlobalOptions, Input, LogNamespace,
-    SourceAcknowledgementsConfig, SourceOutput, TransformOutput, WildcardMatching,
+    DataType, GlobalOptions, Input, LogNamespace,
+    SourceOutput, TransformOutput, WildcardMatching,
 };
 pub use vector_lib::configurable::component::{
     GenerateConfig, SinkDescription, TransformDescription,
@@ -172,50 +172,6 @@ impl Config {
             .map(|t| &t.inputs[..])
             .or_else(|| self.sinks.get(id).map(|s| &s.inputs[..]))
             .or_else(|| self.enrichment_tables.get(id).map(|s| &s.inputs[..]))
-    }
-
-    pub fn propagate_acknowledgements(&mut self) -> Result<(), Vec<String>> {
-        let inputs: Vec<_> = self
-            .sinks
-            .iter()
-            .filter(|(_, sink)| {
-                sink.inner
-                    .acknowledgements()
-                    .merge_default(&self.global.acknowledgements)
-                    .enabled()
-            })
-            .flat_map(|(name, sink)| {
-                sink.inputs
-                    .iter()
-                    .map(|input| (name.clone(), input.clone()))
-            })
-            .collect();
-        self.propagate_acks_rec(inputs);
-        Ok(())
-    }
-
-    fn propagate_acks_rec(&mut self, sink_inputs: Vec<(ComponentKey, OutputId)>) {
-        for (sink, input) in sink_inputs {
-            let component = &input.component;
-            if let Some(source) = self.sources.get_mut(component) {
-                if source.inner.can_acknowledge() {
-                    source.sink_acknowledgements = true;
-                } else {
-                    warn!(
-                        message = "Source has acknowledgements enabled by a sink, but acknowledgements are not supported by this source. Silent data loss could occur.",
-                        source = component.id(),
-                        sink = sink.id(),
-                    );
-                }
-            } else if let Some(transform) = self.transforms.get(component) {
-                let inputs = transform
-                    .inputs
-                    .iter()
-                    .map(|input| (sink.clone(), input.clone()))
-                    .collect();
-                self.propagate_acks_rec(inputs);
-            }
-        }
     }
 }
 

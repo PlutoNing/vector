@@ -3,7 +3,7 @@ use std::{
     iter::Sum,
     ops::{Add, AddAssign, Sub},
 };
-
+/* 偏工具的 */
 /// A newtype for the JSON size of an event.
 /// Used to emit the `component_received_event_bytes_total` and
 /// `component_sent_event_bytes_total` metrics.
