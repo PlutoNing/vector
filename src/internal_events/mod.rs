@@ -6,8 +6,6 @@ mod common;
 mod host_metrics;
 mod open;
 
-mod windows;
-
 #[cfg(feature = "sources-host_metrics")]
 pub(crate) use self::host_metrics::*;
 #[cfg(windows)]
