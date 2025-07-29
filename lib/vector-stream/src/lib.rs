@@ -20,4 +20,4 @@ mod partitioned_batcher;
 pub use concurrent_map::ConcurrentMap;
 
 
-pub use partitioned_batcher::{BatcherSettings, ExpirationQueue, PartitionedBatcher};
+pub use partitioned_batcher::{BatcherSettings};
