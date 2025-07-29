@@ -9487,7 +9487,6 @@ dependencies = [
  "vector-config-common",
  "vector-config-macros",
  "vector-lib",
- "vector-vrl-functions",
  "vrl",
  "warp",
  "windows-service",
@@ -9739,22 +9738,6 @@ dependencies = [
  "twox-hash 2.1.1",
  "vector-common",
  "vector-core",
-]
-
-[[package]]
-name = "vector-vrl-cli"
-version = "0.1.0"
-dependencies = [
- "clap",
- "vector-vrl-functions",
- "vrl",
-]
-
-[[package]]
-name = "vector-vrl-functions"
-version = "0.1.0"
-dependencies = [
- "vrl",
 ]
 
 [[package]]

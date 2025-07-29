@@ -93,8 +93,6 @@ members = [
   "lib/vector-lib",
   "lib/vector-lookup",
   "lib/vector-stream",
-  "lib/vector-vrl/cli",
-  "lib/vector-vrl/functions",
 ]
 
 [workspace.dependencies]
@@ -163,7 +161,6 @@ vector-lib.workspace = true
 vector-config.workspace = true
 vector-config-common.workspace = true
 vector-config-macros.workspace = true
-vector-vrl-functions = { path = "lib/vector-vrl/functions" }
 # Tokio / Futures
 async-stream = { version = "0.3.6", default-features = false }
 async-trait = { version = "0.1.88", default-features = false }
