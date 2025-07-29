@@ -291,10 +291,6 @@ async fn handle_signal(
     allow_empty_config: bool,
 ) -> Option<SignalTo> {
     match signal {
-        Ok(SignalTo::ReloadFromConfigBuilder(config_builder)) => {
-            let topology_controller = topology_controller.lock().await;
-            reload_config_from_result(topology_controller, config_builder.build()).await
-        }
         Ok(SignalTo::ReloadFromDisk) => {
             let mut topology_controller = topology_controller.lock().await;
 
