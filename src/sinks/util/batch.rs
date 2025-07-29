@@ -7,7 +7,7 @@ use vector_lib::configurable::configurable_component;
 use vector_lib::json_size::JsonSize;
 use vector_lib::stream::BatcherSettings;
 
-use super::EncodedEvent;
+
 use crate::event::EventFinalizers;
 
 // * Provide sensible sink default 10 MB with 1s timeout. Don't allow chaining builder methods on
@@ -69,7 +69,7 @@ impl SinkBatchSettings for BulkSizeBasedDefaultBatchSettings {
 /// "Default" batch settings when a sink handles batch settings entirely on its own.
 ///
 /// This has very few usages, but can be notably seen in the Kafka sink, where the values are used
-/// to configure `librdkafka` itself rather than being passed as `BatchSettings`/`BatcherSettings`
+/// to configure `librdkafka` itself rather than being passed as `BatchSettings`/`batcherSettings`
 /// to components in the sink itself.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct NoDefaultsBatchSettings;
@@ -164,12 +164,12 @@ impl<D: SinkBatchSettings + Clone> BatchConfig<D, Unmerged> {
         config.into_batch_settings()
     }
 
-    /// Converts these settings into [`BatcherSettings`].
+    /// Converts these settings into [`batcherSettings`].
     ///
-    /// `BatcherSettings` is effectively the `vector_core` spiritual successor of
+    /// `batcherSettings` is effectively the `vector_core` spiritual successor of
     /// [`BatchSettings<B>`].  Once all sinks are rewritten in the new stream-based style and we can
     /// eschew customized batch buffer types, we can de-genericify `BatchSettings` and move it into
-    /// `vector_core`, and use that instead of `BatcherSettings`.
+    /// `vector_core`, and use that instead of `batcherSettings`.
     pub fn into_batcher_settings(self) -> Result<BatcherSettings, BatchError> {
         let config = self.validate()?;
         config.into_batcher_settings()
@@ -221,12 +221,12 @@ impl<D: SinkBatchSettings + Clone> BatchConfig<D, Merged> {
         })
     }
 
-    /// Converts these settings into [`BatcherSettings`].
+    /// Converts these settings into [`batcherSettings`].
     ///
-    /// `BatcherSettings` is effectively the `vector_core` spiritual successor of
-    /// [`BatchSettings<B>`].  Once all sinks are rewritten in the new stream-based style and we can
+    /// `batcherSettings` is effectively the `vector_core` spiritual successor of
+    /// [`batchSettings<B>`].  Once all sinks are rewritten in the new stream-based style and we can
     /// eschew customized batch buffer types, we can de-genericify `BatchSettings` and move it into
-    /// `vector_core`, and use that instead of `BatcherSettings`.
+    /// `vector_core`, and use that instead of `batcherSettings`.
     pub fn into_batcher_settings(self) -> Result<BatcherSettings, BatchError> {
         let max_bytes = self
             .max_bytes
@@ -360,94 +360,6 @@ pub struct EncodedBatch<I> {
     pub count: usize,
     pub byte_size: usize,
     pub json_byte_size: JsonSize,
-}
-
-/// This is a batch construct that stores an set of event finalizers alongside the batch itself.
-#[derive(Clone, Debug)]
-pub struct FinalizersBatch<B> {
-    inner: B,
-    finalizers: EventFinalizers,
-    // The count of items inserted into this batch is distinct from the
-    // number of items recorded by the inner batch, as that inner count
-    // could be smaller due to aggregated items (ie metrics).
-    count: usize,
-    byte_size: usize,
-    json_byte_size: JsonSize,
-}
-
-impl<B: Batch> From<B> for FinalizersBatch<B> {
-    fn from(inner: B) -> Self {
-        Self {
-            inner,
-            finalizers: Default::default(),
-            count: 0,
-            byte_size: 0,
-            json_byte_size: JsonSize::zero(),
-        }
-    }
-}
-
-impl<B: Batch> Batch for FinalizersBatch<B> {
-    type Input = EncodedEvent<B::Input>;
-    type Output = EncodedBatch<B::Output>;
-
-    fn get_settings_defaults<D: SinkBatchSettings + Clone>(
-        config: BatchConfig<D, Merged>,
-    ) -> Result<BatchConfig<D, Merged>, BatchError> {
-        B::get_settings_defaults(config)
-    }
-
-    fn push(&mut self, item: Self::Input) -> PushResult<Self::Input> {
-        let EncodedEvent {
-            item,
-            finalizers,
-            byte_size,
-            json_byte_size,
-        } = item;
-        match self.inner.push(item) {
-            PushResult::Ok(full) => {
-                self.finalizers.merge(finalizers);
-                self.count += 1;
-                self.byte_size += byte_size;
-                self.json_byte_size += json_byte_size;
-                PushResult::Ok(full)
-            }
-            PushResult::Overflow(item) => PushResult::Overflow(EncodedEvent {
-                item,
-                finalizers,
-                byte_size,
-                json_byte_size,
-            }),
-        }
-    }
-
-    fn is_empty(&self) -> bool {
-        self.inner.is_empty()
-    }
-
-    fn fresh(&self) -> Self {
-        Self {
-            inner: self.inner.fresh(),
-            finalizers: Default::default(),
-            count: 0,
-            byte_size: 0,
-            json_byte_size: JsonSize::zero(),
-        }
-    }
-
-    fn finish(self) -> Self::Output {
-        EncodedBatch {
-            items: self.inner.finish(),
-            finalizers: self.finalizers,
-            count: self.count,
-            byte_size: self.byte_size,
-            json_byte_size: self.json_byte_size,
-        }
-    }
-
-    fn num_items(&self) -> usize {
-        self.inner.num_items()
-    }
 }
 
 #[derive(Clone, Debug)]

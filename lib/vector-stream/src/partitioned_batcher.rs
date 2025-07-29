@@ -1,24 +1,11 @@
-use std::{
-
-
-    num::NonZeroUsize,
-
-
-    time::Duration,
-};
-
-
-
-
+use std::{num::NonZeroUsize, time::Duration};
 
 use vector_common::byte_size_of::ByteSizeOf;
-
 
 use crate::batcher::{
     config::BatchConfigParts,
     data::BatchData,
     limiter::{ByteSizeOfItemSize, ItemBatchSize, SizeLimit},
-
 };
 /// Controls the behavior of the batcher in terms of batch size and flush interval.
 ///
