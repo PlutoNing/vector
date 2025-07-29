@@ -1,31 +1,18 @@
 #![allow(missing_docs)]
-use std::{
-
-
-    sync::{
-        atomic::{AtomicBool, Ordering},
-        Mutex, MutexGuard, OnceLock,
-    },
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Mutex, MutexGuard,
 };
 
-use futures_util::{future::ready, Stream, StreamExt};
+
 
 use tokio::sync::{
-    broadcast::{self, Receiver, Sender},
+
     oneshot,
 };
-use tokio_stream::wrappers::BroadcastStream;
-
-
-
-
-
-
 
 
 pub use tracing_tower::{InstrumentableService, InstrumentedService};
-
-
 
 use crate::event::LogEvent;
 
@@ -46,12 +33,6 @@ static SHOULD_BUFFER: AtomicBool = AtomicBool::new(true);
 static SUBSCRIBERS: Mutex<Option<Vec<oneshot::Sender<Vec<LogEvent>>>>> =
     Mutex::new(Some(Vec::new()));
 
-/// SENDER holds the sender/receiver handle that will receive a copy of all the internal log events *after* the topology
-/// has been initialized.
-static SENDER: OnceLock<Sender<LogEvent>> = OnceLock::new();
-
-
-
 
 
 pub fn init(color: bool, _json: bool, levels: &str, _internal_log_rate_limit: u64) {
@@ -70,10 +51,6 @@ fn get_early_buffer() -> MutexGuard<'static, Option<Vec<LogEvent>>> {
         .expect("Couldn't acquire lock on internal logs buffer")
 }
 
-
-
-
-
 /* 获取早期的buffer的event? */
 /// Consumes the early buffered events.
 ///
@@ -86,44 +63,11 @@ fn consume_early_buffer() -> Vec<LogEvent> {
         .expect("early buffer was already consumed")
 }
 
-/// Gets or creates a trace sender for sending internal log events.
-fn get_trace_sender() -> &'static broadcast::Sender<LogEvent> {
-    SENDER.get_or_init(|| broadcast::channel(99).0)
-}
 
-
-
-/// Creates a trace receiver that receives internal log events.
-///
-/// This will create a trace sender if one did not already exist.
-fn get_trace_receiver() -> broadcast::Receiver<LogEvent> {
-    get_trace_sender().subscribe()
-}
 /* 获取SUBSCRIBERS? */
 /// Gets a mutable reference to the list of waiting subscribers, if it exists.
 fn get_trace_subscriber_list() -> MutexGuard<'static, Option<Vec<oneshot::Sender<Vec<LogEvent>>>>> {
     SUBSCRIBERS.lock().expect("poisoned locks are dumb")
-}
-
-/// Attempts to register for early buffered events.
-///
-/// If early buffering has not yet been stopped, `Some(receiver)` is returned. The given receiver will resolve to a
-/// vector of all early buffered events once early buffering has been stopped. Otherwise, if early buffering is already
-/// stopped, `None` is returned.
-fn try_register_for_early_events() -> Option<oneshot::Receiver<Vec<LogEvent>>> {
-    if SHOULD_BUFFER.load(Ordering::Acquire) {
-        // We're still in early buffering mode. Attempt to subscribe by adding a oneshot sender
-        // to SUBSCRIBERS. If it's already been consumed, then we've gotten beaten out by a
-        // caller that is disabling early buffering, so we just go with the flow either way.
-        get_trace_subscriber_list().as_mut().map(|subscribers| {
-            let (tx, rx) = oneshot::channel();
-            subscribers.push(tx);
-            rx
-        })
-    } else {
-        // Early buffering is being or has been disabled, so we can no longer register.
-        None
-    }
 }
 
 /// Stops early buffering.
@@ -140,7 +84,7 @@ pub fn stop_early_buffering() {
     {
         return;
     }
-/* 把buffered_events发给subscribers_tx */
+    /* 把buffered_events发给subscribers_tx */
     // We won the right to capture all buffered events and forward them to any waiting subscribers,
     // so let's grab the subscriber list and see if there's actually anyone waiting.
     let subscribers = get_trace_subscriber_list().take();
@@ -151,49 +95,5 @@ pub fn stop_early_buffering() {
             // Ignore any errors sending since the caller may have dropped or something else.
             _ = subscriber_tx.send(buffered_events.clone());
         }
-    }
-}
-
-/// A subscription to the log events flowing in via `tracing`, in the Vector native format.
-///
-/// Used to capture tracing events from internal log telemetry, via `tracing`, and convert them to native Vector events,
-/// specifically `LogEvent`, such that they can be shuttled around and treated as normal events.  Currently only powers
-/// the `internal_logs` source, but could be used for other purposes if need be.
-pub struct TraceSubscription {
-    buffered_events_rx: Option<oneshot::Receiver<Vec<LogEvent>>>,
-    trace_rx: Receiver<LogEvent>,
-}
-
-impl TraceSubscription {
-    /// Registers a subscription to the internal log event stream.
-    pub fn subscribe() -> TraceSubscription {
-        let buffered_events_rx = try_register_for_early_events();
-        let trace_rx = get_trace_receiver();
-
-        Self {
-            buffered_events_rx,
-            trace_rx,
-        }
-    }
-
-    /// Gets any early buffered log events.
-    ///
-    /// If this subscription was registered after early buffering was turned off, `None` will be returned immediately.
-    /// Otherwise, waits for early buffering to be stopped and returns `Some(events)` where `events` contains all events
-    /// seen from the moment `tracing` was initialized to the moment early buffering was stopped.
-    pub async fn buffered_events(&mut self) -> Option<Vec<LogEvent>> {
-        // If we have a receiver for buffered events, and it returns them successfully, then pass
-        // them back.  We don't care if the sender drops in the meantime, so just swallow that error.
-        match self.buffered_events_rx.take() {
-            Some(rx) => rx.await.ok(),
-            None => None,
-        }
-    }
-
-    /// Converts this subscription into a raw stream of log events.
-    pub fn into_stream(self) -> impl Stream<Item = LogEvent> + Unpin {
-        // We ignore errors because the only error we get is when the broadcast receiver lags, and there's nothing we
-        // can actually do about that so there's no reason to force callers to even deal with it.
-        BroadcastStream::new(self.trace_rx).filter_map(|event| ready(event.ok()))
     }
 }
