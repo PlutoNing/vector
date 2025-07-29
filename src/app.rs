@@ -194,7 +194,6 @@ impl Application {
     pub fn start(self, handle: &Handle) -> Result<StartedApplication, ExitCode> {
         // Any internal_logs sources will have grabbed a copy of the
         // early buffer by this point and set up a subscriber.
-        crate::trace::stop_early_buffering();
 
         info!("Vector has started.");
         handle.spawn(heartbeat::heartbeat());
