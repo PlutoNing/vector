@@ -4,7 +4,7 @@ use indexmap::IndexMap;
 use vector_lib::config::GlobalOptions;
 use vector_lib::configurable::configurable_component;
 
-use crate::{enrichment_tables::EnrichmentTables};
+
 
 use super::{
     compiler, schema, BoxedSink, BoxedSource, BoxedTransform, ComponentKey, Config,
@@ -107,22 +107,6 @@ impl ConfigBuilder {
     /* 构建一个config返回 */
     pub fn build_with_warnings(self) -> Result<(Config, Vec<String>), Vec<String>> {
         compiler::compile(self)
-    }
-
-    pub fn add_enrichment_table<K: Into<String>, E: Into<EnrichmentTables>>(
-        &mut self,
-        key: K,
-        inputs: &[&str],
-        enrichment_table: E,
-    ) {
-        let inputs = inputs
-            .iter()
-            .map(|value| value.to_string())
-            .collect::<Vec<_>>();
-        self.enrichment_tables.insert(
-            ComponentKey::from(key.into()),
-            EnrichmentTableOuter::new(inputs, enrichment_table),
-        );
     }
 
     pub fn add_source<K: Into<String>, S: Into<BoxedSource>>(&mut self, key: K, source: S) {
