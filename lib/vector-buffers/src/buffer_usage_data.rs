@@ -211,7 +211,7 @@ pub struct BufferUsage {
 
 impl BufferUsage {
     /// Creates an instance of [`BufferUsage`] attached to the given span.
-    ///
+    /// 有调用
     /// As buffers can have multiple stages, callers have the ability to register each stage via [`add_stage`].
     pub fn from_span(span: Span) -> BufferUsage {
         Self {
