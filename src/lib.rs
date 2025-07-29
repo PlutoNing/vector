@@ -60,7 +60,6 @@ pub mod serde;
 #[cfg(windows)]
 pub mod service;
 pub mod signal;
-pub(crate) mod sink_ext;
 #[allow(unreachable_pub)]
 pub mod sinks;
 pub mod source_sender;
