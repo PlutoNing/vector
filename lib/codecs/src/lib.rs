@@ -3,7 +3,7 @@
 
 #![deny(missing_docs)]
 #![deny(warnings)]
-pub mod decoding;
+
 pub mod encoding;
 
 pub use encoding::{
