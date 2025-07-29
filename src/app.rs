@@ -291,27 +291,6 @@ async fn handle_signal(
     allow_empty_config: bool,
 ) -> Option<SignalTo> {
     match signal {
-        Ok(SignalTo::ReloadComponents(components_to_reload)) => {
-            let mut topology_controller = topology_controller.lock().await;
-            topology_controller
-                .topology
-                .extend_reload_set(components_to_reload);
-
-            // Reload paths
-            if let Some(paths) = config::process_paths(config_paths) {
-                topology_controller.config_paths = paths;
-            }
-
-            // Reload config
-            let new_config = config::load_from_paths_with_provider_and_secrets(
-                &topology_controller.config_paths,
-                signal_handler,
-                allow_empty_config,
-            )
-            .await;
-
-            reload_config_from_result(topology_controller, new_config).await
-        }
         Ok(SignalTo::ReloadFromConfigBuilder(config_builder)) => {
             let topology_controller = topology_controller.lock().await;
             reload_config_from_result(topology_controller, config_builder.build()).await
