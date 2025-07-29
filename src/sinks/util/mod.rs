@@ -24,19 +24,14 @@ pub use batch::{
 };
 pub use buffer::{
     json::{BoxedRawValue, JsonArrayBuffer},
-
-
-    Buffer, Compression,
+    Compression,
 };
 
 pub use compressor::Compressor;
 pub use normalizer::Normalizer;
-pub use request_builder::{IncrementalRequestBuilder};
-pub use service::{
-    Concurrency,
-
-};
-pub use sink::{StreamSink};
+pub use request_builder::IncrementalRequestBuilder;
+pub use service::Concurrency;
+pub use sink::StreamSink;
 use snafu::Snafu;
 
 use vector_lib::{json_size::JsonSize, TimeZone};
