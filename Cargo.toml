@@ -95,7 +95,6 @@ members = [
   "lib/vector-stream",
   "lib/vector-vrl/cli",
   "lib/vector-vrl/functions",
-  "lib/vector-vrl/web-playground",
 ]
 
 [workspace.dependencies]
