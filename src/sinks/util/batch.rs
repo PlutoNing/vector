@@ -7,7 +7,6 @@ use vector_lib::configurable::configurable_component;
 use vector_lib::json_size::JsonSize;
 use vector_lib::stream::BatcherSettings;
 
-
 use crate::event::EventFinalizers;
 
 // * Provide sensible sink default 10 MB with 1s timeout. Don't allow chaining builder methods on
@@ -360,71 +359,4 @@ pub struct EncodedBatch<I> {
     pub count: usize,
     pub byte_size: usize,
     pub json_byte_size: JsonSize,
-}
-
-#[derive(Clone, Debug)]
-pub struct StatefulBatch<B> {
-    inner: B,
-    was_full: bool,
-}
-
-impl<B: Batch> From<B> for StatefulBatch<B> {
-    fn from(inner: B) -> Self {
-        Self {
-            inner,
-            was_full: false,
-        }
-    }
-}
-
-impl<B> StatefulBatch<B> {
-    pub const fn was_full(&self) -> bool {
-        self.was_full
-    }
-
-    #[allow(clippy::missing_const_for_fn)] // const cannot run destructor
-    pub fn into_inner(self) -> B {
-        self.inner
-    }
-}
-
-impl<B: Batch> Batch for StatefulBatch<B> {
-    type Input = B::Input;
-    type Output = B::Output;
-
-    fn get_settings_defaults<D: SinkBatchSettings + Clone>(
-        config: BatchConfig<D, Merged>,
-    ) -> Result<BatchConfig<D, Merged>, BatchError> {
-        B::get_settings_defaults(config)
-    }
-
-    fn push(&mut self, item: Self::Input) -> PushResult<Self::Input> {
-        if self.was_full {
-            PushResult::Overflow(item)
-        } else {
-            let result = self.inner.push(item);
-            self.was_full =
-                matches!(result, PushResult::Overflow(_)) || matches!(result, PushResult::Ok(true));
-            result
-        }
-    }
-
-    fn is_empty(&self) -> bool {
-        !self.was_full && self.inner.is_empty()
-    }
-
-    fn fresh(&self) -> Self {
-        Self {
-            inner: self.inner.fresh(),
-            was_full: false,
-        }
-    }
-
-    fn finish(self) -> Self::Output {
-        self.inner.finish()
-    }
-
-    fn num_items(&self) -> usize {
-        self.inner.num_items()
-    }
 }
