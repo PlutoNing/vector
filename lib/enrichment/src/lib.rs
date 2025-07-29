@@ -8,7 +8,6 @@ mod vrl_util;
 
 use dyn_clone::DynClone;
 pub use tables::{TableRegistry, TableSearch};
-use vrl::compiler::Function;
 use vrl::value::{ObjectMap, Value};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -86,10 +85,3 @@ pub trait Table: DynClone {
 }
 
 dyn_clone::clone_trait_object!(Table);
-
-pub fn vrl_functions() -> Vec<Box<dyn Function>> {
-    vec![
-        Box::new(get_enrichment_table_record::GetEnrichmentTableRecord) as _,
-        Box::new(find_enrichment_table_records::FindEnrichmentTableRecords) as _,
-    ]
-}
