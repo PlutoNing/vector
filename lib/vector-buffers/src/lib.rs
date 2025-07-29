@@ -70,7 +70,7 @@ pub enum WhenFull {
 /// An item that can be buffered in memory.
 ///
 /// This supertrait serves as the base trait for any item that can be pushed into a memory buffer.
-/// It is a relaxed version of `Bufferable` that allows for items that are not `Encodable` (e.g., `Instant`),
+/// It is a relaxed version of `Bufferable` that allows for items that are not `encodable` (e.g., `Instant`),
 /// which is an unnecessary constraint for memory buffers.
 pub trait InMemoryBufferable:
     ByteSizeOf + EventCount + Debug + Send + Sync + Unpin + Sized + 'static

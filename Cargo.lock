@@ -6037,13 +6037,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "portpicker"
-version = "1.0.0"
-dependencies = [
- "rand 0.9.1",
-]
-
-[[package]]
 name = "powerfmt"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -9415,7 +9408,6 @@ dependencies = [
  "paste",
  "percent-encoding",
  "pin-project",
- "portpicker",
  "proptest",
  "proptest-derive",
  "prost 0.12.6",

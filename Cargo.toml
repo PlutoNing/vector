@@ -83,7 +83,6 @@ members = [
   "lib/enrichment",
   "lib/fakedata",
   "lib/file-source",
-  "lib/portpicker",
   "lib/vector-buffers",
   "lib/vector-common",
   "lib/vector-config",
@@ -154,7 +153,6 @@ vrl.workspace = true
 
 
 fakedata = { path = "lib/fakedata", optional = true }
-portpicker = { path = "lib/portpicker" }
 vector-common = { path = "lib/vector-common", default-features = false}
 vector-lib.workspace = true
 vector-config.workspace = true
