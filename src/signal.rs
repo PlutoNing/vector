@@ -15,8 +15,6 @@ pub type SignalRx = broadcast::Receiver<SignalTo>;
 /// Control messages used by Vector to drive topology and shutdown events.
 #[allow(clippy::large_enum_variant)] // discovered during Rust upgrade to 1.57; just allowing for now since we did previously
 pub enum SignalTo {
-    /// Signal to reload config from the filesystem.
-    ReloadFromDisk,
     /// Signal to shutdown process.
     Shutdown(Option<ShutdownError>),
     /// Shutdown process immediately.
@@ -28,7 +26,6 @@ impl PartialEq for SignalTo {
         use SignalTo::*;
 
         match (self, other) {
-            (ReloadFromDisk, ReloadFromDisk) => true,
             (Shutdown(a), Shutdown(b)) => a == b,
             (Quit, Quit) => true,
             _ => false,
@@ -194,7 +191,7 @@ fn os_signals(runtime: &Runtime) -> impl Stream<Item = SignalTo> {
                     },
                     _ = sighup.recv() => {
                         info!(message = "Signal received.", signal = "SIGHUP");
-                        SignalTo::ReloadFromDisk
+                        SignalTo::Shutdown(None)
                     },
                 };
                 yield signal;

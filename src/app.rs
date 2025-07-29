@@ -10,7 +10,7 @@ use std::{
 use exitcode::ExitCode;
 use futures::StreamExt;
 use tokio::runtime::{self, Runtime};
-use tokio::sync::{broadcast::error::RecvError, MutexGuard};
+use tokio::sync::{broadcast::error::RecvError};
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
 use crate::extra_context::ExtraContext;
@@ -20,7 +20,7 @@ use crate::{
     heartbeat,
     signal::{SignalHandler, SignalPair, SignalRx, SignalTo},
     topology::{
-        ReloadOutcome, RunningTopology, SharedTopologyController, ShutdownErrorReceiver,
+        RunningTopology, SharedTopologyController, ShutdownErrorReceiver,
         TopologyController,
     },
     trace,
@@ -285,30 +285,12 @@ impl StartedApplication { /* 初始化好config, 已经相关source, sink进程�
 
 async fn handle_signal(
     signal: Result<SignalTo, RecvError>,
-    topology_controller: &SharedTopologyController,
-    config_paths: &[ConfigPath],
-    signal_handler: &mut SignalHandler,
-    allow_empty_config: bool,
+    _topology_controller: &SharedTopologyController,
+    _config_paths: &[ConfigPath],
+    _signal_handler: &mut SignalHandler,
+    _allow_empty_config: bool,
 ) -> Option<SignalTo> {
     match signal {
-        Ok(SignalTo::ReloadFromDisk) => {
-            let mut topology_controller = topology_controller.lock().await;
-
-            // Reload paths
-            if let Some(paths) = config::process_paths(config_paths) {
-                topology_controller.config_paths = paths;
-            }
-
-            // Reload config
-            let new_config = config::load_from_paths_with_provider_and_secrets(
-                &topology_controller.config_paths,
-                signal_handler,
-                allow_empty_config,
-            )
-            .await;
-
-            reload_config_from_result(topology_controller, new_config).await
-        }
         Err(RecvError::Lagged(amt)) => {
             warn!("Overflow, dropped {} signals.", amt);
             None
@@ -318,23 +300,6 @@ async fn handle_signal(
     }
 }
 
-async fn reload_config_from_result(
-    mut topology_controller: MutexGuard<'_, TopologyController>,
-    config: Result<Config, Vec<String>>,
-) -> Option<SignalTo> {
-    match config {
-        Ok(new_config) => match topology_controller.reload(new_config).await {
-            ReloadOutcome::FatalError(error) => Some(SignalTo::Shutdown(Some(error))),
-            _ => None,
-        },
-        Err(errors) => {
-            handle_config_errors(errors);
-            error!("Failed to load config files, reload aborted.");
-
-            None
-        }
-    }
-}
 
 pub struct FinishedApplication {
     pub signal: SignalTo,
@@ -362,7 +327,6 @@ impl FinishedApplication {
         let status = match signal {
             SignalTo::Shutdown(_) => Self::stop(topology_controller, signal_rx).await,
             SignalTo::Quit => Self::quit(),
-            _ => unreachable!(),
         };
 
         for topology in internal_topologies {
