@@ -83,17 +83,6 @@ impl RunningTopology {
         }
     }
 
-    /// Signal that all sources in this topology are ended.
-    ///
-    /// The future returned by this function will finish once all the sources in
-    /// this topology have finished. This allows the caller to wait for or
-    /// detect that the sources in the topology are no longer
-    /// producing. [`Application`][crate::app::Application], as an example, uses this as a
-    /// shutdown signal.
-    pub fn sources_finished(&self) -> future::BoxFuture<'static, ()> {
-        self.shutdown_coordinator.shutdown_tripwire()
-    }
-
     /// Shut down all topology components.
     ///
     /// This function sends the shutdown signal to all sources in this topology

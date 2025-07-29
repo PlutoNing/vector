@@ -8,7 +8,7 @@ use std::{
     task::{ready, Context, Poll},
 };
 
-use futures::{future, FutureExt};
+use futures::{FutureExt};
 use stream_cancel::{Trigger, Tripwire};
 use tokio::time::{timeout_at, Instant};
 
@@ -288,20 +288,6 @@ impl SourceShutdownCoordinator {/* 往里面注册一个source */
             id.clone(),
             Some(deadline),
         )
-    }
-
-    /// Returned future will finish once all *current* sources have finished.
-    #[must_use]
-    pub fn shutdown_tripwire(&self) -> future::BoxFuture<'static, ()> {
-        let futures = self
-            .shutdown_complete_tripwires
-            .values()
-            .cloned()
-            .map(|tripwire| tripwire.then(tripwire_handler).boxed());
-
-        future::join_all(futures)
-            .map(|_| info!("All sources have finished."))
-            .boxed()
     }
 
     fn shutdown_source_complete(

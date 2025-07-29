@@ -253,7 +253,6 @@ impl StartedApplication { /* 初始化好config, 已经相关source, sink进程�
         let mut signal_rx = signals.receiver;
 
         let signal = loop {
-            let has_sources = !topology_controller.lock().await.topology.config.is_empty();
             tokio::select! {
                 signal = signal_rx.recv() => if let Some(signal) = handle_signal(
                     signal,
@@ -266,10 +265,6 @@ impl StartedApplication { /* 初始化好config, 已经相关source, sink进程�
                 },
                 // Trigger graceful shutdown if a component crashed, or all sources have ended.
                 error = graceful_crash.next() => break SignalTo::Shutdown(error),
-                _ = TopologyController::sources_finished(topology_controller.clone()), if has_sources => {
-                    info!("All sources have finished.");
-                    break SignalTo::Shutdown(None)
-                } ,
                 else => unreachable!("Signal streams never end"),
             }
         };
@@ -340,6 +335,7 @@ impl FinishedApplication {
         info!("Vector has stopped.");
         tokio::select! {
             _ = topology_controller.stop() => ExitStatus::from_raw({
+                info!("stop app");
                 #[cfg(windows)]
                 {
                     exitcode::OK as u32

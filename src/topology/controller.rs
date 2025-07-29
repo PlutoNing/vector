@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use crate::extra_context::ExtraContext;
-use futures_util::FutureExt as _;
 use tokio::sync::{Mutex, MutexGuard};
 
 use crate::{config, signal::ShutdownError, topology::RunningTopology};
@@ -52,66 +51,8 @@ pub enum ReloadOutcome {
 }
 
 impl TopologyController {
-    pub async fn reload(&mut self, new_config: config::Config) -> ReloadOutcome {
-        match self
-            .topology
-            .reload_config_and_respawn(new_config, self.extra_context.clone())
-            .await
-        {
-            Ok(true) => {
-                info!(target: "vector", "Vector has reloaded. Config paths: {:?}", self.config_paths);
-
-                ReloadOutcome::Success
-            }
-            Ok(false) => {
-                error!("Reload was not successful.");
-
-                ReloadOutcome::RolledBack
-            }
-            // Trigger graceful shutdown for what remains of the topology
-            Err(()) => {
-                error!("Reload was not successful.");
-                error!("Vector has failed to recover from a failed reload.");
-                ReloadOutcome::FatalError(ShutdownError::ReloadFailedToRestore)
-            }
-        }
-    }
-
+    /* 调用 */
     pub async fn stop(self) {
         self.topology.stop().await;
-    }
-
-    // The `sources_finished` method on `RunningTopology` only considers sources that are currently
-    // running at the time the method is called. This presents a problem when the set of running
-    // sources can change while we are waiting on the resulting future to resolve.
-    //
-    // This function resolves that issue by waiting in two stages. The first is the usual asynchronous
-    // wait for the future to complete. When it does, we know that all of the sources that existed when
-    // the future was built have finished, but we don't know if that's because they were replaced as
-    // part of a reload (in which case we don't want to return yet). To differentiate, we acquire the
-    // lock on the topology, create a new future, and check whether it resolves immediately or not. If
-    // it does resolve, we know all sources are truly finished because we held the lock during the
-    // check, preventing anyone else from adding new sources. If it does not resolve, that indicates
-    // that new sources have been added since our original call and we should start the process over to
-    // continue waiting.
-    pub async fn sources_finished(mutex: SharedTopologyController) {
-        loop {
-            // Do an initial async wait while the topology is running, making sure not the hold the
-            // mutex lock while we wait on sources to finish.
-            let initial = {
-                let tc = mutex.lock().await;
-                tc.topology.sources_finished()
-            };
-            initial.await;
-
-            // Once the initial signal is tripped, hold lock on the topology while checking again. This
-            // ensures that no other task is adding new sources.
-            let top = mutex.lock().await;
-            if top.topology.sources_finished().now_or_never().is_some() {
-                return;
-            } else {
-                continue;
-            }
-        }
     }
 }
