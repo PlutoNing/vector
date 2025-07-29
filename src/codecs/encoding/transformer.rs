@@ -8,13 +8,55 @@ use ordered_float::NotNan;
 use serde::{Deserialize, Deserializer};
 use vector_lib::configurable::configurable_component;
 use vector_lib::event::{LogEvent, MaybeAsLogMut};
-use vector_lib::lookup::lookup_v2::ConfigValuePath;
+/// ========================ownedValuePath impl ======================
 use vector_lib::lookup::{event_path, PathPrefix};
 use vector_lib::schema::meaning;
 use vrl::path::OwnedValuePath;
+/// ========================ownedValuePath impl ======================
+pub use vrl::path::{PathParseError, ValuePath};
+use vrl::value::KeyString;
 use vrl::value::Value;
 
 use crate::{event::Event, serde::is_default};
+/// ========================ownedValuePath impl ======================
+/// A wrapper around `OwnedValuePath` that allows it to be used in Vector config.
+/// This requires a valid path to be used. If you want to allow optional paths,
+/// use [optional_path::optionalValuePath].
+#[configurable_component]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[cfg_attr(feature = "proptest", derive(proptest_derive::Arbitrary))]
+#[serde(try_from = "String", into = "String")]
+pub struct ConfigValuePath(pub OwnedValuePath);
+
+impl TryFrom<String> for ConfigValuePath {
+    type Error = PathParseError;
+
+    fn try_from(src: String) -> Result<Self, Self::Error> {
+        OwnedValuePath::try_from(src).map(ConfigValuePath)
+    }
+}
+
+impl TryFrom<KeyString> for ConfigValuePath {
+    type Error = PathParseError;
+
+    fn try_from(src: KeyString) -> Result<Self, Self::Error> {
+        OwnedValuePath::try_from(String::from(src)).map(ConfigValuePath)
+    }
+}
+
+impl From<ConfigValuePath> for String {
+    fn from(owned: ConfigValuePath) -> Self {
+        String::from(owned.0)
+    }
+}
+
+impl<'a> ValuePath<'a> for &'a ConfigValuePath {
+    type Iter = <&'a OwnedValuePath as ValuePath<'a>>::Iter;
+
+    fn segment_iter(&self) -> Self::Iter {
+        (&self.0).segment_iter()
+    }
+}
 
 /// Transformations to prepare an event for serialization.
 #[configurable_component(no_deser)]
