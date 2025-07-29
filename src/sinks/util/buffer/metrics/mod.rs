@@ -26,7 +26,7 @@ pub struct MetricsBuffer {
     metrics: Option<MetricSet>,
     max_events: usize,
 }
-
+/* 调用 */
 impl MetricsBuffer {
     /// Creates a new `MetricsBuffer` with the given batch settings.
     pub const fn new(settings: BatchSize<Self>) -> Self {

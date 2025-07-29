@@ -25,7 +25,7 @@ pub use batch::{
 pub use buffer::{
     json::{BoxedRawValue, JsonArrayBuffer},
 
-    vec::{EncodedLength, VecBuffer},
+
     Buffer, Compression,
 };
 
