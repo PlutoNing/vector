@@ -7,7 +7,6 @@ mod decoding;
 mod encoding;
 mod ready_frames;
 
-pub use decoding::{Decoder};
 pub use encoding::{
     Encoder, EncodingConfig, EncodingConfigWithFraming, SinkType, TimestampFormat, Transformer,
 };

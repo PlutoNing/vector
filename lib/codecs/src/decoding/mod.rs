@@ -7,22 +7,13 @@ pub mod framing;
 
 use bytes::{Bytes, BytesMut};
 pub use error::StreamDecodingError;
-pub use format::{
-    BoxedDeserializer,
-};
-#[cfg(feature = "syslog")]
-pub use format::{SyslogDeserializer, SyslogDeserializerConfig, SyslogDeserializerOptions};
 pub use framing::{
     BoxedFramer, BoxedFramingError,
     FramingError,
 };
-use smallvec::SmallVec;
-use std::fmt::Debug;
-use vector_core::{
-    config::{LogNamespace},
-    event::Event,
 
-};
+use std::fmt::Debug;
+
 
 /// An error that occurred while decoding structured events from a byte stream /
 /// byte messages.
@@ -82,25 +73,6 @@ impl tokio_util::codec::Decoder for Framer {
     fn decode_eof(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
         match self {
             Framer::Boxed(framer) => framer.decode_eof(src),
-        }
-    }
-}
-
-/// Parse structured events from bytes.
-#[derive(Clone)]
-pub enum Deserializer {
-    /// Uses an opaque `Deserializer` implementation for deserialization.
-    Boxed(BoxedDeserializer),
-}
-
-impl format::Deserializer for Deserializer {
-    fn parse(
-        &self,
-        bytes: Bytes,
-        log_namespace: LogNamespace,
-    ) -> vector_common::Result<SmallVec<[Event; 1]>> {
-        match self {
-            Deserializer::Boxed(deserializer) => deserializer.parse(bytes, log_namespace),
         }
     }
 }
