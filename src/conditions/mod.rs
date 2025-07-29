@@ -74,12 +74,3 @@ pub trait Conditional: std::fmt::Debug {
         }
     }
 }
-
-pub trait ConditionalConfig: std::fmt::Debug + Send + Sync + dyn_clone::DynClone {
-    fn build(
-        &self,
-        enrichment_tables: &vector_lib::enrichment::TableRegistry,
-    ) -> crate::Result<Condition>;
-}
-
-dyn_clone::clone_trait_object!(ConditionalConfig);
