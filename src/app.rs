@@ -23,7 +23,7 @@ use crate::{
         RunningTopology, SharedTopologyController, ShutdownErrorReceiver,
         TopologyController,
     },
-    trace,
+
 };
 
 #[cfg(unix)]
@@ -429,14 +429,12 @@ pub async fn load_configs(
     Ok(config)
 }
 
-pub fn init_logging(color: bool, format: LogFormat, log_level: &str, rate: u64) {
+pub fn init_logging(_color: bool, format: LogFormat, log_level: &str, _rate: u64) {
     let level = get_log_levels(log_level);
-    let json = match format {
+    let _json = match format {
         LogFormat::Text => false,
         LogFormat::Json => true,
     };
-
-    trace::init(color, json, &level, rate);
     debug!(message = "Internal log rate limit configured.",);
     info!(message = "Log level is enabled.", level = ?level);
 }

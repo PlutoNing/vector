@@ -72,7 +72,6 @@ pub mod template;
 
 #[allow(unreachable_pub)]
 pub mod topology;
-pub mod trace;
 #[allow(unreachable_pub)]
 pub mod transforms;
 pub mod types;
