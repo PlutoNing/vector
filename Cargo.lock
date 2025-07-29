@@ -2862,27 +2862,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "de853764b47027c2e862a995c34978ffa63c1501f2e15f987ba11bd4f9bba193"
 
 [[package]]
-name = "fakedata"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "fakedata_generator",
- "rand 0.9.1",
-]
-
-[[package]]
-name = "fakedata_generator"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57b82fba4b485b819fde74012109688a9d2bd4ce7b22583ac12c9fa239f74a02"
-dependencies = [
- "passt",
- "rand 0.8.5",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "fancy-regex"
 version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5701,12 +5680,6 @@ checksum = "c705f256449c60da65e11ff6626e0c16a0a0b96aaa348de61376b249bc340f41"
 dependencies = [
  "regex",
 ]
-
-[[package]]
-name = "passt"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "13242a5ce97f39a8095d03c8b273e91d09f2690c0b7d69a2af844941115bab24"
 
 [[package]]
 name = "paste"
@@ -9318,7 +9291,6 @@ dependencies = [
  "evmap",
  "evmap-derive",
  "exitcode",
- "fakedata",
  "flate2",
  "futures 0.3.31",
  "futures-util",
