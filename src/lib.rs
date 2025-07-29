@@ -52,7 +52,6 @@ pub mod encoding_transcode;
 pub mod enrichment_tables;
 pub mod extra_context;
 pub mod heartbeat;
-pub mod http;
 pub mod line_agg;
 #[allow(unreachable_pub)]
 pub(crate) mod proto;
