@@ -23,8 +23,6 @@ pub trait FramingError: std::error::Error + StreamDecodingError + Send + Sync + 
     fn as_any(&self) -> &dyn Any;
 }
 
-impl std::error::Error for BoxedFramingError {}
-
 impl FramingError for std::io::Error {
     fn as_any(&self) -> &dyn Any {
         self as &dyn Any
@@ -34,23 +32,5 @@ impl FramingError for std::io::Error {
 impl FramingError for LinesCodecError {
     fn as_any(&self) -> &dyn Any {
         self as &dyn Any
-    }
-}
-
-impl<T> From<T> for BoxedFramingError
-where
-    T: FramingError + 'static,
-{
-    fn from(value: T) -> Self {
-        Box::new(value)
-    }
-}
-
-/// A `Box` containing a `FramingError`.
-pub type BoxedFramingError = Box<dyn FramingError>;
-
-impl StreamDecodingError for BoxedFramingError {
-    fn can_continue(&self) -> bool {
-        self.as_ref().can_continue()
     }
 }
