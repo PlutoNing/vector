@@ -14,10 +14,8 @@ mod metadata_ext;
 pub mod paths_provider;
 
 pub use self::{
-    checkpointer::{Checkpointer, CheckpointsView, CHECKPOINT_FILE_NAME},
-    file_server::{calculate_ignore_before, FileServer, Line, Shutdown as FileServerShutdown},
-    fingerprinter::{FileFingerprint, FingerprintStrategy, Fingerprinter},
-    internal_events::FileSourceInternalEvents,
+    checkpointer::{ CHECKPOINT_FILE_NAME},
+
 };
 use vector_config::configurable_component;
 
