@@ -1,41 +1,14 @@
 //! Utilities shared between both VRL functions.
-use std::collections::BTreeMap;
 
-use crate::{Case, Condition, IndexHandle, TableRegistry};
-use vrl::diagnostic::{Label, Span};
+
+use crate::{Condition};
+
 use vrl::prelude::*;
 
-#[derive(Debug)]
-pub enum Error {
-    TablesNotLoaded,
-}
 
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Error::TablesNotLoaded => write!(f, "enrichment tables not loaded"),
-        }
-    }
-}
 
-impl std::error::Error for Error {}
 
-impl DiagnosticMessage for Error {
-    fn code(&self) -> usize {
-        111
-    }
 
-    fn labels(&self) -> Vec<Label> {
-        match self {
-            Error::TablesNotLoaded => {
-                vec![Label::primary(
-                    "enrichment table error: tables not loaded".to_string(),
-                    Span::default(),
-                )]
-            }
-        }
-    }
-}
 
 /// Evaluates the condition object to search the enrichment tables with.
 pub(crate) fn evaluate_condition(key: &str, value: Value) -> ExpressionResult<Condition> {
@@ -73,50 +46,4 @@ pub(crate) fn evaluate_condition(key: &str, value: Value) -> ExpressionResult<Co
         },
         _ => Condition::Equals { field: key, value },
     })
-}
-
-/// Add an index for the given condition to the given enrichment table.
-pub(crate) fn add_index(
-    registry: &mut TableRegistry,
-    tablename: &str,
-    case: Case,
-    condition: &BTreeMap<KeyString, expression::Expr>,
-) -> std::result::Result<IndexHandle, ExpressionError> {
-    let fields = condition
-        .iter()
-        .filter_map(|(field, value)| match value {
-            expression::Expr::Container(expression::Container {
-                variant: expression::Variant::Object(map),
-            }) if (map.contains_key("from") && map.contains_key("to"))
-                || map.contains_key("from")
-                || map.contains_key("to") =>
-            {
-                None
-            }
-            _ => Some(field.as_ref()),
-        })
-        .collect::<Vec<_>>();
-    let index = registry.add_index(tablename, case, &fields)?;
-
-    Ok(index)
-}
-
-pub(crate) fn is_case_sensitive(
-    arguments: &ArgumentList,
-    state: &TypeState,
-) -> Result<Case, function::Error> {
-    Ok(arguments
-        .optional_literal("case_sensitive", state)?
-        .map(|value| {
-            let case_sensitive = value
-                .as_boolean()
-                .expect("case_sensitive should be boolean"); // This will have been caught by the type checker.
-
-            if case_sensitive {
-                Case::Sensitive
-            } else {
-                Case::Insensitive
-            }
-        })
-        .unwrap_or(Case::Sensitive))
 }
