@@ -158,11 +158,6 @@ impl<D: SinkBatchSettings + Clone> BatchConfig<D, Unmerged> {
         }
     }
 
-    pub fn into_batch_settings<T: Batch>(self) -> Result<BatchSettings<T>, BatchError> {
-        let config = self.validate()?;
-        config.into_batch_settings()
-    }
-
     /// Converts these settings into [`batcherSettings`].
     ///
     /// `batcherSettings` is effectively the `vector_core` spiritual successor of
@@ -201,23 +196,6 @@ impl<D: SinkBatchSettings + Clone> BatchConfig<D, Merged> {
             Some(n) if n > limit => Err(BatchError::MaxEventsExceeded { limit }),
             _ => Ok(self),
         }
-    }
-
-    pub fn into_batch_settings<T: Batch>(self) -> Result<BatchSettings<T>, BatchError> {
-        let adjusted = T::get_settings_defaults(self)?;
-
-        // This is unfortunate since we technically have already made sure this isn't possible in
-        // `validate`, but alas.
-        let timeout_secs = adjusted.timeout_secs.ok_or(BatchError::InvalidTimeout)?;
-
-        Ok(BatchSettings {
-            size: BatchSize {
-                bytes: adjusted.max_bytes.unwrap_or(usize::MAX),
-                events: adjusted.max_events.unwrap_or(usize::MAX),
-                _type_marker: PhantomData,
-            },
-            timeout: Duration::from_secs_f64(timeout_secs),
-        })
     }
 
     /// Converts these settings into [`batcherSettings`].
