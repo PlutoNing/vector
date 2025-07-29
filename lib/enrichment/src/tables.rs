@@ -189,33 +189,3 @@ impl TableRegistry {
         }
     }
 }
-
-impl std::fmt::Debug for TableRegistry {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt_enrichment_table(f, "TableRegistry", &self.tables)
-    }
-}
-
-/// Provide some fairly rudimentary debug output for enrichment tables.
-fn fmt_enrichment_table(
-    f: &mut std::fmt::Formatter<'_>,
-    name: &'static str,
-    tables: &Arc<ArcSwap<Option<TableMap>>>,
-) -> std::fmt::Result {
-    let tables = tables.load();
-    match **tables {
-        Some(ref tables) => {
-            let mut tables = tables.iter().fold(String::from("("), |mut s, (key, _)| {
-                s.push_str(key);
-                s.push_str(", ");
-                s
-            });
-
-            tables.truncate(std::cmp::max(tables.len(), 0));
-            tables.push(')');
-
-            write!(f, "{} {}", name, tables)
-        }
-        None => write!(f, "{} loading", name),
-    }
-}
