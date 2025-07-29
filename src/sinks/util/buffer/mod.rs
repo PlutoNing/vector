@@ -1,22 +1,16 @@
 use std::io::Write;
 
 use bytes::{BufMut, BytesMut};
-use flate2::write::{GzEncoder};
+use flate2::write::GzEncoder;
 
-use super::{
-    batch::{err_event_too_large, Batch, BatchSize, PushResult},
-
-
-};
+use super::batch::{err_event_too_large, Batch, BatchSize, PushResult};
 
 pub mod compression;
 pub mod json;
 pub mod metrics;
-pub mod partition;
 pub mod vec;
 
 pub use compression::Compression;
-pub use partition::{Partition, PartitionBuffer, PartitionInnerBuffer};
 
 #[derive(Debug)]
 pub struct Buffer {

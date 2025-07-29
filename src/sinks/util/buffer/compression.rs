@@ -44,7 +44,6 @@ impl Compression {
         Compression::Gzip(CompressionLevel::const_default())
     }
 
-
     pub const fn content_encoding(self) -> Option<&'static str> {
         match self {
             Self::None => None,
@@ -152,10 +151,7 @@ impl<'de> de::Deserialize<'de> for Compression {
                         None => Ok(Compression::None),
                     },
                     "gzip" => Ok(Compression::Gzip(level.unwrap_or_default())),
-                    algorithm => Err(de::Error::unknown_variant(
-                        algorithm,
-                        &["none", "gzip"],
-                    )),
+                    algorithm => Err(de::Error::unknown_variant(algorithm, &["none", "gzip"])),
                 }?;
 
                 if let CompressionLevel::Val(level) = compression.compression_level() {
@@ -249,10 +245,8 @@ impl Configurable for Compression {
             "[gzip]: https://www.gzip.org/",
         );
 
-        let mut all_string_oneof_subschema = generate_one_of_schema(&[
-            none_string_subschema,
-            gzip_string_subschema,
-        ]);
+        let mut all_string_oneof_subschema =
+            generate_one_of_schema(&[none_string_subschema, gzip_string_subschema]);
         apply_base_metadata(&mut all_string_oneof_subschema, string_metadata);
 
         // Next we'll create a full schema for the given algorithms.

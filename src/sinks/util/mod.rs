@@ -24,9 +24,9 @@ pub use batch::{
 };
 pub use buffer::{
     json::{BoxedRawValue, JsonArrayBuffer},
-    partition::Partition,
+
     vec::{EncodedLength, VecBuffer},
-    Buffer, Compression, PartitionBuffer, PartitionInnerBuffer,
+    Buffer, Compression,
 };
 
 pub use compressor::Compressor;
