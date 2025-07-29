@@ -23,7 +23,7 @@ pub use batch::{
     RealtimeSizeBasedDefaultBatchSettings, SinkBatchSettings, Unmerged,
 };
 pub use buffer::{
-    json::{BoxedRawValue, JsonArrayBuffer},
+    json::{BoxedRawValue},
     Compression,
 };
 
