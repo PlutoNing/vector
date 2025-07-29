@@ -3,15 +3,12 @@
 
 #![deny(missing_docs)]
 
-mod bytes;
-
 use std::{any::Any, fmt::Debug};
 
 use ::bytes::Bytes;
 use dyn_clone::DynClone;
 use tokio_util::codec::LinesCodecError;
 
-pub use self::bytes::{BytesDecoder, BytesDecoderConfig};
 use super::StreamDecodingError;
 
 /// An error that occurred while producing byte frames from a byte stream / byte

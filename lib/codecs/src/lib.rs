@@ -7,8 +7,6 @@ pub mod decoding;
 pub mod encoding;
 
 pub use decoding::{
-    BytesDecoder, BytesDecoderConfig,
-
     StreamDecodingError,
 };
 pub use encoding::{

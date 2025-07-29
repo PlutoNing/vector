@@ -1,11 +1,6 @@
 #![allow(missing_docs)]
 use indexmap::map::IndexMap;
 use serde::{Deserialize, Serialize};
-use vector_lib::codecs::{
-    decoding::{
-    FramingConfig},
-    BytesDecoderConfig,
-};
 use vector_lib::configurable::configurable_component;
 pub use vector_lib::serde::{bool_or_struct, is_default};
 
@@ -22,10 +17,6 @@ pub const fn default_false() -> bool {
 /// Any input exceeding this limit will be discarded.
 pub fn default_max_length() -> usize {
     bytesize::kib(100u64) as usize
-}
-
-pub fn default_framing_message_based() -> FramingConfig {
-    BytesDecoderConfig::new().into()
 }
 
 /// Utilities for the `serde_json` crate.
