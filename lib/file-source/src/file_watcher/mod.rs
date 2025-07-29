@@ -39,7 +39,7 @@ pub struct RawLineResult {
 /// the file has been rolled over, as is common for logs.
 ///
 /// The `FileWatcher` is expected to live for the lifetime of the file
-/// path. `FileServer` is responsible for clearing away `FileWatchers` which no
+/// path. `fileServer` is responsible for clearing away `FileWatchers` which no
 /// longer exist.
 pub struct FileWatcher {
     pub path: PathBuf,

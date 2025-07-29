@@ -9,7 +9,7 @@ pub mod glob;
 
 /// Represents the ability to enumerate paths.
 ///
-/// For use at [`crate::FileServer`].
+/// For use at [`crate::fileServer`].
 ///
 /// # Notes
 ///
