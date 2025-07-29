@@ -82,7 +82,6 @@ members = [
   "lib/codecs",
   "lib/enrichment",
   "lib/fakedata",
-  "lib/file-source",
   "lib/vector-buffers",
   "lib/vector-common",
   "lib/vector-config",

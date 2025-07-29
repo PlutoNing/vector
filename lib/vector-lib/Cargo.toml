@@ -8,7 +8,6 @@ publish = false
 [dependencies]
 codecs = { path = "../codecs", default-features = false }
 enrichment = { path = "../enrichment" }
-file-source = { path = "../file-source", optional = true }
 vector-buffers = { path = "../vector-buffers", default-features = false }
 vector-common = { path = "../vector-common" }
 vector-config = { path = "../vector-config" }
@@ -17,7 +16,6 @@ vector-lookup = { path = "../vector-lookup", features = ["test"] }
 vrl = { workspace = true, optional = true }
 
 [features]
-file-source = ["dep:file-source"]
 proptest = []
 syslog = ["codecs/syslog"]
 test = []
