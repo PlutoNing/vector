@@ -1,9 +1,6 @@
 #![deny(warnings)]
 
-pub mod find_enrichment_table_records;
 pub mod tables;
-
-mod vrl_util;
 
 use dyn_clone::DynClone;
 pub use tables::{TableRegistry, TableSearch};
