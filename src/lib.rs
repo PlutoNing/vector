@@ -74,7 +74,6 @@ pub mod template;
 pub mod topology;
 #[allow(unreachable_pub)]
 pub mod transforms;
-pub mod types;
 
 pub(crate) mod utilization;
 
