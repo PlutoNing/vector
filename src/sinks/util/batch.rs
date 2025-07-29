@@ -254,7 +254,7 @@ pub struct BatchSize<B> {
     pub bytes: usize,
     pub events: usize,
     // This type marker is used to drive type inference, which allows us
-    // to call the right Batch::get_settings_defaults without explicitly
+    // to call the right Batch::get_Settings_defaults without explicitly
     // naming the type in BatchSettings::parse_config.
     _type_marker: PhantomData<B>,
 }
@@ -312,16 +312,6 @@ pub enum PushResult<T> {
 pub trait Batch: Sized {
     type Input;
     type Output;
-
-    /// Turn the batch configuration into an actualized set of settings,
-    /// and deal with the proper behavior of `max_size` and if
-    /// `max_bytes` may be set. This is in the trait to ensure all batch
-    /// buffers implement it.
-    fn get_settings_defaults<D: SinkBatchSettings + Clone>(
-        config: BatchConfig<D, Merged>,
-    ) -> Result<BatchConfig<D, Merged>, BatchError> {
-        Ok(config)
-    }
 
     fn push(&mut self, item: Self::Input) -> PushResult<Self::Input>;
     fn is_empty(&self) -> bool;
