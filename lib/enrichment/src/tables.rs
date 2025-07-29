@@ -23,7 +23,7 @@
 //! efficient read-only access and can no longer add indexes or otherwise mutate
 //! the data.
 //!
-//! This data within the `ArcSwap` is accessed through the `TableSearch`
+//! This data within the `ArcSwap` is accessed through the `tableSearch`
 //! struct. Any transform that needs access to this can call
 //! `TableRegistry::as_readonly`. This returns a cheaply clonable struct that
 //! implements `vrl:EnrichmentTableSearch` through with the enrichment tables
@@ -35,9 +35,9 @@ use std::{
 };
 
 use arc_swap::ArcSwap;
-use vrl::value::{ObjectMap, Value};
 
-use super::{Condition, IndexHandle, Table};
+
+use super::{IndexHandle, Table};
 use crate::Case;
 
 /// A hashmap of name => implementation of an enrichment table.
@@ -163,11 +163,7 @@ impl TableRegistry {
         }
     }
 
-    /// Returns a cheaply clonable struct through that provides lock free read
-    /// access to the enrichment tables.
-    pub fn as_readonly(&self) -> TableSearch {
-        TableSearch(self.tables.clone())
-    }
+
 
     /// Returns the indexes that have been applied to the given table.
     /// If the table is reloaded we need these to reapply them to the new reloaded tables.
@@ -197,66 +193,6 @@ impl TableRegistry {
 impl std::fmt::Debug for TableRegistry {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fmt_enrichment_table(f, "TableRegistry", &self.tables)
-    }
-}
-
-/// Provides read only access to the enrichment tables via the
-/// `vrl::EnrichmentTableSearch` trait. Cloning this object is designed to be
-/// cheap. The underlying data will be shared by all clones.
-#[derive(Clone, Default)]
-pub struct TableSearch(Arc<ArcSwap<Option<TableMap>>>);
-
-impl TableSearch {
-    /// Search the given table to find the data.
-    ///
-    /// If we are in the writing stage, this function will return an error.
-    pub fn find_table_row<'a>(
-        &self,
-        table: &str,
-        case: Case,
-        condition: &'a [Condition<'a>],
-        select: Option<&[String]>,
-        wildcard: Option<&Value>,
-        index: Option<IndexHandle>,
-    ) -> Result<ObjectMap, String> {
-        let tables = self.0.load();
-        if let Some(ref tables) = **tables {
-            match tables.get(table) {
-                None => Err(format!("table {} not loaded", table)),
-                Some(table) => table.find_table_row(case, condition, select, wildcard, index),
-            }
-        } else {
-            Err("finish_load not called".to_string())
-        }
-    }
-
-    /// Search the enrichment table data with the given condition.
-    /// All conditions must match (AND).
-    /// Can return multiple matched records
-    pub fn find_table_rows<'a>(
-        &self,
-        table: &str,
-        case: Case,
-        condition: &'a [Condition<'a>],
-        select: Option<&[String]>,
-        wildcard: Option<&Value>,
-        index: Option<IndexHandle>,
-    ) -> Result<Vec<ObjectMap>, String> {
-        let tables = self.0.load();
-        if let Some(ref tables) = **tables {
-            match tables.get(table) {
-                None => Err(format!("table {} not loaded", table)),
-                Some(table) => table.find_table_rows(case, condition, select, wildcard, index),
-            }
-        } else {
-            Err("finish_load not called".to_string())
-        }
-    }
-}
-
-impl std::fmt::Debug for TableSearch {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt_enrichment_table(f, "EnrichmentTableSearch", &self.0)
     }
 }
 

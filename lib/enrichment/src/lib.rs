@@ -3,7 +3,7 @@
 pub mod tables;
 
 use dyn_clone::DynClone;
-pub use tables::{TableRegistry, TableSearch};
+pub use tables::{TableRegistry};
 use vrl::value::{ObjectMap, Value};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
