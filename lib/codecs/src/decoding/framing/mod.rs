@@ -3,10 +3,10 @@
 
 #![deny(missing_docs)]
 
-use std::{any::Any, fmt::Debug};
+use std::{any::Any};
 
-use ::bytes::Bytes;
-use dyn_clone::DynClone;
+
+
 use tokio_util::codec::LinesCodecError;
 
 use super::StreamDecodingError;
@@ -54,25 +54,3 @@ impl StreamDecodingError for BoxedFramingError {
         self.as_ref().can_continue()
     }
 }
-
-/// Produce byte frames from a byte stream / byte message.
-pub trait Framer:
-    tokio_util::codec::Decoder<Item = Bytes, Error = BoxedFramingError> + DynClone + Debug + Send + Sync
-{
-}
-
-/// Default implementation for `Framer`s that implement
-/// `tokio_util::codec::Decoder`.
-impl<Decoder> Framer for Decoder where
-    Decoder: tokio_util::codec::Decoder<Item = Bytes, Error = BoxedFramingError>
-        + Clone
-        + Debug
-        + Send
-        + Sync
-{
-}
-
-dyn_clone::clone_trait_object!(Framer);
-
-/// A `Box` containing a `Framer`.
-pub type BoxedFramer = Box<dyn Framer>;

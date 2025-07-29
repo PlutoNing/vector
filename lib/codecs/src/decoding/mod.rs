@@ -5,10 +5,10 @@ mod error;
 pub mod format;
 pub mod framing;
 
-use bytes::{Bytes, BytesMut};
+
 pub use error::StreamDecodingError;
 pub use framing::{
-    BoxedFramer, BoxedFramingError,
+    BoxedFramingError,
     FramingError,
 };
 
@@ -48,31 +48,6 @@ impl StreamDecodingError for Error {
         match self {
             Self::FramingError(error) => error.can_continue(),
             Self::ParsingError(_) => true,
-        }
-    }
-}
-
-
-/// Produce byte frames from a byte stream / byte message.
-#[derive(Debug, Clone)]
-pub enum Framer {
-    /// Uses an opaque `Framer` implementation for framing.
-    Boxed(BoxedFramer),
-}
-
-impl tokio_util::codec::Decoder for Framer {
-    type Item = Bytes;
-    type Error = BoxedFramingError;
-
-    fn decode(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
-        match self {
-            Framer::Boxed(framer) => framer.decode(src),
-        }
-    }
-
-    fn decode_eof(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
-        match self {
-            Framer::Boxed(framer) => framer.decode_eof(src),
         }
     }
 }
