@@ -36,7 +36,7 @@ pub use service::{
     Concurrency,
 
 };
-pub use sink::{PartitionBatchSink, StreamSink};
+pub use sink::{StreamSink};
 use snafu::Snafu;
 
 use vector_lib::{json_size::JsonSize, TimeZone};
