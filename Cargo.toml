@@ -92,7 +92,6 @@ members = [
   "lib/vector-core",
   "lib/vector-lib",
   "lib/vector-lookup",
-  "lib/vector-stream",
 ]
 
 [workspace.dependencies]

@@ -27,7 +27,7 @@
 // using `title`.  While, by itself, I think `description` makes a little more sense than `title`,
 // it makes it hard to do split-location documentation.
 //
-// For example, it would be nice to have helper types (i.e. `BatchConfig`, `MultilineConfig`, etc)
+// For example, it would be nice to have helper types (i.e. `batchConfig`, `MultilineConfig`, etc)
 // define their own titles, and then allow other structs that have theor types as fields specify a
 // description. This would be very useful in cases where fields are optional, such that you want the
 // field's title to be the title of the underlying type (e.g.  "Multi-line parsing configuration.")

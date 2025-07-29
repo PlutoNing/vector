@@ -32,6 +32,6 @@ pub trait KeyedTimer<K> {
     /// Unlike a typical stream, returning `None` only indicates that the queue
     /// is empty, not that the queue will never return anything else in the future.
     ///
-    /// Used primarily for property testing vis-á-vis `vector_stream::batcher::Batcher`.
+    /// Used primarily for property testing vis-á-vis `vector_stream::batcher::batcher`.
     fn poll_expired(&mut self, cx: &mut Context) -> Poll<Option<K>>;
 }

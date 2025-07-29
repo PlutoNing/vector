@@ -19,7 +19,6 @@ pub use vector_core::{
     EstimatedJsonEncodedSizeOf,
 };
 pub use vector_lookup as lookup;
-pub use vector_stream as stream;
 #[cfg(feature = "vrl")]
 pub use vrl;
 
