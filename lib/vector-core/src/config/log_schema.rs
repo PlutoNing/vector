@@ -1,6 +1,13 @@
 use std::sync::{LazyLock, OnceLock};
 
-use lookup::lookup_v2::OptionalTargetPath;
+/// =================== for OptionalTargetPath
+use vrl::owned_value_path;
+use vrl::path::PathPrefix;
+
+use vrl::path::PathParseError;
+/// =======================for OptionalTargetPath
+
+
 use lookup::{OwnedTargetPath, OwnedValuePath};
 use vector_config::configurable_component;
 
@@ -36,6 +43,68 @@ pub fn init_log_schema(log_schema: LogSchema, deny_if_set: bool) {
 pub fn log_schema() -> &'static LogSchema {
     LOG_SCHEMA.get().unwrap_or(&LOG_SCHEMA_DEFAULT)
 }
+/// optionalTargetPath impl
+#[configurable_component]
+#[derive(Debug, Clone, PartialEq, Eq, Default, Hash, PartialOrd, Ord)]
+#[cfg_attr(feature = "proptest", derive(proptest_derive::Arbitrary))]
+#[serde(try_from = "String", into = "String")]
+/// An optional path that deserializes an empty string to `None`.
+pub struct OptionalTargetPath {
+    pub path: Option<OwnedTargetPath>,
+}
+
+impl OptionalTargetPath {
+    pub fn none() -> Self {
+        Self { path: None }
+    }
+
+    pub fn event(path: &str) -> Self {
+        Self {
+            path: Some(OwnedTargetPath {
+                prefix: PathPrefix::Event,
+                path: owned_value_path!(path),
+            }),
+        }
+    }
+
+    pub fn from(prefix: PathPrefix, path: Option<OwnedValuePath>) -> Self {
+        Self {
+            path: path.map(|path| OwnedTargetPath { prefix, path }),
+        }
+    }
+
+    pub fn as_ref(&self) -> Option<&OwnedTargetPath> {
+        self.path.as_ref()
+    }
+}
+
+impl TryFrom<String> for OptionalTargetPath {
+    type Error = PathParseError;
+
+    fn try_from(src: String) -> Result<Self, Self::Error> {
+        if src.is_empty() {
+            Ok(Self { path: None })
+        } else {
+            OwnedTargetPath::try_from(src).map(|path| Self { path: Some(path) })
+        }
+    }
+}
+
+impl From<OptionalTargetPath> for String {
+    fn from(optional_path: OptionalTargetPath) -> Self {
+        match optional_path.path {
+            Some(path) => String::from(path),
+            None => String::new(),
+        }
+    }
+}
+
+impl From<OwnedTargetPath> for OptionalTargetPath {
+    fn from(path: OwnedTargetPath) -> Self {
+        Self { path: Some(path) }
+    }
+}
+
 
 /// Log schema.
 ///

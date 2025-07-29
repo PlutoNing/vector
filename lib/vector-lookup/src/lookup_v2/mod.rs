@@ -1,6 +1,5 @@
 mod optional_path;
 
-pub use optional_path::{OptionalTargetPath};
 use std::fmt;
 use vector_config_macros::configurable_component;
 
