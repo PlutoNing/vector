@@ -6,9 +6,6 @@
 pub mod decoding;
 pub mod encoding;
 
-pub use decoding::{
-    StreamDecodingError,
-};
 pub use encoding::{
     CharacterDelimitedEncoder, CharacterDelimitedEncoderConfig,
     JsonSerializer,
