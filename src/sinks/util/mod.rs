@@ -18,7 +18,7 @@ pub mod statistic;
 use std::borrow::Cow;
 
 pub use batch::{
-    Batch, BatchConfig, BatchSettings, BatchSize, BulkSizeBasedDefaultBatchSettings, Merged,
+    Batch, BatchSettings, BatchSize, BulkSizeBasedDefaultBatchSettings, Merged,
     NoDefaultsBatchSettings, PushResult, RealtimeEventBasedDefaultBatchSettings,
     RealtimeSizeBasedDefaultBatchSettings, SinkBatchSettings, Unmerged,
 };
