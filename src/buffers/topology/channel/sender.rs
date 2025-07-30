@@ -9,7 +9,7 @@ use vector_common::internal_event::{register, InternalEventHandle, Registered};
 use super::limited_queue::LimitedSender;
 use crate::buffers::buffer_usage_data::BufferUsageHandle;
 use std::time::Duration;
-use vector_lib::buffers::{Bufferable,WhenFull,};
+use vector_lib::config::{Bufferable,WhenFull,};
 use metrics::{histogram, Histogram};
 use vector_common::registered_event;
 registered_event! {

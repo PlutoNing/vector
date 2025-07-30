@@ -19,7 +19,7 @@ use futures::{Stream, StreamExt};
 use metrics::{histogram, Histogram};
 use tracing::Span;
 use crate::buffers::topology::channel::{self, LimitedReceiver, LimitedSender};
-use vector_lib::buffers::EventCount;
+use vector_lib::config::EventCount;
 use vector_lib::event::array::EventArrayIntoIter;
 #[cfg(any(test))]
 use vector_lib::event::{into_event_stream, EventStatus};

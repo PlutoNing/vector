@@ -29,5 +29,7 @@ pub mod config {
     pub use vector_core::event::Event;
     pub use vector_core::serde::{ascii_char,is_default};
     pub use vector_core::schema::Requirement;
-    pub use vector_buffers::spawn_named;
+    pub use vector_core::buffer::{WhenFull,InMemoryBufferable,Encodable,
+    EventCount,Bufferable,spawn_named};
+    // pub use crate::config::spawn_named;
 }

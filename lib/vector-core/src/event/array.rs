@@ -5,7 +5,7 @@
 use std::{iter, slice, sync::Arc, vec};
 
 use futures::{stream, Stream};
-use vector_buffers::EventCount;
+use crate::buffer::EventCount;
 use vector_common::{
     byte_size_of::ByteSizeOf,
     config::ComponentKey,

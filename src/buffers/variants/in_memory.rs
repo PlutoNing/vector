@@ -9,7 +9,7 @@ use crate::buffers::{
         channel::{limited, ReceiverAdapter, SenderAdapter},
     },
 };
-use vector_lib::buffers::Bufferable;
+use vector_lib::config::Bufferable;
 pub struct MemoryBuffer {
     capacity: NonZeroUsize,
 }

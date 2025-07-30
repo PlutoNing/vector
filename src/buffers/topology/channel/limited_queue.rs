@@ -12,9 +12,8 @@ use crossbeam_queue::ArrayQueue;
 use futures::Stream;
 use tokio::sync::{Notify, OwnedSemaphorePermit, Semaphore, TryAcquireError};
 
-use vector_lib::buffers::InMemoryBufferable;
+use vector_lib::config::InMemoryBufferable;
 
-/// Error returned by `LimitedSender::send` when the receiver has disconnected.
 #[derive(Debug, PartialEq, Eq)]
 pub struct SendError<T>(pub T);
 

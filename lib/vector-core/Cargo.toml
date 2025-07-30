@@ -6,8 +6,8 @@ edition = "2021"
 publish = false
 
 [lints.rust]
-unexpected_cfgs = { level = "warn", check-cfg = ['cfg(ddsketch_extended)'] }
-
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(ddsketch_extended)',
+'cfg(tokio_unstable)'] }
 [dependencies]
 async-trait = { version = "0.1", default-features = false }
 bitmask-enum = { version = "2.2.5", default-features = false }

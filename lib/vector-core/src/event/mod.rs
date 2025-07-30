@@ -12,7 +12,7 @@ pub use metric::{Metric, MetricKind, MetricTags, MetricValue, StatisticKind};
 pub use r#ref::{EventMutRef, EventRef};
 use serde::{Deserialize, Serialize};
 pub use trace::TraceEvent;
-use vector_buffers::EventCount;
+use crate::buffer::EventCount;
 use vector_common::{
     byte_size_of::ByteSizeOf, config::ComponentKey, finalization,
     json_size::JsonSize, EventDataEq,

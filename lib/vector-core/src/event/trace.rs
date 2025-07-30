@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use lookup::lookup_v2::TargetPath;
 use serde::{Deserialize, Serialize};
-use vector_buffers::EventCount;
+use crate::buffer::EventCount;
 use vector_common::{
     byte_size_of::ByteSizeOf, json_size::JsonSize, EventDataEq,
 };

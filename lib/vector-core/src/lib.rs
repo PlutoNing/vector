@@ -33,6 +33,7 @@ pub mod metrics;
 pub mod schema;
 pub mod serde;
 pub mod sink;
+pub mod buffer;
 pub mod source;
 pub mod time;
 pub mod transform;
