@@ -1,9 +1,7 @@
 use std::{
     collections::HashMap,
     future::ready,
-
     sync::{Arc, LazyLock, Mutex},
-
 };
 
 use futures::{StreamExt, TryStreamExt};
@@ -13,22 +11,13 @@ use stream_cancel::{StreamExt as StreamCancelExt, Trigger, Tripwire};
 use tokio::{
     select,
     sync::{mpsc::UnboundedSender, oneshot},
-
 };
 use tracing::Instrument;
 
-use vector_lib::internal_event::{
-    CountByteSize, InternalEventHandle as _,
-};
+use vector_lib::internal_event::{CountByteSize, InternalEventHandle as _};
 
 use vector_lib::{
-    buffers::{
-        topology::{
-            channel::{BufferSender},
-        },
-        BufferType,
-    },
-
+    buffers::{topology::channel::BufferSender, BufferType},
     EstimatedJsonEncodedSizeOf,
 };
 
@@ -40,16 +29,17 @@ use super::{
 };
 use crate::{
     config::{
-        ComponentKey, Config, DataType, EnrichmentTableConfig, Inputs, OutputId,
-        ProxyConfig, SinkContext, SourceContext,
+        ComponentKey, Config, DataType, EnrichmentTableConfig, Inputs, OutputId, ProxyConfig,
+        SinkContext, SourceContext,
     },
     event::{EventArray, EventContainer},
     internal_events::EventsReceived,
     shutdown::SourceShutdownCoordinator,
-    source_sender::{SourceSenderItem, CHUNK_SIZE},
     spawn_named,
     topology::task::TaskError,
     SourceSender,
+    sources::SourceSenderItem,
+    sources::CHUNK_SIZE
 };
 
 static ENRICHMENT_TABLES: LazyLock<vector_lib::enrichment::TableRegistry> =
@@ -67,14 +57,14 @@ static TRANSFORM_CONCURRENCY_LIMIT: LazyLock<usize> = LazyLock::new(|| {
 const INTERNAL_SOURCES: [&str; 2] = ["internal_logs", "internal_metrics"];
 
 struct Builder<'a> {
-    config: &'a super::Config,/* 现在的新config */
-    diff: &'a ConfigDiff,/* 新config带来的diff */
+    config: &'a super::Config,                       /* 现在的新config */
+    diff: &'a ConfigDiff,                            /* 新config带来的diff */
     shutdown_coordinator: SourceShutdownCoordinator, /*  */
     errors: Vec<String>,
     outputs: HashMap<OutputId, UnboundedSender<fanout::ControlMessage>>, /*  */
     tasks: HashMap<ComponentKey, Task>, /* 好像是source或者output的一个task, sink的也在这 */
     buffers: HashMap<ComponentKey, BuiltBuffer>,
-    inputs: HashMap<ComponentKey, (BufferSender<EventArray>, Inputs<OutputId>)>,/* buffer的tx */
+    inputs: HashMap<ComponentKey, (BufferSender<EventArray>, Inputs<OutputId>)>, /* buffer的tx */
     detach_triggers: HashMap<ComponentKey, Trigger>,
 }
 /* 基于config构建拓扑 */
@@ -96,10 +86,10 @@ impl<'a> Builder<'a> {
             detach_triggers: HashMap::new(),
         }
     }
-/* 构建一个拓扑,（config, diff已经初始化在了self） */
+    /* 构建一个拓扑,（config, diff已经初始化在了self） */
     /// Builds the new pieces of the topology found in `self.diff`.
     async fn build(mut self) -> Result<TopologyPieces, Vec<String>> {
-        let enrichment_tables = self.load_enrichment_tables().await;/* 一般是空的 */
+        let enrichment_tables = self.load_enrichment_tables().await; /* 一般是空的 */
         let source_tasks = self.build_sources(enrichment_tables).await; /* 构建source */
         self.build_transforms(enrichment_tables).await; /* 好像一般也是空的 */
         self.build_sinks(enrichment_tables).await; /* 构建sink */
@@ -136,14 +126,15 @@ impl<'a> Builder<'a> {
 
         finalized_outputs
     }
-/* build之前加载enrichment表 */
+    /* build之前加载enrichment表 */
     /// Loads, or reloads the enrichment tables.
     /// The tables are stored in the `ENRICHMENT_TABLES` global variable.
     async fn load_enrichment_tables(&mut self) -> &'static vector_lib::enrichment::TableRegistry {
         let mut enrichment_tables = HashMap::new();
-/* 'tables: 是一个标签，标记了这个 for 循环 */
+        /* 'tables: 是一个标签，标记了这个 for 循环 */
         // Build enrichment tables
-        'tables: for (name, table_outer) in self.config.enrichment_tables.iter() {/* 这里的循环一般是空的 */
+        'tables: for (name, table_outer) in self.config.enrichment_tables.iter() {
+            /* 这里的循环一般是空的 */
             let table_name = name.to_string();
             if ENRICHMENT_TABLES.needs_reload(&table_name) {
                 let indexes = if !self.diff.enrichment_tables.is_added(name) {
@@ -190,10 +181,10 @@ impl<'a> Builder<'a> {
 
         &ENRICHMENT_TABLES
     }
-/* 构建拓扑过程中调用,  */
+    /* 构建拓扑过程中调用,  */
     async fn build_sources(
         &mut self,
-        enrichment_tables: &vector_lib::enrichment::TableRegistry,/* 可能是空的 */
+        enrichment_tables: &vector_lib::enrichment::TableRegistry, /* 可能是空的 */
     ) -> HashMap<ComponentKey, Task> {
         let mut source_tasks = HashMap::new();
 
@@ -239,21 +230,24 @@ impl<'a> Builder<'a> {
             let mut controls = HashMap::new();
             let mut schema_definitions = HashMap::with_capacity(source_outputs.len());
 
-            for output in source_outputs.into_iter() {/* key可能就是my_source_id */
+            for output in source_outputs.into_iter() {
+                /* key可能就是my_source_id */
                 let mut rx = builder.add_source_output(output.clone(), key.clone());
-/* 把builder的self.default_output设置为tx, 返回rx */
+                /* 把builder的self.default_output设置为tx, 返回rx */
                 let (mut fanout, control) = Fanout::new();
                 let source_type = source.inner.get_component_name();
                 let source = Arc::new(key.clone());
-/* 这就开始导出source了? */
+                /* 这就开始导出source了? */
                 let pump = async move {
                     debug!("Source pump starting.");
 
                     while let Some(SourceSenderItem {
                         events: mut array,
                         send_reference,
-                    }) = rx.next().await/* 从rx读取 */
-                    { /* 如果读取到了 */
+                    }) = rx.next().await
+                    /* 从rx读取 */
+                    {
+                        /* 如果读取到了 */
                         array.set_output_id(&source);
                         array.set_source_type(source_type);
                         fanout
@@ -268,7 +262,7 @@ impl<'a> Builder<'a> {
                     debug!("Source pump finished normally.");
                     Ok(TaskOutput::Source)
                 };
-/* 把span塞到pump里面，push进去 */
+                /* 把span塞到pump里面，push进去 */
                 pumps.push(pump.instrument(span.clone()));
                 controls.insert(
                     OutputId {
@@ -328,11 +322,11 @@ impl<'a> Builder<'a> {
                 globals: self.config.global.clone(),
                 enrichment_tables: enrichment_tables.clone(),
                 shutdown: shutdown_signal, /* self.shutdown_coordinator里面那个 */
-                out: pipeline, /* 是self.default_output那个tx */
+                out: pipeline,             /* 是self.default_output那个tx */
                 proxy: ProxyConfig::merge_with_env(&self.config.global.proxy, &source.proxy),
                 schema_definitions,
                 schema: self.config.schema,
-            };/* impl SourceConfig for HostMetricsConfig */
+            }; /* impl SourceConfig for HostMetricsConfig */
             let source = source.inner.build(context).await;
             let server = match source {
                 Err(error) => {
@@ -351,7 +345,7 @@ impl<'a> Builder<'a> {
             // to shutdown unless some input is given.
             let server = async move {
                 debug!("Source starting.");
-/* 这里是开始获取指标的逻辑 */
+                /* 这里是开始获取指标的逻辑 */
                 let mut result = select! {
                     biased;
 
@@ -401,14 +395,13 @@ impl<'a> Builder<'a> {
 
         source_tasks
     }
-/* 构建完config之后, 构建enrichment, source,然后基于enrichment构建transform */
+    /* 构建完config之后, 构建enrichment, source,然后基于enrichment构建transform */
     async fn build_transforms(
         &mut self,
         _enrichment_tables: &vector_lib::enrichment::TableRegistry,
-    ) {/* 有调用 */
-
+    ) { /* 有调用 */
     }
-/* 获取config之后, 构建source, transform, sinks, 这里构建sinks */
+    /* 获取config之后, 构建source, transform, sinks, 这里构建sinks */
     async fn build_sinks(&mut self, enrichment_tables: &vector_lib::enrichment::TableRegistry) {
         let table_sinks = self
             .config
@@ -453,7 +446,7 @@ impl<'a> Builder<'a> {
             ) {
                 self.errors.append(&mut err);
             };
-/* buffer的tx rx */
+            /* buffer的tx rx */
             let (tx, rx) = if let Some(buffer) = self.buffers.remove(key) {
                 buffer
             } else {
@@ -473,7 +466,7 @@ impl<'a> Builder<'a> {
                     Err(error) => {
                         self.errors.push(format!("Sink \"{}\": {}", key, error));
                         continue;
-                    }/* buffer的tx rx */
+                    } /* buffer的tx rx */
                     Ok((tx, rx)) => (tx, Arc::new(Mutex::new(Some(rx.into_stream())))),
                 }
             };
@@ -540,9 +533,7 @@ impl<'a> Builder<'a> {
             /* 像是开启一个task, 运行上面这个siink */
             let task = Task::new(key.clone(), typetag, sink);
 
-
-
-/* key是sink的id */
+            /* key是sink的id */
             self.inputs.insert(key.clone(), (tx, sink_inputs.clone()));
             self.tasks.insert(key.clone(), task); /* 把sink task塞进去 */
             self.detach_triggers.insert(key.clone(), trigger);
@@ -559,12 +550,14 @@ pub struct TopologyPieces {
     pub(crate) detach_triggers: HashMap<ComponentKey, Trigger>, /*  */
 }
 /* 构建拓扑的方法 */
-impl TopologyPieces {/*  */
+impl TopologyPieces {
+    /*  */
     pub async fn build_or_log_errors(
-        config: &Config,/* 解析出的config */
-        diff: &ConfigDiff,/* 这个config的产生的变化 */
+        config: &Config,   /* 解析出的config */
+        diff: &ConfigDiff, /* 这个config的产生的变化 */
         buffers: HashMap<ComponentKey, BuiltBuffer>,
-    ) -> Option<Self> {/* 构建各种东西, source, sink等等 */
+    ) -> Option<Self> {
+        /* 构建各种东西, source, sink等等 */
         match TopologyPieces::build(config, diff, buffers).await {
             Err(errors) => {
                 for error in errors {
@@ -579,12 +572,10 @@ impl TopologyPieces {/*  */
     /// Builds only the new pieces, and doesn't check their topology.
     pub async fn build(
         config: &super::Config, /* 新config */
-        diff: &ConfigDiff, /* 新config产生的diff */
+        diff: &ConfigDiff,      /* 新config产生的diff */
         buffers: HashMap<ComponentKey, BuiltBuffer>,
     ) -> Result<Self, Vec<String>> {
-        Builder::new(config, diff, buffers)
-            .build()
-            .await
+        Builder::new(config, diff, buffers).build().await
     }
 }
 

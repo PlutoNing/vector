@@ -49,7 +49,6 @@ pub mod enrichment_tables;
 pub(crate) mod proto;
 #[allow(unreachable_pub)]
 pub mod sinks;
-pub mod source_sender;
 #[allow(unreachable_pub)]
 pub mod sources;
 
@@ -60,7 +59,7 @@ pub mod topology;
 #[allow(unreachable_pub)]
 pub mod transforms;
 
-pub use source_sender::SourceSender;
+pub use sources::SourceSender;
 pub use vector_lib::{event, metrics, schema};
 pub use vector_lib::{shutdown, Error, Result};
 
