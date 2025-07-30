@@ -1,7 +1,7 @@
-use bytes::{Buf, BufMut};
+use bytes::{Buf, BufMut};()
 use enumflags2::{bitflags, BitFlags, FromBitsError};
 use snafu::Snafu;
-use vector_buffers::encoding::{AsMetadata, Encodable};
+use vector_buffers::encoding::{Encodable};
 
 use super::{EventArray};
 
@@ -67,15 +67,6 @@ impl TryFrom<u32> for EventEncodableMetadata {
     }
 }
 
-impl AsMetadata for EventEncodableMetadata {
-    fn into_u32(self) -> u32 {
-        self.0.bits()
-    }
-
-    fn from_u32(value: u32) -> Option<Self> {
-        EventEncodableMetadata::try_from(value).ok()
-    }
-}
 impl Encodable for EventArray {
     type Metadata = EventEncodableMetadata;
     type EncodeError = EncodeError;

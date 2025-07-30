@@ -74,7 +74,7 @@ impl AsMetadata for () {
 /// information: encoding type, schema version, whether specific information is present in the
 /// encoded object, and so on.
 pub trait Encodable: Sized {
-    type Metadata: AsMetadata + Copy;
+    type Metadata: Copy;
     type EncodeError: error::Error + Send + Sync + 'static;
     type DecodeError: error::Error + Send + Sync + 'static;
 
