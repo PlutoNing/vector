@@ -43,7 +43,6 @@ pub mod expiring_hash_map;
 #[allow(unreachable_pub)]
 pub mod internal_events;
 pub mod app;
-pub mod async_read;
 
 #[allow(unreachable_pub)]
 pub mod codecs;
