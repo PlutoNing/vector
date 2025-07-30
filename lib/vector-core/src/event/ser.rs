@@ -1,7 +1,7 @@
 use bytes::{Buf, BufMut};
 use enumflags2::{bitflags, BitFlags, FromBitsError};
 use snafu::Snafu;
-use vector_buffers::encoding::{Encodable};
+use vector_buffers::Encodable;
 
 use super::{EventArray};
 
