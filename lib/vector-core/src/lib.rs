@@ -30,7 +30,6 @@
 pub mod config;
 pub mod event;
 pub mod fanout;
-pub mod ipallowlist;
 pub mod metrics;
 pub mod partition;
 pub mod schema;

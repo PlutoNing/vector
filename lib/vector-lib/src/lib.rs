@@ -12,7 +12,7 @@ pub use vector_config::impl_generate_config_from_default;
 #[cfg(feature = "vrl")]
 pub use vector_core::compile_vrl;
 pub use vector_core::{
-    buckets, default_data_dir, emit, event, fanout, ipallowlist, metric_tags, metrics, partition,
+    buckets, default_data_dir, emit, event, fanout, metric_tags, metrics, partition,
     quantiles, register, samples, schema, serde, sink, source, transform,
     EstimatedJsonEncodedSizeOf,
 };
