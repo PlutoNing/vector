@@ -20,12 +20,11 @@ use vector_lib::{
     ByteSizeOf, EstimatedJsonEncodedSizeOf,
 };
 use vrl::value::Value;
-
-mod errors;
-
 use crate::config::{ComponentKey, OutputId};
 use crate::schema::Definition;
-pub use errors::{ClosedError, StreamSendError};
+
+use tokio::sync::mpsc;
+use vector_lib::buffers::topology::channel::SendError;
 
 pub(crate) const CHUNK_SIZE: usize = 1000;
 
@@ -33,7 +32,34 @@ pub(crate) const CHUNK_SIZE: usize = 1000;
 const TEST_BUFFER_SIZE: usize = 100;
 
 const LAG_TIME_NAME: &str = "source_lag_time_seconds";
+#[derive(Clone, Debug)]
+pub struct ClosedError;
 
+impl fmt::Display for ClosedError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("Sender is closed.")
+    }
+}
+
+impl std::error::Error for ClosedError {}
+
+impl From<mpsc::error::SendError<Event>> for ClosedError {
+    fn from(_: mpsc::error::SendError<Event>) -> Self {
+        Self
+    }
+}
+
+impl From<mpsc::error::SendError<EventArray>> for ClosedError {
+    fn from(_: mpsc::error::SendError<EventArray>) -> Self {
+        Self
+    }
+}
+
+impl<T> From<SendError<T>> for ClosedError {
+    fn from(_: SendError<T>) -> Self {
+        Self
+    }
+}
 /// SourceSenderItem is a thin wrapper around [EventArray] used to track the send duration of a batch.
 ///
 /// This is needed because the send duration is calculated as the difference between when the batch
@@ -107,10 +133,10 @@ impl Builder {
         self.buf_size = n;
         self
     }
-/* 初始化builder的self.default_output . 返回对应的rx */
+    /* 初始化builder的self.default_output . 返回对应的rx */
     pub fn add_source_output(
         &mut self,
-        output: SourceOutput,/*  */
+        output: SourceOutput,        /*  */
         component_key: ComponentKey, /* 可能是source的Id */
     ) -> LimitedReceiver<SourceSenderItem> {
         let lag_time = self.lag_time.clone();
@@ -127,7 +153,7 @@ impl Builder {
                     lag_time,
                     log_definition,
                     output_id,
-                );/* output是channel 的tx */
+                ); /* output是channel 的tx */
                 self.default_output = Some(output);
                 rx /* 返回channel的rx */
             }
@@ -144,7 +170,7 @@ impl Builder {
             }
         }
     }
-/* 从builder获取一个source? */
+    /* 从builder获取一个source? */
     pub fn build(self) -> SourceSender {
         SourceSender {
             default_output: self.default_output,
@@ -161,7 +187,8 @@ pub struct SourceSender {
     named_outputs: HashMap<String, Output>,
 }
 
-impl SourceSender {/* 为什么这里需要个builder */
+impl SourceSender {
+    /* 为什么这里需要个builder */
     pub fn builder() -> Builder {
         Builder::default()
     }
@@ -258,7 +285,7 @@ impl SourceSender {/* 为什么这里需要个builder */
         self.named_outputs.insert(name, output);
         recv
     }
-/* 发送到buffer的tx */
+    /* 发送到buffer的tx */
     /// Get a mutable reference to the default output, panicking if none exists.
     const fn default_output_mut(&mut self) -> &mut Output {
         self.default_output.as_mut().expect("no default output")
@@ -290,7 +317,8 @@ impl SourceSender {/* 为什么这里需要个builder */
         E: Into<Event> + ByteSizeOf,
         I: IntoIterator<Item = E>,
         <I as IntoIterator>::IntoIter: ExactSizeIterator,
-    {/* 发送指标 */
+    {
+        /* 发送指标 */
         self.default_output_mut().send_batch(events).await
     }
 
@@ -370,14 +398,16 @@ impl fmt::Debug for Output {
     }
 }
 
-impl Output {/* 新建一个output, 制定了buffer大小 */
+impl Output {
+    /* 新建一个output, 制定了buffer大小 */
     fn new_with_buffer(
-        n: usize,  /* buffer大小 */
+        n: usize, /* buffer大小 */
         output: String,
         lag_time: Option<Histogram>,
         log_definition: Option<Arc<Definition>>,
         output_id: OutputId,
-    ) -> (Self, LimitedReceiver<SourceSenderItem>) {/* 看来output是基于channel的 */
+    ) -> (Self, LimitedReceiver<SourceSenderItem>) {
+        /* 看来output是基于channel的 */
         let (tx, rx) = channel::limited(n);
         (
             Self {
@@ -448,7 +478,7 @@ impl Output {/* 新建一个output, 制定了buffer大小 */
         }
         Ok(())
     }
-/*  */
+    /*  */
     async fn send_batch<I, E>(&mut self, events: I) -> Result<(), ClosedError>
     where
         E: Into<Event> + ByteSizeOf,
