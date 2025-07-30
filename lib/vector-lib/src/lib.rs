@@ -24,7 +24,7 @@ pub mod config {
         clone_input_definitions, init_log_schema, log_schema, proxy,
         DataType, GlobalOptions, Input, LegacyKey, LogNamespace, LogSchema,
         OutputId, SourceOutput, TransformOutput,
-        WildcardMatching, MEMORY_BUFFER_DEFAULT_MAX_EVENTS,
+        WildcardMatching,
     };
     pub use vector_core::event::Event;
     pub use vector_core::serde::{ascii_char,is_default};

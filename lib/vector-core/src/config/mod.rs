@@ -1,5 +1,5 @@
 use std::sync::Arc;
-use std::{collections::HashMap, fmt, num::NonZeroUsize};
+use std::{collections::HashMap, fmt};
 
 use bitmask_enum::bitmask;
 use bytes::Bytes;
@@ -22,9 +22,6 @@ use vector_config::configurable_component;
 use vrl::value::Value;
 
 use crate::schema;
-
-pub const MEMORY_BUFFER_DEFAULT_MAX_EVENTS: NonZeroUsize =
-    vector_buffers::config::memory_buffer_default_max_events();
 
 // This enum should be kept alphabetically sorted as the bitmask value is used when
 // sorting sources by data type in the GraphQL API.
