@@ -16,8 +16,8 @@ use vrl::path::OwnedValuePath;
 pub use vrl::path::{PathParseError, ValuePath};
 use vrl::value::KeyString;
 use vrl::value::Value;
-
-use crate::{event::Event, serde::is_default};
+pub use vector_lib::serde::{is_default};
+use crate::{event::Event};
 /// ========================ownedValuePath impl ======================
 /// A wrapper around `OwnedValuePath` that allows it to be used in Vector config.
 /// This requires a valid path to be used. If you want to allow optional paths,

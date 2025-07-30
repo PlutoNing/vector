@@ -9,7 +9,10 @@ use vector_lib::{conversion::Conversion, TimeZone};
 use vrl::value::{ObjectMap, Value};
 
 use crate::config::EnrichmentTableConfig;
-
+/// move from src/serde.rs
+pub const fn default_true() -> bool {
+    true
+}
 /// File encoding configuration.
 #[configurable_component]
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -26,7 +29,7 @@ pub enum Encoding {
         /// the values will be used for the names of each column. This is the default behavior.
         ///
         /// When set to `false`, columns are referred to by their numerical index.
-        #[serde(default = "crate::serde::default_true")]
+        #[serde(default = "default_true")]
         include_headers: bool,
 
         /// The delimiter used to separate fields in each row of the CSV file.

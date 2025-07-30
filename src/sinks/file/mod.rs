@@ -23,7 +23,7 @@ use vector_lib::{
     internal_event::{CountByteSize, EventsSent, InternalEventHandle as _, Output, Registered},
     EstimatedJsonEncodedSizeOf, TimeZone,
 };
-
+pub use vector_lib::serde::{is_default};
 use crate::{
     codecs::{Encoder, EncodingConfigWithFraming, SinkType, Transformer},
     config::{GenerateConfig, Input, SinkConfig, SinkContext},
@@ -67,7 +67,7 @@ pub struct FileSinkConfig {
     pub encoding: EncodingConfigWithFraming,
 
     #[configurable(derived)]
-    #[serde(default, skip_serializing_if = "crate::serde::is_default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub compression: Compression,
 
     #[configurable(derived)]

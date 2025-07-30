@@ -48,7 +48,6 @@ pub mod enrichment_tables;
 pub mod line_agg;
 #[allow(unreachable_pub)]
 pub(crate) mod proto;
-pub mod serde;
 #[allow(unreachable_pub)]
 pub mod sinks;
 pub mod source_sender;
