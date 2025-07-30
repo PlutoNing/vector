@@ -9,7 +9,6 @@ pub use vector_lib::configurable::configurable_component;
 pub use vector_lib::{
     config::Input,
     event::Value,
-    partition::Partitioner,
     schema::Requirement,
     sink::{StreamSink, VectorSink},
     ByteSizeOf, EstimatedJsonEncodedSizeOf,

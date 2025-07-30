@@ -31,7 +31,6 @@ pub mod config;
 pub mod event;
 pub mod fanout;
 pub mod metrics;
-pub mod partition;
 pub mod schema;
 pub mod serde;
 pub mod sink;
