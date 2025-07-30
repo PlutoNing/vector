@@ -20,9 +20,9 @@ use vector_lib::{
     buffers::{topology::channel::BufferSender, BufferType},
     EstimatedJsonEncodedSizeOf,
 };
-
+use crate::core::fanout::{self, Fanout};
 use super::{
-    fanout::{self, Fanout},
+    // fanout::{self, Fanout},
     schema,
     task::{Task, TaskOutput},
     BuiltBuffer, ConfigDiff,

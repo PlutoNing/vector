@@ -7,7 +7,7 @@
 //! part contains config related items including config traits for
 //! each type of component.
 
-pub(super) use vector_lib::fanout;
+pub(super) use crate::core::fanout;
 pub mod schema;
 
 pub mod builder;

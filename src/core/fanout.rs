@@ -5,10 +5,9 @@ use futures_util::{pending, poll};
 use indexmap::IndexMap;
 use tokio::sync::mpsc;
 use tokio_util::sync::ReusableBoxFuture;
-use vector_buffers::topology::channel::BufferSender;
-
-use crate::{config::ComponentKey, event::EventArray};
-
+use vector_lib::buffers::topology::channel::{BufferSender};
+use vector_lib::{config::ComponentKey, event::EventArray};
+/// doc
 pub enum ControlMessage {
     /// Adds a new sink to the fanout.
     Add(ComponentKey, BufferSender<EventArray>),
@@ -37,17 +36,18 @@ impl fmt::Debug for ControlMessage {
         }
     }
 }
-
+/// doc
 // TODO: We should really wrap this in a custom type that has dedicated methods for each operation
 // so that high-lever components don't need to do the raw channel sends, etc.
 pub type ControlChannel = mpsc::UnboundedSender<ControlMessage>;
-
+/// doc
 pub struct Fanout {
     senders: IndexMap<ComponentKey, Option<Sender>>,
     control_channel: mpsc::UnboundedReceiver<ControlMessage>,
 }
 
 impl Fanout {
+    /// doc
     pub fn new() -> (Self, ControlChannel) {
         let (control_tx, control_rx) = mpsc::unbounded_channel();
 

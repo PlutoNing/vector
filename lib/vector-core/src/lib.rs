@@ -29,7 +29,6 @@
 
 pub mod config;
 pub mod event;
-pub mod fanout;
 pub mod metrics;
 pub mod schema;
 pub mod serde;
