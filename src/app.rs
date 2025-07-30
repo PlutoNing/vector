@@ -18,7 +18,7 @@ use tokio::sync::broadcast::error::RecvError;
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
 use crate::{
-    cli::{handle_config_errors, LogFormat, Opts, RootOpts, WatchConfigMethod},
+    cli::{handle_config_errors, Opts, RootOpts, WatchConfigMethod},
     config::{self, Config, ConfigPath},
     signal::{SignalHandler, SignalPair, SignalRx, SignalTo},
     topology::{
@@ -152,7 +152,6 @@ impl Application {
 
         init_logging(
             true,
-            opts.root.log_format,
             opts.log_level(),
             opts.root.internal_log_rate_limit,
         );
@@ -406,12 +405,8 @@ pub async fn load_configs(
     Ok(config)
 }
 
-pub fn init_logging(_color: bool, format: LogFormat, log_level: &str, _rate: u64) {
+pub fn init_logging(_color: bool, log_level: &str, _rate: u64) {
     let level = get_log_levels(log_level);
-    let _json = match format {
-        LogFormat::Text => false,
-        LogFormat::Json => true,
-    };
     debug!(message = "Internal log rate limit configured.",);
     info!(message = "Log level is enabled.", level = ?level);
 }

@@ -108,12 +108,6 @@ pub struct RootOpts {
     #[arg(short, long, action = ArgAction::Count)]
     pub quiet: u8,
 
-    /// Set the logging format
-    #[arg(long, default_value = "text", env = "VECTOR_LOG_FORMAT")]
-    pub log_format: LogFormat,
-
-
-
     /// Watch for changes in configuration file, and reload accordingly.
     #[arg(short, long, env = "VECTOR_WATCH_CONFIG")]
     pub watch_config: bool,
@@ -204,12 +198,6 @@ impl RootOpts {
     pub fn init_global(&self) {
         crate::metrics::init_global().expect("metrics initialization failed");
     }
-}
-
-#[derive(clap::ValueEnum, Debug, Clone, Copy, PartialEq, Eq)]
-pub enum LogFormat {
-    Text,
-    Json,
 }
 
 #[derive(clap::ValueEnum, Debug, Clone, Copy, PartialEq, Eq)]
