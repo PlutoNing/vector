@@ -18,7 +18,7 @@ use chrono::Utc;
 use futures::{Stream, StreamExt};
 use metrics::{histogram, Histogram};
 use tracing::Span;
-use vector_lib::buffers::topology::channel::{self, LimitedReceiver, LimitedSender};
+use crate::buffers::topology::channel::{self, LimitedReceiver, LimitedSender};
 use vector_lib::buffers::EventCount;
 use vector_lib::event::array::EventArrayIntoIter;
 #[cfg(any(test))]
@@ -37,7 +37,7 @@ use crate::config::{ComponentKey, OutputId};
 use crate::schema::Definition;
 
 use tokio::sync::mpsc;
-use vector_lib::buffers::topology::channel::SendError;
+use crate::buffers::topology::channel::SendError;
 
 
 

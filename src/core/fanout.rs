@@ -5,7 +5,7 @@ use futures_util::{pending, poll};
 use indexmap::IndexMap;
 use tokio::sync::mpsc;
 use tokio_util::sync::ReusableBoxFuture;
-use vector_lib::buffers::topology::channel::{BufferSender};
+use crate::buffers::topology::channel::{BufferSender};
 use vector_lib::{config::ComponentKey, event::EventArray};
 /// doc
 pub enum ControlMessage {

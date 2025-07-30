@@ -28,7 +28,7 @@ use tokio::{
 };
 use tracing::Instrument;
 use vector_lib::trigger::DisabledTrigger;
-use vector_lib::{buffers::topology::channel::BufferSender};
+use crate::{buffers::topology::channel::BufferSender};
 
 pub type ShutdownErrorReceiver = mpsc::UnboundedReceiver<ShutdownError>;
 

@@ -5,7 +5,6 @@
 #![deny(unused_assignments)]
 #![deny(unused_comparisons)]
 #![deny(warnings)]
-#![deny(missing_docs)]
 #![cfg_attr(docsrs, feature(doc_cfg), deny(rustdoc::broken_intra_doc_links))]
 #![allow(async_fn_in_trait)]
 #![allow(clippy::approx_constant)]
@@ -45,6 +44,7 @@ pub mod app;
 pub mod codecs;
 pub mod common;
 pub mod core;
+pub mod buffers;
 pub mod enrichment_tables;
 #[allow(unreachable_pub)]
 pub(crate) mod proto;

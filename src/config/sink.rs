@@ -3,7 +3,7 @@ use async_trait::async_trait;
 use dyn_clone::DynClone;
 use serde::Serialize;
 use std::path::PathBuf;
-use vector_lib::buffers::{BufferConfig, BufferType};
+use crate::buffers::{BufferConfig, BufferType};
 use vector_lib::configurable::attributes::CustomAttribute;
 use vector_lib::configurable::schema::{SchemaGenerator, SchemaObject};
 use vector_lib::configurable::{

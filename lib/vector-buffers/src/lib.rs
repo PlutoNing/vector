@@ -11,26 +11,16 @@
 #![allow(clippy::must_use_candidate)]
 #![allow(async_fn_in_trait)]
 
-#[macro_use]
-extern crate tracing;
-
-mod buffer_usage_data;
-use std::error;
 use bytes::{Buf, BufMut};
-pub mod config;
-pub use config::{BufferConfig, BufferType};
+use std::error;
+
 use vector_config::configurable_component;
 
-pub(crate) use vector_common::Result;
 
-pub mod encoding;
-pub mod topology;
-
-pub(crate) mod variants;
 
 use std::fmt::Debug;
 
-use vector_common::{byte_size_of::ByteSizeOf};
+use vector_common::byte_size_of::ByteSizeOf;
 
 /// Event handling behavior when a buffer is full.
 #[configurable_component]
@@ -111,7 +101,7 @@ where
 }
 
 #[track_caller]
-pub(crate) fn spawn_named<T>(
+pub fn spawn_named<T>(
     task: impl std::future::Future<Output = T> + Send + 'static,
     _name: &str,
 ) -> tokio::task::JoinHandle<T>
@@ -127,7 +117,6 @@ where
     #[cfg(not(tokio_unstable))]
     tokio::spawn(task)
 }
-
 
 /// An object that can encode and decode itself to and from a buffer.
 ///
@@ -225,4 +214,3 @@ pub trait Encodable: Sized {
         buffer: B,
     ) -> std::result::Result<Self, Self::DecodeError>;
 }
-

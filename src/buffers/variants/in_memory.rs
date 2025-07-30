@@ -2,15 +2,14 @@ use std::{error::Error, num::NonZeroUsize};
 
 use async_trait::async_trait;
 
-use crate::{
+use crate::buffers::{
     buffer_usage_data::BufferUsageHandle,
     topology::{
         builder::IntoBuffer,
         channel::{limited, ReceiverAdapter, SenderAdapter},
     },
-    Bufferable,
 };
-
+use vector_lib::buffers::Bufferable;
 pub struct MemoryBuffer {
     capacity: NonZeroUsize,
 }

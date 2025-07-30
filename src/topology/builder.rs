@@ -17,9 +17,9 @@ use tracing::Instrument;
 use vector_lib::internal_event::{CountByteSize, InternalEventHandle as _};
 
 use vector_lib::{
-    buffers::{topology::channel::BufferSender, BufferType},
     EstimatedJsonEncodedSizeOf,
 };
+use crate::buffers::{BufferType, topology::channel::BufferSender};
 use crate::core::fanout::{self, Fanout};
 use super::{
     // fanout::{self, Fanout},

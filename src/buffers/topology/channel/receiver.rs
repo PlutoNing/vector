@@ -11,12 +11,10 @@ use tokio_util::sync::ReusableBoxFuture;
 
 
 use super::limited_queue::LimitedReceiver;
-use crate::{
+use crate::buffers::{
     buffer_usage_data::BufferUsageHandle,
-
-    Bufferable,
 };
-
+use vector_lib::buffers::Bufferable;
 /// Adapter for papering over various receiver backends.
 #[derive(Debug)]
 pub enum ReceiverAdapter<T: Bufferable> {

@@ -10,16 +10,12 @@ use snafu::{ResultExt, Snafu};
 use tracing::Span;
 use vector_common::{config::ComponentKey, finalization::Finalizable};
 use vector_config::configurable_component;
-
-use crate::{
-    topology::{
+use crate::buffers::topology::{
         builder::{TopologyBuilder, TopologyError},
         channel::{BufferReceiver, BufferSender},
-    },
-    variants::{MemoryBuffer},
-    Bufferable, WhenFull,
-};
-
+    };
+use crate::buffers::variants::{MemoryBuffer};
+use vector_lib::buffers::{Bufferable,WhenFull,};
 #[derive(Debug, Snafu)]
 pub enum BufferBuildError {
     #[snafu(display("the configured buffer type requires `data_dir` be specified"))]
