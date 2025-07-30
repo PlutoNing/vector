@@ -34,7 +34,7 @@ use self::task::{TaskError, TaskResult};
 use crate::{
     config::{Config, ConfigDiff},
     event::EventArray,
-    signal::ShutdownError,
+    app::ShutdownError,
 };
 
 type TaskHandle = tokio::task::JoinHandle<TaskResult>;

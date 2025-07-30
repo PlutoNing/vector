@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use tokio::sync::{Mutex, MutexGuard};
 
-use crate::{config, signal::ShutdownError, topology::RunningTopology};
+use crate::{config, app::ShutdownError, topology::RunningTopology};
 
 #[derive(Clone, Debug)]
 pub struct SharedTopologyController(Arc<Mutex<TopologyController>>);

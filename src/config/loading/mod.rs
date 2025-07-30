@@ -19,7 +19,7 @@ pub use source::*;
 use super::{
     builder::ConfigBuilder, format, vars, Config, ConfigPath, Format, FormatHint,
 };
-use crate::{signal};
+
 
 pub static CONFIG_PATHS: Mutex<Vec<ConfigPath>> = Mutex::new(Vec::new());
 
@@ -132,7 +132,7 @@ pub fn load_from_paths(config_paths: &[ConfigPath]) -> Result<Config, Vec<String
 /// provider instantiation is skipped.
 pub async fn load_from_paths_with_provider_and_secrets(
     config_paths: &[ConfigPath], /* 配置文件列表 */
-    signal_handler: &mut signal::SignalHandler,
+    signal_handler: &mut crate::app::SignalHandler,
     allow_empty: bool,
 ) -> Result<Config, Vec<String>> {
     let mut builder = load_builder_from_paths(config_paths)?;

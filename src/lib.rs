@@ -49,7 +49,6 @@ pub mod line_agg;
 #[allow(unreachable_pub)]
 pub(crate) mod proto;
 pub mod serde;
-pub mod signal;
 #[allow(unreachable_pub)]
 pub mod sinks;
 pub mod source_sender;

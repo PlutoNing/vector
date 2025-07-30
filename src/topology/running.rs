@@ -17,7 +17,7 @@ use crate::{
     config::{ComponentKey, Config, ConfigDiff, Inputs, OutputId, Resource},
     event::EventArray,
     shutdown::SourceShutdownCoordinator,
-    signal::ShutdownError,
+    app::ShutdownError,
     spawn_named,
 };
 use futures::{future, Future, FutureExt};
