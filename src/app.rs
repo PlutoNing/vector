@@ -18,7 +18,7 @@ use tokio::sync::broadcast::error::RecvError;
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
 use crate::{
-    cli::{Opts, RootOpts, WatchConfigMethod},
+    cli::{Opts, RootOpts},
     config::{self, Config, ConfigPath},
     signal::{SignalHandler, SignalPair, SignalRx, SignalTo},
     topology::{
@@ -35,7 +35,13 @@ static WORKER_THREADS: AtomicUsize = AtomicUsize::new(0);
 pub fn worker_threads() -> Option<NonZeroUsize> {
     NonZeroUsize::new(WORKER_THREADS.load(Ordering::Relaxed))
 }
-
+/// Refer to [`crate::cli::watchConfigMethod`] for details.
+pub enum WatcherConfig {
+    /// Recommended watcher for the current OS.
+    RecommendedWatcher,
+    /// A poll-based watcher that checks for file changes at regular intervals.
+    PollWatcher(u64),
+}
 /* 定义app的config */
 pub struct ApplicationConfig {
     pub config_paths: Vec<config::ConfigPath>, /* 配置文件路径 */
@@ -73,7 +79,6 @@ impl ApplicationConfig {
 
         let watcher_conf = if opts.watch_config {
             Some(watcher_config(
-                opts.watch_config_method,
                 opts.watch_config_poll_interval_seconds,
             ))
         } else {
@@ -378,7 +383,7 @@ pub fn build_runtime(threads: Option<usize>, thread_name: &str) -> Result<Runtim
 /*运行后来到这里, 加载配置  20250717152203, 读取配置文件, 解析, 存入config结构体 */
 pub async fn load_configs(
     config_paths: &[ConfigPath], /* 里面是搜索的可能的conf路径? */
-    _watcher_conf: Option<config::watcher::WatcherConfig>,
+    _watcher_conf: Option<WatcherConfig>,
 
     allow_empty_config: bool,
     graceful_shutdown_duration: Option<Duration>,
@@ -420,11 +425,8 @@ pub fn init_logging(_color: bool, log_level: &str, _rate: u64) {
 }
 
 pub fn watcher_config(
-    method: WatchConfigMethod,
-    interval: NonZeroU64,
-) -> config::watcher::WatcherConfig {
-    match method {
-        WatchConfigMethod::Recommended => config::watcher::WatcherConfig::RecommendedWatcher,
-        WatchConfigMethod::Poll => config::watcher::WatcherConfig::PollWatcher(interval.into()),
-    }
+    _interval: NonZeroU64,
+) -> WatcherConfig {
+        WatcherConfig::RecommendedWatcher
+
 }
