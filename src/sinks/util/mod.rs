@@ -7,7 +7,6 @@ pub mod builder;
 pub mod compressor;
 pub mod metadata;
 pub mod normalizer;
-pub mod partitioner;
 pub mod processed_event;
 pub mod request_builder;
 pub mod retries;
