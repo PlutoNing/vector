@@ -53,24 +53,3 @@ impl Condition {
         }
     }
 }
-
-
-pub trait Conditional: std::fmt::Debug {
-    /// Checks if a condition is true.
-    ///
-    /// The event should not be modified, it is only mutable so it can be passed into VRL, but VRL type checking prevents mutation.
-    fn check(&self, event: Event) -> (bool, Event);
-
-    /// Checks if a condition is true, with a `Result`-oriented return for easier composition.
-    ///
-    /// This can be mildly expensive for conditions that do not often match, as it allocates a string for the error
-    /// case. As such, it should typically be avoided in hot paths.
-    fn check_with_context(&self, e: Event) -> (Result<(), String>, Event) {
-        let (result, event) = self.check(e);
-        if result {
-            (Ok(()), event)
-        } else {
-            (Err("condition failed".into()), event)
-        }
-    }
-}
