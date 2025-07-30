@@ -1,13 +1,16 @@
 //! Functionality to handle enrichment tables.
 use enum_dispatch::enum_dispatch;
 use vector_lib::configurable::configurable_component;
-pub use vector_lib::enrichment::{Condition, IndexHandle, Table};
+pub use crate::enrichment_tables::enrichment::{Condition, IndexHandle, Table};
 
 use crate::config::{
     ComponentKey, EnrichmentTableConfig, GenerateConfig, GlobalOptions, SinkConfig, SourceConfig,
 };
 
+/// doc
 pub mod file;
+/// doc
+pub mod enrichment;
 
 /// Configuration options for an [enrichment table](https://vector.dev/docs/reference/glossary/#enrichment-tables) to be used in a
 /// [`remap`](https://vector.dev/docs/reference/configuration/transforms/remap/) transform. Currently supported are:

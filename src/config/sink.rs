@@ -166,7 +166,7 @@ dyn_clone::clone_trait_object!(SinkConfig);
 #[derive(Clone)]
 pub struct SinkContext {
     pub globals: GlobalOptions,
-    pub enrichment_tables: vector_lib::enrichment::TableRegistry,
+    pub enrichment_tables: crate::enrichment_tables::enrichment::TableRegistry,
     pub proxy: ProxyConfig,
     pub schema: schema::Options,
     pub app_name: String,

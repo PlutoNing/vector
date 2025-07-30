@@ -97,7 +97,7 @@ impl Graph {
                 Node::Transform {
                     in_ty: transform.inner.input().data_type(),
                     outputs: transform.inner.outputs(
-                        vector_lib::enrichment::TableRegistry::default(),
+                        crate::enrichment_tables::enrichment::TableRegistry::default(),
                         &[(id.into(), schema::Definition::any())],
                         schema.log_namespace(),
                     ),

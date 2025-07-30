@@ -42,8 +42,8 @@ use crate::{
     sources::CHUNK_SIZE
 };
 
-static ENRICHMENT_TABLES: LazyLock<vector_lib::enrichment::TableRegistry> =
-    LazyLock::new(vector_lib::enrichment::TableRegistry::default);
+static ENRICHMENT_TABLES: LazyLock<crate::enrichment_tables::enrichment::TableRegistry> =
+    LazyLock::new(crate::enrichment_tables::enrichment::TableRegistry::default);
 
 pub(crate) static SOURCE_SENDER_BUFFER_SIZE: LazyLock<usize> =
     LazyLock::new(|| *TRANSFORM_CONCURRENCY_LIMIT * CHUNK_SIZE);
@@ -129,7 +129,7 @@ impl<'a> Builder<'a> {
     /* build之前加载enrichment表 */
     /// Loads, or reloads the enrichment tables.
     /// The tables are stored in the `ENRICHMENT_TABLES` global variable.
-    async fn load_enrichment_tables(&mut self) -> &'static vector_lib::enrichment::TableRegistry {
+    async fn load_enrichment_tables(&mut self) -> &'static crate::enrichment_tables::enrichment::TableRegistry {
         let mut enrichment_tables = HashMap::new();
         /* 'tables: 是一个标签，标记了这个 for 循环 */
         // Build enrichment tables
@@ -184,7 +184,7 @@ impl<'a> Builder<'a> {
     /* 构建拓扑过程中调用,  */
     async fn build_sources(
         &mut self,
-        enrichment_tables: &vector_lib::enrichment::TableRegistry, /* 可能是空的 */
+        enrichment_tables: &crate::enrichment_tables::enrichment::TableRegistry, /* 可能是空的 */
     ) -> HashMap<ComponentKey, Task> {
         let mut source_tasks = HashMap::new();
 
@@ -398,11 +398,11 @@ impl<'a> Builder<'a> {
     /* 构建完config之后, 构建enrichment, source,然后基于enrichment构建transform */
     async fn build_transforms(
         &mut self,
-        _enrichment_tables: &vector_lib::enrichment::TableRegistry,
+        _enrichment_tables: &crate::enrichment_tables::enrichment::TableRegistry,
     ) { /* 有调用 */
     }
     /* 获取config之后, 构建source, transform, sinks, 这里构建sinks */
-    async fn build_sinks(&mut self, enrichment_tables: &vector_lib::enrichment::TableRegistry) {
+    async fn build_sinks(&mut self, enrichment_tables: &crate::enrichment_tables::enrichment::TableRegistry) {
         let table_sinks = self
             .config
             .enrichment_tables

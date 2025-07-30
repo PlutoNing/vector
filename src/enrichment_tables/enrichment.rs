@@ -11,7 +11,7 @@ use std::{
 use arc_swap::ArcSwap;
 /// A hashmap of name => implementation of an enrichment table.
 type TableMap = HashMap<String, Box<dyn Table + Send + Sync>>;
-
+/// doc
 #[derive(Clone, Default)]
 pub struct TableRegistry {
     loading: Arc<Mutex<Option<TableMap>>>,
@@ -156,35 +156,49 @@ impl TableRegistry {
         }
     }
 }
-
+/// doc
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct IndexHandle(pub usize);
-
+/// doc
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Condition<'a> {
     /// Condition exactly matches the field value.
-    Equals { field: &'a str, value: Value },
+    Equals {
+        /// doc
+        field: &'a str,
+        /// doc
+        value: Value,
+    },
     /// The date in the field is between from and to (inclusive).
     BetweenDates {
+        /// doc
         field: &'a str,
+        /// doc
         from: chrono::DateTime<chrono::Utc>,
+        /// doc
         to: chrono::DateTime<chrono::Utc>,
     },
     /// The date in the field is greater than or equal to `from`.
     FromDate {
+        /// doc
         field: &'a str,
+        /// doc
         from: chrono::DateTime<chrono::Utc>,
     },
     /// The date in the field is less than or equal to `to`.
     ToDate {
+        /// doc
         field: &'a str,
+        /// doc
         to: chrono::DateTime<chrono::Utc>,
     },
 }
-
+/// doc
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Case {
+    /// doc
     Sensitive,
+    /// doc
     Insensitive,
 }
 

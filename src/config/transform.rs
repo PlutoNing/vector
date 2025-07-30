@@ -116,7 +116,7 @@ pub struct TransformContext {
 
     pub globals: GlobalOptions,
 
-    pub enrichment_tables: vector_lib::enrichment::TableRegistry,
+    pub enrichment_tables: crate::enrichment_tables::enrichment::TableRegistry,
 
     /// Tracks the schema IDs assigned to schemas exposed by the transform.
     ///
@@ -194,7 +194,7 @@ pub trait TransformConfig: DynClone + NamedComponent + core::fmt::Debug + Send +
     /// of events flowing through the transform.
     fn outputs(
         &self,
-        enrichment_tables: vector_lib::enrichment::TableRegistry,
+        enrichment_tables: crate::enrichment_tables::enrichment::TableRegistry,
         input_definitions: &[(OutputId, schema::Definition)],
 
         // This only exists for transforms that create logs from non-logs, to know which namespace
@@ -256,7 +256,7 @@ pub fn get_transform_output_ids<T: TransformConfig + ?Sized>(
 ) -> impl Iterator<Item = OutputId> + '_ {
     transform
         .outputs(
-            vector_lib::enrichment::TableRegistry::default(),
+            crate::enrichment_tables::enrichment::TableRegistry::default(),
             &[(key.clone().into(), schema::Definition::any())],
             global_log_namespace,
         )

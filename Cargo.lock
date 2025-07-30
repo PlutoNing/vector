@@ -2637,16 +2637,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c34f04666d835ff5d62e058c3995147c06f42fe86ff053337632bca83e42702d"
 
 [[package]]
-name = "enrichment"
-version = "0.1.0"
-dependencies = [
- "arc-swap",
- "chrono",
- "dyn-clone",
- "vrl",
-]
-
-[[package]]
 name = "enum-as-inner"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -9547,7 +9537,6 @@ dependencies = [
 name = "vector-lib"
 version = "0.1.0"
 dependencies = [
- "enrichment",
  "vector-buffers",
  "vector-common",
  "vector-config",

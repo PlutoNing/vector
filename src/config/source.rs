@@ -106,7 +106,7 @@ dyn_clone::clone_trait_object!(SourceConfig);
 pub struct SourceContext {
     pub key: ComponentKey, /*   source的id  */
     pub globals: GlobalOptions,
-    pub enrichment_tables: vector_lib::enrichment::TableRegistry,
+    pub enrichment_tables: crate::enrichment_tables::enrichment::TableRegistry,
     pub shutdown: ShutdownSignal,  /* self.shutdown_coordinator里面那个 */
     pub out: SourceSender, /*  是self.default_output那个tx*/
     pub proxy: ProxyConfig,

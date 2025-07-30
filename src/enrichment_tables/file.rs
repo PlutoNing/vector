@@ -4,7 +4,7 @@ use std::{collections::HashMap, fs, hash::Hasher, path::PathBuf, time::SystemTim
 use bytes::Bytes;
 use tracing::trace;
 use vector_lib::configurable::configurable_component;
-use vector_lib::enrichment::{Case, Condition, IndexHandle, Table};
+use crate::enrichment_tables::enrichment::{Case, Condition, IndexHandle, Table};
 use vector_lib::{conversion::Conversion, TimeZone};
 use vrl::value::{ObjectMap, Value};
 
