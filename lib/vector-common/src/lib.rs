@@ -40,7 +40,6 @@ pub use event_data_eq::EventDataEq;
 
 
 pub mod finalization;
-pub mod finalizer;
 
 pub mod id;
 
