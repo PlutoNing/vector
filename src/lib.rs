@@ -46,7 +46,6 @@ pub mod app;
 pub mod codecs;
 pub mod common;
 pub mod enrichment_tables;
-pub mod heartbeat;
 pub mod line_agg;
 #[allow(unreachable_pub)]
 pub(crate) mod proto;

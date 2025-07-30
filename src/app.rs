@@ -6,7 +6,11 @@ use std::{
     sync::atomic::{AtomicUsize, Ordering},
     time::Duration,
 };
+/// heart beat
+use std::time::{Instant};
 
+use tokio::time::interval;
+/// 
 use exitcode::ExitCode;
 use futures::StreamExt;
 use tokio::runtime::{self, Runtime};
@@ -16,7 +20,6 @@ use tokio_stream::wrappers::UnboundedReceiverStream;
 use crate::{
     cli::{handle_config_errors, LogFormat, Opts, RootOpts, WatchConfigMethod},
     config::{self, Config, ConfigPath},
-    heartbeat,
     signal::{SignalHandler, SignalPair, SignalRx, SignalTo},
     topology::{
         RunningTopology, SharedTopologyController, ShutdownErrorReceiver, TopologyController,
@@ -108,6 +111,18 @@ impl ApplicationConfig {
         Ok(())
     }
 }
+
+/* heartbeat进程 */
+/// Emits heartbeat event every second.
+pub async fn heartbeat() {
+    let since = Instant::now();
+    let mut interval = interval(Duration::from_secs(1));
+    loop {
+        interval.tick().await;
+        debug!("heartbeat: uptime {} seconds", since.elapsed().as_secs());
+    }
+}
+
 /* 运行程序 */
 impl Application {
     pub fn run() -> ExitStatus {
@@ -170,7 +185,7 @@ impl Application {
         // early buffer by this point and set up a subscriber.
 
         info!("Vector has started.");
-        handle.spawn(heartbeat::heartbeat());
+        handle.spawn(heartbeat());
 
         let Self {
             root_opts,
