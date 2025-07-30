@@ -24,9 +24,6 @@ use vector_config::configurable_component;
 pub(crate) use vector_common::Result;
 
 pub mod encoding;
-
-mod internal_events;
-
 pub mod topology;
 
 pub(crate) mod variants;

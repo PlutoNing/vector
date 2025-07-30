@@ -1,4 +1,4 @@
-use std::{time::Instant};
+use std::time::Instant;
 
 use async_recursion::async_recursion;
 use derivative::Derivative;
@@ -7,13 +7,22 @@ use tracing::Span;
 use vector_common::internal_event::{register, InternalEventHandle, Registered};
 
 use super::limited_queue::LimitedSender;
-use crate::{
-    buffer_usage_data::BufferUsageHandle,
-    internal_events::BufferSendDuration,
+use crate::{buffer_usage_data::BufferUsageHandle, Bufferable, WhenFull};
+use std::time::Duration;
 
-    Bufferable, WhenFull,
-};
+use metrics::{histogram, Histogram};
+use vector_common::registered_event;
+registered_event! {
+    BufferSendDuration {
+        stage: usize,
+    } => {
+        send_duration: Histogram = histogram!("buffer_send_duration_seconds", "stage" => self.stage.to_string()),
+    }
 
+    fn emit(&self, duration: Duration) {
+        self.send_duration.record(duration);
+    }
+}
 /// Adapter for papering over various sender backends.
 #[derive(Clone, Debug)]
 pub enum SenderAdapter<T: Bufferable> {
