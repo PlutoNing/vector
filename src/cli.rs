@@ -108,20 +108,6 @@ pub struct RootOpts {
     #[arg(short, long, action = ArgAction::Count)]
     pub quiet: u8,
 
-    /// Watch for changes in configuration file, and reload accordingly.
-    #[arg(short, long, env = "VECTOR_WATCH_CONFIG")]
-    pub watch_config: bool,
-
-    /// Poll for changes in the configuration file at the given interval.
-    ///
-    /// This setting is only applicable if `Poll` is set in `--watch-config-method`.
-    #[arg(
-        long,
-        env = "VECTOR_WATCH_CONFIG_POLL_INTERVAL_SECONDS",
-        default_value = "30"
-    )]
-    pub watch_config_poll_interval_seconds: NonZeroU64,
-
     /// Set the internal log rate limit
     /// Note that traces are throttled by default unless tagged with `internal_log_rate_limit = false`.
     #[arg(

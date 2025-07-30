@@ -77,17 +77,9 @@ impl ApplicationConfig {
         let graceful_shutdown_duration = (!opts.no_graceful_shutdown_limit)
             .then(|| Duration::from_secs(u64::from(opts.graceful_shutdown_limit_secs)));
 
-        let watcher_conf = if opts.watch_config {
-            Some(watcher_config(
-                opts.watch_config_poll_interval_seconds,
-            ))
-        } else {
-            None
-        };
         /* 加载配置 20250717152148 */
         let config = load_configs(
             &config_paths,
-            watcher_conf,
             opts.allow_empty_config,
             graceful_shutdown_duration,
             signal_handler,
@@ -383,8 +375,6 @@ pub fn build_runtime(threads: Option<usize>, thread_name: &str) -> Result<Runtim
 /*运行后来到这里, 加载配置  20250717152203, 读取配置文件, 解析, 存入config结构体 */
 pub async fn load_configs(
     config_paths: &[ConfigPath], /* 里面是搜索的可能的conf路径? */
-    _watcher_conf: Option<WatcherConfig>,
-
     allow_empty_config: bool,
     graceful_shutdown_duration: Option<Duration>,
     signal_handler: &mut SignalHandler,
