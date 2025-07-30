@@ -218,6 +218,6 @@ fn main() {
         .write_to_file("built.rs")
         .expect("Failed to write build-time constants file!");
 
-    // Emit the aforementioned stanzas.
+    // emit the aforementioned stanzas.
     tracker.emit_rerun_stanzas();
 }

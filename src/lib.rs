@@ -45,7 +45,6 @@ pub mod app;
 pub mod codecs;
 pub mod common;
 pub mod enrichment_tables;
-pub mod line_agg;
 #[allow(unreachable_pub)]
 pub(crate) mod proto;
 #[allow(unreachable_pub)]
