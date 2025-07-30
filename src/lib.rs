@@ -55,7 +55,6 @@ pub mod sinks;
 pub mod source_sender;
 #[allow(unreachable_pub)]
 pub mod sources;
-pub mod stats;
 
 pub mod template;
 
