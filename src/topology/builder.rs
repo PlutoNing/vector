@@ -8,7 +8,7 @@ use std::{
 
 use futures::{StreamExt, TryStreamExt};
 use futures_util::stream::FuturesUnordered;
-use metrics::gauge;
+
 use stream_cancel::{StreamExt as StreamCancelExt, Trigger, Tripwire};
 use tokio::{
     select,
@@ -49,8 +49,6 @@ use crate::{
     source_sender::{SourceSenderItem, CHUNK_SIZE},
     spawn_named,
     topology::task::TaskError,
-    
-    utilization::{wrap, UtilizationEmitter},
     SourceSender,
 };
 
@@ -78,7 +76,6 @@ struct Builder<'a> {
     buffers: HashMap<ComponentKey, BuiltBuffer>,
     inputs: HashMap<ComponentKey, (BufferSender<EventArray>, Inputs<OutputId>)>,/* buffer的tx */
     detach_triggers: HashMap<ComponentKey, Trigger>,
-    utilization_emitter: UtilizationEmitter,
 }
 /* 基于config构建拓扑 */
 impl<'a> Builder<'a> {
@@ -97,7 +94,6 @@ impl<'a> Builder<'a> {
             tasks: HashMap::new(),
             inputs: HashMap::new(),
             detach_triggers: HashMap::new(),
-            utilization_emitter: UtilizationEmitter::new(),
         }
     }
 /* 构建一个拓扑,（config, diff已经初始化在了self） */
@@ -120,7 +116,6 @@ impl<'a> Builder<'a> {
                 source_tasks,
                 shutdown_coordinator: self.shutdown_coordinator,
                 detach_triggers: self.detach_triggers,
-                utilization_emitter: Some(self.utilization_emitter),
             })
         } else {
             Err(self.errors)
@@ -502,10 +497,7 @@ impl<'a> Builder<'a> {
 
             let (trigger, tripwire) = Tripwire::new();
 
-            let utilization_sender = self
-                .utilization_emitter
-                .add_component(key.clone(), gauge!("utilization"));
-            let component_key = key.clone();
+            let _component_key = key.clone();
             let sink = async move {
                 debug!("Sink starting.");
 
@@ -521,7 +513,7 @@ impl<'a> Builder<'a> {
                     .take()
                     .expect("Task started but input has been taken.");
 
-                let mut rx = wrap(utilization_sender, component_key.clone(), rx);
+                let mut rx = rx;
 
                 let events_received = register!(EventsReceived);
                 sink.run(
@@ -565,7 +557,6 @@ pub struct TopologyPieces {
     pub(crate) source_tasks: HashMap<ComponentKey, Task>, /* source的task */
     pub(crate) shutdown_coordinator: SourceShutdownCoordinator, /*  */
     pub(crate) detach_triggers: HashMap<ComponentKey, Trigger>, /*  */
-    pub(crate) utilization_emitter: Option<UtilizationEmitter>, /*  */
 }
 /* 构建拓扑的方法 */
 impl TopologyPieces {/*  */

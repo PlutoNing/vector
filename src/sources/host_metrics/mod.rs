@@ -50,16 +50,16 @@ pub enum Collector {
     /// Only available on Linux.
     CGroups,
 
-    /// Metrics related to CPU utilization.
+    /// Metrics related to CPU utilize.
     Cpu,
 
-    /// Metrics related to Process utilization.
+    /// Metrics related to Process utilize.
     Process,
 
-    /// Metrics related to disk I/O utilization.
+    /// Metrics related to disk I/O utilize.
     Disk,
 
-    /// Metrics related to filesystem space utilization.
+    /// Metrics related to filesystem space utilize.
     Filesystem,
 
     /// Metrics related to the system load average.
@@ -68,10 +68,10 @@ pub enum Collector {
     /// Metrics related to the host.
     Host,
 
-    /// Metrics related to memory utilization.
+    /// Metrics related to memory utilize.
     Memory,
 
-    /// Metrics related to network utilization.
+    /// Metrics related to network utilize.
     Network,
 
     /// Metrics related to TCP connections.

@@ -14,7 +14,7 @@ use super::{default_all_devices, example_devices, filter_result, FilterList, Hos
 #[derive(Clone, Debug, Default)]
 pub struct NetworkConfig {
     /// Lists of device name patterns to include or exclude in gathering
-    /// network utilization metrics.
+    /// network utilize metrics.
     #[serde(default = "default_all_devices")]
     #[configurable(metadata(docs::examples = "example_devices()"))]
     devices: FilterList,

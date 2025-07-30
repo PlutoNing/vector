@@ -10,7 +10,7 @@ use super::{default_all_devices, example_devices, filter_result, FilterList, Hos
 #[derive(Clone, Debug, Default)]
 pub struct DiskConfig {
     /// Lists of device name patterns to include or exclude in gathering
-    /// I/O utilization metrics.
+    /// I/O utilize metrics.
     #[configurable(metadata(docs::examples = "example_devices()"))]
     #[serde(default = "default_all_devices")]
     devices: FilterList,

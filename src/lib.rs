@@ -68,8 +68,6 @@ pub mod topology;
 #[allow(unreachable_pub)]
 pub mod transforms;
 
-pub(crate) mod utilization;
-
 pub use source_sender::SourceSender;
 pub use vector_lib::{event, metrics, schema};
 pub use vector_lib::{shutdown, Error, Result};

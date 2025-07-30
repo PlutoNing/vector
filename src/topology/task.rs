@@ -12,13 +12,14 @@ use tokio::task::JoinError;
 use vector_lib::buffers::topology::channel::BufferReceiverStream;
 use vector_lib::event::EventArray;
 
-use crate::{config::ComponentKey, utilization::Utilization};
+use crate::{config::ComponentKey};
 
 #[allow(clippy::large_enum_variant)]
 pub(crate) enum TaskOutput {
     Source,
     /// Buffer of sink
-    Sink(Utilization<BufferReceiverStream<EventArray>>),
+    Sink(BufferReceiverStream<EventArray>),
+    #[allow(dead_code)]
     Healthcheck,
 }
 
