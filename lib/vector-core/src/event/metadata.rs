@@ -3,7 +3,7 @@
 use std::{borrow::Cow, collections::BTreeMap, fmt, sync::Arc};
 
 use derivative::Derivative;
-use lookup::OwnedTargetPath;
+use vrl::path::OwnedTargetPath;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use vector_common::{byte_size_of::ByteSizeOf, config::ComponentKey, EventDataEq};

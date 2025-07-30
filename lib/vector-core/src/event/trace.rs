@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use lookup::lookup_v2::TargetPath;
+use vrl::path::TargetPath;
 use serde::{Deserialize, Serialize};
 use crate::buffer::EventCount;
 use vector_common::{

@@ -11,7 +11,7 @@ use snafu::Snafu;
 use vector_lib::configurable::{
     configurable_component, ConfigurableNumber, ConfigurableString, NumberClass,
 };
-use vector_lib::lookup::lookup_v2::parse_target_path;
+use vrl::path::parse_target_path;
 
 use crate::{
     config::log_schema,

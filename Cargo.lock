@@ -9327,7 +9327,6 @@ dependencies = [
  "vector-common",
  "vector-config",
  "vector-config-common",
- "vector-lookup",
  "vrl",
 ]
 
@@ -9338,19 +9337,6 @@ dependencies = [
  "vector-common",
  "vector-config",
  "vector-core",
- "vector-lookup",
- "vrl",
-]
-
-[[package]]
-name = "vector-lookup"
-version = "0.1.0"
-dependencies = [
- "proptest",
- "proptest-derive",
- "serde",
- "vector-config",
- "vector-config-macros",
  "vrl",
 ]
 

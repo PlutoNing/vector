@@ -8,7 +8,7 @@ use vrl::path::PathParseError;
 /// =======================for OptionalTargetPath
 
 
-use lookup::{OwnedTargetPath, OwnedValuePath};
+use vrl::path::{OwnedTargetPath, OwnedValuePath};
 use vector_config::configurable_component;
 
 static LOG_SCHEMA: OnceLock<LogSchema> = OnceLock::new();

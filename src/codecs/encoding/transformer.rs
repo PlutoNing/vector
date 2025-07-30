@@ -9,7 +9,7 @@ use serde::{Deserialize, Deserializer};
 use vector_lib::configurable::configurable_component;
 use vector_lib::event::{LogEvent, MaybeAsLogMut};
 /// ========================ownedValuePath impl ======================
-use vector_lib::lookup::{event_path, PathPrefix};
+use vrl::{event_path, path::PathPrefix};
 use vector_lib::schema::meaning;
 use vrl::path::OwnedValuePath;
 /// ========================ownedValuePath impl ======================

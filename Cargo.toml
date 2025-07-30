@@ -85,7 +85,6 @@ members = [
   "lib/vector-config-macros",
   "lib/vector-core",
   "lib/vector-lib",
-  "lib/vector-lookup",
 ]
 
 [workspace.dependencies]

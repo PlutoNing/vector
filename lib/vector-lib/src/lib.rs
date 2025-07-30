@@ -13,7 +13,6 @@ pub use vector_core::{
     quantiles, register, samples, schema, serde, sink, source, transform,
     EstimatedJsonEncodedSizeOf,
 };
-pub use vector_lookup as lookup;
 #[cfg(feature = "vrl")]
 pub use vrl;
 

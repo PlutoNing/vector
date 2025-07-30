@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use lookup::OwnedTargetPath;
+use vrl::path::OwnedTargetPath;
 use vrl::value::Kind;
 
 use crate::config::LogNamespace;
