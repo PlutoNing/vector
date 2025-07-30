@@ -28,8 +28,8 @@ use crate::{
     codecs::{Encoder, EncodingConfigWithFraming, SinkType, Transformer},
     config::{GenerateConfig, Input, SinkConfig, SinkContext},
     event::{Event, EventStatus, Finalizable},
-    expiring_hash_map::ExpiringHashMap,
-    sinks::util::{timezone_to_offset, StreamSink},
+    
+    sinks::util::{expiring_hash_map::ExpiringHashMap,timezone_to_offset, StreamSink},
     template::Template,
 };
 

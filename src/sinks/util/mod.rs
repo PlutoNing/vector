@@ -14,7 +14,7 @@ pub mod retries;
 pub mod service;
 pub mod sink;
 pub mod statistic;
-
+pub mod expiring_hash_map;
 use std::borrow::Cow;
 
 pub use batch::{
