@@ -10,7 +10,7 @@ use std::{
 use exitcode::ExitCode;
 use futures::StreamExt;
 use tokio::runtime::{self, Runtime};
-use tokio::sync::{broadcast::error::RecvError};
+use tokio::sync::broadcast::error::RecvError;
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
 use crate::{
@@ -19,10 +19,8 @@ use crate::{
     heartbeat,
     signal::{SignalHandler, SignalPair, SignalRx, SignalTo},
     topology::{
-        RunningTopology, SharedTopologyController, ShutdownErrorReceiver,
-        TopologyController,
+        RunningTopology, SharedTopologyController, ShutdownErrorReceiver, TopologyController,
     },
-
 };
 
 #[cfg(unix)]
@@ -40,7 +38,7 @@ pub fn worker_threads() -> Option<NonZeroUsize> {
 /* 定义app的config */
 pub struct ApplicationConfig {
     pub config_paths: Vec<config::ConfigPath>, /* 配置文件路径 */
-    pub topology: RunningTopology, /* 构建的拓扑 */
+    pub topology: RunningTopology,             /* 构建的拓扑 */
     pub graceful_crash_receiver: ShutdownErrorReceiver,
     pub internal_topologies: Vec<RunningTopology>,
 }
@@ -52,11 +50,13 @@ pub struct Application {
     pub signals: SignalPair,
 }
 
-impl ApplicationConfig { /* vector::app::ApplicationConfig::from_opts vector::app::Application::prepare_from_opts vector::app::Application::prepare vector::app::Application::prepare_start vector::app::Application::run vector::main*/
+impl ApplicationConfig {
+    /* vector::app::ApplicationConfig::from_opts vector::app::Application::prepare_from_opts vector::app::Application::prepare vector::app::Application::prepare_start vector::app::Application::run vector::main*/
     pub async fn from_opts(
         opts: &RootOpts,
         signal_handler: &mut SignalHandler,
-    ) -> Result<Self, ExitCode> { /* 从prepare_from_opts来到这里 */
+    ) -> Result<Self, ExitCode> {
+        /* 从prepare_from_opts来到这里 */
         let config_paths = opts.config_paths_with_formats();
 
         let graceful_shutdown_duration = (!opts.no_graceful_shutdown_limit)
@@ -70,11 +70,10 @@ impl ApplicationConfig { /* vector::app::ApplicationConfig::from_opts vector::ap
         } else {
             None
         };
-/* 加载配置 20250717152148 */
+        /* 加载配置 20250717152148 */
         let config = load_configs(
             &config_paths,
             watcher_conf,
-
             opts.allow_empty_config,
             graceful_shutdown_duration,
             signal_handler,
@@ -83,16 +82,15 @@ impl ApplicationConfig { /* vector::app::ApplicationConfig::from_opts vector::ap
 
         Self::from_config(config_paths, config).await
     }
-/*  */
+    /*  */
     pub async fn from_config(
         config_paths: Vec<ConfigPath>, /* 配置文件路径 */
-        config: Config, /* 读取,解析好的config结构体 */
+        config: Config,                /* 读取,解析好的config结构体 */
     ) -> Result<Self, ExitCode> {
-/* 解析好的config下一步来到这， 看来是生成什么拓扑(包含source, sink等的东西) */
-        let (topology, graceful_crash_receiver) =
-            RunningTopology::start_init_validated(config)
-                .await
-                .ok_or(exitcode::CONFIG)?;
+        /* 解析好的config下一步来到这， 看来是生成什么拓扑(包含source, sink等的东西) */
+        let (topology, graceful_crash_receiver) = RunningTopology::start_init_validated(config)
+            .await
+            .ok_or(exitcode::CONFIG)?;
 
         Ok(Self {
             config_paths,
@@ -102,47 +100,41 @@ impl ApplicationConfig { /* vector::app::ApplicationConfig::from_opts vector::ap
         })
     }
 
-    pub async fn add_internal_config(
-        &mut self,
-        config: Config,
-    ) -> Result<(), ExitCode> {
-        let Some((topology, _)) =
-            RunningTopology::start_init_validated(config).await
-        else {
+    pub async fn add_internal_config(&mut self, config: Config) -> Result<(), ExitCode> {
+        let Some((topology, _)) = RunningTopology::start_init_validated(config).await else {
             return Err(exitcode::CONFIG);
         };
         self.internal_topologies.push(topology);
         Ok(())
     }
-
 }
 /* 运行程序 */
 impl Application {
     pub fn run() -> ExitStatus {
-        let (runtime, app) =
-            Self::prepare_start().unwrap_or_else(|code| std::process::exit(code));
+        let (runtime, app) = Self::prepare_start().unwrap_or_else(|code| std::process::exit(code));
 
         runtime.block_on(app.run())
     }
-/* 运行调用层次: main->run->prepare_start */
-    pub fn prepare_start() -> Result<(Runtime, StartedApplication), ExitCode> { /* 返回一个 Result 类型，表示操作的结果。成功时返回一个包含 Runtime 和 StartedApplication 的元组，失败时返回一个 ExitCode */
-        Self::prepare()/* prepare 方法返回一个 Result<(Runtime, Application), ExitCode> */
-            .and_then(|(runtime, app)| app.start(runtime.handle()).map(|app| (runtime, app)))/* and_then 是 Result 类型的方法，用于链式处理成功的结果。如果 prepare 方法成功，and_then 会接收一个包含 runtime 和 app 的元组，并执行闭包中的代码。 */
+    /* 运行调用层次: main->run->prepare_start */
+    pub fn prepare_start() -> Result<(Runtime, StartedApplication), ExitCode> {
+        /* 返回一个 Result 类型，表示操作的结果。成功时返回一个包含 Runtime 和 StartedApplication 的元组，失败时返回一个 ExitCode */
+        Self::prepare() /* prepare 方法返回一个 Result<(Runtime, Application), ExitCode> */
+            .and_then(|(runtime, app)| app.start(runtime.handle()).map(|app| (runtime, app)))
+        /* and_then 是 Result 类型的方法，用于链式处理成功的结果。如果 prepare 方法成功，and_then 会接收一个包含 runtime 和 app 的元组，并执行闭包中的代码。 */
     }
     /*main->run->prepare_start->prepare ; 返回rt和app, 然后app.start(runtime.handle()).map(|app| (runtime, app)) */
     pub fn prepare() -> Result<(Runtime, Self), ExitCode> {
-        let opts = Opts::get_matches().map_err(|error| { /* opts 是一个类型为 Opts 的变量。它通常用于存储从命令行解析得到的选项和参数 */
+        let opts = Opts::get_matches().map_err(|error| {
+            /* opts 是一个类型为 Opts 的变量。它通常用于存储从命令行解析得到的选项和参数 */
             // Printing to stdout/err can itself fail; ignore it.
             _ = error.print();
             exitcode::USAGE
         })?;
-/* 程序刚运行时一直来到这里 */
+        /* 程序刚运行时一直来到这里 */
         Self::prepare_from_opts(opts)
     }
     /* main->run->prepare_start->prepare->prepare_from_opts */
-    pub fn prepare_from_opts(
-        opts: Opts,
-    ) -> Result<(Runtime, Self), ExitCode> {
+    pub fn prepare_from_opts(opts: Opts) -> Result<(Runtime, Self), ExitCode> {
         opts.root.init_global();
 
         init_logging(
@@ -152,19 +144,11 @@ impl Application {
             opts.root.internal_log_rate_limit,
         );
 
-
-
-
-
-/* 构建rt */
+        /* 构建rt */
         let runtime = build_runtime(opts.root.threads, "vector-worker")?;
 
         // Signal handler for OS and provider messages.
         let mut signals = SignalPair::new(&runtime);
-
-        if let Some(sub_command) = &opts.sub_command { /* 这里不一定执行 */
-            return Err(runtime.block_on(sub_command.execute(signals, true)));
-        }
 
         let config = runtime.block_on(ApplicationConfig::from_opts(
             &opts.root,
@@ -180,7 +164,7 @@ impl Application {
             },
         ))
     }
-/* 开启app? */
+    /* 开启app? */
     pub fn start(self, handle: &Handle) -> Result<StartedApplication, ExitCode> {
         // Any internal_logs sources will have grabbed a copy of the
         // early buffer by this point and set up a subscriber.
@@ -195,7 +179,7 @@ impl Application {
         } = self;
 
         let topology_controller = SharedTopologyController::new(TopologyController {
-            topology: config.topology, /* 构建的拓扑 */
+            topology: config.topology,                 /* 构建的拓扑 */
             config_paths: config.config_paths.clone(), /* 配置文件路径 */
         });
 
@@ -219,11 +203,12 @@ pub struct StartedApplication {
     pub allow_empty_config: bool,
 }
 
-impl StartedApplication { /* 初始化好config, 已经相关source, sink进程后调用 */
+impl StartedApplication {
+    /* 初始化好config, 已经相关source, sink进程后调用 */
     pub async fn run(self) -> ExitStatus {
         self.main().await.shutdown().await
     }
-/* app的主函数? */
+    /* app的主函数? */
     pub async fn main(self) -> FinishedApplication {
         let Self {
             config_paths,
@@ -281,7 +266,6 @@ async fn handle_signal(
         Ok(signal) => Some(signal),
     }
 }
-
 
 pub struct FinishedApplication {
     pub signal: SignalTo,
@@ -409,8 +393,8 @@ pub async fn load_configs(
     .map_err(handle_config_errors)?;
     /* 刚刚处理了config */
 
-/* log schema是什么 */
-    config::init_log_schema(config.global.log_schema.clone(), true);/* 这里是初始化这两个字段 */
+    /* log schema是什么 */
+    config::init_log_schema(config.global.log_schema.clone(), true); /* 这里是初始化这两个字段 */
 
     config.graceful_shutdown_duration = graceful_shutdown_duration;
 

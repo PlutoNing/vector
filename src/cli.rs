@@ -5,16 +5,12 @@ use std::{num::NonZeroU64, path::PathBuf};
 use clap::{ArgAction, CommandFactory, FromArgMatches, Parser};
 
 use crate::{config, get_version};
-use crate::{signal};
 /* 程序选项 */
 #[derive(Parser, Debug)] /* Parser是 clap 库提供的一个派生宏，用于自动生成命令行解析逻辑。 */
 #[command(rename_all = "kebab-case")] /* 指定命令行选项的命名风格为 "kebab-case"，即选项名称中使用连字符分隔单词（例如，--some-option）。 */
 pub struct Opts {
     #[command(flatten)]
     pub root: RootOpts,
-
-    #[command(subcommand)] /* #[command(subcommand)] 表示 sub_command 是一个子命令，clap 会根据命令行输入解析出具体的子命令。 */
-    pub sub_command: Option<SubCommand>,
 }
 
 impl Opts { /* 获取启动时的命令行选项,app.get_matches() 解析命令行参数，并返回一个 ArgMatches 实例。 Opts::from_arg_matches(...) 将 ArgMatches 转换为 Opts 实例。 */
@@ -209,28 +205,6 @@ impl RootOpts {
         crate::metrics::init_global().expect("metrics initialization failed");
     }
 }
-
-#[derive(Parser, Debug)]
-#[command(rename_all = "kebab-case")]
-pub enum SubCommand {
-    /// Output a provided Vector configuration file/dir as a single JSON object, useful for checking in to version control.
-    #[command(hide = true)]
-    Config(config::Opts),
-}
-
-impl SubCommand {
-    pub async fn execute(
-        &self,
-        _signals: signal::SignalPair,
-        _color: bool,
-    ) -> exitcode::ExitCode {
-        match self {
-            Self::Config(c) => config::cmd(c),
-        }
-    }
-}
-
-
 
 #[derive(clap::ValueEnum, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LogFormat {
