@@ -22,7 +22,6 @@ use super::dot_graph::GraphConfig;
 use super::schema::Options as SchemaOptions;
 use super::ComponentKey;
 use super::OutputId;
-use crate::extra_context::ExtraContext;
 
 pub type BoxedTransform = Box<dyn TransformConfig>;
 
@@ -133,10 +132,6 @@ pub struct TransformContext {
     pub merged_schema_definition: schema::Definition,
 
     pub schema: SchemaOptions,
-
-    /// Extra context data provided by the running app and shared across all components. This can be
-    /// used to pass shared settings or other data from outside the components.
-    pub extra_context: ExtraContext,
 }
 
 impl Default for TransformContext {
@@ -148,7 +143,6 @@ impl Default for TransformContext {
             schema_definitions: HashMap::from([(None, HashMap::new())]),
             merged_schema_definition: schema::Definition::any(),
             schema: SchemaOptions::default(),
-            extra_context: Default::default(),
         }
     }
 }

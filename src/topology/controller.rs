@@ -1,6 +1,4 @@
 use std::sync::Arc;
-
-use crate::extra_context::ExtraContext;
 use tokio::sync::{Mutex, MutexGuard};
 
 use crate::{config, signal::ShutdownError, topology::RunningTopology};
@@ -29,8 +27,6 @@ impl SharedTopologyController {
 pub struct TopologyController {
     pub topology: RunningTopology,
     pub config_paths: Vec<config::ConfigPath>,
-
-    pub extra_context: ExtraContext,
 }
 
 impl std::fmt::Debug for TopologyController {

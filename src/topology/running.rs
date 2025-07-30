@@ -16,7 +16,6 @@ use super::{
 use crate::{
     config::{ComponentKey, Config, ConfigDiff, Inputs, OutputId, Resource},
     event::EventArray,
-    extra_context::ExtraContext,
     shutdown::SourceShutdownCoordinator,
     signal::ShutdownError,
     spawn_named,
@@ -222,7 +221,6 @@ impl RunningTopology {
     pub async fn reload_config_and_respawn(
         &mut self,
         new_config: Config,
-        extra_context: ExtraContext,
     ) -> Result<bool, ()> {
         info!("Reloading running topology with new configuration.");
 
@@ -261,7 +259,6 @@ impl RunningTopology {
             &new_config,
             &diff,
             buffers.clone(),
-            extra_context.clone(),
         )
         .await
         {
@@ -282,7 +279,7 @@ impl RunningTopology {
 
         let diff = diff.flip();
         if let Some(mut new_pieces) =
-            TopologyPieces::build_or_log_errors(&self.config, &diff, buffers, extra_context.clone())
+            TopologyPieces::build_or_log_errors(&self.config, &diff, buffers)
                 .await
         {
             self.connect_diff(&diff, &mut new_pieces).await;
@@ -962,11 +959,10 @@ impl RunningTopology {
 /* 解析好的config来这里生成拓扑 */
     pub async fn start_init_validated(
         config: Config,  /* 刚刚加载解析出的config */
-        extra_context: ExtraContext,
     ) -> Option<(Self, ShutdownErrorReceiver)> {/* 这个diff描述的就是这个新config的增量 */
         let diff = ConfigDiff::initial(&config);
         let pieces =
-            TopologyPieces::build_or_log_errors(&config, &diff, HashMap::new(), extra_context)
+            TopologyPieces::build_or_log_errors(&config, &diff, HashMap::new())
                 .await?;
         Self::start_validated(config, diff, pieces).await
     }

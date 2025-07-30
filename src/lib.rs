@@ -49,7 +49,6 @@ pub mod async_read;
 pub mod codecs;
 pub mod common;
 pub mod enrichment_tables;
-pub mod extra_context;
 pub mod heartbeat;
 pub mod line_agg;
 #[allow(unreachable_pub)]

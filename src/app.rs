@@ -13,7 +13,6 @@ use tokio::runtime::{self, Runtime};
 use tokio::sync::{broadcast::error::RecvError};
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
-use crate::extra_context::ExtraContext;
 use crate::{
     cli::{handle_config_errors, LogFormat, Opts, RootOpts, WatchConfigMethod},
     config::{self, Config, ConfigPath},
@@ -44,7 +43,6 @@ pub struct ApplicationConfig {
     pub topology: RunningTopology, /* 构建的拓扑 */
     pub graceful_crash_receiver: ShutdownErrorReceiver,
     pub internal_topologies: Vec<RunningTopology>,
-    pub extra_context: ExtraContext,
 }
 
 /* app本体? */
@@ -58,7 +56,6 @@ impl ApplicationConfig { /* vector::app::ApplicationConfig::from_opts vector::ap
     pub async fn from_opts(
         opts: &RootOpts,
         signal_handler: &mut SignalHandler,
-        extra_context: ExtraContext,
     ) -> Result<Self, ExitCode> { /* 从prepare_from_opts来到这里 */
         let config_paths = opts.config_paths_with_formats();
 
@@ -84,17 +81,16 @@ impl ApplicationConfig { /* vector::app::ApplicationConfig::from_opts vector::ap
         )
         .await?;
 
-        Self::from_config(config_paths, config, extra_context).await
+        Self::from_config(config_paths, config).await
     }
 /*  */
     pub async fn from_config(
         config_paths: Vec<ConfigPath>, /* 配置文件路径 */
         config: Config, /* 读取,解析好的config结构体 */
-        extra_context: ExtraContext,
     ) -> Result<Self, ExitCode> {
 /* 解析好的config下一步来到这， 看来是生成什么拓扑(包含source, sink等的东西) */
         let (topology, graceful_crash_receiver) =
-            RunningTopology::start_init_validated(config, extra_context.clone())
+            RunningTopology::start_init_validated(config)
                 .await
                 .ok_or(exitcode::CONFIG)?;
 
@@ -103,17 +99,15 @@ impl ApplicationConfig { /* vector::app::ApplicationConfig::from_opts vector::ap
             topology,
             graceful_crash_receiver,
             internal_topologies: Vec::new(),
-            extra_context,
         })
     }
 
     pub async fn add_internal_config(
         &mut self,
         config: Config,
-        extra_context: ExtraContext,
     ) -> Result<(), ExitCode> {
         let Some((topology, _)) =
-            RunningTopology::start_init_validated(config, extra_context).await
+            RunningTopology::start_init_validated(config).await
         else {
             return Err(exitcode::CONFIG);
         };
@@ -124,33 +118,30 @@ impl ApplicationConfig { /* vector::app::ApplicationConfig::from_opts vector::ap
 }
 /* 运行程序 */
 impl Application {
-    pub fn run(extra_context: ExtraContext) -> ExitStatus {
+    pub fn run() -> ExitStatus {
         let (runtime, app) =
-            Self::prepare_start(extra_context).unwrap_or_else(|code| std::process::exit(code));
+            Self::prepare_start().unwrap_or_else(|code| std::process::exit(code));
 
         runtime.block_on(app.run())
     }
 /* 运行调用层次: main->run->prepare_start */
-    pub fn prepare_start(
-        extra_context: ExtraContext,
-    ) -> Result<(Runtime, StartedApplication), ExitCode> { /* 返回一个 Result 类型，表示操作的结果。成功时返回一个包含 Runtime 和 StartedApplication 的元组，失败时返回一个 ExitCode */
-        Self::prepare(extra_context)/* prepare 方法返回一个 Result<(Runtime, Application), ExitCode> */
+    pub fn prepare_start() -> Result<(Runtime, StartedApplication), ExitCode> { /* 返回一个 Result 类型，表示操作的结果。成功时返回一个包含 Runtime 和 StartedApplication 的元组，失败时返回一个 ExitCode */
+        Self::prepare()/* prepare 方法返回一个 Result<(Runtime, Application), ExitCode> */
             .and_then(|(runtime, app)| app.start(runtime.handle()).map(|app| (runtime, app)))/* and_then 是 Result 类型的方法，用于链式处理成功的结果。如果 prepare 方法成功，and_then 会接收一个包含 runtime 和 app 的元组，并执行闭包中的代码。 */
     }
     /*main->run->prepare_start->prepare ; 返回rt和app, 然后app.start(runtime.handle()).map(|app| (runtime, app)) */
-    pub fn prepare(extra_context: ExtraContext) -> Result<(Runtime, Self), ExitCode> {
+    pub fn prepare() -> Result<(Runtime, Self), ExitCode> {
         let opts = Opts::get_matches().map_err(|error| { /* opts 是一个类型为 Opts 的变量。它通常用于存储从命令行解析得到的选项和参数 */
             // Printing to stdout/err can itself fail; ignore it.
             _ = error.print();
             exitcode::USAGE
         })?;
 /* 程序刚运行时一直来到这里 */
-        Self::prepare_from_opts(opts, extra_context)
+        Self::prepare_from_opts(opts)
     }
     /* main->run->prepare_start->prepare->prepare_from_opts */
     pub fn prepare_from_opts(
         opts: Opts,
-        extra_context: ExtraContext,
     ) -> Result<(Runtime, Self), ExitCode> {
         opts.root.init_global();
 
@@ -178,7 +169,6 @@ impl Application {
         let config = runtime.block_on(ApplicationConfig::from_opts(
             &opts.root,
             &mut signals.handler,
-            extra_context,
         ))?;
 
         Ok((
@@ -207,8 +197,6 @@ impl Application {
         let topology_controller = SharedTopologyController::new(TopologyController {
             topology: config.topology, /* 构建的拓扑 */
             config_paths: config.config_paths.clone(), /* 配置文件路径 */
-
-            extra_context: config.extra_context,
         });
 
         Ok(StartedApplication {

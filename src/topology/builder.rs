@@ -44,7 +44,6 @@ use crate::{
         ProxyConfig, SinkContext, SourceContext,
     },
     event::{EventArray, EventContainer},
-    extra_context::ExtraContext,
     internal_events::EventsReceived,
     shutdown::SourceShutdownCoordinator,
     source_sender::{SourceSenderItem, CHUNK_SIZE},
@@ -79,7 +78,6 @@ struct Builder<'a> {
     buffers: HashMap<ComponentKey, BuiltBuffer>,
     inputs: HashMap<ComponentKey, (BufferSender<EventArray>, Inputs<OutputId>)>,/* buffer的tx */
     detach_triggers: HashMap<ComponentKey, Trigger>,
-    extra_context: ExtraContext,
     utilization_emitter: UtilizationEmitter,
 }
 /* 基于config构建拓扑 */
@@ -88,7 +86,6 @@ impl<'a> Builder<'a> {
         config: &'a super::Config,
         diff: &'a ConfigDiff,
         buffers: HashMap<ComponentKey, BuiltBuffer>,
-        extra_context: ExtraContext,
     ) -> Self {
         Self {
             config,
@@ -100,7 +97,6 @@ impl<'a> Builder<'a> {
             tasks: HashMap::new(),
             inputs: HashMap::new(),
             detach_triggers: HashMap::new(),
-            extra_context,
             utilization_emitter: UtilizationEmitter::new(),
         }
     }
@@ -341,7 +337,6 @@ impl<'a> Builder<'a> {
                 proxy: ProxyConfig::merge_with_env(&self.config.global.proxy, &source.proxy),
                 schema_definitions,
                 schema: self.config.schema,
-                extra_context: self.extra_context.clone(),
             };/* impl SourceConfig for HostMetricsConfig */
             let source = source.inner.build(context).await;
             let server = match source {
@@ -495,7 +490,6 @@ impl<'a> Builder<'a> {
                 schema: self.config.schema,
                 app_name: crate::get_app_name().to_string(),
                 app_name_slug: crate::get_slugified_app_name(),
-                extra_context: self.extra_context.clone(),
             };
             /* 这里的sink就是具体的sink了, 比如到console */
             let sink = match sink.inner.build(cx).await {
@@ -579,9 +573,8 @@ impl TopologyPieces {/*  */
         config: &Config,/* 解析出的config */
         diff: &ConfigDiff,/* 这个config的产生的变化 */
         buffers: HashMap<ComponentKey, BuiltBuffer>,
-        extra_context: ExtraContext,
     ) -> Option<Self> {/* 构建各种东西, source, sink等等 */
-        match TopologyPieces::build(config, diff, buffers, extra_context).await {
+        match TopologyPieces::build(config, diff, buffers).await {
             Err(errors) => {
                 for error in errors {
                     error!(message = "Configuration error.", %error);
@@ -597,9 +590,8 @@ impl TopologyPieces {/*  */
         config: &super::Config, /* 新config */
         diff: &ConfigDiff, /* 新config产生的diff */
         buffers: HashMap<ComponentKey, BuiltBuffer>,
-        extra_context: ExtraContext,
     ) -> Result<Self, Vec<String>> {
-        Builder::new(config, diff, buffers, extra_context)
+        Builder::new(config, diff, buffers)
             .build()
             .await
     }

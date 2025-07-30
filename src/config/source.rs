@@ -16,7 +16,7 @@ use vector_lib::{
 };
 
 use super::{dot_graph::GraphConfig, schema, ComponentKey, ProxyConfig, Resource};
-use crate::{extra_context::ExtraContext, shutdown::ShutdownSignal, SourceSender};
+use crate::{shutdown::ShutdownSignal, SourceSender};
 /* 使用 Box 装箱一个实现了 SourceConfig 特征的动态对象。这种用法允许在运行时决定具体的 SourceConfig 实现。 */
 pub type BoxedSource = Box<dyn SourceConfig>;
 
@@ -117,10 +117,6 @@ pub struct SourceContext {
     /// Given a source can expose multiple [`SourceOutput`] channels, the ID is tied to the identifier of
     /// that `SourceOutput`.
     pub schema_definitions: HashMap<Option<String>, schema::Definition>,
-
-    /// Extra context data provided by the running app and shared across all components. This can be
-    /// used to pass shared settings or other data from outside the components.
-    pub extra_context: ExtraContext,
 }
 
 impl SourceContext {

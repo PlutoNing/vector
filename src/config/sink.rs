@@ -16,9 +16,6 @@ use vector_lib::{
 };
 
 use super::{dot_graph::GraphConfig, schema, ComponentKey, ProxyConfig, Resource};
-use crate::extra_context::ExtraContext;
-
-
 pub type BoxedSink = Box<dyn SinkConfig>;
 
 impl Configurable for BoxedSink {
@@ -174,10 +171,6 @@ pub struct SinkContext {
     pub schema: schema::Options,
     pub app_name: String,
     pub app_name_slug: String,
-
-    /// Extra context data provided by the running app and shared across all components. This can be
-    /// used to pass shared settings or other data from outside the components.
-    pub extra_context: ExtraContext,
 }
 
 impl Default for SinkContext {
@@ -189,7 +182,6 @@ impl Default for SinkContext {
             schema: Default::default(),
             app_name: crate::get_app_name().to_string(),
             app_name_slug: crate::get_slugified_app_name(),
-            extra_context: Default::default(),
         }
     }
 }
