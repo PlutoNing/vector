@@ -1,4 +1,3 @@
-pub use codecs;
 pub use enrichment;
 pub use vector_buffers as buffers;
 pub use vector_common::{
@@ -28,4 +27,7 @@ pub mod config {
         OutputId, SourceOutput, TransformOutput,
         WildcardMatching, MEMORY_BUFFER_DEFAULT_MAX_EVENTS,
     };
+    pub use vector_core::event::Event;
+    pub use vector_core::serde::{ascii_char,is_default};
+    pub use vector_core::schema::Requirement;
 }

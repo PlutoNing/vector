@@ -1,13 +1,11 @@
-
 use tokio::io;
-use vector_lib::codecs::{
-    encoding::{Framer, FramingConfig},
-    JsonSerializerConfig,
-};
+
 use vector_lib::configurable::configurable_component;
 
 use crate::{
-    codecs::{Encoder, EncodingConfigWithFraming, SinkType},
+    codecs::{
+        Encoder, EncodingConfigWithFraming, Framer, FramingConfig, JsonSerializerConfig, SinkType,
+    },
     config::{GenerateConfig, Input, SinkConfig, SinkContext},
     sinks::{console::sink::WriterSink, VectorSink},
 };
@@ -19,7 +17,8 @@ use crate::{
 #[derive(Clone, Debug, Derivative)]
 #[derivative(Default)]
 #[serde(rename_all = "lowercase")]
-pub enum Target {/* 表示是到stdout还是stderr */
+pub enum Target {
+    /* 表示是到stdout还是stderr */
     /// Write output to [STDOUT][stdout].
     ///
     /// [stdout]: https://en.wikipedia.org/wiki/Standard_streams#Standard_output_(stdout)
@@ -70,7 +69,7 @@ impl SinkConfig for ConsoleSinkConfig {
     async fn build(&self, _cx: SinkContext) -> crate::Result<VectorSink> {
         let transformer = self.encoding.transformer();
         /* Result<(Framer, Serializer)可能分别是字符分割编码器,和文本序列化器 */
-        let (framer, serializer) = self.encoding.build(SinkType::StreamBased)?; 
+        let (framer, serializer) = self.encoding.build(SinkType::StreamBased)?;
         /* 把(framer, serializer)组合为encoder */
         let encoder = Encoder::<Framer>::new(framer, serializer);
 
@@ -89,7 +88,7 @@ impl SinkConfig for ConsoleSinkConfig {
 
         Ok(sink)
     }
-/* 调用 */
+    /* 调用 */
     fn input(&self) -> Input {
         Input::new(self.encoding.config().1.input_type())
     }

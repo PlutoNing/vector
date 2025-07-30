@@ -32,7 +32,7 @@ impl CharacterDelimitedEncoderConfig {
 pub struct CharacterDelimitedEncoderOptions {
     /// The ASCII (7-bit) character that delimits byte sequences.
     #[configurable(metadata(docs::type_override = "ascii_char"))]
-    #[serde(with = "vector_core::serde::ascii_char")]
+    #[serde(with = "vector_lib::serde::ascii_char")]
     pub delimiter: u8,
 }
 /* 字符分割的文本编码器 */

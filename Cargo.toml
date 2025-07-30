@@ -79,7 +79,6 @@ depends = ""
 [workspace]
 members = [
   ".",
-  "lib/codecs",
   "lib/enrichment",
   "lib/vector-buffers",
   "lib/vector-common",

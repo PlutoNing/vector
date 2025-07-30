@@ -14,8 +14,8 @@ use tokio::{
 };
 use tokio_util::codec::Encoder as _;
 use tracing::{debug, error, trace};
-use vector_lib::codecs::{
-    encoding::{Framer, FramingConfig},
+use crate::codecs::{
+    Framer, FramingConfig,
     TextSerializerConfig,
 };
 use vector_lib::configurable::configurable_component;

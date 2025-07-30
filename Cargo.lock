@@ -1878,44 +1878,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "codecs"
-version = "0.1.0"
-dependencies = [
- "bytes 1.10.1",
- "chrono",
- "derivative",
- "dyn-clone",
- "flate2",
- "futures 0.3.31",
- "indoc",
- "memchr",
- "ordered-float 4.6.0",
- "prost 0.12.6",
- "prost-reflect",
- "rand 0.9.1",
- "regex",
- "rstest",
- "serde",
- "serde_json",
- "serde_with",
- "similar-asserts",
- "smallvec",
- "snafu 0.8.6",
- "syslog_loose 0.22.0",
- "tokio",
- "tokio-util",
- "tracing 0.1.41",
- "tracing-test",
- "uuid",
- "vector-common",
- "vector-config",
- "vector-config-macros",
- "vector-core",
- "vector-lookup",
- "vrl",
-]
-
-[[package]]
 name = "codespan-reporting"
 version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8136,16 +8098,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "syslog_loose"
-version = "0.22.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d6ec4df26907adce53e94eac201a9ba38744baea3bc97f34ffd591d5646231a6"
-dependencies = [
- "chrono",
- "nom 8.0.0",
-]
-
-[[package]]
 name = "system-configuration"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8907,33 +8859,11 @@ dependencies = [
  "serde",
  "serde_json",
  "sharded-slab",
- "smallvec",
  "thread_local",
  "tracing 0.1.41",
  "tracing-core 0.1.33",
  "tracing-log",
  "tracing-serde",
-]
-
-[[package]]
-name = "tracing-test"
-version = "0.2.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "557b891436fe0d5e0e363427fc7f217abf9ccd510d5136549847bdcbcd011d68"
-dependencies = [
- "tracing-core 0.1.33",
- "tracing-subscriber",
- "tracing-test-macro",
-]
-
-[[package]]
-name = "tracing-test-macro"
-version = "0.2.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "04659ddb06c87d233c566112c1c9c5b9e98256d9af50ec3bc9c8327f873a7568"
-dependencies = [
- "quote 1.0.40",
- "syn 2.0.104",
 ]
 
 [[package]]
@@ -9617,7 +9547,6 @@ dependencies = [
 name = "vector-lib"
 version = "0.1.0"
 dependencies = [
- "codecs",
  "enrichment",
  "vector-buffers",
  "vector-common",
@@ -9734,7 +9663,7 @@ dependencies = [
  "snafu 0.8.6",
  "snap",
  "strip-ansi-escapes",
- "syslog_loose 0.21.0",
+ "syslog_loose",
  "termcolor",
  "thiserror 2.0.3",
  "tokio",

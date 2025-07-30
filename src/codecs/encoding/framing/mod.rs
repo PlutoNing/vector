@@ -9,7 +9,7 @@ mod newline_delimited;
 use std::fmt::Debug;
 
 pub use character_delimited::{
-    CharacterDelimitedEncoder, CharacterDelimitedEncoderConfig, CharacterDelimitedEncoderOptions,
+    CharacterDelimitedEncoder, CharacterDelimitedEncoderConfig,
 };
 use dyn_clone::DynClone;
 pub use newline_delimited::{NewlineDelimitedEncoder, NewlineDelimitedEncoderConfig};

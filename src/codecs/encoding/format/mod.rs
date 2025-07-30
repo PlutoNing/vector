@@ -3,16 +3,16 @@
 
 #![deny(missing_docs)]
 
-mod common;
+pub mod common;
 mod json;
 mod text;
-
 use std::fmt::Debug;
 
 use dyn_clone::DynClone;
-pub use json::{JsonSerializer, JsonSerializerConfig, JsonSerializerOptions};
+pub use json::{JsonSerializer, JsonSerializerConfig};
 pub use text::{TextSerializer, TextSerializerConfig};
-use vector_core::event::Event;
+pub use common::get_serializer_schema_requirement;
+use vector_lib::event::Event;
 
 /// Serialize a structured event into a byte frame.
 pub trait Serializer:

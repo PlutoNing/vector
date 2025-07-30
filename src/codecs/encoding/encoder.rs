@@ -1,10 +1,10 @@
 use bytes::BytesMut;
 use tokio_util::codec::Encoder as _;
-use vector_lib::codecs::{
+use crate::codecs::{
     encoding::{Error, Framer, Serializer},
-    CharacterDelimitedEncoder, NewlineDelimitedEncoder, TextSerializerConfig,
+    NewlineDelimitedEncoder, TextSerializerConfig,
 };
-
+use crate::codecs::encoding::CharacterDelimitedEncoder;
 use crate::{
     event::Event,
 };

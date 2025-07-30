@@ -9,7 +9,7 @@ use futures::stream::{BoxStream, StreamExt};
 use serde_with::serde_as;
 use sqlx::{sqlite::SqlitePoolOptions, Pool, Sqlite, Row};
 use tokio::sync::Mutex;
-use vector_lib::codecs::{
+use codecs::{
     encoding::{Framer, FramingConfig},
     TextSerializerConfig,
 };

@@ -6,7 +6,6 @@ edition = "2021"
 publish = false
 
 [dependencies]
-codecs = { path = "../codecs", default-features = false }
 enrichment = { path = "../enrichment" }
 vector-buffers = { path = "../vector-buffers", default-features = false }
 vector-common = { path = "../vector-common" }
@@ -17,6 +16,5 @@ vrl = { workspace = true, optional = true }
 
 [features]
 proptest = []
-syslog = ["codecs/syslog"]
 test = []
 vrl = ["vector-core/vrl", "dep:vrl"]
