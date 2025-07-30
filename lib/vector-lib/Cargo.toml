@@ -6,7 +6,6 @@ edition = "2021"
 publish = false
 
 [dependencies]
-vector-buffers = { path = "../vector-buffers", default-features = false }
 vector-common = { path = "../vector-common" }
 vector-config = { path = "../vector-config" }
 vector-core = { path = "../vector-core", default-features = false }

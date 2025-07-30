@@ -9,7 +9,6 @@ use crossbeam_utils::atomic::AtomicCell;
 use futures::future::FutureExt;
 use tokio::sync::oneshot;
 
-#[cfg(feature = "byte_size_of")]
 use crate::byte_size_of::ByteSizeOf;
 
 /// A collection of event finalizers.
@@ -37,7 +36,6 @@ impl PartialOrd for EventFinalizers {
     }
 }
 
-#[cfg(feature = "byte_size_of")]
 impl ByteSizeOf for EventFinalizers {
     fn allocated_bytes(&self) -> usize {
         // Don't count the allocated data here, it's not really event
@@ -115,7 +113,6 @@ pub struct EventFinalizer {
     batch: BatchNotifier,
 }
 
-#[cfg(feature = "byte_size_of")]
 impl ByteSizeOf for EventFinalizer {
     fn allocated_bytes(&self) -> usize {
         // Don't count the batch notifier, as it's shared across

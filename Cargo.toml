@@ -79,7 +79,6 @@ depends = ""
 [workspace]
 members = [
   ".",
-  "lib/vector-buffers",
   "lib/vector-common",
   "lib/vector-config",
   "lib/vector-config-common",
