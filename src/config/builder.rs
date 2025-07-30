@@ -43,7 +43,7 @@ pub struct ConfigBuilder {
 
     /// The duration in seconds to wait for graceful shutdown after SIGINT or SIGTERM are received.
     /// After the duration has passed, Vector will force shutdown. Default value is 60 seconds. This
-    /// value can be set using a [cli arg](crate::cli::RootOpts::graceful_shutdown_limit_secs).
+    /// value can be set using a [cli arg](crate::cli::rootOpts::graceful_shutdown_limit_secs).
     #[serde(default, skip)]
     #[doc(hidden)]
     pub graceful_shutdown_duration: Option<Duration>,
