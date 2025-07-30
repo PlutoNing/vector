@@ -1,8 +1,6 @@
 use futures::StreamExt;
 #[cfg(target_os = "linux")]
 use heim::net::os::linux::IoCountersExt;
-#[cfg(windows)]
-use heim::net::os::windows::IoCountersExt;
 use heim::units::information::byte;
 use vector_lib::configurable::configurable_component;
 use vector_lib::metric_tags;

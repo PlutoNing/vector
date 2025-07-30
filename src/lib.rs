@@ -50,8 +50,6 @@ pub mod line_agg;
 #[allow(unreachable_pub)]
 pub(crate) mod proto;
 pub mod serde;
-#[cfg(windows)]
-pub mod service;
 pub mod signal;
 #[allow(unreachable_pub)]
 pub mod sinks;

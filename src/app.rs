@@ -28,8 +28,6 @@ use crate::{
 
 #[cfg(unix)]
 use std::os::unix::process::ExitStatusExt;
-#[cfg(windows)]
-use std::os::windows::process::ExitStatusExt;
 use tokio::runtime::Handle;
 
 static WORKER_THREADS: AtomicUsize = AtomicUsize::new(0);
@@ -322,10 +320,6 @@ impl FinishedApplication {
         tokio::select! {
             _ = topology_controller.stop() => ExitStatus::from_raw({
                 info!("stop app");
-                #[cfg(windows)]
-                {
-                    exitcode::OK as u32
-                }
                 #[cfg(unix)]
                 exitcode::OK
             }), // Graceful shutdown finished
@@ -337,10 +331,6 @@ impl FinishedApplication {
         // It is highly unlikely that this event will exit from topology.
         info!("Vector has quit.");
         ExitStatus::from_raw({
-            #[cfg(windows)]
-            {
-                exitcode::UNAVAILABLE as u32
-            }
             #[cfg(unix)]
             exitcode::OK
         })

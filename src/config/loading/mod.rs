@@ -260,18 +260,9 @@ where
 fn default_path() -> PathBuf {
     "/etc/vector/vector.yaml".into()
 }
-
-#[cfg(windows)]
-fn default_path() -> PathBuf {
-    let program_files =
-        std::env::var("ProgramFiles").expect("%ProgramFiles% environment variable must be defined");
-    format!("{}\\Vector\\config\\vector.yaml", program_files).into()
-}
 /* 获取默认的配置文件路径 */
 fn default_config_paths() -> Vec<ConfigPath> {
     #[cfg(not(windows))]
-    let default_path = default_path();
-    #[cfg(windows)]
     let default_path = default_path();
 
     vec![ConfigPath::File(default_path, Some(Format::Yaml))]
