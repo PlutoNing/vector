@@ -4,7 +4,7 @@ use clap::Parser;
 use serde_json::Value;
 
 use super::{load_builder_from_paths, load_source_from_paths, process_paths, ConfigBuilder};
-use crate::cli::handle_config_errors;
+use crate::app::handle_config_errors;
 use crate::config;
 
 #[derive(Parser, Debug, Clone)]

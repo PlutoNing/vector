@@ -18,7 +18,7 @@ use tokio::sync::broadcast::error::RecvError;
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
 use crate::{
-    cli::{handle_config_errors, Opts, RootOpts, WatchConfigMethod},
+    cli::{Opts, RootOpts, WatchConfigMethod},
     config::{self, Config, ConfigPath},
     signal::{SignalHandler, SignalPair, SignalRx, SignalTo},
     topology::{
@@ -49,6 +49,14 @@ pub struct Application {
     pub root_opts: RootOpts,
     pub config: ApplicationConfig,
     pub signals: SignalPair,
+}
+
+pub fn handle_config_errors(errors: Vec<String>) -> exitcode::ExitCode {
+    for error in errors {
+        error!(message = "Configuration error.", %error);
+    }
+
+    exitcode::CONFIG
 }
 
 impl ApplicationConfig {

@@ -208,11 +208,3 @@ pub enum WatchConfigMethod {
     /// The interval is determined by  [`RootOpts::watch_config_poll_interval_seconds`].
     Poll,
 }
-
-pub fn handle_config_errors(errors: Vec<String>) -> exitcode::ExitCode {
-    for error in errors {
-        error!(message = "Configuration error.", %error);
-    }
-
-    exitcode::CONFIG
-}
