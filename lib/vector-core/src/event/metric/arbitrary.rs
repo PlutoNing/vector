@@ -1,11 +1,11 @@
-use proptest::collection::{btree_set, hash_map, hash_set};
+use proptest::collection::{hash_map, hash_set};
 use proptest::option;
 use proptest::prelude::*;
 
 
 
 use super::{
-    samples_to_buckets, Bucket, MetricTags, MetricValue, Quantile, Sample,
+    Bucket, MetricTags, Quantile, Sample,
     StatisticKind, TagValue, TagValueSet,
 };
 

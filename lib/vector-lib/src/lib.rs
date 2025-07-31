@@ -1,7 +1,7 @@
 pub use vector_common::{
     assert_event_data_eq, btreemap, byte_size_of, byte_size_of::ByteSizeOf, conversion,
-    encode_logfmt, finalization, id, impl_event_data_eq, internal_event, json_size,
-    registered_event, shutdown, trigger, Error, Result,
+    encode_logfmt, finalization, id, impl_event_data_eq,  json_size,
+     shutdown, trigger, Error, Result,
     TimeZone,
 };
 pub use vector_config as configurable;
@@ -10,7 +10,7 @@ pub use vector_config::impl_generate_config_from_default;
 pub use vector_core::compile_vrl;
 pub use vector_core::{
     buckets, default_data_dir, emit, event, metric_tags, metrics,
-    quantiles, register, samples, schema, serde, sink, source, transform,
+    quantiles, samples, schema, serde, sink, source, transform,
     EstimatedJsonEncodedSizeOf,
 };
 #[cfg(feature = "vrl")]

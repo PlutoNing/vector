@@ -4,14 +4,18 @@ use async_recursion::async_recursion;
 use derivative::Derivative;
 
 use tracing::Span;
-use vector_common::internal_event::{register, InternalEventHandle, Registered};
+// use vector_common::internal_event::{register, InternalEventHandle, Registered};
+use crate::internal_event::{InternalEventHandle, Registered};
+use crate::register;
+
 
 use super::limited_queue::LimitedSender;
 use crate::buffers::buffer_usage_data::BufferUsageHandle;
 use std::time::Duration;
 use vector_lib::config::{Bufferable,WhenFull,};
 use metrics::{histogram, Histogram};
-use vector_common::registered_event;
+// use vector_common::registered_event;
+use crate::registered_event;
 registered_event! {
     BufferSendDuration {
         stage: usize,
@@ -132,7 +136,7 @@ impl<T: Bufferable> BufferSender<T> {
     /// Configures this sender to instrument the send duration.
     pub fn with_send_duration_instrumentation(&mut self, stage: usize, span: &Span) {
         let _enter = span.enter();
-        self.send_duration = Some(register(BufferSendDuration { stage }));
+        self.send_duration = Some(register!(BufferSendDuration { stage }));
     }
 }
 

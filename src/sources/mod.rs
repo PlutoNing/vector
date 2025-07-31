@@ -27,10 +27,14 @@ use vector_lib::json_size::JsonSize;
 use vector_lib::{
     config::{log_schema, SourceOutput},
     event::{array, Event, EventArray, EventContainer, EventRef},
-    internal_event::{
+
+    ByteSizeOf, EstimatedJsonEncodedSizeOf,
+};
+use crate::{
+    register,
+        internal_event::{
         self, CountByteSize, EventsSent, InternalEventHandle as _, Registered, DEFAULT_OUTPUT,
     },
-    ByteSizeOf, EstimatedJsonEncodedSizeOf,
 };
 use vrl::value::Value;
 use crate::config::{ComponentKey, OutputId};

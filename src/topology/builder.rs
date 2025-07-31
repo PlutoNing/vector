@@ -14,7 +14,7 @@ use tokio::{
 };
 use tracing::Instrument;
 
-use vector_lib::internal_event::{CountByteSize, InternalEventHandle as _};
+use crate::internal_event::{CountByteSize, InternalEventHandle as _};
 
 use vector_lib::{
     EstimatedJsonEncodedSizeOf,
@@ -27,8 +27,9 @@ use super::{
     task::{Task, TaskOutput},
     BuiltBuffer, ConfigDiff,
 };
-use vector_lib::internal_event::EventsReceived;
+use crate::internal_event::EventsReceived;
 use crate::{
+    register,
     config::{
         ComponentKey, Config, DataType, EnrichmentTableConfig, Inputs, OutputId, ProxyConfig,
         SinkContext, SourceContext,

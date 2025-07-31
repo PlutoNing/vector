@@ -15,11 +15,12 @@ pub use vector_lib::{
 };
 pub use vector_lib::{
     finalization::{EventFinalizers, EventStatus, Finalizable},
-    internal_event::CountByteSize,
+    
     json_size::JsonSize,
 };
 
 pub use crate::{
+    internal_event::CountByteSize,
     codecs::{Encoder, EncodingConfig, Transformer},
     config::{DataType, GenerateConfig, SinkConfig, SinkContext},
     event::{Event, LogEvent},

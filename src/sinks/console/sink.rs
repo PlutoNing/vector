@@ -5,13 +5,15 @@ use tokio::{io, io::AsyncWriteExt};
 use tokio_util::codec::Encoder as _;
 use crate::codecs::Framer;
 use vector_lib::{
-    internal_event::{
-        ByteSize, BytesSent, CountByteSize, EventsSent, InternalEventHandle as _, Output, Protocol,
-    },
+    // internal_event::{
+        // ByteSize, BytesSent, CountByteSize, EventsSent, InternalEventHandle as _, Output, Protocol,
+    // },
     EstimatedJsonEncodedSizeOf,
 };
-
+use crate::internal_event::{ ByteSize, BytesSent, CountByteSize, EventsSent, InternalEventHandle as _, Output, Protocol,};
 use crate::{
+    register,
+    // registered_event,
     codecs::{Encoder, Transformer},
     event::{Event, EventStatus, Finalizable},
     sinks::util::StreamSink,

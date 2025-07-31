@@ -92,11 +92,3 @@ macro_rules! register {
         })
     };
 }
-
-#[cfg(not(feature = "test"))]
-#[macro_export]
-macro_rules! register {
-    ($event:expr) => {
-        vector_lib::internal_event::register($event)
-    };
-}

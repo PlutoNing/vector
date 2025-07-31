@@ -75,7 +75,8 @@ impl<T> From<Option<T>> for OptionalTag<T> {
     }
 }
 
-use crate::json_size::JsonSize;
+// use crate::json_size::JsonSize;
+use vector_lib::json_size::JsonSize;
 
 pub trait InternalEvent: Sized {
     fn emit(self);
@@ -131,12 +132,10 @@ impl<E: RegisterInternalEvent> RegisterInternalEvent for DefaultName<E> {
     }
 }
 
-#[cfg(not(any(test, feature = "test")))]
 pub fn emit(event: impl InternalEvent) {
     event.emit();
 }
 
-#[cfg(not(any(test, feature = "test")))]
 pub fn register<E: RegisterInternalEvent>(event: E) -> E::Handle {
     event.register()
 }
@@ -288,5 +287,12 @@ macro_rules! registered_event {
             }
 
         }
+    };
+}
+
+#[macro_export]
+macro_rules! register {
+    ($event:expr) => {
+        crate::internal_event::register($event)
     };
 }

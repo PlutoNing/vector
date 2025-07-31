@@ -15,18 +15,19 @@ use tokio::time;
 use tokio_stream::wrappers::IntervalStream;
 use vector_lib::config::LogNamespace;
 use vector_lib::configurable::configurable_component;
-use vector_lib::internal_event::{
+use crate::internal_event::{
     ByteSize, BytesReceived, CountByteSize, InternalEventHandle as _, Protocol, Registered,
 };
 use vector_lib::EstimatedJsonEncodedSizeOf;
 
 use crate::{
+    register,
     config::{SourceConfig, SourceContext, SourceOutput},
     event::metric::{Metric, MetricKind, MetricTags, MetricValue},
     shutdown::ShutdownSignal,
     SourceSender,
 };
-use vector_lib::internal_event::EventsReceived;
+use crate::internal_event::EventsReceived;
 #[cfg(target_os = "linux")]
 mod cgroups;
 mod cpu;

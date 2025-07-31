@@ -41,8 +41,6 @@ pub mod finalization;
 
 pub mod id;
 
-pub mod internal_event;
-
 pub mod shutdown;
 
 pub mod trigger;
