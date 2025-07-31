@@ -10,12 +10,11 @@ pub use vector_lib::{
     config::Input,
     event::Value,
     schema::Requirement,
-    sink::{StreamSink, VectorSink},
     ByteSizeOf, EstimatedJsonEncodedSizeOf,
 };
+// use crate::core::sink::{StreamSink, VectorSink};
 pub use vector_lib::{
     finalization::{EventFinalizers, EventStatus, Finalizable},
-    
     json_size::JsonSize,
 };
 

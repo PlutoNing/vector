@@ -12,8 +12,8 @@ use vector_lib::{
         GlobalOptions, LogNamespace,
         SourceOutput,
     },
-    source::Source,
 };
+use crate::common::Source;
 
 use super::{dot_graph::GraphConfig, schema, ComponentKey, ProxyConfig, Resource};
 use crate::{shutdown::ShutdownSignal, SourceSender};

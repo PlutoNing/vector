@@ -8,7 +8,7 @@ pub use vector_config as configurable;
 pub use vector_config::impl_generate_config_from_default;
 pub use vector_core::{
     buckets, default_data_dir, emit, event, metric_tags, metrics,
-    quantiles, samples, schema, serde, sink, source, transform,
+    quantiles, samples, schema, serde, transform,
     EstimatedJsonEncodedSizeOf,
 };
 #[cfg(feature = "vrl")]

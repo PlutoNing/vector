@@ -10,8 +10,8 @@ pub mod console;
 #[cfg(feature = "sinks-file")] 
 pub mod file;
 //pub mod sqlite;
-pub use vector_lib::{config::Input, sink::VectorSink};
-
+pub use vector_lib::{config::Input};
+use crate::core::sink::VectorSink;
 /// Common build errors
 #[derive(Debug, Snafu)]
 pub enum BuildError {

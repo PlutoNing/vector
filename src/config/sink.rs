@@ -12,8 +12,8 @@ use vector_lib::configurable::{
 use vector_lib::{
     config::{GlobalOptions, Input},
     id::Inputs,
-    sink::VectorSink,
 };
+use crate::core::sink::VectorSink;
 
 use super::{dot_graph::GraphConfig, schema, ComponentKey, ProxyConfig, Resource};
 pub type BoxedSink = Box<dyn SinkConfig>;

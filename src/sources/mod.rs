@@ -3,7 +3,7 @@ use snafu::Snafu;
 
 #[cfg(feature = "sources-host_metrics")]
 pub mod host_metrics;
-pub use vector_lib::source::Source;
+pub use crate::common::Source;
 
 #[allow(dead_code)] // Easier than listing out all the features that use this
 /// Common build errors

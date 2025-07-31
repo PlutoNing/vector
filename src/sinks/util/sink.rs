@@ -32,4 +32,4 @@
 //! it to notify the consumer that the request has succeeded.
 
 // === StreamSink<Event> ===
-pub use vector_lib::sink::StreamSink;
+pub use crate::core::sink::StreamSink;
