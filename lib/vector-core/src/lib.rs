@@ -37,14 +37,10 @@ pub mod buffer;
 pub mod source;
 pub mod time;
 pub mod transform;
-#[cfg(feature = "vrl")]
-pub mod vrl;
+
 
 use float_eq::FloatEq;
 use std::path::PathBuf;
-
-#[cfg(feature = "vrl")]
-pub use crate::vrl::compile_vrl;
 
 pub use event::EstimatedJsonEncodedSizeOf;
 

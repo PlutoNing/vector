@@ -6,8 +6,6 @@ pub use vector_common::{
 };
 pub use vector_config as configurable;
 pub use vector_config::impl_generate_config_from_default;
-#[cfg(feature = "vrl")]
-pub use vector_core::compile_vrl;
 pub use vector_core::{
     buckets, default_data_dir, emit, event, metric_tags, metrics,
     quantiles, samples, schema, serde, sink, source, transform,
