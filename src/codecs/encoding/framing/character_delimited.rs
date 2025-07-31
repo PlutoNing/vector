@@ -26,13 +26,49 @@ impl CharacterDelimitedEncoderConfig {
     }
 }
 
+pub mod ascii_char {
+    use serde::{de, Deserialize, Deserializer, Serializer};
+
+    /// Deserialize an ASCII character as `u8`.
+    ///
+    /// # Errors
+    ///
+    /// If the item fails to be deserialized as a character, of the character to
+    /// be deserialized is not part of the ASCII range, an error is returned.
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<u8, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let character = char::deserialize(deserializer)?;
+        if character.is_ascii() {
+            Ok(character as u8)
+        } else {
+            Err(de::Error::custom(format!(
+                "invalid character: {character}, expected character in ASCII range"
+            )))
+        }
+    }
+
+    /// Serialize an `u8` as ASCII character.
+    ///
+    /// # Errors
+    ///
+    /// Does not error.
+    pub fn serialize<S>(character: &u8, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_char(*character as char)
+    }
+}
+
 /// Configuration for character-delimited framing.
 #[configurable_component]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CharacterDelimitedEncoderOptions {
     /// The ASCII (7-bit) character that delimits byte sequences.
     #[configurable(metadata(docs::type_override = "ascii_char"))]
-    #[serde(with = "vector_lib::serde::ascii_char")]
+    #[serde(with = "ascii_char")]
     pub delimiter: u8,
 }
 /* 字符分割的文本编码器 */
