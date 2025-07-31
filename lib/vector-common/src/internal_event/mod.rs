@@ -1,4 +1,3 @@
-mod bytes_received;
 mod bytes_sent;
 mod events_received;
 mod events_sent;
@@ -7,10 +6,34 @@ use std::ops::{Add, AddAssign};
 
 pub use metrics::SharedString;
 
-pub use bytes_received::BytesReceived;
 pub use bytes_sent::BytesSent;
 pub use events_received::EventsReceived;
 pub use events_sent::{EventsSent, DEFAULT_OUTPUT};
+
+use metrics::{counter, Counter};
+/* 有调用 */
+crate::registered_event!(
+    BytesReceived {
+        protocol: SharedString,
+    } => {
+        received_bytes: Counter = counter!("component_received_bytes_total", "protocol" => self.protocol.clone()),
+        protocol: SharedString = self.protocol,
+    }
+
+    fn emit(&self, data: ByteSize) {
+        self.received_bytes.increment(data.0 as u64);
+        trace!(message = "Bytes received.", byte_size = %data.0, protocol = %self.protocol);
+    }
+);
+
+impl From<Protocol> for BytesReceived {
+    fn from(protocol: Protocol) -> Self {
+        Self {
+            protocol: protocol.0,
+        }
+    }
+}
+
 
 /// The user can configure whether a tag should be emitted. If they configure it to
 /// be emitted, but the value doesn't exist - we should emit the tag but with a value
