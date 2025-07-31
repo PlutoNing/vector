@@ -1,1 +1,0 @@
-pub use vector_lib::internal_event::EventsReceived;

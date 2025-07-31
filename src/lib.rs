@@ -35,9 +35,6 @@ static ALLOC: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 #[allow(unreachable_pub)]
 pub mod config;
 
-#[macro_use]
-#[allow(unreachable_pub)]
-pub mod internal_events;
 pub mod app;
 
 #[allow(unreachable_pub)]

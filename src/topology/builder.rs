@@ -27,13 +27,14 @@ use super::{
     task::{Task, TaskOutput},
     BuiltBuffer, ConfigDiff,
 };
+use vector_lib::internal_event::EventsReceived;
 use crate::{
     config::{
         ComponentKey, Config, DataType, EnrichmentTableConfig, Inputs, OutputId, ProxyConfig,
         SinkContext, SourceContext,
     },
     event::{EventArray, EventContainer},
-    internal_events::EventsReceived,
+
     shutdown::SourceShutdownCoordinator,
     spawn_named,
     topology::task::TaskError,

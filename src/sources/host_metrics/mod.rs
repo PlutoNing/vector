@@ -23,11 +23,10 @@ use vector_lib::EstimatedJsonEncodedSizeOf;
 use crate::{
     config::{SourceConfig, SourceContext, SourceOutput},
     event::metric::{Metric, MetricKind, MetricTags, MetricValue},
-    internal_events::{EventsReceived},
     shutdown::ShutdownSignal,
     SourceSender,
 };
-
+use vector_lib::internal_event::EventsReceived;
 #[cfg(target_os = "linux")]
 mod cgroups;
 mod cpu;
