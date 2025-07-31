@@ -6,7 +6,7 @@ use std::{
 
 use indexmap::IndexMap;
 use serde_json::{Map, Value};
-use vector_config_common::{attributes::CustomAttribute, constants, schema::*};
+use agent_config_common::{attributes::CustomAttribute, constants, schema::*};
 
 use crate::{
     num::ConfigurableNumber, Configurable, ConfigurableRef, GenerateError, Metadata, ToValue,

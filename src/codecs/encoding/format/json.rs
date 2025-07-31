@@ -1,6 +1,6 @@
 use bytes::{BufMut, BytesMut};
 use tokio_util::codec::Encoder;
-use vector_config_macros::configurable_component;
+use agent_config_macros::configurable_component;
 use vector_lib::{config::DataType, event::Event, schema};
 
 use crate::codecs::MetricTagValues;

@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use vector_config_common::schema::{visit::Visitor, *};
+use agent_config_common::schema::{visit::Visitor, *};
 
 /// A schema reference which can refer to either a schema definition or the root schema itself.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]

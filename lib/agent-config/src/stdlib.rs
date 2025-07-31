@@ -13,7 +13,7 @@ use std::{
 
 use indexmap::IndexMap;
 use serde_json::{Number, Value};
-use vector_config_common::{attributes::CustomAttribute, constants, validation::Validation};
+use agent_config_common::{attributes::CustomAttribute, constants, validation::Validation};
 use vrl::value::KeyString;
 
 use crate::{

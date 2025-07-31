@@ -6,7 +6,7 @@ use std::num::{
 use num_traits::{Bounded, One, ToPrimitive, Zero};
 use serde::Serialize;
 use serde_json::Number;
-use vector_config_common::num::{NUMERIC_ENFORCED_LOWER_BOUND, NUMERIC_ENFORCED_UPPER_BOUND};
+use agent_config_common::num::{NUMERIC_ENFORCED_LOWER_BOUND, NUMERIC_ENFORCED_UPPER_BOUND};
 
 use crate::schema::InstanceType;
 

@@ -81,8 +81,8 @@ members = [
   ".",
   "lib/agent-common",
   "lib/agent-config",
-  "lib/vector-config-common",
-  "lib/vector-config-macros",
+  "lib/agent-config-common",
+  "lib/agent-config-macros",
   "lib/vector-core",
   "lib/vector-lib",
 ]
@@ -128,8 +128,8 @@ tonic-build = { version = "0.11", default-features = false, features = ["transpo
 uuid = { version = "1.17.0", features = ["v4", "v7", "serde"] }
 vector-lib = { path = "lib/vector-lib", default-features = false, features = ["vrl"] }
 agent-config = { path = "lib/agent-config" }
-vector-config-common = { path = "lib/vector-config-common" }
-vector-config-macros = { path = "lib/vector-config-macros" }
+agent-config-common = { path = "lib/agent-config-common" }
+agent-config-macros = { path = "lib/agent-config-macros" }
 vrl = { git = "https://github.com/vectordotdev/vrl.git", branch = "main", features = ["arbitrary", "cli", "test", "test_framework"] }
 
 [dependencies]
@@ -148,8 +148,8 @@ vrl.workspace = true
 agent-common = { path = "lib/agent-common", default-features = false}
 vector-lib.workspace = true
 agent-config.workspace = true
-vector-config-common.workspace = true
-vector-config-macros.workspace = true
+agent-config-common.workspace = true
+agent-config-macros.workspace = true
 # Tokio / Futures
 async-stream = { version = "0.3.6", default-features = false }
 async-trait = { version = "0.1.88", default-features = false }

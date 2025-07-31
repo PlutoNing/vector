@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
 use tracing::debug;
-use vector_config_common::schema::{
+use agent_config_common::schema::{
     visit::{with_resolved_schema_reference, Visitor},
     *,
 };

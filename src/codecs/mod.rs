@@ -15,7 +15,7 @@ pub use encoding::{
     Framer,FramingConfig,Serializer,SerializerConfig
 };
 pub use ready_frames::ReadyFrames;
-use vector_config_macros::configurable_component;
+use agent_config_macros::configurable_component;
 
 /// The user configuration to choose the metric tag strategy.
 #[configurable_component]

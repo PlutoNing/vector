@@ -5,7 +5,7 @@ use syn::{
     parse_macro_input, parse_quote, spanned::Spanned, token::PathSep, DeriveInput, ExprPath, Ident,
     PathArguments, Type,
 };
-// use vector_config_common::validation::Validation;
+// use agent_config_common::validation::Validation;
 use crate::config_common::validation::Validation;
 
 // use crate::ast::{Container, Data, Field, LazyCustomAttribute, Style, Tagging, Variant};

@@ -3,7 +3,7 @@
 use std::mem::discriminant;
 
 use serde_json::Value;
-use vector_config_common::schema::*;
+use agent_config_common::schema::*;
 
 /// A type that can be merged with itself.
 pub trait Mergeable {

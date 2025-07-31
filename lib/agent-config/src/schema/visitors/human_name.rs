@@ -1,5 +1,5 @@
 use serde_json::Value;
-use vector_config_common::{
+use agent_config_common::{
     constants,
     human_friendly::generate_human_friendly_string,
     schema::{visit::Visitor, *},

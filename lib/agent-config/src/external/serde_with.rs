@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 
-use vector_config_common::{attributes::CustomAttribute, constants};
+use agent_config_common::{attributes::CustomAttribute, constants};
 
 use crate::schema::generate_optional_schema;
 use crate::{

@@ -2,7 +2,7 @@ use std::borrow::Cow;
 
 use serde_json::Value;
 use snafu::Snafu;
-use vector_config_common::{
+use agent_config_common::{
     attributes::CustomAttribute,
     constants::{self, ComponentType},
     schema::SchemaObject,

@@ -8,7 +8,7 @@ use crate::{
 use chrono_tz::Tz;
 use serde_json::Value;
 use std::cell::RefCell;
-use vector_config_common::{attributes::CustomAttribute, constants};
+use agent_config_common::{attributes::CustomAttribute, constants};
 use vrl::compiler::TimeZone;
 
 // TODO: Consider an approach for generating schema of "fixed string value, or remainder" structure

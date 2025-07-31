@@ -11,7 +11,7 @@ pub use container::Container;
 pub use field::Field;
 use syn::Expr;
 pub use variant::Variant;
-use vector_config_common::constants;
+use agent_config_common::constants;
 
 const INVALID_VALUE_EXPR: &str =
     "got function call-style literal value but could not parse as expression";

@@ -98,6 +98,8 @@ dependencies = [
 name = "agent-config"
 version = "0.1.0"
 dependencies = [
+ "agent-config-common",
+ "agent-config-macros",
  "assert-json-diff",
  "chrono",
  "chrono-tz",
@@ -114,9 +116,35 @@ dependencies = [
  "toml",
  "tracing 0.1.41",
  "url",
- "vector-config-common",
- "vector-config-macros",
  "vrl",
+]
+
+[[package]]
+name = "agent-config-common"
+version = "0.1.0"
+dependencies = [
+ "convert_case 0.8.0",
+ "darling",
+ "proc-macro2 1.0.95",
+ "quote 1.0.40",
+ "serde",
+ "serde_json",
+ "syn 2.0.104",
+ "tracing 0.1.41",
+]
+
+[[package]]
+name = "agent-config-macros"
+version = "0.1.0"
+dependencies = [
+ "agent-config",
+ "agent-config-common",
+ "darling",
+ "proc-macro2 1.0.95",
+ "quote 1.0.40",
+ "serde",
+ "serde_derive_internals",
+ "syn 2.0.104",
 ]
 
 [[package]]
@@ -9049,6 +9077,8 @@ version = "0.49.0"
 dependencies = [
  "agent-common",
  "agent-config",
+ "agent-config-common",
+ "agent-config-macros",
  "approx",
  "arc-swap",
  "arr_macro",
@@ -9215,8 +9245,6 @@ dependencies = [
  "typetag",
  "url",
  "uuid",
- "vector-config-common",
- "vector-config-macros",
  "vector-lib",
  "vrl",
  "warp",
@@ -9226,39 +9254,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "vector-config-common"
-version = "0.1.0"
-dependencies = [
- "convert_case 0.8.0",
- "darling",
- "proc-macro2 1.0.95",
- "quote 1.0.40",
- "serde",
- "serde_json",
- "syn 2.0.104",
- "tracing 0.1.41",
-]
-
-[[package]]
-name = "vector-config-macros"
-version = "0.1.0"
-dependencies = [
- "agent-config",
- "darling",
- "proc-macro2 1.0.95",
- "quote 1.0.40",
- "serde",
- "serde_derive_internals",
- "syn 2.0.104",
- "vector-config-common",
-]
-
-[[package]]
 name = "vector-core"
 version = "0.1.0"
 dependencies = [
  "agent-common",
  "agent-config",
+ "agent-config-common",
  "async-trait",
  "base64 0.22.1",
  "bitmask-enum",
@@ -9326,7 +9327,6 @@ dependencies = [
  "url",
  "urlencoding",
  "uuid",
- "vector-config-common",
  "vrl",
 ]
 

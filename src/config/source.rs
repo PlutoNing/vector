@@ -4,9 +4,9 @@ use std::collections::HashMap;
 use async_trait::async_trait;
 use dyn_clone::DynClone;
 use agent_config::{Configurable, GenerateError, Metadata, NamedComponent};
-use vector_config_common::attributes::CustomAttribute;
-use vector_config_common::schema::{SchemaGenerator, SchemaObject};
-use vector_config_macros::configurable_component;
+use agent_config_common::attributes::CustomAttribute;
+use agent_config_common::schema::{SchemaGenerator, SchemaObject};
+use agent_config_macros::configurable_component;
 use vector_lib::{
     config::{
         LogNamespace,

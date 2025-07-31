@@ -6,7 +6,7 @@ use proc_macro2::{Span, TokenStream};
 use quote::ToTokens;
 use serde_derive_internals::ast as serde_ast;
 use syn::{parse_quote, ExprPath, Ident};
-use vector_config_common::validation::Validation;
+use agent_config_common::validation::Validation;
 
 use super::{
     util::{

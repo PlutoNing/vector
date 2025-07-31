@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use serde_json::Value;
 use tracing::debug;
-use vector_config_common::schema::{visit::Visitor, *};
+use agent_config_common::schema::{visit::Visitor, *};
 
 use crate::schema::visitors::merge::Mergeable;
 

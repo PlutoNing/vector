@@ -2,7 +2,7 @@ use std::{cell::RefCell, marker::PhantomData};
 
 use snafu::Snafu;
 use toml::Value;
-use vector_config_common::{attributes::CustomAttribute, constants};
+use agent_config_common::{attributes::CustomAttribute, constants};
 
 use super::{ComponentMarker, GenerateConfig};
 use crate::schema::{SchemaGenerator, SchemaObject};

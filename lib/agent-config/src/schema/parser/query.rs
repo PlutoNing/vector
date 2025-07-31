@@ -2,7 +2,7 @@ use std::{fs::File, io::BufReader, path::Path, sync::OnceLock};
 
 use serde_json::Value;
 use snafu::Snafu;
-use vector_config_common::{
+use agent_config_common::{
     attributes::CustomAttribute,
     constants,
     schema::{InstanceType, RootSchema, Schema, SchemaObject, SingleOrVec},

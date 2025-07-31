@@ -6,7 +6,7 @@ use syn::{
     parse_macro_input, parse_quote, parse_quote_spanned, punctuated::Punctuated, spanned::Spanned,
     token::Comma, DeriveInput, Lit, LitStr, Meta, MetaList, Path,
 };
-use vector_config_common::{
+use agent_config_common::{
     constants::ComponentType, human_friendly::generate_human_friendly_string,
 };
 

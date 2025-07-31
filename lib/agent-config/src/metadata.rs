@@ -1,6 +1,6 @@
 use std::fmt;
 
-use vector_config_common::{attributes::CustomAttribute, validation};
+use agent_config_common::{attributes::CustomAttribute, validation};
 
 use crate::ToValue;
 

@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 
 use serde_json::Value;
-use vector_config_common::validation::{Format, Validation};
+use agent_config_common::validation::{Format, Validation};
 
 use crate::{
     schema::{generate_string_schema, SchemaGenerator, SchemaObject},
