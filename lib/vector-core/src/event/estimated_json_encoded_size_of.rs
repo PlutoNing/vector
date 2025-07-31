@@ -4,7 +4,7 @@ use bytes::Bytes;
 use chrono::{DateTime, Timelike, Utc};
 use ordered_float::NotNan;
 use smallvec::SmallVec;
-use vector_common::json_size::JsonSize;
+use agent_common::json_size::JsonSize;
 use vrl::value::{KeyString, Value};
 
 const NULL_SIZE: JsonSize = JsonSize::new(4);

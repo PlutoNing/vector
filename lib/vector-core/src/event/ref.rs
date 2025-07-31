@@ -1,6 +1,6 @@
 #![deny(missing_docs)]
 
-use vector_common::EventDataEq;
+use agent_common::EventDataEq;
 
 use super::{Event, EventMetadata, LogEvent, Metric, TraceEvent};
 

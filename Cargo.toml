@@ -79,7 +79,7 @@ depends = ""
 [workspace]
 members = [
   ".",
-  "lib/vector-common",
+  "lib/agent-common",
   "lib/vector-config",
   "lib/vector-config-common",
   "lib/vector-config-macros",
@@ -145,7 +145,7 @@ snafu.workspace = true
 uuid.workspace = true
 vrl.workspace = true
 
-vector-common = { path = "lib/vector-common", default-features = false}
+agent-common = { path = "lib/agent-common", default-features = false}
 vector-lib.workspace = true
 vector-config.workspace = true
 vector-config-common.workspace = true

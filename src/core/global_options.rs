@@ -1,7 +1,7 @@
 use std::{fs::DirBuilder, path::PathBuf, time::Duration};
 
 use snafu::{ResultExt, Snafu};
-use vector_common::TimeZone;
+use agent_common::TimeZone;
 use vector_config::{configurable_component, impl_generate_config_from_default};
 
 

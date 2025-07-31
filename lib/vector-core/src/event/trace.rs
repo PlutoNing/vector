@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use vrl::path::TargetPath;
 use serde::{Deserialize, Serialize};
 use crate::buffer::EventCount;
-use vector_common::{
+use agent_common::{
     byte_size_of::ByteSizeOf, json_size::JsonSize, EventDataEq,
 };
 use vrl::path::PathParseError;

@@ -71,6 +71,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "agent-common"
+version = "0.1.0"
+dependencies = [
+ "async-stream",
+ "bytes 1.10.1",
+ "chrono",
+ "crossbeam-utils",
+ "derivative",
+ "futures 0.3.31",
+ "indexmap 2.10.0",
+ "metrics",
+ "paste",
+ "pin-project",
+ "serde",
+ "serde_json",
+ "smallvec",
+ "stream-cancel",
+ "tokio",
+ "tracing 0.1.41",
+ "vector-config",
+ "vrl",
+]
+
+[[package]]
 name = "ahash"
 version = "0.8.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8998,6 +9022,7 @@ checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 name = "vector"
 version = "0.49.0"
 dependencies = [
+ "agent-common",
  "approx",
  "arc-swap",
  "arr_macro",
@@ -9164,7 +9189,6 @@ dependencies = [
  "typetag",
  "url",
  "uuid",
- "vector-common",
  "vector-config",
  "vector-config-common",
  "vector-config-macros",
@@ -9174,30 +9198,6 @@ dependencies = [
  "windows-service",
  "wiremock",
  "zstd",
-]
-
-[[package]]
-name = "vector-common"
-version = "0.1.0"
-dependencies = [
- "async-stream",
- "bytes 1.10.1",
- "chrono",
- "crossbeam-utils",
- "derivative",
- "futures 0.3.31",
- "indexmap 2.10.0",
- "metrics",
- "paste",
- "pin-project",
- "serde",
- "serde_json",
- "smallvec",
- "stream-cancel",
- "tokio",
- "tracing 0.1.41",
- "vector-config",
- "vrl",
 ]
 
 [[package]]
@@ -9257,6 +9257,7 @@ dependencies = [
 name = "vector-core"
 version = "0.1.0"
 dependencies = [
+ "agent-common",
  "async-trait",
  "base64 0.22.1",
  "bitmask-enum",
@@ -9324,7 +9325,6 @@ dependencies = [
  "url",
  "urlencoding",
  "uuid",
- "vector-common",
  "vector-config",
  "vector-config-common",
  "vrl",
@@ -9334,7 +9334,7 @@ dependencies = [
 name = "vector-lib"
 version = "0.1.0"
 dependencies = [
- "vector-common",
+ "agent-common",
  "vector-config",
  "vector-core",
  "vrl",

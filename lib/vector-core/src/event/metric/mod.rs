@@ -11,7 +11,7 @@ use std::{
 };
 
 use chrono::{DateTime, Utc};
-use vector_common::{
+use agent_common::{
     byte_size_of::ByteSizeOf,
 
     json_size::JsonSize,

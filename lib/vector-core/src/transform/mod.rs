@@ -1,7 +1,7 @@
 use std::{collections::HashMap, sync::Arc};
 
 
-use vector_common::{byte_size_of::ByteSizeOf, json_size::JsonSize, EventDataEq};
+use agent_common::{byte_size_of::ByteSizeOf, json_size::JsonSize, EventDataEq};
 
 use crate::config::{OutputId};
 use crate::event::EventMutRef;

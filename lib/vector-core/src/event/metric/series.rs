@@ -1,6 +1,6 @@
 use core::fmt;
 
-use vector_common::byte_size_of::ByteSizeOf;
+use agent_common::byte_size_of::ByteSizeOf;
 use vector_config::configurable_component;
 
 use super::{write_list, write_word, MetricTags, TagValue};

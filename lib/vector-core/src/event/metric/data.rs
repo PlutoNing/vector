@@ -1,7 +1,7 @@
 use std::num::NonZeroU32;
 
 use chrono::{DateTime, Utc};
-use vector_common::byte_size_of::ByteSizeOf;
+use agent_common::byte_size_of::ByteSizeOf;
 use vector_config::configurable_component;
 
 use super::{MetricKind, MetricValue};

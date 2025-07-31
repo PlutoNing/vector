@@ -6,7 +6,7 @@ use derivative::Derivative;
 use vrl::path::OwnedTargetPath;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use vector_common::{byte_size_of::ByteSizeOf, config::ComponentKey, EventDataEq};
+use agent_common::{byte_size_of::ByteSizeOf, config::ComponentKey, EventDataEq};
 use vrl::{
     compiler::SecretTarget,
     value::{KeyString, Kind, Value},

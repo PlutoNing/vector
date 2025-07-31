@@ -6,7 +6,7 @@ edition = "2021"
 publish = false
 
 [dependencies]
-vector-common = { path = "../vector-common" }
+agent-common = { path = "../agent-common" }
 vector-config = { path = "../vector-config" }
 vector-core = { path = "../vector-core", default-features = false }
 vrl = { workspace = true, optional = true }

@@ -18,7 +18,7 @@ pub trait IntoBuffer<T: Bufferable>: Send {
     /// in the middle of the channel without introducing an unnecessary hop, [`BufferSender`] and
     /// [`BufferReceiver`] can be configured to instrument all events flowing through directly.
     ///
-    /// When instrumentation is provided in this way, [`vector_common::byte_size_of::ByteSizeOf`]
+    /// When instrumentation is provided in this way, [`agent_common::byte_size_of::ByteSizeOf`]
     ///  is used to calculate the size of the event going both into and out of the buffer.
     fn provides_instrumentation(&self) -> bool {
         false

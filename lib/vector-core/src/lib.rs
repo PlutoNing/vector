@@ -45,7 +45,7 @@ extern crate tracing;
 
 
 
-pub(crate) use vector_common::{Error, Result};
+pub(crate) use agent_common::{Error, Result};
 
 pub(crate) fn float_eq(l_value: f64, r_value: f64) -> bool {
     (l_value.is_nan() && r_value.is_nan()) || l_value.eq_ulps(&r_value, &1)

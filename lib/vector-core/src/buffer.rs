@@ -5,7 +5,7 @@ use vector_config::configurable_component;
 
 use std::fmt::Debug;
 
-use vector_common::byte_size_of::ByteSizeOf;
+use agent_common::byte_size_of::ByteSizeOf;
 /// Event handling behavior when a buffer is full.
 #[configurable_component]
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]

@@ -8,7 +8,7 @@ use std::{
 use serde::{de, Deserialize, Deserializer, Serialize};
 use snafu::{ResultExt, Snafu};
 use tracing::Span;
-use vector_common::{config::ComponentKey, finalization::Finalizable};
+use agent_common::{config::ComponentKey, finalization::Finalizable};
 use vector_config::configurable_component;
 use crate::buffers::topology::{
         builder::{TopologyBuilder, TopologyError},

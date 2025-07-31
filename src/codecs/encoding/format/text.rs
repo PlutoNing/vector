@@ -58,7 +58,7 @@ impl TextSerializer {
 }
 
 impl Encoder<Event> for TextSerializer {
-    type Error = vector_common::Error;
+    type Error = agent_common::Error;
 
     fn encode(&mut self, event: Event, buffer: &mut BytesMut) -> Result<(), Self::Error> {
         match event {

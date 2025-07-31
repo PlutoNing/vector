@@ -17,7 +17,7 @@ use vrl::path;
 use vrl::path::{TargetPath, PathPrefix};
 use vrl::{metadata_path};
 use serde::{Deserialize, Serialize, Serializer};
-use vector_common::{
+use agent_common::{
     byte_size_of::ByteSizeOf,
 
     json_size::{JsonSize, NonZeroJsonSize},

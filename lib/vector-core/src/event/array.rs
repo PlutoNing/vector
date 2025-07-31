@@ -6,7 +6,7 @@ use std::{iter, slice, sync::Arc, vec};
 
 use futures::{stream, Stream};
 use crate::buffer::EventCount;
-use vector_common::{
+use agent_common::{
     byte_size_of::ByteSizeOf,
     config::ComponentKey,
     finalization::{EventFinalizers, Finalizable},
