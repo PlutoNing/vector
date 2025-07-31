@@ -1,9 +1,5 @@
-
-
 use metrics::{counter, Counter};
 use tracing::trace;
-
-
 
 use super::{CountByteSize, Output, SharedString};
 

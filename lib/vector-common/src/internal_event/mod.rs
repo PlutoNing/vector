@@ -2,7 +2,6 @@ mod bytes_received;
 mod bytes_sent;
 mod events_received;
 mod events_sent;
-mod prelude;
 
 use std::ops::{Add, AddAssign};
 
@@ -12,7 +11,6 @@ pub use bytes_received::BytesReceived;
 pub use bytes_sent::BytesSent;
 pub use events_received::EventsReceived;
 pub use events_sent::{EventsSent, DEFAULT_OUTPUT};
-pub use prelude::{error_stage, error_type};
 
 /// The user can configure whether a tag should be emitted. If they configure it to
 /// be emitted, but the value doesn't exist - we should emit the tag but with a value
