@@ -2,8 +2,8 @@ use futures::StreamExt;
 #[cfg(target_os = "linux")]
 use heim::net::os::linux::IoCountersExt;
 use heim::units::information::byte;
-use vector_lib::configurable::configurable_component;
-use vector_lib::metric_tags;
+use agent_lib::configurable::configurable_component;
+use agent_lib::metric_tags;
 
 use super::{default_all_devices, example_devices, filter_result, FilterList, HostMetrics};
 

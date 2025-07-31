@@ -1,15 +1,68 @@
-mod events_received;
-mod events_sent;
-
 use std::ops::{Add, AddAssign};
 
 pub use metrics::SharedString;
+use agent_lib::json_size::JsonSize;
+use metrics::{counter, histogram, Counter, Histogram};
 
-pub use events_received::EventsReceived;
-pub use events_sent::{EventsSent, DEFAULT_OUTPUT};
+/* 有调用 */
+crate::registered_event!(
+    EventsReceived => {
+        events_count: Histogram = histogram!("component_received_events_count"),
+        events: Counter = counter!("component_received_events_total"),
+        event_bytes: Counter = counter!("component_received_event_bytes_total"),
+    }
+/* emit是什么意思 */
+    fn emit(&self, data: CountByteSize) {
+        let CountByteSize(count, byte_size) = data;
 
-use metrics::{counter, Counter};
+        #[allow(clippy::cast_precision_loss)]
+        self.events_count.record(count as f64);
+        self.events.increment(count as u64);
+        self.event_bytes.increment(byte_size.get() as u64);
+    }
+);
 
+pub const DEFAULT_OUTPUT: &str = "_default";
+/* 有调用 */
+crate::registered_event!(
+    EventsSent {
+        output: Option<SharedString>,
+    } => {
+        events: Counter = if let Some(output) = &self.output {
+            counter!("component_sent_events_total", "output" => output.clone())
+        } else {
+            counter!("component_sent_events_total")
+        },
+        event_bytes: Counter = if let Some(output) = &self.output {
+            counter!("component_sent_event_bytes_total", "output" => output.clone())
+        } else {
+            counter!("component_sent_event_bytes_total")
+        },
+        output: Option<SharedString> = self.output,
+    }
+
+    fn emit(&self, data: CountByteSize) {
+        let CountByteSize(count, byte_size) = data;
+
+        match &self.output {
+            Some(output) => {
+                trace!(message = "Events sent.", count = %count, byte_size = %byte_size.get(), output = %output);
+            }
+            None => {
+                trace!(message = "Events sent.", count = %count, byte_size = %byte_size.get());
+            }
+        }
+
+        self.events.increment(count as u64);
+        self.event_bytes.increment(byte_size.get() as u64);
+    }
+);
+/* 有调用 */
+impl From<Output> for EventsSent {
+    fn from(output: Output) -> Self {
+        Self { output: output.0 }
+    }
+}
 
 crate::registered_event!(
     BytesSent {
@@ -31,10 +84,6 @@ impl From<Protocol> for BytesSent {
         }
     }
 }
-
-
-
-
 
 /* 有调用 */
 crate::registered_event!(
@@ -59,7 +108,6 @@ impl From<Protocol> for BytesReceived {
     }
 }
 
-
 /// The user can configure whether a tag should be emitted. If they configure it to
 /// be emitted, but the value doesn't exist - we should emit the tag but with a value
 /// of `-`.
@@ -74,9 +122,6 @@ impl<T> From<Option<T>> for OptionalTag<T> {
         Self::Specified(value)
     }
 }
-
-// use crate::json_size::JsonSize;
-use agent_lib::json_size::JsonSize;
 
 pub trait InternalEvent: Sized {
     fn emit(self);
@@ -132,10 +177,12 @@ impl<E: RegisterInternalEvent> RegisterInternalEvent for DefaultName<E> {
     }
 }
 
+#[cfg(not(any(test, feature = "test")))]
 pub fn emit(event: impl InternalEvent) {
     event.emit();
 }
 
+#[cfg(not(any(test, feature = "test")))]
 pub fn register<E: RegisterInternalEvent>(event: E) -> E::Handle {
     event.register()
 }
@@ -265,7 +312,7 @@ macro_rules! registered_event {
                 $( $field: $type, )*
             }
 
-            impl $crate::internal_event::RegisterInternalEvent for $event {
+            impl $crate::app_event::InternalEventHandle for $event {
                 type Handle = [<$event Handle>];
 
                 fn name(&self) -> Option<&'static str> {
@@ -279,7 +326,7 @@ macro_rules! registered_event {
                 }
             }
 
-            impl $crate::internal_event::InternalEventHandle for [<$event Handle>] {
+            impl $crate::app_event::InternalEventHandle for [<$event Handle>] {
                 type Data = $data;
 
                 fn emit(&$slf, $data_name: $data)
@@ -287,12 +334,5 @@ macro_rules! registered_event {
             }
 
         }
-    };
-}
-
-#[macro_export]
-macro_rules! register {
-    ($event:expr) => {
-        crate::internal_event::register($event)
     };
 }

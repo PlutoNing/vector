@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use indexmap::IndexMap;
-use vector_lib::config::OutputId;
+use agent_lib::config::OutputId;
 
 use super::{ComponentKey, Config, EnrichmentTableOuter};
 /* config的diff是什么, 里面每个成员描述的是config对应组件的变化 */

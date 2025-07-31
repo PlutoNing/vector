@@ -5,7 +5,7 @@ use heim::memory::os::macos::MemoryExt;
 #[cfg(not(windows))]
 use heim::memory::os::SwapExt;
 use heim::units::information::byte;
-use vector_lib::event::MetricTags;
+use agent_lib::event::MetricTags;
 
 use super::HostMetrics;
 

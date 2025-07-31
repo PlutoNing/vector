@@ -7,7 +7,7 @@ use tracing::Span;
 use crate::buffers::buffer_usage_data::{BufferUsage, BufferUsageHandle};
 use crate::buffers::topology::channel::{BufferReceiver, BufferSender,ReceiverAdapter, SenderAdapter};
 use crate::buffers::variants::{MemoryBuffer};
-use vector_lib::config::{Bufferable,WhenFull,};
+use agent_lib::config::{Bufferable,WhenFull,};
 /// Value that can be used as a stage in a buffer topology.
 #[async_trait]
 pub trait IntoBuffer<T: Bufferable>: Send {

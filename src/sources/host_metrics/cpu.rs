@@ -2,7 +2,7 @@ use futures::StreamExt;
 #[cfg(target_os = "linux")]
 use heim::cpu::os::linux::CpuTimeExt;
 use heim::units::time::second;
-use vector_lib::{event::MetricTags, metric_tags};
+use agent_lib::{event::MetricTags, metric_tags};
 
 use super::{filter_result, HostMetrics};
 

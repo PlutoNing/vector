@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use vector_lib::event::{metric::MetricData, Metric, MetricValue};
+use agent_lib::event::{metric::MetricData, Metric, MetricValue};
 
 #[allow(clippy::large_enum_variant)]
 enum SplitState {

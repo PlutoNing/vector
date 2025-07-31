@@ -15,7 +15,7 @@ use crate::buffers::topology::{
         channel::{BufferReceiver, BufferSender},
     };
 use crate::buffers::variants::{MemoryBuffer};
-use vector_lib::config::{Bufferable,WhenFull,};
+use agent_lib::config::{Bufferable,WhenFull,};
 #[derive(Debug, Snafu)]
 pub enum BufferBuildError {
     #[snafu(display("the configured buffer type requires `data_dir` be specified"))]

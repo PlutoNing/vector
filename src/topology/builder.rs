@@ -16,7 +16,7 @@ use tracing::Instrument;
 
 use crate::internal_event::{CountByteSize, InternalEventHandle as _};
 
-use vector_lib::{
+use agent_lib::{
     EstimatedJsonEncodedSizeOf,
 };
 use crate::buffers::{BufferType, topology::channel::BufferSender};

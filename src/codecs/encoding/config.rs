@@ -5,7 +5,7 @@ use crate::codecs::{
       
 };
 use crate::codecs::encoding::CharacterDelimitedEncoder;
-use vector_lib::configurable::configurable_component;
+use agent_lib::configurable::configurable_component;
 /* 比如说sink file时, 构建encoder config */
 /// Encoding configuration.
 #[configurable_component]

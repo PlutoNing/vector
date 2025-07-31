@@ -6,17 +6,17 @@ use std::collections::BTreeMap;
 
 use ordered_float::NotNan;
 use serde::{Deserialize, Deserializer};
-use vector_lib::configurable::configurable_component;
-use vector_lib::event::{LogEvent, MaybeAsLogMut};
+use agent_lib::configurable::configurable_component;
+use agent_lib::event::{LogEvent, MaybeAsLogMut};
 /// ========================ownedValuePath impl ======================
 use vrl::{event_path, path::PathPrefix};
-use vector_lib::schema::meaning;
+use agent_lib::schema::meaning;
 use vrl::path::OwnedValuePath;
 /// ========================ownedValuePath impl ======================
 pub use vrl::path::{PathParseError, ValuePath};
 use vrl::value::KeyString;
 use vrl::value::Value;
-pub use vector_lib::serde::{is_default};
+pub use agent_lib::serde::{is_default};
 use crate::{event::Event};
 /// ========================ownedValuePath impl ======================
 /// A wrapper around `OwnedValuePath` that allows it to be used in Vector config.

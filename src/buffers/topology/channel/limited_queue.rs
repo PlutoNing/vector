@@ -12,7 +12,7 @@ use crossbeam_queue::ArrayQueue;
 use futures::Stream;
 use tokio::sync::{Notify, OwnedSemaphorePermit, Semaphore, TryAcquireError};
 
-use vector_lib::config::InMemoryBufferable;
+use agent_lib::config::InMemoryBufferable;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct SendError<T>(pub T);

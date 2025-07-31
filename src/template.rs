@@ -8,7 +8,7 @@ use chrono::{
 };
 use regex::Regex;
 use snafu::Snafu;
-use vector_lib::configurable::{
+use agent_lib::configurable::{
     configurable_component, ConfigurableNumber, ConfigurableString, NumberClass,
 };
 use vrl::path::parse_target_path;

@@ -1,5 +1,5 @@
-use vector_lib::config::LogNamespace;
-use vector_lib::configurable::configurable_component;
+use agent_lib::config::LogNamespace;
+use agent_lib::configurable::configurable_component;
 
 pub(crate) use crate::schema::Definition;
 

@@ -1,6 +1,6 @@
 //! Functionality to handle enrichment tables.
 use enum_dispatch::enum_dispatch;
-use vector_lib::configurable::configurable_component;
+use agent_lib::configurable::configurable_component;
 pub use crate::enrichment_tables::enrichment::{Condition, IndexHandle, Table};
 
 use crate::config::{

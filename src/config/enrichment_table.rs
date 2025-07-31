@@ -1,8 +1,8 @@
 use enum_dispatch::enum_dispatch;
 use serde::Serialize;
 use crate::core::global_options::GlobalOptions;
-use vector_lib::configurable::{configurable_component, Configurable, NamedComponent, ToValue};
-use vector_lib::id::{ComponentKey, Inputs};
+use agent_lib::configurable::{configurable_component, Configurable, NamedComponent, ToValue};
+use agent_lib::id::{ComponentKey, Inputs};
 
 use crate::enrichment_tables::EnrichmentTables;
 
@@ -19,7 +19,7 @@ where
     #[serde(flatten)]
     pub inner: EnrichmentTables,
     #[configurable(derived)]
-    #[serde(default, skip_serializing_if = "vector_lib::serde::is_default")]
+    #[serde(default, skip_serializing_if = "agent_lib::serde::is_default")]
     pub graph: GraphConfig,
     #[configurable(derived)]
     #[serde(

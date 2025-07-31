@@ -4,16 +4,16 @@
 pub use async_trait::async_trait;
 pub use futures::{future, future::BoxFuture, stream::BoxStream, FutureExt, StreamExt};
 pub use tower::{Service, ServiceBuilder};
-pub use vector_lib::config::EventCount;
-pub use vector_lib::configurable::configurable_component;
-pub use vector_lib::{
+pub use agent_lib::config::EventCount;
+pub use agent_lib::configurable::configurable_component;
+pub use agent_lib::{
     config::Input,
     event::Value,
     schema::Requirement,
     ByteSizeOf, EstimatedJsonEncodedSizeOf,
 };
 // use crate::core::sink::{StreamSink, VectorSink};
-pub use vector_lib::{
+pub use agent_lib::{
     finalization::{EventFinalizers, EventStatus, Finalizable},
     json_size::JsonSize,
 };

@@ -19,12 +19,12 @@ use futures::{Stream, StreamExt};
 use metrics::{histogram, Histogram};
 use tracing::Span;
 use crate::buffers::topology::channel::{self, LimitedReceiver, LimitedSender};
-use vector_lib::config::EventCount;
-use vector_lib::event::array::EventArrayIntoIter;
+use agent_lib::config::EventCount;
+use agent_lib::event::array::EventArrayIntoIter;
 #[cfg(any(test))]
-use vector_lib::event::{into_event_stream, EventStatus};
-use vector_lib::json_size::JsonSize;
-use vector_lib::{
+use agent_lib::event::{into_event_stream, EventStatus};
+use agent_lib::json_size::JsonSize;
+use agent_lib::{
     config::{log_schema, SourceOutput},
     event::{array, Event, EventArray, EventContainer, EventRef},
 

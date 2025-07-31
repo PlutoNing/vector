@@ -3,9 +3,9 @@ use std::{collections::HashMap, fs, hash::Hasher, path::PathBuf, time::SystemTim
 
 use bytes::Bytes;
 use tracing::trace;
-use vector_lib::configurable::configurable_component;
+use agent_lib::configurable::configurable_component;
 use crate::enrichment_tables::enrichment::{Case, Condition, IndexHandle, Table};
-use vector_lib::{conversion::Conversion, TimeZone};
+use agent_lib::{conversion::Conversion, TimeZone};
 use vrl::value::{ObjectMap, Value};
 
 use crate::config::EnrichmentTableConfig;
@@ -267,7 +267,7 @@ pub struct FileData {
     pub modified: SystemTime,
 }
 
-/// A struct that implements [vector_lib::enrichment::Table] to handle loading enrichment data from a CSV file.
+/// A struct that implements [agent_lib::enrichment::Table] to handle loading enrichment data from a CSV file.
 #[derive(Clone)]
 pub struct File {
     config: FileConfig,

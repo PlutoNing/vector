@@ -4,12 +4,12 @@ use dyn_clone::DynClone;
 use serde::Serialize;
 use std::path::PathBuf;
 use crate::buffers::{BufferConfig, BufferType};
-use vector_lib::configurable::attributes::CustomAttribute;
-use vector_lib::configurable::schema::{SchemaGenerator, SchemaObject};
-use vector_lib::configurable::{
+use agent_lib::configurable::attributes::CustomAttribute;
+use agent_lib::configurable::schema::{SchemaGenerator, SchemaObject};
+use agent_lib::configurable::{
     configurable_component, Configurable, GenerateError, Metadata, NamedComponent,
 };
-use vector_lib::{
+use agent_lib::{
     config::{Input},
     id::Inputs,
 };
@@ -33,7 +33,7 @@ impl Configurable for BoxedSink {
     }
 
     fn generate_schema(gen: &RefCell<SchemaGenerator>) -> Result<SchemaObject, GenerateError> {
-        vector_lib::configurable::component::SinkDescription::generate_schemas(gen)
+        agent_lib::configurable::component::SinkDescription::generate_schemas(gen)
     }
 }
 
@@ -52,18 +52,18 @@ where
     T: Configurable + Serialize + 'static,
 {
     #[configurable(derived)]
-    #[serde(default, skip_serializing_if = "vector_lib::serde::is_default")]
+    #[serde(default, skip_serializing_if = "agent_lib::serde::is_default")]
     pub graph: GraphConfig,
 
     #[configurable(derived)]
     pub inputs: Inputs<T>,
 
     #[configurable(derived)]
-    #[serde(default, skip_serializing_if = "vector_lib::serde::is_default")]
+    #[serde(default, skip_serializing_if = "agent_lib::serde::is_default")]
     pub buffer: BufferConfig,
 
     #[configurable(derived)]
-    #[serde(default, skip_serializing_if = "vector_lib::serde::is_default")]
+    #[serde(default, skip_serializing_if = "agent_lib::serde::is_default")]
     pub proxy: ProxyConfig,
 
     #[serde(flatten)]

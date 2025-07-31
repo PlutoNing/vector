@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use vector_lib::configurable::configurable_component;
+use agent_lib::configurable::configurable_component;
 
 /// Extra graph configuration
 ///

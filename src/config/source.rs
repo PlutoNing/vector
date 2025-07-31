@@ -7,7 +7,7 @@ use agent_config::{Configurable, GenerateError, Metadata, NamedComponent};
 use agent_config_common::attributes::CustomAttribute;
 use agent_config_common::schema::{SchemaGenerator, SchemaObject};
 use agent_config_macros::configurable_component;
-use vector_lib::{
+use agent_lib::{
     config::{
         LogNamespace,
         SourceOutput,
@@ -35,7 +35,7 @@ impl Configurable for BoxedSource {
     }
 
     fn generate_schema(gen: &RefCell<SchemaGenerator>) -> Result<SchemaObject, GenerateError> {
-        vector_lib::configurable::component::SourceDescription::generate_schemas(gen)
+        agent_lib::configurable::component::SourceDescription::generate_schemas(gen)
     }
 }
 
@@ -51,11 +51,11 @@ impl<T: SourceConfig + 'static> From<T> for BoxedSource {
 #[derive(Clone, Debug)]
 pub struct SourceOuter {
     #[configurable(derived)]
-    #[serde(default, skip_serializing_if = "vector_lib::serde::is_default")]
+    #[serde(default, skip_serializing_if = "agent_lib::serde::is_default")]
     pub proxy: ProxyConfig,
 
     #[configurable(derived)]
-    #[serde(default, skip_serializing_if = "vector_lib::serde::is_default")]
+    #[serde(default, skip_serializing_if = "agent_lib::serde::is_default")]
     pub graph: GraphConfig,
 
     #[configurable(metadata(docs::hidden))]

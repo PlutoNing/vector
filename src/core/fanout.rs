@@ -6,7 +6,7 @@ use indexmap::IndexMap;
 use tokio::sync::mpsc;
 use tokio_util::sync::ReusableBoxFuture;
 use crate::buffers::topology::channel::{BufferSender};
-use vector_lib::{config::ComponentKey, event::EventArray};
+use agent_lib::{config::ComponentKey, event::EventArray};
 /// doc
 pub enum ControlMessage {
     /// Adds a new sink to the fanout.

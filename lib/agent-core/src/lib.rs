@@ -51,13 +51,13 @@ pub(crate) fn float_eq(l_value: f64, r_value: f64) -> bool {
     (l_value.is_nan() && r_value.is_nan()) || l_value.eq_ulps(&r_value, &1)
 }
 
-// These macros aren't actually usable in lib crates without some `vector_lib` shenanigans.
+// These macros aren't actually usable in lib crates without some `agent_lib` shenanigans.
 // This test version won't be needed once all `InternalEvent`s implement `name()`.
 #[cfg(feature = "test")]
 #[macro_export]
 macro_rules! emit {
     ($event:expr) => {
-        vector_lib::internal_event::emit(vector_lib::internal_event::DefaultName {
+        agent_lib::internal_event::emit(agent_lib::internal_event::DefaultName {
             event: $event,
             name: stringify!($event),
         })
@@ -68,7 +68,7 @@ macro_rules! emit {
 #[macro_export]
 macro_rules! emit {
     ($event:expr) => {
-        vector_lib::internal_event::emit($event)
+        agent_lib::internal_event::emit($event)
     };
 }
 
@@ -76,7 +76,7 @@ macro_rules! emit {
 #[macro_export]
 macro_rules! register {
     ($event:expr) => {
-        vector_lib::internal_event::register(vector_lib::internal_event::DefaultName {
+        agent_lib::internal_event::register(agent_lib::internal_event::DefaultName {
             event: $event,
             name: stringify!($event),
         })

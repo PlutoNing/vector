@@ -12,7 +12,7 @@ use crate::register;
 use super::limited_queue::LimitedSender;
 use crate::buffers::buffer_usage_data::BufferUsageHandle;
 use std::time::Duration;
-use vector_lib::config::{Bufferable,WhenFull,};
+use agent_lib::config::{Bufferable,WhenFull,};
 use metrics::{histogram, Histogram};
 // use agent_common::registered_event;
 use crate::registered_event;

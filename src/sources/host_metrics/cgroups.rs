@@ -6,7 +6,7 @@ use tokio::{
     fs::{self, File},
     io::AsyncReadExt,
 };
-use vector_lib::metric_tags;
+use agent_lib::metric_tags;
 
 use super::{filter_result_sync, CGroupsConfig, HostMetrics, MetricsBuffer};
 use crate::event::MetricTags;

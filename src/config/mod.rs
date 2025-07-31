@@ -12,12 +12,12 @@ use std::{
 use indexmap::IndexMap;
 use serde::Serialize;
 
-pub use vector_lib::config::{
+pub use agent_lib::config::{
     DataType,  Input, LogNamespace,
     SourceOutput, TransformOutput,
 };
 use crate::core::global_options::{GlobalOptions,WildcardMatching};
-pub use vector_lib::configurable::component::{
+pub use agent_lib::configurable::component::{
     GenerateConfig, SinkDescription, TransformDescription,
 };
 
@@ -54,7 +54,7 @@ pub use transform::{
     get_transform_output_ids, BoxedTransform, TransformConfig, TransformContext, TransformOuter,
 };
 pub use vars::{interpolate, ENVIRONMENT_VARIABLE_INTERPOLATION_REGEX};
-pub use vector_lib::{
+pub use agent_lib::{
     config::{
         init_log_schema, log_schema, proxy::ProxyConfig, ComponentKey,
         LogSchema, OutputId,

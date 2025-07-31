@@ -13,8 +13,8 @@ use codecs::{
     encoding::{Framer, FramingConfig},
     TextSerializerConfig,
 };
-use vector_lib::configurable::configurable_component;
-use vector_lib::{
+use agent_lib::configurable::configurable_component;
+use agent_lib::{
     internal_event::{CountByteSize, EventsSent, InternalEventHandle as _, Output, Registered},
     EstimatedJsonEncodedSizeOf, TimeZone,
 };

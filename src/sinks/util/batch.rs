@@ -4,7 +4,7 @@ use derivative::Derivative;
 
 use snafu::Snafu;
 
-use vector_lib::json_size::JsonSize;
+use agent_lib::json_size::JsonSize;
 
 use crate::event::EventFinalizers;
 

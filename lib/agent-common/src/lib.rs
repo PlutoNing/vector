@@ -1,6 +1,6 @@
 //! The Vector Core common library
 //!
-//! This library includes common functionality relied upon by vector-core
+//! This library includes common functionality relied upon by agent-core
 //! and core-related crates (e.g. buffers).
 
 #![deny(warnings)]

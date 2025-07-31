@@ -13,12 +13,12 @@ use serde_with::serde_as;
 use sysinfo::System;
 use tokio::time;
 use tokio_stream::wrappers::IntervalStream;
-use vector_lib::config::LogNamespace;
-use vector_lib::configurable::configurable_component;
+use agent_lib::config::LogNamespace;
+use agent_lib::configurable::configurable_component;
 use crate::internal_event::{
     ByteSize, BytesReceived, CountByteSize, InternalEventHandle as _, Protocol, Registered,
 };
-use vector_lib::EstimatedJsonEncodedSizeOf;
+use agent_lib::EstimatedJsonEncodedSizeOf;
 
 use crate::{
     register,

@@ -1,9 +1,9 @@
 use serde::Serialize;
-use vector_lib::{
+use agent_lib::{
     event::{EventFinalizers, Finalizable, LogEvent, MaybeAsLogMut},
     ByteSizeOf, EstimatedJsonEncodedSizeOf,
 };
-use vector_lib::{
+use agent_lib::{
     json_size::JsonSize,
 };
 

@@ -1,7 +1,7 @@
 use bytes::{BufMut, BytesMut};
 use tokio_util::codec::Encoder;
 use agent_config_macros::configurable_component;
-use vector_lib::{config::DataType, event::Event, schema};
+use agent_lib::{config::DataType, event::Event, schema};
 
 use crate::codecs::MetricTagValues;
 
@@ -13,7 +13,7 @@ pub struct JsonSerializerConfig {
     ///
     /// When set to `single`, only the last non-bare value of tags are displayed with the
     /// metric.  When set to `full`, all metric tags are exposed as separate assignments.
-    #[serde(default, skip_serializing_if = "vector_lib::serde::is_default")]
+    #[serde(default, skip_serializing_if = "agent_lib::serde::is_default")]
     pub metric_tag_values: MetricTagValues,
 
     /// Options for the JsonSerializer.

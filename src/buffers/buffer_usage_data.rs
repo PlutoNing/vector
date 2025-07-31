@@ -9,7 +9,7 @@ use std::{
 use tokio::time::interval;
 use tracing::{Instrument, Span};
 
-use vector_lib::config::spawn_named;
+use agent_lib::config::spawn_named;
 
 /// Snapshot of category metrics.
 struct CategorySnapshot {

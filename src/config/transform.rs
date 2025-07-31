@@ -5,13 +5,13 @@ use std::path::PathBuf;
 use async_trait::async_trait;
 use dyn_clone::DynClone;
 use serde::Serialize;
-use vector_lib::configurable::attributes::CustomAttribute;
-use vector_lib::configurable::{
+use agent_lib::configurable::attributes::CustomAttribute;
+use agent_lib::configurable::{
     configurable_component,
     schema::{SchemaGenerator, SchemaObject},
     Configurable, GenerateError, Metadata, NamedComponent,
 };
-use vector_lib::{
+use agent_lib::{
     config::{Input, LogNamespace, TransformOutput},
     id::Inputs,
     schema,
@@ -39,7 +39,7 @@ impl Configurable for BoxedTransform {
     }
 
     fn generate_schema(gen: &RefCell<SchemaGenerator>) -> Result<SchemaObject, GenerateError> {
-        vector_lib::configurable::component::TransformDescription::generate_schemas(gen)
+        agent_lib::configurable::component::TransformDescription::generate_schemas(gen)
     }
 }
 
@@ -58,7 +58,7 @@ where
     T: Configurable + Serialize + 'static,
 {
     #[configurable(derived)]
-    #[serde(default, skip_serializing_if = "vector_lib::serde::is_default")]
+    #[serde(default, skip_serializing_if = "agent_lib::serde::is_default")]
     pub graph: GraphConfig,
 
     #[configurable(derived)]

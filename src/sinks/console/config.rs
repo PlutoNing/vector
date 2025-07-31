@@ -1,6 +1,6 @@
 use tokio::io;
 
-use vector_lib::configurable::configurable_component;
+use agent_lib::configurable::configurable_component;
 
 use crate::{
     codecs::{

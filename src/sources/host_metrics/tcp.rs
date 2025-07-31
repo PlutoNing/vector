@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, NativeEndian};
 use std::{collections::HashMap, io, path::Path};
-use vector_lib::event::MetricTags;
+use agent_lib::event::MetricTags;
 
 use netlink_packet_core::{
     NetlinkHeader, NetlinkMessage, NetlinkPayload, NLM_F_ACK, NLM_F_DUMP, NLM_F_REQUEST,

@@ -4,7 +4,7 @@ use futures::{stream::BoxStream, StreamExt};
 use tokio::{io, io::AsyncWriteExt};
 use tokio_util::codec::Encoder as _;
 use crate::codecs::Framer;
-use vector_lib::{
+use agent_lib::{
     // internal_event::{
         // ByteSize, BytesSent, CountByteSize, EventsSent, InternalEventHandle as _, Output, Protocol,
     // },

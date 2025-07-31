@@ -33,7 +33,7 @@ pub use service::Concurrency;
 pub use sink::StreamSink;
 use snafu::Snafu;
 
-use vector_lib::{json_size::JsonSize, TimeZone};
+use agent_lib::{json_size::JsonSize, TimeZone};
 
 use crate::event::EventFinalizers;
 use chrono::{FixedOffset, Offset, Utc};

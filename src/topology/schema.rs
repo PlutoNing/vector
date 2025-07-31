@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use snafu::Snafu;
-use vector_lib::config::SourceOutput;
+use agent_lib::config::SourceOutput;
 
 pub(super) use crate::schema::Definition;
 

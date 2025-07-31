@@ -2,8 +2,8 @@ use std::{cell::RefCell, fmt};
 
 use serde::Serializer;
 use serde_json::Value;
-use vector_lib::configurable::attributes::CustomAttribute;
-use vector_lib::configurable::{
+use agent_lib::configurable::attributes::CustomAttribute;
+use agent_lib::configurable::{
     schema::{
         apply_base_metadata, generate_const_string_schema, generate_number_schema,
         generate_one_of_schema, SchemaGenerator, SchemaObject,

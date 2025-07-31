@@ -15,7 +15,7 @@ use serde_with::serde_as;
 use stream_cancel::{Trigger, Tripwire};
 use tokio::time::{sleep, Duration};
 use tower::Service;
-use vector_lib::{configurable::configurable_component};
+use agent_lib::{configurable::configurable_component};
 
 use crate::{
     sinks::util::retries::ExponentialBackoff,

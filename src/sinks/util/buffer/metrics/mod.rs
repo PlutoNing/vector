@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use vector_lib::event::metric::{Metric, MetricValue, Sample};
+use agent_lib::event::metric::{Metric, MetricValue, Sample};
 
 use crate::sinks::util::{
     batch::{Batch, BatchSize, PushResult},

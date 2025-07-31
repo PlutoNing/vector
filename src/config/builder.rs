@@ -2,7 +2,7 @@ use std::{path::Path, time::Duration};
 
 use indexmap::IndexMap;
 use crate::core::global_options::GlobalOptions;
-use vector_lib::configurable::configurable_component;
+use agent_lib::configurable::configurable_component;
 
 
 

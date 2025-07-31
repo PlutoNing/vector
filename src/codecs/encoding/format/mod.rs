@@ -12,7 +12,7 @@ use dyn_clone::DynClone;
 pub use json::{JsonSerializer, JsonSerializerConfig};
 pub use text::{TextSerializer, TextSerializerConfig};
 pub use common::get_serializer_schema_requirement;
-use vector_lib::event::Event;
+use agent_lib::event::Event;
 
 /// Serialize a structured event into a byte frame.
 pub trait Serializer:

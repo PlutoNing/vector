@@ -24,7 +24,7 @@ extern crate derivative;
 #[macro_use]
 extern crate tracing;
 #[macro_use]
-extern crate vector_lib;
+extern crate agent_lib;
 
 pub use indoc::indoc;
 
@@ -58,8 +58,8 @@ pub mod topology;
 pub mod transforms;
 pub mod internal_event;
 pub use sources::SourceSender;
-pub use vector_lib::{event, metrics, schema};
-pub use vector_lib::{shutdown, Error, Result};
+pub use agent_lib::{event, metrics, schema};
+pub use agent_lib::{shutdown, Error, Result};
 
 static APP_NAME_SLUG: std::sync::OnceLock<String> = std::sync::OnceLock::new();
 

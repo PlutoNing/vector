@@ -5,8 +5,8 @@ use agent_common::TimeZone;
 use agent_config::{configurable_component, impl_generate_config_from_default};
 
 
-use vector_lib::PerMetricSetExpiration;
-use vector_lib::{config::proxy::ProxyConfig, config::LogSchema};
+use agent_lib::PerMetricSetExpiration;
+use agent_lib::{config::proxy::ProxyConfig, config::LogSchema};
 pub fn default_data_dir() -> Option<PathBuf> {
     Some(PathBuf::from("/var/lib/vector/"))
 }

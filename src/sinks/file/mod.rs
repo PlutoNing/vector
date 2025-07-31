@@ -18,13 +18,13 @@ use crate::codecs::{
     Framer, FramingConfig,
     TextSerializerConfig,
 };
-use vector_lib::configurable::configurable_component;
-use vector_lib::{
+use agent_lib::configurable::configurable_component;
+use agent_lib::{
     // internal_event::{CountByteSize, EventsSent, InternalEventHandle as _, Output, Registered},
     EstimatedJsonEncodedSizeOf, TimeZone,
 };
 use crate::internal_event::{CountByteSize, EventsSent, InternalEventHandle as _, Output, Registered};
-pub use vector_lib::serde::{is_default};
+pub use agent_lib::serde::{is_default};
 use crate::{
     register,
     codecs::{Encoder, EncodingConfigWithFraming, SinkType, Transformer},

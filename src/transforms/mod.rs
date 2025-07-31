@@ -2,7 +2,7 @@
 #[allow(unused_imports)]
 use std::collections::HashSet;
 
-pub use vector_lib::transform::{
+pub use agent_lib::transform::{
     FunctionTransform, OutputBuffer, Transform,
     TransformOutputsBuf,
 };

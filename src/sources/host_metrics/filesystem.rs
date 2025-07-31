@@ -2,8 +2,8 @@ use futures::StreamExt;
 use heim::units::information::byte;
 #[cfg(not(windows))]
 use heim::units::ratio::ratio;
-use vector_lib::configurable::configurable_component;
-use vector_lib::metric_tags;
+use agent_lib::configurable::configurable_component;
+use agent_lib::metric_tags;
 use super::{default_all_devices, example_devices, filter_result, FilterList, HostMetrics};
 
 /// Options for the filesystem metrics collector.

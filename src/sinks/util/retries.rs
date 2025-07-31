@@ -10,7 +10,7 @@ use std::{
 use futures::FutureExt;
 use tokio::time::{sleep, Sleep};
 use tower::{retry::Policy, timeout::error::Elapsed};
-use vector_lib::configurable::configurable_component;
+use agent_lib::configurable::configurable_component;
 
 use crate::Error;
 

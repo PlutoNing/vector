@@ -27,7 +27,7 @@ use tokio::{
     time::{interval, sleep_until, Duration, Instant},
 };
 use tracing::Instrument;
-use vector_lib::trigger::DisabledTrigger;
+use agent_lib::trigger::DisabledTrigger;
 use crate::{buffers::topology::channel::BufferSender};
 
 pub type ShutdownErrorReceiver = mpsc::UnboundedReceiver<ShutdownError>;
