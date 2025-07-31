@@ -9,7 +9,7 @@ use vrl::path::PathParseError;
 
 
 use vrl::path::{OwnedTargetPath, OwnedValuePath};
-use vector_config::configurable_component;
+use agent_config::configurable_component;
 
 static LOG_SCHEMA: OnceLock<LogSchema> = OnceLock::new();
 static LOG_SCHEMA_DEFAULT: LazyLock<LogSchema> = LazyLock::new(LogSchema::default);

@@ -9,7 +9,7 @@ use serde::{de, Deserialize, Deserializer, Serialize};
 use snafu::{ResultExt, Snafu};
 use tracing::Span;
 use agent_common::{config::ComponentKey, finalization::Finalizable};
-use vector_config::configurable_component;
+use agent_config::configurable_component;
 use crate::buffers::topology::{
         builder::{TopologyBuilder, TopologyError},
         channel::{BufferReceiver, BufferSender},

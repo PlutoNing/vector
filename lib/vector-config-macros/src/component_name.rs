@@ -94,7 +94,7 @@ pub fn derive_component_name_impl(input: TokenStream) -> TokenStream {
             pub(super) const NAME: &'static str = #component_name;
         }
 
-        impl #impl_generics ::vector_config::NamedComponent for #ident #ty_generics #where_clause {
+        impl #impl_generics ::agent_config::NamedComponent for #ident #ty_generics #where_clause {
             fn get_component_name(&self) -> &'static str {
                 #component_name
             }

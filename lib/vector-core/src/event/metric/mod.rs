@@ -18,7 +18,7 @@ use agent_common::{
 
     EventDataEq,
 };
-use vector_config::configurable_component;
+use agent_config::configurable_component;
 
 use super::{
     estimated_json_encoded_size_of::EstimatedJsonEncodedSizeOf, BatchNotifier, EventFinalizer,

@@ -4,8 +4,8 @@ pub use agent_common::{
      shutdown, trigger, Error, Result,
     TimeZone,
 };
-pub use vector_config as configurable;
-pub use vector_config::impl_generate_config_from_default;
+pub use agent_config as configurable;
+pub use agent_config::impl_generate_config_from_default;
 pub use vector_core::{
     buckets, emit, event, metric_tags, metrics,
     quantiles, samples, schema, serde, transform,

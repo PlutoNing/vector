@@ -17,7 +17,7 @@ use vrl::path::{ValuePath,PathPrefix};
 pub use output_id::OutputId;
 use serde::{Deserialize, Serialize};
 pub use agent_common::config::ComponentKey;
-use vector_config::configurable_component;
+use agent_config::configurable_component;
 use vrl::value::Value;
 
 use crate::schema;

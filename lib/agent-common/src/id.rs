@@ -1,6 +1,6 @@
 use std::ops::Deref;
 
-use vector_config::configurable_component;
+use agent_config::configurable_component;
 
 pub use crate::config::ComponentKey;
 

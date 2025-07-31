@@ -5,10 +5,13 @@ use syn::{
     parse_macro_input, parse_quote, spanned::Spanned, token::PathSep, DeriveInput, ExprPath, Ident,
     PathArguments, Type,
 };
-use vector_config_common::validation::Validation;
+// use vector_config_common::validation::Validation;
+use crate::config_common::validation::Validation;
 
-use crate::ast::{Container, Data, Field, LazyCustomAttribute, Style, Tagging, Variant};
-
+// use crate::ast::{Container, Data, Field, LazyCustomAttribute, Style, Tagging, Variant};
+use crate::config_macros::ast::{
+    Container, Data, Field, LazyCustomAttribute, Style, Tagging, Variant,
+};
 pub fn derive_configurable_impl(input: TokenStream) -> TokenStream {
     // Parse our input token stream as a derive input, and process the container, and the
     // container's children, that the macro is applied to.

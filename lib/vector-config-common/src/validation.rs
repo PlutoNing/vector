@@ -143,17 +143,17 @@ impl Format {
 impl ToTokens for Format {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let format_tokens = match self {
-            Format::Date => quote! { ::vector_config::validation::Format::Date },
-            Format::Time => quote! { ::vector_config::validation::Format::Time },
-            Format::DateTime => quote! { ::vector_config::validation::Format::DateTime },
-            Format::Duration => quote! { ::vector_config::validation::Format::Duration },
-            Format::Email => quote! { ::vector_config::validation::Format::Email },
-            Format::Hostname => quote! { ::vector_config::validation::Format::Hostname },
-            Format::Uri => quote! { ::vector_config::validation::Format::Uri },
-            Format::IPv4 => quote! { ::vector_config::validation::Format::IPv4 },
-            Format::IPv6 => quote! { ::vector_config::validation::Format::IPv6 },
-            Format::Uuid => quote! { ::vector_config::validation::Format::Uuid },
-            Format::Regex => quote! { ::vector_config::validation::Format::Regex },
+            Format::Date => quote! { ::agent_config::validation::Format::Date },
+            Format::Time => quote! { ::agent_config::validation::Format::Time },
+            Format::DateTime => quote! { ::agent_config::validation::Format::DateTime },
+            Format::Duration => quote! { ::agent_config::validation::Format::Duration },
+            Format::Email => quote! { ::agent_config::validation::Format::Email },
+            Format::Hostname => quote! { ::agent_config::validation::Format::Hostname },
+            Format::Uri => quote! { ::agent_config::validation::Format::Uri },
+            Format::IPv4 => quote! { ::agent_config::validation::Format::IPv4 },
+            Format::IPv6 => quote! { ::agent_config::validation::Format::IPv6 },
+            Format::Uuid => quote! { ::agent_config::validation::Format::Uuid },
+            Format::Regex => quote! { ::agent_config::validation::Format::Regex },
         };
 
         tokens.extend(format_tokens);
@@ -298,22 +298,22 @@ impl ToTokens for Validation {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let validation_tokens = match self {
             Validation::KnownFormat(format) => {
-                quote! { ::vector_config::validation::Validation::KnownFormat(#format) }
+                quote! { ::agent_config::validation::Validation::KnownFormat(#format) }
             }
             Validation::Length { minimum, maximum } => {
                 let min_tokens = option_as_token(*minimum);
                 let max_tokens = option_as_token(*maximum);
 
-                quote! { ::vector_config::validation::Validation::Length { minimum: #min_tokens, maximum: #max_tokens } }
+                quote! { ::agent_config::validation::Validation::Length { minimum: #min_tokens, maximum: #max_tokens } }
             }
             Validation::Range { minimum, maximum } => {
                 let min_tokens = option_as_token(*minimum);
                 let max_tokens = option_as_token(*maximum);
 
-                quote! { ::vector_config::validation::Validation::Range { minimum: #min_tokens, maximum: #max_tokens } }
+                quote! { ::agent_config::validation::Validation::Range { minimum: #min_tokens, maximum: #max_tokens } }
             }
             Validation::Pattern(pattern) => {
-                quote! { ::vector_config::validation::Validation::Pattern(#pattern.to_string()) }
+                quote! { ::agent_config::validation::Validation::Pattern(#pattern.to_string()) }
             }
         };
 

@@ -17,4 +17,4 @@ vector-config-common = { path = "../vector-config-common" }
 
 [dev-dependencies]
 serde.workspace = true
-vector-config = { path = "../vector-config" }
+agent-config = { path = "../agent-config" }

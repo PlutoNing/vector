@@ -59,7 +59,7 @@ url = { version = "2", default-features = false }
 urlencoding = { version = "2.1.3", default-features = false }
 uuid.workspace = true
 agent-common = { path = "../agent-common" }
-vector-config = { path = "../vector-config" }
+agent-config = { path = "../agent-config" }
 vector-config-common = { path = "../vector-config-common" }
 vrl.workspace = true
 cfg-if.workspace = true

@@ -318,7 +318,7 @@ pub struct RootOpts {
         id = "config",
         short,
         long,
-        env = "VECTOR_CONFIG",
+        env = "agent_config",
         value_delimiter(',')
     )]
     pub config_paths: Vec<PathBuf>,

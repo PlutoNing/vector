@@ -82,26 +82,26 @@ impl TypedComponent {
             let config_ty = &input.ident;
             let desc_ty: syn::Type = match self.component_type {
                 ComponentType::Api => {
-                    parse_quote! { ::vector_config::component::ApiDescription }
+                    parse_quote! { ::agent_config::component::ApiDescription }
                 }
                 ComponentType::EnrichmentTable => {
-                    parse_quote! { ::vector_config::component::EnrichmentTableDescription }
+                    parse_quote! { ::agent_config::component::EnrichmentTableDescription }
                 }
                 ComponentType::GlobalOption => {
-                    parse_quote! { ::vector_config::component::GlobalOptionDescription }
+                    parse_quote! { ::agent_config::component::GlobalOptionDescription }
                 }
                 ComponentType::Provider => {
-                    parse_quote! { ::vector_config::component::ProviderDescription }
+                    parse_quote! { ::agent_config::component::ProviderDescription }
                 }
                 ComponentType::Secrets => {
-                    parse_quote! { ::vector_config::component::SecretsDescription }
+                    parse_quote! { ::agent_config::component::SecretsDescription }
                 }
-                ComponentType::Sink => parse_quote! { ::vector_config::component::SinkDescription },
+                ComponentType::Sink => parse_quote! { ::agent_config::component::SinkDescription },
                 ComponentType::Source => {
-                    parse_quote! { ::vector_config::component::SourceDescription }
+                    parse_quote! { ::agent_config::component::SourceDescription }
                 }
                 ComponentType::Transform => {
-                    parse_quote! { ::vector_config::component::TransformDescription }
+                    parse_quote! { ::agent_config::component::TransformDescription }
                 }
             };
 
@@ -137,11 +137,11 @@ impl TypedComponent {
         let helper_attr = get_named_component_helper_ident(self.component_type);
         match self.component_name.as_ref() {
             None => quote_spanned! {self.span=>
-                #[derive(::vector_config::NamedComponent)]
+                #[derive(::agent_config::NamedComponent)]
                 #[#helper_attr]
             },
             Some(component_name) => quote_spanned! {self.span=>
-                #[derive(::vector_config::NamedComponent)]
+                #[derive(::agent_config::NamedComponent)]
                 #[#helper_attr(#component_name)]
             },
         }
@@ -313,7 +313,7 @@ pub fn configurable_component_impl(args: TokenStream, item: TokenStream) -> Toke
     // Generate and apply all of the necessary derives.
     let mut derives = Punctuated::<Path, Comma>::new();
     derives.push(parse_quote_spanned! {input.ident.span()=>
-        ::vector_config::Configurable
+        ::agent_config::Configurable
     });
 
     if !options.skip_derive_ser() {

@@ -7,7 +7,7 @@ use std::{cmp::Ordering, mem};
 use indexmap::IndexSet;
 use serde::{ser::SerializeSeq, Deserialize, Deserializer, Serialize, Serializer};
 use agent_common::byte_size_of::ByteSizeOf;
-use vector_config::{configurable_component, Configurable};
+use agent_config::{configurable_component, Configurable};
 
 /// A single tag value, either a bare tag or a value.
 #[derive(Clone, Configurable, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]

@@ -26,7 +26,7 @@ pub struct Opts {
         id = "config",
         short,
         long,
-        env = "VECTOR_CONFIG",
+        env = "agent_config",
         value_delimiter(',')
     )]
     paths: Vec<PathBuf>,

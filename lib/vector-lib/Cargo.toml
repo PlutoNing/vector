@@ -7,7 +7,7 @@ publish = false
 
 [dependencies]
 agent-common = { path = "../agent-common" }
-vector-config = { path = "../vector-config" }
+agent-config = { path = "../agent-config" }
 vector-core = { path = "../vector-core", default-features = false }
 vrl = { workspace = true, optional = true }
 

@@ -21,7 +21,7 @@ pub use framing::{
     CharacterDelimitedEncoderConfig,
     NewlineDelimitedEncoder, NewlineDelimitedEncoderConfig,
 };
-use vector_config::configurable_component;
+use agent_config::configurable_component;
 use vector_lib::{config::DataType, event::Event, schema};
 
 /// An error that occurred while building an encoder.

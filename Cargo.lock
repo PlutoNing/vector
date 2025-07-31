@@ -74,6 +74,7 @@ dependencies = [
 name = "agent-common"
 version = "0.1.0"
 dependencies = [
+ "agent-config",
  "async-stream",
  "bytes 1.10.1",
  "chrono",
@@ -90,7 +91,31 @@ dependencies = [
  "stream-cancel",
  "tokio",
  "tracing 0.1.41",
- "vector-config",
+ "vrl",
+]
+
+[[package]]
+name = "agent-config"
+version = "0.1.0"
+dependencies = [
+ "assert-json-diff",
+ "chrono",
+ "chrono-tz",
+ "encoding_rs",
+ "http 0.2.9",
+ "indexmap 2.10.0",
+ "inventory",
+ "no-proxy",
+ "num-traits",
+ "serde",
+ "serde_json",
+ "serde_with",
+ "snafu 0.8.6",
+ "toml",
+ "tracing 0.1.41",
+ "url",
+ "vector-config-common",
+ "vector-config-macros",
  "vrl",
 ]
 
@@ -9023,6 +9048,7 @@ name = "vector"
 version = "0.49.0"
 dependencies = [
  "agent-common",
+ "agent-config",
  "approx",
  "arc-swap",
  "arr_macro",
@@ -9189,7 +9215,6 @@ dependencies = [
  "typetag",
  "url",
  "uuid",
- "vector-config",
  "vector-config-common",
  "vector-config-macros",
  "vector-lib",
@@ -9198,31 +9223,6 @@ dependencies = [
  "windows-service",
  "wiremock",
  "zstd",
-]
-
-[[package]]
-name = "vector-config"
-version = "0.1.0"
-dependencies = [
- "assert-json-diff",
- "chrono",
- "chrono-tz",
- "encoding_rs",
- "http 0.2.9",
- "indexmap 2.10.0",
- "inventory",
- "no-proxy",
- "num-traits",
- "serde",
- "serde_json",
- "serde_with",
- "snafu 0.8.6",
- "toml",
- "tracing 0.1.41",
- "url",
- "vector-config-common",
- "vector-config-macros",
- "vrl",
 ]
 
 [[package]]
@@ -9243,13 +9243,13 @@ dependencies = [
 name = "vector-config-macros"
 version = "0.1.0"
 dependencies = [
+ "agent-config",
  "darling",
  "proc-macro2 1.0.95",
  "quote 1.0.40",
  "serde",
  "serde_derive_internals",
  "syn 2.0.104",
- "vector-config",
  "vector-config-common",
 ]
 
@@ -9258,6 +9258,7 @@ name = "vector-core"
 version = "0.1.0"
 dependencies = [
  "agent-common",
+ "agent-config",
  "async-trait",
  "base64 0.22.1",
  "bitmask-enum",
@@ -9325,7 +9326,6 @@ dependencies = [
  "url",
  "urlencoding",
  "uuid",
- "vector-config",
  "vector-config-common",
  "vrl",
 ]
@@ -9335,7 +9335,7 @@ name = "vector-lib"
 version = "0.1.0"
 dependencies = [
  "agent-common",
- "vector-config",
+ "agent-config",
  "vector-core",
  "vrl",
 ]

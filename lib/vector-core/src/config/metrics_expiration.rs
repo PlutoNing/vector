@@ -1,4 +1,4 @@
-use vector_config::configurable_component;
+use agent_config::configurable_component;
 
 /// Per metric set expiration options.
 #[configurable_component]

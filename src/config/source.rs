@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use async_trait::async_trait;
 use dyn_clone::DynClone;
-use vector_config::{Configurable, GenerateError, Metadata, NamedComponent};
+use agent_config::{Configurable, GenerateError, Metadata, NamedComponent};
 use vector_config_common::attributes::CustomAttribute;
 use vector_config_common::schema::{SchemaGenerator, SchemaObject};
 use vector_config_macros::configurable_component;

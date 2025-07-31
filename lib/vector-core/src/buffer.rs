@@ -1,7 +1,7 @@
 use bytes::{Buf, BufMut};
 use std::error;
 
-use vector_config::configurable_component;
+use agent_config::configurable_component;
 
 use std::fmt::Debug;
 

@@ -1,6 +1,6 @@
 use bytes::{BufMut, BytesMut};
 use tokio_util::codec::Encoder;
-use vector_config::configurable_component;
+use agent_config::configurable_component;
 
 use super::BoxedFramingError;
 

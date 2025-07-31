@@ -3,7 +3,7 @@ use std::{
     fmt,
 };
 
-use vector_config::{configurable_component, ConfigurableString};
+use agent_config::{configurable_component, ConfigurableString};
 
 /// Component identifier.
 #[configurable_component(no_deser, no_ser)]
