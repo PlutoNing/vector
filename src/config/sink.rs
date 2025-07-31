@@ -10,9 +10,10 @@ use vector_lib::configurable::{
     configurable_component, Configurable, GenerateError, Metadata, NamedComponent,
 };
 use vector_lib::{
-    config::{GlobalOptions, Input},
+    config::{Input},
     id::Inputs,
 };
+use crate::core::global_options::GlobalOptions;
 use crate::core::sink::VectorSink;
 
 use super::{dot_graph::GraphConfig, schema, ComponentKey, ProxyConfig, Resource};

@@ -1,7 +1,7 @@
 use std::{path::Path, time::Duration};
 
 use indexmap::IndexMap;
-use vector_lib::config::GlobalOptions;
+use crate::core::global_options::GlobalOptions;
 use vector_lib::configurable::configurable_component;
 
 

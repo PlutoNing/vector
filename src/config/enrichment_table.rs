@@ -1,6 +1,6 @@
 use enum_dispatch::enum_dispatch;
 use serde::Serialize;
-use vector_lib::config::GlobalOptions;
+use crate::core::global_options::GlobalOptions;
 use vector_lib::configurable::{configurable_component, Configurable, NamedComponent, ToValue};
 use vector_lib::id::{ComponentKey, Inputs};
 

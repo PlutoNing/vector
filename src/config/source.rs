@@ -9,10 +9,11 @@ use vector_config_common::schema::{SchemaGenerator, SchemaObject};
 use vector_config_macros::configurable_component;
 use vector_lib::{
     config::{
-        GlobalOptions, LogNamespace,
+        LogNamespace,
         SourceOutput,
     },
 };
+use crate::core::global_options::GlobalOptions;
 use crate::common::Source;
 
 use super::{dot_graph::GraphConfig, schema, ComponentKey, ProxyConfig, Resource};

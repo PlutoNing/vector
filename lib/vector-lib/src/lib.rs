@@ -7,9 +7,10 @@ pub use vector_common::{
 pub use vector_config as configurable;
 pub use vector_config::impl_generate_config_from_default;
 pub use vector_core::{
-    buckets, default_data_dir, emit, event, metric_tags, metrics,
+    buckets, emit, event, metric_tags, metrics,
     quantiles, samples, schema, serde, transform,
     EstimatedJsonEncodedSizeOf,
+    config::metrics_expiration::PerMetricSetExpiration,
 };
 #[cfg(feature = "vrl")]
 pub use vrl;
@@ -18,9 +19,8 @@ pub mod config {
     pub use vector_common::config::ComponentKey;
     pub use vector_core::config::{
         clone_input_definitions, init_log_schema, log_schema, proxy,
-        DataType, GlobalOptions, Input, LegacyKey, LogNamespace, LogSchema,
+        DataType,Input, LegacyKey, LogNamespace, LogSchema,
         OutputId, SourceOutput, TransformOutput,
-        WildcardMatching,
     };
     pub use vector_core::event::Event;
     pub use vector_core::serde::{is_default};

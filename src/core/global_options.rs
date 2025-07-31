@@ -4,10 +4,12 @@ use snafu::{ResultExt, Snafu};
 use vector_common::TimeZone;
 use vector_config::{configurable_component, impl_generate_config_from_default};
 
-use super::super::default_data_dir;
-use super::metrics_expiration::PerMetricSetExpiration;
-use super::{proxy::ProxyConfig, LogSchema};
 
+use vector_lib::PerMetricSetExpiration;
+use vector_lib::{config::proxy::ProxyConfig, config::LogSchema};
+pub fn default_data_dir() -> Option<PathBuf> {
+    Some(PathBuf::from("/var/lib/vector/"))
+}
 #[derive(Debug, Snafu)]
 pub(crate) enum DataDirError {
     #[snafu(display("data_dir option required, but not given here or globally"))]
@@ -41,7 +43,10 @@ pub enum WildcardMatching {
     /// Relaxed matching (must match 0 or more inputs)
     Relaxed,
 }
-
+#[inline]
+pub fn is_default<E: Default + PartialEq>(e: &E) -> bool {
+    e == &E::default()
+}
 /// Global configuration options.
 //
 // If this is modified, make sure those changes are reflected in the `ConfigBuilder::append`
@@ -55,7 +60,7 @@ pub struct GlobalOptions {
     /// checkpoints, and more.
     ///
     /// Vector must have write permissions to this directory.
-    #[serde(default = "crate::default_data_dir")]
+    #[serde(default = "default_data_dir")]
     #[configurable(metadata(docs::common = false))]
     pub data_dir: Option<PathBuf>,
 
@@ -63,7 +68,7 @@ pub struct GlobalOptions {
     ///
     /// Setting this to "relaxed" allows configurations with wildcards that do not match any inputs
     /// to be accepted without causing an error.
-    #[serde(skip_serializing_if = "crate::serde::is_default")]
+    #[serde(skip_serializing_if = "is_default")]
     #[configurable(metadata(docs::common = false, docs::required = false))]
     pub wildcard_matching: Option<WildcardMatching>,
 
@@ -71,7 +76,7 @@ pub struct GlobalOptions {
     ///
     /// This is used if a component does not have its own specific log schema. All events use a log
     /// schema, whether or not the default is used, to assign event fields on incoming events.
-    #[serde(default, skip_serializing_if = "crate::serde::is_default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     #[configurable(metadata(docs::common = false, docs::required = false))]
     pub log_schema: LogSchema,
 
@@ -83,12 +88,12 @@ pub struct GlobalOptions {
     /// Note that in Vector/VRL all timestamps are represented in UTC.
     ///
     /// [tzdb]: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-    #[serde(default, skip_serializing_if = "crate::serde::is_default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     #[configurable(metadata(docs::common = false))]
     pub timezone: Option<TimeZone>,
 
     #[configurable(derived)]
-    #[serde(default, skip_serializing_if = "crate::serde::is_default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     #[configurable(metadata(docs::common = false, docs::required = false))]
     pub proxy: ProxyConfig,
 
@@ -97,7 +102,7 @@ pub struct GlobalOptions {
     ///
     /// Deprecated: use expire_metrics_secs instead
     #[configurable(deprecated)]
-    #[serde(default, skip_serializing_if = "crate::serde::is_default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     #[configurable(metadata(docs::hidden))]
     pub expire_metrics: Option<Duration>,
 
@@ -106,14 +111,14 @@ pub struct GlobalOptions {
     ///
     /// Set this to a value larger than your `internal_metrics` scrape interval (default 5 minutes)
     /// so metrics live long enough to be emitted and captured.
-    #[serde(skip_serializing_if = "crate::serde::is_default")]
+    #[serde(skip_serializing_if = "is_default")]
     #[configurable(metadata(docs::common = false, docs::required = false))]
     pub expire_metrics_secs: Option<f64>,
 
     /// This allows configuring different expiration intervals for different metric sets.
     /// By default this is empty and any metric not matched by one of these sets will use
     /// the global default value, defined using `expire_metrics_secs`.
-    #[serde(skip_serializing_if = "crate::serde::is_default")]
+    #[serde(skip_serializing_if = "is_default")]
     pub expire_metrics_per_metric_set: Option<Vec<PerMetricSetExpiration>>,
 }
 

@@ -6,3 +6,4 @@ pub mod fanout;
 pub use fanout::{ControlChannel,ControlMessage,Fanout};
 /// doc
 pub mod sink;
+pub mod global_options;

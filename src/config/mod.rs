@@ -13,9 +13,10 @@ use indexmap::IndexMap;
 use serde::Serialize;
 
 pub use vector_lib::config::{
-    DataType, GlobalOptions, Input, LogNamespace,
-    SourceOutput, TransformOutput, WildcardMatching,
+    DataType,  Input, LogNamespace,
+    SourceOutput, TransformOutput,
 };
+use crate::core::global_options::{GlobalOptions,WildcardMatching};
 pub use vector_lib::configurable::component::{
     GenerateConfig, SinkDescription, TransformDescription,
 };

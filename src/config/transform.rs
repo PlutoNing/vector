@@ -12,12 +12,12 @@ use vector_lib::configurable::{
     Configurable, GenerateError, Metadata, NamedComponent,
 };
 use vector_lib::{
-    config::{GlobalOptions, Input, LogNamespace, TransformOutput},
+    config::{Input, LogNamespace, TransformOutput},
     id::Inputs,
     schema,
     transform::Transform,
 };
-
+use crate::core::global_options::GlobalOptions;
 use super::dot_graph::GraphConfig;
 use super::schema::Options as SchemaOptions;
 use super::ComponentKey;

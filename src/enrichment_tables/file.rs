@@ -242,11 +242,11 @@ impl FileConfig {
         })
     }
 }
-
+use crate::core::global_options::GlobalOptions;
 impl EnrichmentTableConfig for FileConfig {
     async fn build(
         &self,
-        globals: &crate::config::GlobalOptions,
+        globals: &GlobalOptions,
     ) -> crate::Result<Box<dyn Table + Send + Sync>> {
         Ok(Box::new(File::new(
             self.clone(),

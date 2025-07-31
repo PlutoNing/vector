@@ -37,16 +37,13 @@ pub mod transform;
 
 
 use float_eq::FloatEq;
-use std::path::PathBuf;
 
 pub use event::EstimatedJsonEncodedSizeOf;
-
+pub use config::metrics_expiration::PerMetricSetExpiration;
 #[macro_use]
 extern crate tracing;
 
-pub fn default_data_dir() -> Option<PathBuf> {
-    Some(PathBuf::from("/var/lib/vector/"))
-}
+
 
 pub(crate) use vector_common::{Error, Result};
 

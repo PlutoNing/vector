@@ -4,9 +4,9 @@ use vector_lib::configurable::configurable_component;
 pub use crate::enrichment_tables::enrichment::{Condition, IndexHandle, Table};
 
 use crate::config::{
-    ComponentKey, EnrichmentTableConfig, GenerateConfig, GlobalOptions, SinkConfig, SourceConfig,
+    ComponentKey, EnrichmentTableConfig, GenerateConfig, SinkConfig, SourceConfig,
 };
-
+use crate::core::global_options::GlobalOptions;
 /// doc
 pub mod file;
 /// doc
