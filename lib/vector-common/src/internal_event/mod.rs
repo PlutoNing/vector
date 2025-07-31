@@ -1,4 +1,3 @@
-mod bytes_sent;
 mod events_received;
 mod events_sent;
 
@@ -6,11 +5,37 @@ use std::ops::{Add, AddAssign};
 
 pub use metrics::SharedString;
 
-pub use bytes_sent::BytesSent;
 pub use events_received::EventsReceived;
 pub use events_sent::{EventsSent, DEFAULT_OUTPUT};
 
 use metrics::{counter, Counter};
+
+
+crate::registered_event!(
+    BytesSent {
+        protocol: SharedString,
+    } => {
+        bytes_sent: Counter = counter!("component_sent_bytes_total", "protocol" => self.protocol.clone()),
+        _protocol: SharedString = self.protocol,
+    }
+
+    fn emit(&self, byte_size: ByteSize) {
+        self.bytes_sent.increment(byte_size.0 as u64);
+    }
+);
+
+impl From<Protocol> for BytesSent {
+    fn from(protocol: Protocol) -> Self {
+        Self {
+            protocol: protocol.0,
+        }
+    }
+}
+
+
+
+
+
 /* 有调用 */
 crate::registered_event!(
     BytesReceived {
