@@ -18,7 +18,7 @@
 #![deny(clippy::disallowed_methods)] // [nursery] mark some functions as verboten
 #![deny(clippy::missing_const_for_fn)] // [nursery] valuable to the optimizer, but may produce false positives
 
-//! The main library to support building Vector.
+//! The main library to build
 #[macro_use]
 extern crate derivative;
 #[macro_use]
@@ -63,17 +63,10 @@ pub use agent_lib::{shutdown, Error, Result};
 
 static APP_NAME_SLUG: std::sync::OnceLock<String> = std::sync::OnceLock::new();
 
-/// The name used to identify this Vector application.
-///
-/// This can be set at compile-time through the VECTOR_APP_NAME env variable.
-/// Defaults to "Vector".
 pub fn get_app_name() -> &'static str {
-    option_env!("VECTOR_APP_NAME").unwrap_or("Vector")
+    option_env!("VECTOR_APP_NAME").unwrap_or("scx_gent")
 }
 
-/// Returns a slugified version of the name used to identify this Vector application.
-///
-/// Defaults to "vector".
 pub fn get_slugified_app_name() -> String {
     APP_NAME_SLUG
         .get_or_init(|| get_app_name().to_lowercase().replace(' ', "-"))
@@ -124,8 +117,6 @@ pub mod built_info {
     include!(concat!(env!("OUT_DIR"), "/built.rs"));
 }
 
-/// Returns the host name of the current system.
-/// The hostname can be overridden by setting the VECTOR_HOSTNAME environment variable.
 pub fn get_hostname() -> std::io::Result<String> {
     Ok(if let Ok(hostname) = std::env::var("VECTOR_HOSTNAME") {
         hostname.to_string()
@@ -156,7 +147,6 @@ where
     tokio::spawn(task)
 }
 
-/// Returns an estimate of the number of recommended threads that Vector should spawn.
 pub fn num_threads() -> usize {
     let count = match std::thread::available_parallelism() {
         Ok(count) => count,

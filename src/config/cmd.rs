@@ -27,15 +27,15 @@ pub struct Opts {
     )]
     paths: Vec<PathBuf>,
 
-    /// Vector config files in TOML format.
+    /// config files in TOML format.
     #[arg(id = "config-toml", long, value_delimiter(','))]
     paths_toml: Vec<PathBuf>,
 
-    /// Vector config files in JSON format.
+    /// config files in JSON format.
     #[arg(id = "config-json", long, value_delimiter(','))]
     paths_json: Vec<PathBuf>,
 
-    /// Vector config files in YAML format.
+    /// config files in YAML format.
     #[arg(id = "config-yaml", long, value_delimiter(','))]
     paths_yaml: Vec<PathBuf>,
 

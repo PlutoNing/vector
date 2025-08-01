@@ -57,7 +57,7 @@ pub type SignalTx = Sender<SignalTo>;
 pub type SignalRx = Receiver<SignalTo>;
 
 #[derive(Debug, Clone)]
-/// Control messages used by Vector to drive topology and shutdown events.
+/// agent用于驱动拓扑和关闭事件的控制消息。
 #[allow(clippy::large_enum_variant)] // discovered during Rust upgrade to 1.57; just allowing for now since we did previously
 pub enum SignalTo {
     /// Signal to shutdown process.
@@ -386,9 +386,8 @@ pub struct RootOpts {
     )]
     pub internal_log_rate_limit: u64,
 
-    /// Set the duration in seconds to wait for graceful shutdown after SIGINT or SIGTERM are
-    /// received. After the duration has passed, Vector will force shutdown. To never force
-    /// shutdown, use `--no-graceful-shutdown-limit`.
+    /// 设置收到SIGINT或SIGTERM后优雅关闭的等待秒数。超过此时间后agent将强制关闭。
+    /// 要永不强制关闭，使用--no-graceful-shutdown-limit。
     #[arg(
         long,
         default_value = "60",
@@ -397,9 +396,8 @@ pub struct RootOpts {
     )]
     pub graceful_shutdown_limit_secs: NonZeroU64,
 
-    /// Never time out while waiting for graceful shutdown after SIGINT or SIGTERM received.
-    /// This is useful when you would like for Vector to attempt to send data until terminated
-    /// by a SIGKILL. Overrides/cannot be set with `--graceful-shutdown-limit-secs`.
+    /// 收到SIGINT或SIGTERM后等待优雅关闭时永不超时。适用于希望agent持续尝试发送数据直到被SIGKILL终止的场景。
+    /// 会覆盖--graceful-shutdown-limit-secs且不能与其同时设置。
     #[arg(
         long,
         default_value = "false",
@@ -442,8 +440,7 @@ impl RootOpts {
 /// opts end
 
 impl ApplicationConfig {
-    /* vector::app::ApplicationConfig::from_opts vector::app::Application::prepare_from_opts vector::app::Application::prepare vector::app::Application::prepare_start vector::app::Application::run vector::main*/
-    pub async fn from_opts(
+      pub async fn from_opts(
         opts: &RootOpts,
         signal_handler: &mut SignalHandler,
     ) -> Result<Self, ExitCode> {
@@ -558,7 +555,7 @@ impl Application {
         // Any internal_logs sources will have grabbed a copy of the
         // early buffer by this point and set up a subscriber.
 
-        info!("Vector has started.");
+        info!("Agent has started.");
         handle.spawn(heartbeat());
 
         let Self {
@@ -692,7 +689,7 @@ impl FinishedApplication {
     }
 
     async fn stop(topology_controller: TopologyController, mut signal_rx: SignalRx) -> ExitStatus {
-        info!("Vector has stopped.");
+        info!("Agent has stopped.");
         tokio::select! {
             _ = topology_controller.stop() => ExitStatus::from_raw({
                 info!("stop app");
@@ -705,7 +702,7 @@ impl FinishedApplication {
 
     fn quit() -> ExitStatus {
         // It is highly unlikely that this event will exit from topology.
-        info!("Vector has quit.");
+        info!("Agent has quit.");
         ExitStatus::from_raw({
             #[cfg(unix)]
             exitcode::OK

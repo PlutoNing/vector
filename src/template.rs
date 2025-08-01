@@ -1,4 +1,4 @@
-//! Functionality for managing template fields used by Vector's sinks.
+//! Functionality
 use std::{borrow::Cow, convert::TryFrom, fmt, hash::Hash, path::PathBuf, sync::LazyLock};
 
 use bytes::Bytes;
@@ -26,7 +26,7 @@ static RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\{\{(?P<key>[^\}]+)\}
 pub enum TemplateParseError {
     #[snafu(display("Invalid strftime item"))]
     StrftimeError,
-    #[snafu(display("Invalid field path in template {:?} (see https://vector.dev/docs/reference/configuration/template-syntax/)", path))]
+    #[snafu(display("Invalid field path in template {:?}", path))]
     InvalidPathSyntax { path: String },
     #[snafu(display("Invalid numeric template"))]
     InvalidNumericTemplate { template: String },
@@ -540,8 +540,6 @@ fn parse_template(src: &str) -> Result<Vec<Part>, TemplateParseError> {
 
         let path = cap[1].trim().to_owned();
 
-        // This checks the syntax, but doesn't yet store it for use later
-        // see: https://github.com/vectordotdev/vector/issues/14864
         if parse_target_path(&path).is_err() {
             return Err(TemplateParseError::InvalidPathSyntax { path });
         }

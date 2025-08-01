@@ -1,6 +1,6 @@
+use agent_lib::event::MetricTags;
 use byteorder::{ByteOrder, NativeEndian};
 use std::{collections::HashMap, io, path::Path};
-use agent_lib::event::MetricTags;
 
 use netlink_packet_core::{
     NetlinkHeader, NetlinkMessage, NetlinkPayload, NLM_F_ACK, NLM_F_DUMP, NLM_F_REQUEST,
@@ -132,20 +132,20 @@ struct TcpStats {
     rx_queued_bytes: f64,
     tx_queued_bytes: f64,
 }
+/* 从缓冲区解析Netlink消息，提取InetResponseHeader。
 
+参数：
+- buffer - 包含Netlink消息的原始字节切片
+- headers - 用于存储解析后的InetResponseHeader的可变代理
+
+返回：
+- Ok(true) 如果解析完成（收到Done消息）
+- Ok(false) 如果期望更多数据，此时可再次调用此函数
+- Err(TcpError) 在长度无效、反序列化失败或Netlink错误时
+
+错误：
+在消息长度无效或Netlink错误时返回TcpError变体。 */
 /// Parses Netlink messages from a buffer, extracting [`InetResponseHeader`]s.
-///
-/// # Arguments
-/// * `buffer` - Raw byte slice containing Netlink messages.
-/// * `headers` - Mutable vector to store parsed [`InetResponseHeader`]s.
-///
-/// # Returns
-/// * `Ok(true)` if parsing is complete (Done message received).
-/// * `Ok(false)` if more data is expected. In this case, this function can be called again.
-/// * `Err(TcpError)` on invalid length, deserialization failure, or Netlink error.
-///
-/// # Errors
-/// Returns [`TcpError`] variants for invalid message lengths or Netlink errors.
 fn parse_netlink_messages(
     buffer: &[u8],
     headers: &mut Vec<InetResponseHeader>,

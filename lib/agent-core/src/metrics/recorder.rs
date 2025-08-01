@@ -19,9 +19,11 @@ pub(super) struct Registry {
     recency: RwLock<Option<Recency<Key, MetricKeyMatcher>>>,
 }
 
-impl Registry { /* 产生一个新的registry */
+impl Registry {
+    /* 产生一个新的registry */
     fn new() -> Self {
-        Self { /* 看来是个metrics  registry, 主要参数是存储 */
+        Self {
+            /* 看来是个metrics  registry, 主要参数是存储 */
             registry: MetricsRegistry::new(GenerationalStorage::new(VectorStorage)),
             recency: RwLock::new(None),
         }
@@ -105,27 +107,18 @@ impl Registry { /* 产生一个新的registry */
     }
 }
 
-/// [`VectorRecorder`] is a [`metrics::Recorder`] implementation that's suitable
-/// for the advanced usage that we have in Vector.
-///
-/// TODO: The latest version of the `metrics` crate has a test recorder interface that could be used
-/// to replace this whole global/local switching mechanism, as it effectively does the exact same
-/// thing internally. However, it is only available through a `with_test_recorder` function that
-/// takes a closure and cleans up the test recorder once the closure finishes. This is a much
-/// cleaner interface, but interacts poorly with async code as used by the component tests. The best
-/// path forward to make async tests work, then, is to replace the standard `#[tokio::test]` proc
-/// macro wrapper with an alternate wrapper that does the normal tokio setup from within the
-/// `with_test_recorder` closure, and use it across all the tests that require a test
-/// recorder. Given the large number of such tests, we are retaining this global test recorder hack
-/// here, but some day we should refactor the tests to eliminate it.
-#[derive(Clone)]/* 自动为 VectorRecorder 实现 Clone trait，使得枚举的实例可以被克隆 */
-pub(super) enum VectorRecorder { /* 包含一组registry （用于存储metric） */
+///自动为 VectorRecorder 实现 Clone trait，使得枚举的实例可以被克隆
+#[derive(Clone)] /*  */
+pub(super) enum VectorRecorder {
+    /* 包含一组registry （用于存储metric） */
     Global(Arc<Registry>),
     ThreadLocal,
 }
 
-impl VectorRecorder { /* 函数创建registry （一个metric registry , 包含了特定的存储） */
-    pub(super) fn new_global() -> Self { /* Global 变体包含一个 Arc<Registry>，用于全局的 Registry。Arc 是一个线程安全的引用计数智能指针，允许多个所有者共享同一个 Registry 实例。 */
+impl VectorRecorder {
+    /* 函数创建registry （一个metric registry , 包含了特定的存储） */
+    pub(super) fn new_global() -> Self {
+        /* Global 变体包含一个 Arc<Registry>，用于全局的 Registry。Arc 是一个线程安全的引用计数智能指针，允许多个所有者共享同一个 Registry 实例。 */
         Self::Global(Arc::new(Registry::new()))
     }
 

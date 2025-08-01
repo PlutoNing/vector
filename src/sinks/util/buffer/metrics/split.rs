@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use agent_lib::event::{metric::MetricData, Metric, MetricValue};
+use agent_lib::event::{Metric};
 
 #[allow(clippy::large_enum_variant)]
 enum SplitState {
@@ -87,99 +87,5 @@ impl<S: Default> Default for MetricSplitter<S> {
 impl<S> From<S> for MetricSplitter<S> {
     fn from(splitter: S) -> Self {
         Self { splitter }
-    }
-}
-
-/// A splitter that separates an aggregated summary into its various parts.
-///
-/// Generally speaking, all metric types supported by Vector have way to be added to and removed from other instances of
-/// themselves, such as merging two counters by adding together their values, or merging two distributions simply be
-/// adding all of their samples together.
-///
-/// However, one particular metric type is not amenable to these operations: aggregated summaries. Hailing from
-/// Prometheus, aggregated summaries are meant to be client-side generated versions of summary data about a histogram:
-/// count, sum, and various quantiles. As quantiles themselves cannot simply be added to or removed from each other
-/// without entirely altering the statistical significancy of their value, we often do not do anything with them except
-/// forwards them on directly as their individual pieces, or even drop them.
-///
-/// However, as many sinks must do this, this splitter exists to bundle the operation in a reusable piece of code that
-/// all sinks needing to do so can share.
-///
-/// All other metric types are passed through as-is.
-#[derive(Clone, Copy, Debug, Default)]
-pub struct AggregatedSummarySplitter;
-
-impl MetricSplit for AggregatedSummarySplitter {
-    fn split(&mut self, input: Metric) -> SplitIterator {
-        let (series, data, metadata) = input.into_parts();
-        match data.value() {
-            // If it's not an aggregated summary, just send it on semi-unchanged. :)
-            MetricValue::Counter { .. }
-            | MetricValue::Gauge { .. }
-            | MetricValue::Set { .. }
-            | MetricValue::Distribution { .. }
-            | MetricValue::AggregatedHistogram { .. } => {
-                SplitIterator::single(Metric::from_parts(series, data, metadata))
-            }
-            MetricValue::AggregatedSummary { .. } => {
-                // Further extract the aggregated summary components so we can generate our multiple metrics.
-                let (time, kind, value) = data.into_parts();
-                let (quantiles, count, sum) = match value {
-                    MetricValue::AggregatedSummary {
-                        quantiles,
-                        count,
-                        sum,
-                    } => (quantiles, count, sum),
-                    _ => unreachable!("metric value must be aggregated summary to be here"),
-                };
-
-                // We generate one metric for the count, one metric for the sum, and one metric for each quantile. We
-                // clone the timestamp, kind, metadata, etc, to keep everything the same as it was on the way in.
-                let mut metrics = VecDeque::new();
-
-                let mut count_series = series.clone();
-                count_series.name_mut().name_mut().push_str("_count");
-                let count_data = MetricData::from_parts(
-                    time,
-                    kind,
-                    MetricValue::Counter {
-                        value: count as f64,
-                    },
-                );
-                let count_metadata = metadata.clone();
-
-                metrics.push_back(Metric::from_parts(count_series, count_data, count_metadata));
-
-                for quantile in quantiles {
-                    let mut quantile_series = series.clone();
-                    quantile_series
-                        .replace_tag(String::from("quantile"), quantile.to_quantile_string());
-                    let quantile_data = MetricData::from_parts(
-                        time,
-                        kind,
-                        MetricValue::Gauge {
-                            value: quantile.value,
-                        },
-                    );
-                    let quantile_metadata = metadata.clone();
-
-                    metrics.push_back(Metric::from_parts(
-                        quantile_series,
-                        quantile_data,
-                        quantile_metadata,
-                    ));
-                }
-
-                let mut sum_series = series;
-                sum_series.name_mut().name_mut().push_str("_sum");
-                let sum_data =
-                    MetricData::from_parts(time, kind, MetricValue::Counter { value: sum });
-                let sum_metadata = metadata;
-
-                metrics.push_back(Metric::from_parts(sum_series, sum_data, sum_metadata));
-
-                SplitIterator::multiple(metrics)
-            }
-        }
     }
 }

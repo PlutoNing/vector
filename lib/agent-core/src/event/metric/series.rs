@@ -89,12 +89,10 @@ pub struct MetricName {
     pub name: String,
 
     /// The namespace of the metric.
-    ///
-    /// Namespace represents a grouping for a metric where the name itself may otherwise be too
-    /// generic. For example, while the name of a metric may be `memory.used` for the amount of used
-    /// system memory, the namespace could differentiate that by being `system` for the total amount
-    /// of used memory across the system, or `vector` for the amount of used system memory specific
-    /// to Vector, and so on.
+    /* 指标的命名空间。命名空间为指标提供分组，当指标名称本身过于通用时很有用。
+    例如，虽然指标名称可能是memory.used表示已用系统内存量，但命名空间可以通过
+    system表示整个系统的已用内存总量，
+    或通过表示agent专用的已用系统内存量等方式进行区分。 */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub namespace: Option<String>,
 }

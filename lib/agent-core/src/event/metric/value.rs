@@ -112,9 +112,7 @@ impl MetricValue {
 
 
     /// Zeroes out all the values contained in this value.
-    ///
-    /// This keeps all the bucket/value vectors for the histogram and summary metric types intact while zeroing the
-    /// counts. Distribution metrics are emptied of all their values.
+    /* 清零此值中包含的所有值。直方图和摘要指标类型保留所有桶值向量，同时将计数清零。分布指标清空所有值。 */
     pub fn zero(&mut self) {
         match self {
             Self::Counter { value } | Self::Gauge { value } => *value = 0.0,

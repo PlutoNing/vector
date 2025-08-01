@@ -3,6 +3,12 @@ use std::{
     time::Duration,
 };
 
+use crate::internal_event::{
+    ByteSize, BytesReceived, CountByteSize, InternalEventHandle as _, Protocol, Registered,
+};
+use agent_lib::config::LogNamespace;
+use agent_lib::configurable::configurable_component;
+use agent_lib::EstimatedJsonEncodedSizeOf;
 use chrono::{DateTime, Utc};
 use futures::StreamExt;
 use glob::{Pattern, PatternError};
@@ -13,21 +19,15 @@ use serde_with::serde_as;
 use sysinfo::System;
 use tokio::time;
 use tokio_stream::wrappers::IntervalStream;
-use agent_lib::config::LogNamespace;
-use agent_lib::configurable::configurable_component;
-use crate::internal_event::{
-    ByteSize, BytesReceived, CountByteSize, InternalEventHandle as _, Protocol, Registered,
-};
-use agent_lib::EstimatedJsonEncodedSizeOf;
 
+use crate::internal_event::EventsReceived;
 use crate::{
-    register,
     config::{SourceConfig, SourceContext, SourceOutput},
     event::metric::{Metric, MetricKind, MetricTags, MetricValue},
+    register,
     shutdown::ShutdownSignal,
     SourceSender,
 };
-use crate::internal_event::EventsReceived;
 #[cfg(target_os = "linux")]
 mod cgroups;
 mod cpu;
@@ -212,16 +212,8 @@ fn default_collectors() -> Option<Vec<Collector>> {
         Collector::Process,
     ];
 
-    #[cfg(target_os = "linux")]
-    {
-        collectors.push(Collector::CGroups);
-        collectors.push(Collector::TCP);
-    }
-    #[cfg(not(target_os = "linux"))]
-    if std::env::var("VECTOR_GENERATE_SCHEMA").is_ok() {
-        collectors.push(Collector::CGroups);
-        collectors.push(Collector::TCP);
-    }
+    collectors.push(Collector::CGroups);
+    collectors.push(Collector::TCP);
 
     Some(collectors)
 }
@@ -270,16 +262,7 @@ fn default_cgroups_config() -> Option<CGroupsConfig> {
     if std::env::var("VECTOR_GENERATE_SCHEMA").is_ok() {
         return Some(CGroupsConfig::default());
     }
-
-    #[cfg(not(target_os = "linux"))]
-    {
-        None
-    }
-
-    #[cfg(target_os = "linux")]
-    {
-        Some(CGroupsConfig::default())
-    }
+    Some(CGroupsConfig::default())
 }
 
 impl_generate_config_from_default!(HostMetricsConfig);
@@ -452,9 +435,7 @@ impl HostMetrics {
                 );
             }
             Err(_error) => {
-                error!(
-                    "Failed to load average info"
-                );
+                error!("Failed to load average info");
             }
         }
     }
@@ -464,18 +445,14 @@ impl HostMetrics {
         match heim::host::uptime().await {
             Ok(time) => output.gauge("uptime", time.get::<second>(), MetricTags::default()),
             Err(_error) => {
-                error!(
-"Failed to load host uptime info"
-                );
+                error!("Failed to load host uptime info");
             }
         }
 
         match heim::host::boot_time().await {
             Ok(time) => output.gauge("boot_time", time.get::<second>(), MetricTags::default()),
             Err(_error) => {
-                error!(
-                    "Failed to load host boot time info"
-                );
+                error!("Failed to load host boot time info");
             }
         }
     }
@@ -533,11 +510,7 @@ where
     E: std::error::Error,
 {
     result
-        .map_err(|_error| {
-            error!(
-                "filter_result_sync error"
-            )
-        })
+        .map_err(|_error| error!("filter_result_sync error"))
         .ok()
 }
 

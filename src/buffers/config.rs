@@ -163,10 +163,7 @@ impl DiskUsage {
 #[serde(rename_all = "snake_case", tag = "type")]
 #[configurable(metadata(docs::enum_tag_description = "The type of buffer to use."))]
 pub enum BufferType {
-    /// A buffer stage backed by an in-memory channel provided by `tokio`.
-    ///
-    /// This is more performant, but less durable. Data will be lost if Vector is restarted
-    /// forcefully or crashes.
+    /// 由tokio提供的内存通道支持的缓冲区。性能更高但持久性较差，如果agent强制重启或崩溃数据会丢失
     #[configurable(title = "Events are buffered in memory.")]
     #[serde(rename = "memory")]
     Memory {

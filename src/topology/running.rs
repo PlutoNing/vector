@@ -216,7 +216,7 @@ impl RunningTopology {
         if self.config.global != new_config.global {
             error!(
                 message =
-                "Global options can't be changed while reloading config file; reload aborted. Please restart Vector to reload the configuration file."
+                "Global options can't be changed while reloading config file; reload aborted. Please restart to reload the configuration file."
             );
             return Ok(false);
         }
@@ -232,14 +232,6 @@ impl RunningTopology {
             ConfigDiff::new(&self.config, &new_config, HashSet::new())
         };
         let buffers = self.shutdown_diff(&diff, &new_config).await;
-
-        // Gives windows some time to make available any port
-        // released by shutdown components.
-        // Issue: https://github.com/vectordotdev/vector/issues/3035
-        if cfg!(windows) {
-            // This value is guess work.
-            tokio::time::sleep(Duration::from_millis(200)).await;
-        }
 
         // Try to build all of the new components coming from the new configuration.  If we can
         // successfully build them, we'll attempt to connect them up to the topology and spawn their

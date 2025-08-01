@@ -70,7 +70,7 @@ pub(super) struct Inner {
     /// we have to use `String`.
     dropped_fields: ObjectMap,
 
-    /// An internal vector id that can be used to identify this event across all components.
+    /// 用于在所有组件中标识此事件
     #[derivative(PartialEq = "ignore")]
     pub(crate) source_event_id: Option<Uuid>,
 }
