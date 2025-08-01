@@ -1,23 +1,19 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 
-use async_trait::async_trait;
-use dyn_clone::DynClone;
+use crate::common::Source;
+use crate::core::global_options::GlobalOptions;
 use agent_config::{Configurable, GenerateError, Metadata, NamedComponent};
 use agent_config_common::attributes::CustomAttribute;
 use agent_config_common::schema::{SchemaGenerator, SchemaObject};
 use agent_config_macros::configurable_component;
-use agent_lib::{
-    config::{
-        LogNamespace,
-        SourceOutput,
-    },
-};
-use crate::core::global_options::GlobalOptions;
-use crate::common::Source;
+use agent_lib::config::{LogNamespace, SourceOutput};
+use async_trait::async_trait;
+use dyn_clone::DynClone;
 
 use super::{dot_graph::GraphConfig, schema, ComponentKey, ProxyConfig, Resource};
-use crate::{shutdown::ShutdownSignal, SourceSender};
+use crate::common::ShutdownSignal;
+use crate::SourceSender;
 /* 使用 Box 装箱一个实现了 SourceConfig 特征的动态对象。这种用法允许在运行时决定具体的 SourceConfig 实现。 */
 pub type BoxedSource = Box<dyn SourceConfig>;
 
@@ -108,8 +104,8 @@ pub struct SourceContext {
     pub key: ComponentKey, /*   source的id  */
     pub globals: GlobalOptions,
     pub enrichment_tables: crate::enrichment_tables::enrichment::TableRegistry,
-    pub shutdown: ShutdownSignal,  /* self.shutdown_coordinator里面那个 */
-    pub out: SourceSender, /*  是self.default_output那个tx*/
+    pub shutdown: ShutdownSignal, /* self.shutdown_coordinator里面那个 */
+    pub out: SourceSender,        /*  是self.default_output那个tx*/
     pub proxy: ProxyConfig,
     pub schema: schema::Options,
 

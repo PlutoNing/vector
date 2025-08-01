@@ -16,33 +16,31 @@ use tracing::Instrument;
 
 use crate::internal_event::{CountByteSize, InternalEventHandle as _};
 
-use agent_lib::{
-    EstimatedJsonEncodedSizeOf,
-};
-use crate::buffers::{BufferType, topology::channel::BufferSender};
-use crate::core::fanout::{self, Fanout};
 use super::{
     // fanout::{self, Fanout},
     schema,
     task::{Task, TaskOutput},
-    BuiltBuffer, ConfigDiff,
+    BuiltBuffer,
+    ConfigDiff,
 };
+use crate::buffers::{topology::channel::BufferSender, BufferType};
+use crate::core::fanout::{self, Fanout};
 use crate::internal_event::EventsReceived;
 use crate::{
-    register,
+    common::SourceShutdownCoordinator,
     config::{
         ComponentKey, Config, DataType, EnrichmentTableConfig, Inputs, OutputId, ProxyConfig,
         SinkContext, SourceContext,
     },
     event::{EventArray, EventContainer},
-
-    shutdown::SourceShutdownCoordinator,
+    register,
+    sources::SourceSenderItem,
+    sources::CHUNK_SIZE,
     spawn_named,
     topology::task::TaskError,
     SourceSender,
-    sources::SourceSenderItem,
-    sources::CHUNK_SIZE
 };
+use agent_lib::EstimatedJsonEncodedSizeOf;
 
 static ENRICHMENT_TABLES: LazyLock<crate::enrichment_tables::enrichment::TableRegistry> =
     LazyLock::new(crate::enrichment_tables::enrichment::TableRegistry::default);
@@ -131,7 +129,9 @@ impl<'a> Builder<'a> {
     /* build之前加载enrichment表 */
     /// Loads, or reloads the enrichment tables.
     /// The tables are stored in the `ENRICHMENT_TABLES` global variable.
-    async fn load_enrichment_tables(&mut self) -> &'static crate::enrichment_tables::enrichment::TableRegistry {
+    async fn load_enrichment_tables(
+        &mut self,
+    ) -> &'static crate::enrichment_tables::enrichment::TableRegistry {
         let mut enrichment_tables = HashMap::new();
         /* 'tables: 是一个标签，标记了这个 for 循环 */
         // Build enrichment tables
@@ -404,7 +404,10 @@ impl<'a> Builder<'a> {
     ) { /* 有调用 */
     }
     /* 获取config之后, 构建source, transform, sinks, 这里构建sinks */
-    async fn build_sinks(&mut self, enrichment_tables: &crate::enrichment_tables::enrichment::TableRegistry) {
+    async fn build_sinks(
+        &mut self,
+        enrichment_tables: &crate::enrichment_tables::enrichment::TableRegistry,
+    ) {
         let table_sinks = self
             .config
             .enrichment_tables

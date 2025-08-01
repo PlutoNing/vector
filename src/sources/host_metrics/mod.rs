@@ -20,13 +20,12 @@ use sysinfo::System;
 use tokio::time;
 use tokio_stream::wrappers::IntervalStream;
 
+use crate::common::ShutdownSignal;
 use crate::internal_event::EventsReceived;
 use crate::{
     config::{SourceConfig, SourceContext, SourceOutput},
     event::metric::{Metric, MetricKind, MetricTags, MetricValue},
-    register,
-    shutdown::ShutdownSignal,
-    SourceSender,
+    register, SourceSender,
 };
 #[cfg(target_os = "linux")]
 mod cgroups;

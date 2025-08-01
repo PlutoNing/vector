@@ -34,18 +34,14 @@ pub mod conversion {
 pub mod event_data_eq;
 pub use event_data_eq::EventDataEq;
 
-
 pub mod finalization;
 
 pub mod id;
-
-pub mod shutdown;
 
 pub mod trigger;
 
 #[macro_use]
 extern crate tracing;
-
 
 pub type Error = Box<dyn std::error::Error + Send + Sync + 'static>;
 

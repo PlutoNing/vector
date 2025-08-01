@@ -15,9 +15,9 @@ use super::{
 };
 use crate::{
     app::ShutdownError,
+    common::SourceShutdownCoordinator,
     config::{ComponentKey, Config, ConfigDiff, Inputs, OutputId, Resource},
     event::EventArray,
-    shutdown::SourceShutdownCoordinator,
     spawn_named,
 };
 use futures::{future, Future, FutureExt};
