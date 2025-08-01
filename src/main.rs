@@ -1,7 +1,7 @@
 #![deny(warnings)]
 
-extern crate vector;
-use vector::{app::Application};
+extern crate scx_agent;
+use scx_agent::{app::Application};
 
 use std::process::ExitCode;
 /* 项目主函数 */
