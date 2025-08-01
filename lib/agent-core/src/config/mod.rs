@@ -6,7 +6,6 @@ use bytes::Bytes;
 use chrono::{DateTime, Utc};
 
 mod log_schema;
-pub mod metrics_expiration;
 pub mod output_id;
 
 use crate::event::LogEvent;
