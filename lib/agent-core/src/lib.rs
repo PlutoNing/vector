@@ -24,7 +24,6 @@ pub mod buffer;
 pub mod config;
 pub mod event;
 pub mod schema;
-pub mod serde;
 pub mod transform;
 
 use float_eq::FloatEq;
@@ -43,4 +42,10 @@ macro_rules! emit {
     ($event:expr) => {
         agent_lib::internal_event::emit($event)
     };
+}
+
+/// Answers "Is this value in it's default state?" which can be used to skip serializing the value.
+#[inline]
+pub fn is_default<E: Default + PartialEq>(e: &E) -> bool {
+    e == &E::default()
 }

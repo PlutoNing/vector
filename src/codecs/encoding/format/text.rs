@@ -14,7 +14,7 @@ pub struct TextSerializerConfig {
     ///
     /// When set to `single`, only the last non-bare value of tags are displayed with the
     /// metric.  When set to `full`, all metric tags are exposed as separate assignments.
-    #[serde(default, skip_serializing_if = "agent_lib::serde::is_default")]
+    #[serde(default, skip_serializing_if = "agent_lib::config::is_default")]
     pub metric_tag_values: MetricTagValues,
 }
 /* 文本的序列化 */

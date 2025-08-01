@@ -24,7 +24,7 @@ use agent_lib::{
     EstimatedJsonEncodedSizeOf, TimeZone,
 };
 use crate::internal_event::{CountByteSize, EventsSent, InternalEventHandle as _, Output, Registered};
-pub use agent_lib::serde::{is_default};
+pub use agent_lib::config::is_default;
 use crate::{
     register,
     codecs::{Encoder, EncodingConfigWithFraming, SinkType, Transformer},

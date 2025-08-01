@@ -47,7 +47,7 @@ impl<T: SourceConfig + 'static> From<T> for BoxedSource {
 #[derive(Clone, Debug)]
 pub struct SourceOuter {
     #[configurable(derived)]
-    #[serde(default, skip_serializing_if = "agent_lib::serde::is_default")]
+    #[serde(default, skip_serializing_if = "agent_lib::config::is_default")]
     pub graph: GraphConfig,
 
     #[configurable(metadata(docs::hidden))]

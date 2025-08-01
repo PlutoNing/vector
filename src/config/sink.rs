@@ -52,14 +52,14 @@ where
     T: Configurable + Serialize + 'static,
 {
     #[configurable(derived)]
-    #[serde(default, skip_serializing_if = "agent_lib::serde::is_default")]
+    #[serde(default, skip_serializing_if = "agent_lib::config::is_default")]
     pub graph: GraphConfig,
 
     #[configurable(derived)]
     pub inputs: Inputs<T>,
 
     #[configurable(derived)]
-    #[serde(default, skip_serializing_if = "agent_lib::serde::is_default")]
+    #[serde(default, skip_serializing_if = "agent_lib::config::is_default")]
     pub buffer: BufferConfig,
 
     #[serde(flatten)]

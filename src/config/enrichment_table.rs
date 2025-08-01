@@ -19,7 +19,7 @@ where
     #[serde(flatten)]
     pub inner: EnrichmentTables,
     #[configurable(derived)]
-    #[serde(default, skip_serializing_if = "agent_lib::serde::is_default")]
+    #[serde(default, skip_serializing_if = "agent_lib::config::is_default")]
     pub graph: GraphConfig,
     #[configurable(derived)]
     #[serde(

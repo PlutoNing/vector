@@ -16,7 +16,7 @@ use vrl::path::OwnedValuePath;
 pub use vrl::path::{PathParseError, ValuePath};
 use vrl::value::KeyString;
 use vrl::value::Value;
-pub use agent_lib::serde::{is_default};
+pub use agent_lib::config::is_default;
 use crate::{event::Event};
 /// ========================ownedValuePath impl ======================
 /// A wrapper around `OwnedValuePath` that allows it to be used in Vector config.
