@@ -10,25 +10,25 @@ use super::{
     builder::{self, TopologyPieces},
     fanout::{ControlChannel, ControlMessage},
     handle_errors, retain,
-    task::{ TaskOutput},
+    task::TaskOutput,
     BuiltBuffer, TaskHandle,
 };
 use crate::{
+    app::ShutdownError,
     config::{ComponentKey, Config, ConfigDiff, Inputs, OutputId, Resource},
     event::EventArray,
     shutdown::SourceShutdownCoordinator,
-    app::ShutdownError,
     spawn_named,
 };
 use futures::{future, Future, FutureExt};
 
+use crate::buffers::topology::channel::BufferSender;
+use agent_lib::trigger::DisabledTrigger;
 use tokio::{
-    sync::{mpsc},
+    sync::mpsc,
     time::{interval, sleep_until, Duration, Instant},
 };
 use tracing::Instrument;
-use agent_lib::trigger::DisabledTrigger;
-use crate::{buffers::topology::channel::BufferSender};
 
 pub type ShutdownErrorReceiver = mpsc::UnboundedReceiver<ShutdownError>;
 
@@ -207,10 +207,7 @@ impl RunningTopology {
     ///
     /// If all changes from the new configuration cannot be made, and the current configuration
     /// cannot be fully restored, then `Err(())` is returned.
-    pub async fn reload_config_and_respawn(
-        &mut self,
-        new_config: Config,
-    ) -> Result<bool, ()> {
+    pub async fn reload_config_and_respawn(&mut self, new_config: Config) -> Result<bool, ()> {
         info!("Reloading running topology with new configuration.");
 
         if self.config.global != new_config.global {
@@ -236,12 +233,8 @@ impl RunningTopology {
         // Try to build all of the new components coming from the new configuration.  If we can
         // successfully build them, we'll attempt to connect them up to the topology and spawn their
         // respective component tasks.
-        if let Some(mut new_pieces) = TopologyPieces::build_or_log_errors(
-            &new_config,
-            &diff,
-            buffers.clone(),
-        )
-        .await
+        if let Some(mut new_pieces) =
+            TopologyPieces::build_or_log_errors(&new_config, &diff, buffers.clone()).await
         {
             self.connect_diff(&diff, &mut new_pieces).await;
             self.spawn_diff(&diff, new_pieces);
@@ -250,7 +243,6 @@ impl RunningTopology {
             info!("New configuration loaded successfully.");
 
             return Ok(true);
-    
         }
 
         // We failed to build, connect, and spawn all of the changed/new components, so we flip
@@ -260,8 +252,7 @@ impl RunningTopology {
 
         let diff = diff.flip();
         if let Some(mut new_pieces) =
-            TopologyPieces::build_or_log_errors(&self.config, &diff, buffers)
-                .await
+            TopologyPieces::build_or_log_errors(&self.config, &diff, buffers).await
         {
             self.connect_diff(&diff, &mut new_pieces).await;
             self.spawn_diff(&diff, new_pieces);
@@ -269,7 +260,6 @@ impl RunningTopology {
             info!("Old configuration restored successfully.");
 
             return Ok(false);
-
         }
 
         error!("Failed to restore old configuration.");
@@ -937,66 +927,22 @@ impl RunningTopology {
         self.source_tasks
             .insert(key.clone(), spawn_named(source_task, task_name.as_ref()));
     }
-/* 解析好的config来这里生成拓扑 */
+    /* 解析好的config来这里生成拓扑 */
     pub async fn start_init_validated(
-        config: Config,  /* 刚刚加载解析出的config */
-    ) -> Option<(Self, ShutdownErrorReceiver)> {/* 这个diff描述的就是这个新config的增量 */
+        config: Config, /* 刚刚加载解析出的config */
+    ) -> Option<(Self, ShutdownErrorReceiver)> {
+        /* 这个diff描述的就是这个新config的增量 */
         let diff = ConfigDiff::initial(&config);
-        let pieces =
-            TopologyPieces::build_or_log_errors(&config, &diff, HashMap::new())
-                .await?;
+        let pieces = TopologyPieces::build_or_log_errors(&config, &diff, HashMap::new()).await?;
         Self::start_validated(config, diff, pieces).await
     }
 
     pub async fn start_validated(
-        config: Config, /* 新config */
-        diff: ConfigDiff, /* 新config带来的变化 */
+        config: Config,             /* 新config */
+        diff: ConfigDiff,           /* 新config带来的变化 */
         mut pieces: TopologyPieces, /* 配置的新拓扑, 包含了source, sink等等 */
     ) -> Option<(Self, ShutdownErrorReceiver)> {
         let (abort_tx, abort_rx) = mpsc::unbounded_channel();
-
-        let expire_metrics = match (
-            config.global.expire_metrics,
-            config.global.expire_metrics_secs,
-        ) {
-            (Some(e), None) => {
-                warn!(
-                "DEPRECATED: `expire_metrics` setting is deprecated and will be removed in a future version. Use `expire_metrics_secs` instead."
-            );
-                if e < Duration::from_secs(0) {
-                    None
-                } else {
-                    Some(e.as_secs_f64())
-                }
-            }
-            (Some(_), Some(_)) => {
-                error!("Cannot set both `expire_metrics` and `expire_metrics_secs`.");
-                return None;
-            }
-            (None, Some(e)) => {
-                if e < 0f64 {
-                    None
-                } else {
-                    Some(e)
-                }
-            }
-            (None, None) => Some(300f64),
-        };
-
-        if let Err(error) = crate::metrics::Controller::get()
-            .expect("Metrics must be initialized")
-            .set_expiry(
-                expire_metrics,
-                config
-                    .global
-                    .expire_metrics_per_metric_set
-                    .clone()
-                    .unwrap_or_default(),
-            )
-        {
-            error!(message = "Invalid metrics expiry.", %error);
-            return None;
-        }
 
         let mut running_topology = Self::new(config, abort_tx);
 

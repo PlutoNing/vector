@@ -12,19 +12,17 @@ use crate::event::util::log::all_fields_skip_array_elements;
 use bytes::Bytes;
 use chrono::Utc;
 
-use crossbeam_utils::atomic::AtomicCell;
-use vrl::path;
-use vrl::path::{TargetPath, PathPrefix};
-use vrl::{metadata_path};
-use serde::{Deserialize, Serialize, Serializer};
 use agent_common::{
     byte_size_of::ByteSizeOf,
-
     json_size::{JsonSize, NonZeroJsonSize},
-
     EventDataEq,
 };
+use crossbeam_utils::atomic::AtomicCell;
+use serde::{Deserialize, Serialize, Serializer};
+use vrl::metadata_path;
+use vrl::path;
 use vrl::path::{parse_target_path, OwnedTargetPath, PathParseError};
+use vrl::path::{PathPrefix, TargetPath};
 use vrl::{event_path, owned_value_path};
 
 use super::{
@@ -33,8 +31,8 @@ use super::{
     metadata::EventMetadata,
     util, EventFinalizers, Finalizable, KeyString, ObjectMap, Value,
 };
+use crate::config::log_schema;
 use crate::config::LogNamespace;
-use crate::config::{log_schema};
 use crate::event::util::log::{all_fields, all_metadata_fields};
 use crate::event::MaybeAsLogMut;
 

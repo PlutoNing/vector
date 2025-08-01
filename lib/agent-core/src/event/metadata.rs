@@ -2,11 +2,11 @@
 
 use std::{borrow::Cow, collections::BTreeMap, fmt, sync::Arc};
 
+use agent_common::{byte_size_of::ByteSizeOf, config::ComponentKey, EventDataEq};
 use derivative::Derivative;
-use vrl::path::OwnedTargetPath;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use agent_common::{byte_size_of::ByteSizeOf, config::ComponentKey, EventDataEq};
+use vrl::path::OwnedTargetPath;
 use vrl::{
     compiler::SecretTarget,
     value::{KeyString, Kind, Value},

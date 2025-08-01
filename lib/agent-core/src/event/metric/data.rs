@@ -1,8 +1,8 @@
 use std::num::NonZeroU32;
 
-use chrono::{DateTime, Utc};
 use agent_common::byte_size_of::ByteSizeOf;
 use agent_config::configurable_component;
+use chrono::{DateTime, Utc};
 
 use super::{MetricKind, MetricValue};
 

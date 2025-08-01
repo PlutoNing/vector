@@ -58,7 +58,7 @@ pub mod topology;
 pub mod transforms;
 pub mod internal_event;
 pub use sources::SourceSender;
-pub use agent_lib::{event, metrics, schema};
+pub use agent_lib::{event, schema};
 pub use agent_lib::{shutdown, Error, Result};
 
 static APP_NAME_SLUG: std::sync::OnceLock<String> = std::sync::OnceLock::new();

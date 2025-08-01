@@ -6,7 +6,7 @@ use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 use agent_common::byte_size_of::ByteSizeOf;
 use agent_config::configurable_component;
 
-use crate::{float_eq};
+use crate::float_eq;
 
 use super::{write_list, write_word};
 
@@ -92,7 +92,6 @@ impl MetricValue {
 
             MetricValue::AggregatedSummary { count, .. }
             | MetricValue::AggregatedHistogram { count, .. } => *count == 0,
-
         }
     }
 
@@ -109,7 +108,6 @@ impl MetricValue {
             Self::AggregatedSummary { .. } => "aggregated summary",
         }
     }
-
 
     /// Zeroes out all the values contained in this value.
     /* 清零此值中包含的所有值。直方图和摘要指标类型保留所有桶值向量，同时将计数清零。分布指标清空所有值。 */

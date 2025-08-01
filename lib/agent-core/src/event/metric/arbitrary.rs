@@ -2,12 +2,7 @@ use proptest::collection::{hash_map, hash_set};
 use proptest::option;
 use proptest::prelude::*;
 
-
-
-use super::{
-    Bucket, MetricTags, Quantile, Sample,
-    StatisticKind, TagValue, TagValueSet,
-};
+use super::{Bucket, MetricTags, Quantile, Sample, StatisticKind, TagValue, TagValueSet};
 
 fn realistic_float() -> proptest::num::f64::Any {
     proptest::num::f64::POSITIVE | proptest::num::f64::NEGATIVE | proptest::num::f64::ZERO

@@ -1,9 +1,9 @@
+use agent_config::configurable_component;
 use headers::Authorization;
 use http::uri::InvalidUri;
 use hyper_proxy::{Custom, Intercept, Proxy, ProxyConnector};
 use no_proxy::NoProxy;
 use url::Url;
-use agent_config::configurable_component;
 
 use crate::serde::is_default;
 

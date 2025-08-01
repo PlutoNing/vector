@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use vrl::path::TargetPath;
 use vrl::owned_value_path;
+use vrl::path::TargetPath;
 use vrl::path::{OwnedTargetPath, OwnedValuePath, PathPrefix};
 use vrl::value::{kind::Collection, Kind};
 

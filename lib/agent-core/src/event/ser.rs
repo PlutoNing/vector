@@ -1,9 +1,9 @@
+use crate::buffer::Encodable;
 use bytes::{Buf, BufMut};
 use enumflags2::{bitflags, BitFlags, FromBitsError};
 use snafu::Snafu;
-use crate::buffer::Encodable;
 
-use super::{EventArray};
+use super::EventArray;
 
 #[derive(Debug, Snafu)]
 pub enum EncodeError {
@@ -91,8 +91,6 @@ impl Encodable for EventArray {
     where
         B: Buf + Clone,
     {
-        
         Err(DecodeError::UnsupportedEncodingMetadata)
- 
     }
 }

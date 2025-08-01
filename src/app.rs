@@ -421,10 +421,6 @@ impl RootOpts {
         )
         .collect()
     }
-    /* 启动时初始化root opt */
-    pub fn init_global(&self) {
-        crate::metrics::init_global().expect("metrics initialization failed");
-    }
 }
 
 /// opts end
@@ -492,28 +488,38 @@ pub async fn heartbeat() {
 /* 运行程序 */
 impl Application {
     pub fn run() -> ExitStatus {
-        let (runtime, app) = Self::prepare_start().unwrap_or_else(|code| std::process::exit(code));
+        let opts_res = Opts::get_matches();
+        let opts = match opts_res {
+            Ok(opts) => opts,
+            Err(error) => {
+                let _ = error.print();
+                std::process::exit(exitcode::USAGE);
+            }
+        };
+        let res1 = Self::prepare_from_opts(opts);
+        let res = match res1 {
+            Ok((runtime, app)) => {
+                let start_res = app.start(runtime.handle());
+                match start_res {
+                    Ok(app) => Ok((runtime, app)),
+                    Err(code) => Err(code),
+                }
+            }
+            Err(code) => Err(code),
+        };
+        let (runtime, app) = match res {
+            Ok((runtime, app)) => (runtime, app),
+            Err(code) => std::process::exit(code),
+        };
 
         runtime.block_on(app.run())
     }
 
-    pub fn prepare_start() -> Result<(Runtime, StartedApplication), ExitCode> {
-        Self::prepare()
-            .and_then(|(runtime, app)| app.start(runtime.handle()).map(|app| (runtime, app)))
-    }
-
-    pub fn prepare() -> Result<(Runtime, Self), ExitCode> {
-        let opts = Opts::get_matches().map_err(|error| {
-            _ = error.print();
-            exitcode::USAGE
-        })?;
-
-        Self::prepare_from_opts(opts)
-    }
-
     pub fn prepare_from_opts(opts: Opts) -> Result<(Runtime, Self), ExitCode> {
-        opts.root.init_global();
-
+        if let Err(_) = metrics::set_global_recorder(metrics::NoopRecorder) {
+            // 如果已经初始化过，忽略错误
+            warn!("Metrics recorder already initialized");
+        }
         init_logging(true, opts.log_level(), opts.root.internal_log_rate_limit);
 
         let runtime = build_runtime(opts.root.threads, "vector-worker")?;

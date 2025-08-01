@@ -4,7 +4,6 @@
 
 use std::{iter, slice, sync::Arc, vec};
 
-use futures::{stream, Stream};
 use crate::buffer::EventCount;
 use agent_common::{
     byte_size_of::ByteSizeOf,
@@ -12,10 +11,11 @@ use agent_common::{
     finalization::{EventFinalizers, Finalizable},
     json_size::JsonSize,
 };
+use futures::{stream, Stream};
 
 use super::{
-    EstimatedJsonEncodedSizeOf, Event, EventDataEq, EventMutRef, EventRef,
-    LogEvent, Metric, TraceEvent,
+    EstimatedJsonEncodedSizeOf, Event, EventDataEq, EventMutRef, EventRef, LogEvent, Metric,
+    TraceEvent,
 };
 
 /// The type alias for an array of `LogEvent` elements.

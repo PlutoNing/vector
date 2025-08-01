@@ -10,21 +10,14 @@ use std::{
     num::NonZeroU32,
 };
 
-use chrono::{DateTime, Utc};
-use agent_common::{
-    byte_size_of::ByteSizeOf,
-
-    json_size::JsonSize,
-
-    EventDataEq,
-};
+use agent_common::{byte_size_of::ByteSizeOf, json_size::JsonSize, EventDataEq};
 use agent_config::configurable_component;
+use chrono::{DateTime, Utc};
 
 use super::{
     estimated_json_encoded_size_of::EstimatedJsonEncodedSizeOf, BatchNotifier, EventFinalizer,
     EventFinalizers, EventMetadata, Finalizable,
 };
-
 
 #[cfg(any(test, feature = "test"))]
 mod arbitrary;
@@ -69,12 +62,13 @@ pub struct Metric {
     metadata: EventMetadata,
 }
 /* 表示一个指标 */
-impl Metric {/* 有调用 */
+impl Metric {
+    /* 有调用 */
     /// Creates a new `Metric` with the given `name`, `kind`, and `value`.
     pub fn new<T: Into<String>>(name: T, kind: MetricKind, value: MetricValue) -> Self {
         Self::new_with_metadata(name, kind, value, EventMetadata::default())
     }
-/* 有调用 */
+    /* 有调用 */
     /// Creates a new `Metric` with the given `name`, `kind`, `value`, and `metadata`.
     pub fn new_with_metadata<T: Into<String>>(
         name: T,
@@ -305,24 +299,6 @@ impl Metric {/* 有调用 */
         }
     }
 
-    /// Creates a new metric from components specific to a metric emitted by `metrics`.
-    #[allow(clippy::cast_precision_loss)]
-    pub(crate) fn from_metric_kv(
-        key: &metrics::Key,
-        value: MetricValue,
-        timestamp: DateTime<Utc>,
-    ) -> Self {
-        let labels = key
-            .labels()
-            .map(|label| (String::from(label.key()), String::from(label.value())))
-            .collect::<MetricTags>();
-
-        Self::new(key.name().to_string(), MetricKind::Absolute, value)
-            .with_namespace(Some("vector"))
-            .with_timestamp(Some(timestamp))
-            .with_tags((!labels.is_empty()).then_some(labels))
-    }
-
     /// Removes a tag from this metric, returning the value of the tag if the tag was previously in the metric.
     pub fn remove_tag(&mut self, key: &str) -> Option<String> {
         self.series.remove_tag(key)
@@ -436,7 +412,8 @@ impl Display for Metric {
     /// ```text
     /// 2020-08-12T20:23:37.248661343Z vector_received_bytes_total{component_kind="sink",component_type="blackhole"} = 6391
     /// ```
-    fn fmt(&self, fmt: &mut Formatter<'_>) -> Result<(), fmt::Error> {/* 有调用 */
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> Result<(), fmt::Error> {
+        /* 有调用 */
         if let Some(timestamp) = &self.data.time.timestamp {
             write!(fmt, "{timestamp:?} ")?;
         }
@@ -458,7 +435,8 @@ impl EventDataEq for Metric {
     }
 }
 
-impl ByteSizeOf for Metric {/* 有调用 */
+impl ByteSizeOf for Metric {
+    /* 有调用 */
     fn allocated_bytes(&self) -> usize {
         self.series.allocated_bytes()
             + self.data.allocated_bytes()
@@ -466,7 +444,8 @@ impl ByteSizeOf for Metric {/* 有调用 */
     }
 }
 
-impl EstimatedJsonEncodedSizeOf for Metric {/* 有调用 */
+impl EstimatedJsonEncodedSizeOf for Metric {
+    /* 有调用 */
     fn estimated_json_encoded_size_of(&self) -> JsonSize {
         // TODO: For now we're using the in-memory representation of the metric, but we'll convert
         // this to actually calculate the JSON encoded size in the near future.

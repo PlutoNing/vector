@@ -1,7 +1,6 @@
 //! The agent Core Library
 //!agent 核心库是构建 agent 所需的基础组件集合
 
-
 #![deny(warnings)]
 #![deny(clippy::all)]
 #![deny(clippy::pedantic)]
@@ -21,23 +20,17 @@
 #![allow(clippy::unnested_or_patterns)] // nightly-only feature as of 1.51.0
 #![allow(clippy::type_complexity)] // long-types happen, especially in async code
 
+pub mod buffer;
 pub mod config;
 pub mod event;
-pub mod metrics;
 pub mod schema;
 pub mod serde;
-pub mod buffer;
 pub mod transform;
-
 
 use float_eq::FloatEq;
 
-pub use event::EstimatedJsonEncodedSizeOf;
 pub use config::metrics_expiration::PerMetricSetExpiration;
-#[macro_use]
-extern crate tracing;
-
-
+pub use event::EstimatedJsonEncodedSizeOf;
 
 pub(crate) use agent_common::{Error, Result};
 

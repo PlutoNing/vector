@@ -1,10 +1,10 @@
 use std::collections::{BTreeMap, HashMap};
 
+use agent_common::json_size::JsonSize;
 use bytes::Bytes;
 use chrono::{DateTime, Timelike, Utc};
 use ordered_float::NotNan;
 use smallvec::SmallVec;
-use agent_common::json_size::JsonSize;
 use vrl::value::{KeyString, Value};
 
 const NULL_SIZE: JsonSize = JsonSize::new(4);

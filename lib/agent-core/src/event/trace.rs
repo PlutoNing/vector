@@ -1,12 +1,10 @@
 use std::fmt::Debug;
 
-use vrl::path::TargetPath;
-use serde::{Deserialize, Serialize};
 use crate::buffer::EventCount;
-use agent_common::{
-    byte_size_of::ByteSizeOf, json_size::JsonSize, EventDataEq,
-};
+use agent_common::{byte_size_of::ByteSizeOf, json_size::JsonSize, EventDataEq};
+use serde::{Deserialize, Serialize};
 use vrl::path::PathParseError;
+use vrl::path::TargetPath;
 
 use super::{
     BatchNotifier, EstimatedJsonEncodedSizeOf, EventFinalizer, EventFinalizers, EventMetadata,

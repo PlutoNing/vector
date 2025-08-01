@@ -1,5 +1,9 @@
 use std::{convert::TryInto, fmt::Debug, sync::Arc};
 
+use crate::buffer::EventCount;
+use agent_common::{
+    byte_size_of::ByteSizeOf, config::ComponentKey, finalization, json_size::JsonSize, EventDataEq,
+};
 pub use array::{into_event_stream, EventArray, EventContainer, LogArray, MetricArray, TraceArray};
 pub use estimated_json_encoded_size_of::EstimatedJsonEncodedSizeOf;
 pub use finalization::{
@@ -12,11 +16,6 @@ pub use metric::{Metric, MetricKind, MetricTags, MetricValue, StatisticKind};
 pub use r#ref::{EventMutRef, EventRef};
 use serde::{Deserialize, Serialize};
 pub use trace::TraceEvent;
-use crate::buffer::EventCount;
-use agent_common::{
-    byte_size_of::ByteSizeOf, config::ComponentKey, finalization,
-    json_size::JsonSize, EventDataEq,
-};
 pub use vrl::value::{KeyString, ObjectMap, Value};
 
 use crate::config::LogNamespace;
@@ -361,15 +360,6 @@ impl TryInto<serde_json::Value> for Event {
         }
     }
 }
-
-
-
-
-
-
-
-
-
 
 impl From<LogEvent> for Event {
     fn from(log: LogEvent) -> Self {

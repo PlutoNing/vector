@@ -84,8 +84,6 @@ where
     }
 }
 
-
-
 /// An object that can encode and decode itself to and from a buffer.
 ///
 /// # Metadata
