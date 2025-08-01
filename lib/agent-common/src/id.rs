@@ -9,10 +9,6 @@ pub use crate::config::ComponentKey;
 /// Wildcards (`*`) are supported.
 ///
 /// See [configuration][configuration] for more info.
-///
-/// [sources]: https://vector.dev/docs/reference/configuration/sources/
-/// [transforms]: https://vector.dev/docs/reference/configuration/transforms/
-/// [configuration]: https://vector.dev/docs/reference/configuration/
 #[configurable_component]
 #[configurable(metadata(
     docs::examples = "my-source-or-transform-id",
