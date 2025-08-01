@@ -8,7 +8,6 @@ use chrono::{DateTime, Utc};
 mod log_schema;
 pub mod metrics_expiration;
 pub mod output_id;
-pub mod proxy;
 
 use crate::event::LogEvent;
 pub use agent_common::config::ComponentKey;

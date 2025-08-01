@@ -56,7 +56,7 @@ pub use transform::{
 pub use vars::{interpolate, ENVIRONMENT_VARIABLE_INTERPOLATION_REGEX};
 pub use agent_lib::{
     config::{
-        init_log_schema, log_schema, proxy::ProxyConfig, ComponentKey,
+        init_log_schema, log_schema, ComponentKey,
         LogSchema, OutputId,
     },
 };

@@ -5,7 +5,7 @@ use agent_common::TimeZone;
 use agent_config::{configurable_component, impl_generate_config_from_default};
 
 
-use agent_lib::{config::proxy::ProxyConfig, config::LogSchema};
+use agent_lib::{ config::LogSchema};
 pub fn default_data_dir() -> Option<PathBuf> {
     Some(PathBuf::from("/var/lib/vector/"))
 }
@@ -90,11 +90,6 @@ pub struct GlobalOptions {
     #[serde(default, skip_serializing_if = "is_default")]
     #[configurable(metadata(docs::common = false))]
     pub timezone: Option<TimeZone>,
-
-    #[configurable(derived)]
-    #[serde(default, skip_serializing_if = "is_default")]
-    #[configurable(metadata(docs::common = false, docs::required = false))]
-    pub proxy: ProxyConfig,
 
     /// The amount of time, in seconds, that internal metrics will persist after having not been
     /// updated before they expire and are removed.
@@ -184,17 +179,6 @@ impl GlobalOptions {
             errors.push("conflicting values for 'wildcard_matching' found".to_owned());
         }
 
-        if conflicts(self.proxy.http.as_ref(), with.proxy.http.as_ref()) {
-            errors.push("conflicting values for 'proxy.http' found".to_owned());
-        }
-
-        if conflicts(self.proxy.https.as_ref(), with.proxy.https.as_ref()) {
-            errors.push("conflicting values for 'proxy.https' found".to_owned());
-        }
-
-        if !self.proxy.no_proxy.is_empty() && !with.proxy.no_proxy.is_empty() {
-            errors.push("conflicting values for 'proxy.no_proxy' found".to_owned());
-        }
 
         if conflicts(self.timezone.as_ref(), with.timezone.as_ref()) {
             errors.push("conflicting values for 'timezone' found".to_owned());
@@ -235,7 +219,6 @@ impl GlobalOptions {
                 wildcard_matching: self.wildcard_matching.or(with.wildcard_matching),
                 log_schema,
                 timezone: self.timezone.or(with.timezone),
-                proxy: self.proxy.merge(&with.proxy),
                 expire_metrics: self.expire_metrics.or(with.expire_metrics),
                 expire_metrics_secs: self.expire_metrics_secs.or(with.expire_metrics_secs),
             })

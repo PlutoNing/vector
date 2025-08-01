@@ -62,7 +62,6 @@ where
                     graph: self.graph.clone(),
                     inputs: self.inputs.clone(),
                     buffer: Default::default(),
-                    proxy: Default::default(),
                     inner: sink,
                 },
             )
@@ -75,7 +74,6 @@ where
                 key,
                 SourceOuter {
                     graph: self.graph.clone(),
-                    proxy: Default::default(),
                     inner: source,
                 },
             )

@@ -16,7 +16,7 @@ use crate::common::Inputs;
 use crate::core::global_options::GlobalOptions;
 use crate::core::sink::VectorSink;
 
-use super::{dot_graph::GraphConfig, schema, ComponentKey, ProxyConfig, Resource};
+use super::{dot_graph::GraphConfig, schema, ComponentKey,  Resource};
 pub type BoxedSink = Box<dyn SinkConfig>;
 
 impl Configurable for BoxedSink {
@@ -62,10 +62,6 @@ where
     #[serde(default, skip_serializing_if = "agent_lib::serde::is_default")]
     pub buffer: BufferConfig,
 
-    #[configurable(derived)]
-    #[serde(default, skip_serializing_if = "agent_lib::serde::is_default")]
-    pub proxy: ProxyConfig,
-
     #[serde(flatten)]
     #[configurable(metadata(docs::hidden))]
     pub inner: BoxedSink, /* 比如可能是个file sink config */
@@ -84,7 +80,6 @@ where
             inputs: Inputs::from_iter(inputs),
             buffer: Default::default(),
             inner: inner.into(),
-            proxy: Default::default(),
             graph: Default::default(),
         }
     }
@@ -97,10 +92,6 @@ where
             }
         }
         resources
-    }
-
-    pub const fn proxy(&self) -> &ProxyConfig {
-        &self.proxy
     }
 
     pub(super) fn map_inputs<U>(self, f: impl Fn(&T) -> U) -> SinkOuter<U>
@@ -120,7 +111,6 @@ where
             inputs: Inputs::from_iter(inputs),
             inner: self.inner,
             buffer: self.buffer,
-            proxy: self.proxy,
             graph: self.graph,
         }
     }
@@ -168,7 +158,6 @@ dyn_clone::clone_trait_object!(SinkConfig);
 pub struct SinkContext {
     pub globals: GlobalOptions,
     pub enrichment_tables: crate::enrichment_tables::enrichment::TableRegistry,
-    pub proxy: ProxyConfig,
     pub schema: schema::Options,
     pub app_name: String,
     pub app_name_slug: String,
@@ -179,7 +168,6 @@ impl Default for SinkContext {
         Self {
             globals: Default::default(),
             enrichment_tables: Default::default(),
-            proxy: Default::default(),
             schema: Default::default(),
             app_name: crate::get_app_name().to_string(),
             app_name_slug: crate::get_slugified_app_name(),
@@ -192,7 +180,4 @@ impl SinkContext {
         &self.globals
     }
 
-    pub const fn proxy(&self) -> &ProxyConfig {
-        &self.proxy
-    }
 }

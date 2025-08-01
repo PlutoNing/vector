@@ -11,7 +11,7 @@ use agent_lib::config::{LogNamespace, SourceOutput};
 use async_trait::async_trait;
 use dyn_clone::DynClone;
 
-use super::{dot_graph::GraphConfig, schema, ComponentKey, ProxyConfig, Resource};
+use super::{dot_graph::GraphConfig, schema, ComponentKey,  Resource};
 use crate::common::ShutdownSignal;
 use crate::SourceSender;
 /* 使用 Box 装箱一个实现了 SourceConfig 特征的动态对象。这种用法允许在运行时决定具体的 SourceConfig 实现。 */
@@ -48,10 +48,6 @@ impl<T: SourceConfig + 'static> From<T> for BoxedSource {
 pub struct SourceOuter {
     #[configurable(derived)]
     #[serde(default, skip_serializing_if = "agent_lib::serde::is_default")]
-    pub proxy: ProxyConfig,
-
-    #[configurable(derived)]
-    #[serde(default, skip_serializing_if = "agent_lib::serde::is_default")]
     pub graph: GraphConfig,
 
     #[configurable(metadata(docs::hidden))]
@@ -62,7 +58,6 @@ pub struct SourceOuter {
 impl SourceOuter {
     pub(crate) fn new<I: Into<BoxedSource>>(inner: I) -> Self {
         Self {
-            proxy: Default::default(),
             graph: Default::default(),
             inner: inner.into(),
         }
@@ -106,7 +101,6 @@ pub struct SourceContext {
     pub enrichment_tables: crate::enrichment_tables::enrichment::TableRegistry,
     pub shutdown: ShutdownSignal, /* self.shutdown_coordinator里面那个 */
     pub out: SourceSender,        /*  是self.default_output那个tx*/
-    pub proxy: ProxyConfig,
     pub schema: schema::Options,
 
     /// Tracks the schema IDs assigned to schemas exposed by the source.

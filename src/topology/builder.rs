@@ -30,7 +30,7 @@ use crate::common::Inputs;
 use crate::{
     common::SourceShutdownCoordinator,
     config::{
-        ComponentKey, Config, DataType, EnrichmentTableConfig, OutputId, ProxyConfig,
+        ComponentKey, Config, DataType, EnrichmentTableConfig, OutputId,
         SinkContext, SourceContext,
     },
     event::{EventArray, EventContainer},
@@ -326,7 +326,6 @@ impl<'a> Builder<'a> {
                 enrichment_tables: enrichment_tables.clone(),
                 shutdown: shutdown_signal, /* self.shutdown_coordinator里面那个 */
                 out: pipeline,             /* 是self.default_output那个tx */
-                proxy: ProxyConfig::merge_with_env(&self.config.global.proxy, &source.proxy),
                 schema_definitions,
                 schema: self.config.schema,
             }; /* impl SourceConfig for HostMetricsConfig */
@@ -480,7 +479,6 @@ impl<'a> Builder<'a> {
             let cx = SinkContext {
                 globals: self.config.global.clone(),
                 enrichment_tables: enrichment_tables.clone(),
-                proxy: ProxyConfig::merge_with_env(&self.config.global.proxy, sink.proxy()),
                 schema: self.config.schema,
                 app_name: crate::get_app_name().to_string(),
                 app_name_slug: crate::get_slugified_app_name(),
