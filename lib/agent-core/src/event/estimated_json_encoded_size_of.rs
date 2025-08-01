@@ -23,23 +23,7 @@ const EPOCH_RFC3339_3: &str = "1970-01-01T00:00:00.000Z";
 const EPOCH_RFC3339_6: &str = "1970-01-01T00:00:00.000000Z";
 const EPOCH_RFC3339_9: &str = "1970-01-01T00:00:00.000000000Z";
 
-/// Return the estimated size of a type in bytes when encoded as JSON.
-///
-/// The result of this function is not guaranteed to be accurate but is intended to give a good
-/// approximation to be used by internal events in Vector.
-///
-/// It should *NOT* be used for exact size calculations, as it may lead to incorrect results.
-///
-/// Implementers of this trait should strive to provide as accurate numbers as possible, without
-/// introducing a significant performance penalty.
-///
-/// As an example, the size of a type that results in a JSON string should not iterate over
-/// individual bytes of that string to check for the need of escape sequences or the need for UTF-8
-/// REPLACEMENT CHARACTER, as those operations are too expensive to do. Instead, the size of the
-/// string is the estimation of the actual size of the string in memory, combined with two
-/// surrounding quotes.
-///
-/// Ideally, no allocations should take place in any implementation of this function.
+/// 返回类型编码为JSON时的估计字节大小
 pub trait EstimatedJsonEncodedSizeOf {
     fn estimated_json_encoded_size_of(&self) -> JsonSize;
 }

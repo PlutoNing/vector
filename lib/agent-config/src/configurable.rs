@@ -93,7 +93,7 @@ pub trait ToValue {
     fn to_value(&self) -> Value;
 }
 
-/// A pseudo-reference to a type that can be represented in a Vector configuration. This is
+/// A pseudo-reference to a type that can be represented in a configuration. This is
 /// composed of references to all the class trait functions.
 pub struct ConfigurableRef {
     // TODO: Turn this into a plain value once this is resolved:

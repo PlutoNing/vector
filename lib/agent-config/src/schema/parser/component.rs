@@ -31,7 +31,7 @@ impl SchemaError {
     }
 }
 
-/// A schema object that represents the schema of a single Vector component.
+/// A schema object that represents the schema of a single agent component.
 ///
 /// The schema represents the equivalent of the component's configuration type, excluding any common
 /// configuration fields that appear on a per-component type basis. This means that, for a sink

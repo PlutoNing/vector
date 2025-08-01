@@ -11,13 +11,13 @@ pub mod output_id;
 pub mod proxy;
 
 use crate::event::LogEvent;
-pub use log_schema::{init_log_schema, log_schema, LogSchema};
-use vrl::path;
-use vrl::path::{ValuePath,PathPrefix};
-pub use output_id::OutputId;
-use serde::{Deserialize, Serialize};
 pub use agent_common::config::ComponentKey;
 use agent_config::configurable_component;
+pub use log_schema::{init_log_schema, log_schema, LogSchema};
+pub use output_id::OutputId;
+use serde::{Deserialize, Serialize};
+use vrl::path;
+use vrl::path::{PathPrefix, ValuePath};
 use vrl::value::Value;
 
 use crate::schema;
@@ -48,15 +48,16 @@ pub struct Input {
     log_schema_requirement: schema::Requirement,
 }
 
-impl Input {/* 调用 */
+impl Input {
+    /* 调用 */
     pub fn data_type(&self) -> DataType {
         self.ty
     }
-/* 调用 */
+    /* 调用 */
     pub fn schema_requirement(&self) -> &schema::Requirement {
         &self.log_schema_requirement
     }
-/* 调用 */
+    /* 调用 */
     pub fn new(ty: DataType) -> Self {
         Self {
             ty,
@@ -133,7 +134,8 @@ impl SourceOutput {
     ///
     /// Sets the datatype to be [`DataType::Metric`].
     #[must_use]
-    pub fn new_metrics() -> Self {/* 调用 */
+    pub fn new_metrics() -> Self {
+        /* 调用 */
         Self {
             port: None,
             ty: DataType::Metric,
@@ -154,17 +156,14 @@ impl SourceOutput {
         }
     }
 
+    /* 返回输出的schema定义。根据schema_enabled标志决定返回完整定义还是简单定义。
+    完整定义包含字段和关联类型，简单定义仅返回命名空间默认值。
+    命名空间包含含义。schema_enabled由用户配置设置。 */
     /// Return the schema [`schema::Definition`] from this output.
-    ///
-    /// Takes a `schema_enabled` flag to determine if the full definition including the fields
-    /// and associated types should be returned, or if a simple definition should be returned.
-    /// A simple definition is just the default for the namespace. For the Vector namespace the
-    /// meanings are included.
-    /// Schema enabled is set in the users configuration.
     #[must_use]
     pub fn schema_definition(&self, schema_enabled: bool) -> Option<schema::Definition> {
         use std::ops::Deref;
-/* 调用 */
+        /* 调用 */
         self.schema_definition.as_ref().map(|definition| {
             if schema_enabled {
                 definition.deref().clone()
@@ -241,14 +240,10 @@ impl TransformOutput {
         self.port = Some(name.into());
         self
     }
-
+    /* 返回输出的schema定义。根据schema_enabled标志决定返回完整定义还是简单定义。
+    完整定义包含字段和关联类型，简单定义仅返回命名空间默认值。命名空间包含含义。
+    schema_enabled由用户配置设置。 */
     /// Return the schema [`schema::Definition`] from this output.
-    ///
-    /// Takes a `schema_enabled` flag to determine if the full definition including the fields
-    /// and associated types should be returned, or if a simple definition should be returned.
-    /// A simple definition is just the default for the namespace. For the Vector namespace the
-    /// meanings are included.
-    /// Schema enabled is set in the users configuration.
     #[must_use]
     pub fn schema_definitions(
         &self,

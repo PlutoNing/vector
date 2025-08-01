@@ -11,8 +11,6 @@ use std::cell::RefCell;
 use agent_config_common::{attributes::CustomAttribute, constants};
 use vrl::compiler::TimeZone;
 
-// TODO: Consider an approach for generating schema of "fixed string value, or remainder" structure
-// used by this type.
 impl Configurable for TimeZone {
     fn referenceable_name() -> Option<&'static str> {
         Some(std::any::type_name::<Self>())
@@ -21,7 +19,7 @@ impl Configurable for TimeZone {
     fn metadata() -> Metadata {
         let mut metadata = Metadata::default();
         metadata.set_title("Timezone to use for any date specifiers in template strings.");
-        metadata.set_description(r#"This can refer to any valid timezone as defined in the [TZ database][tzdb], or "local" which refers to the system local timezone. It will default to the [globally configured timezone](https://vector.dev/docs/reference/configuration/global-options/#timezone).
+        metadata.set_description(r#"This can refer to any valid timezone as defined in the [TZ database][tzdb], or "local" which refers to the system local timezone. It will default to the [globally configured timezone].
 
 [tzdb]: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"#);
         metadata.add_custom_attribute(CustomAttribute::kv(

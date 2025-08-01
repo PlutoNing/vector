@@ -4,12 +4,10 @@ use std::sync::{LazyLock, OnceLock};
 use vrl::owned_value_path;
 use vrl::path::PathPrefix;
 
+use agent_config::configurable_component;
 use vrl::path::PathParseError;
 /// =======================for OptionalTargetPath
-
-
 use vrl::path::{OwnedTargetPath, OwnedValuePath};
-use agent_config::configurable_component;
 
 static LOG_SCHEMA: OnceLock<LogSchema> = OnceLock::new();
 static LOG_SCHEMA_DEFAULT: LazyLock<LogSchema> = LazyLock::new(LogSchema::default);
@@ -105,14 +103,14 @@ impl From<OwnedTargetPath> for OptionalTargetPath {
     }
 }
 
-
+/* 日志模式定义了agent处理日志事件的标准字段映射。它包含五个核心字段：message_key存储原始日志内容，
+timestamp_key记录事件时间，host_key标识来源主机，source_type_key标记创建事件的源类型，
+metadata_key保存agent生成的元数据。这些字段名称可配置，默认使用标准名称。系统支持全局模式设置和
+配置合并，确保所有组件以统一方式处理日志事件。 */
 /// Log schema.
-///
-/// A log schema is used by Vector not only to uniformly process the fields of an event, but also to
-/// specify which fields should hold specific data that is also set by Vector once an event is
-/// flowing through a topology.
 #[configurable_component]
-#[derive(Clone, Debug, Eq, PartialEq)] /* #[derive(...)] 是一个派生宏，用于自动为结构体实现一些常用的特征（traits） */
+#[derive(Clone, Debug, Eq, PartialEq)]
+/* #[derive(...)] 是一个派生宏，用于自动为结构体实现一些常用的特征（traits） */
 #[serde(default)] /* 是 Serde 库的一个属性，用于序列化和反序列化。它指定在反序列化时，如果某个字段缺失，则使用默认值。 */
 pub struct LogSchema {
     /// The name of the event field to treat as the event message.
@@ -132,16 +130,15 @@ pub struct LogSchema {
     #[serde(default = "LogSchema::default_host_key")]
     host_key: OptionalTargetPath,
 
+    /* 日志模式定义事件字段的标准位置。source_type_key字段由创建事件的agent源设置，
+    用于标识事件来源类型。默认值为"source_type"，可配置为其他路径。系统支持全局模式设置和配置合并，
+    确保所有组件统一处理日志事件。 */
     /// The name of the event field to set the source identifier in.
-    ///
-    /// This field will be set by the Vector source that the event was created in.
     #[serde(default = "LogSchema::default_source_type_key")]
     source_type_key: OptionalTargetPath,
 
+    /* metadata_key字段由agent设置，用于保存事件特定的元数据，比如remap转换在遇到错误或中止时添加的注释。 */
     /// The name of the event field to set the event metadata in.
-    ///
-    /// Generally, this field will be set by Vector to hold event-specific metadata, such as
-    /// annotations by the `remap` transform when an error or abort is encountered.
     #[serde(default = "LogSchema::default_metadata_key")]
     metadata_key: OptionalTargetPath,
 }

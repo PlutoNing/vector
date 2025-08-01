@@ -198,9 +198,7 @@ impl LogEvent {
         &mut self.metadata
     }
 
-    /// This detects the log namespace used at runtime by checking for the existence
-    /// of the read-only "vector" metadata, which only exists (and is required to exist)
-    /// with the `Vector` log namespace.
+    /// 运行时通过检查只读元数据的存在来检测日志命名空间，该元数据仅在日志命名空间中存在且必须存在。
     pub fn namespace(&self) -> LogNamespace {
         if self.contains((PathPrefix::Metadata, path!("vector"))) {
             LogNamespace::Vector

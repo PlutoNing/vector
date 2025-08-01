@@ -86,7 +86,7 @@ fn group_doc_lines(ungrouped: &[String]) -> Vec<String> {
     //
     // What we want to do is actually parse this as three paragraphs, with the individual lines of
     // each paragraph merged together as a single string, and extraneous whitespace removed, such
-    // that we should end up with a vector of strings that looks like:
+    // that we should end up with a agent of strings that looks like:
     //
     // - "A helper for XYZ."
     // - "This helper works in the following way, and so on and so forth."

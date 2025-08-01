@@ -43,7 +43,7 @@ impl<'a> Container<'a> {
     /// Creates a new `Container<'a>` from the raw derive macro input.
     pub fn from_derive_input(input: &'a DeriveInput) -> darling::Result<Container<'a>> {
         // We can't do anything unless `serde` can also handle this container. We specifically only care about
-        // deserialization here, because the schema tells us what we can _give_ to Vector.
+        // deserialization here, because the schema tells us what we can _give_ to agent.
         let context = Ctxt::new();
         let serde = match serde_ast::Container::from_ast(&context, input, Derive::Deserialize) {
             Some(serde) => {

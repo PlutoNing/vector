@@ -8,7 +8,7 @@ mod component_name;
 mod configurable;
 mod configurable_component;
 
-/// Designates a type as being part of a Vector configuration.
+/// Designates a type as being part of a agent configuration.
 ///
 /// This will automatically derive the [`Configurable`][agent-config::Configurable] trait for the given struct/enum, as
 /// well as ensuring that serialization/deserialization (via `serde`) is derived.
@@ -51,7 +51,7 @@ mod configurable_component;
 /// This adds special metadata to the generated schema for that type, which indicates that it
 /// represents the top-level configuration object as a component of the given type. Additionally,
 /// relevant traits and annotations will be added to register the component (using the given name)
-/// within Vector, for the purposes of example configuration generation, and so on.
+/// within agent, for the purposes of example configuration generation, and so on.
 ///
 /// ## Opting out of automatic derives
 ///

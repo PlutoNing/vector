@@ -1,3 +1,6 @@
+use agent_config_common::{
+    constants::ComponentType, human_friendly::generate_human_friendly_string,
+};
 use darling::{ast::NestedMeta, Error, FromMeta};
 use proc_macro::TokenStream;
 use proc_macro2::{Ident, Span};
@@ -5,9 +8,6 @@ use quote::{quote, quote_spanned};
 use syn::{
     parse_macro_input, parse_quote, parse_quote_spanned, punctuated::Punctuated, spanned::Spanned,
     token::Comma, DeriveInput, Lit, LitStr, Meta, MetaList, Path,
-};
-use agent_config_common::{
-    constants::ComponentType, human_friendly::generate_human_friendly_string,
 };
 
 use crate::attrs;
@@ -150,12 +150,13 @@ impl TypedComponent {
 
 #[derive(Debug)]
 struct Options {
+    /* 虽然 `#[configurable_component]` 宏暗示任何被注解的项都是组件，但在拓扑中
+        什么可以是组件与配置中允许作为可配置"组件"之间做了区分。
+
+    - __拓扑组件__：实际在 agent 数据流中运行的组件（Source、Transform、Sink 等）
+    - __配置组件__：配置文件中可以定义的任何可配置项（包括全局选项、提供程序等）
+     */
     /// Component type details, if specified.
-    ///
-    /// While the macro `#[configurable_component]` sort of belies an implication that any item
-    /// being annotated is a component, we make a distinction here in terms of what can be a
-    /// component in a Vector topology, versus simply what is allowed as a configurable "component"
-    /// within a Vector configuration.
     typed_component: Option<TypedComponent>,
 
     /// Whether to disable the automatic derive for `serde::Serialize`.
@@ -286,7 +287,7 @@ pub fn configurable_component_impl(args: TokenStream, item: TokenStream) -> Toke
     //   Enum model. this only happens if the component is actually named, and only sources are
     //   named at the moment.
     // - we automatically generate the call to register the component config type via `inventory`
-    //   which powers the `vector generate` subcommand by maintaining a name -> config type map
+    //   which powers the `agent generate` subcommand by maintaining a name -> config type map
     let component_type = options.typed_component().map(|tc| {
         let component_type = tc.component_type.as_str();
         quote! {

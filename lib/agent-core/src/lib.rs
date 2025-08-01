@@ -1,12 +1,6 @@
-//! The Vector Core Library
-//!
-//! The Vector Core Library are the foundational pieces needed to make a vector
-//! and is not vector with pieces missing. While this library is obviously
-//! tailored to the needs of vector it is written in such a way to make
-//! experimentation and testing _in the library_ cheap and demonstrative.
-//!
-//! This library was extracted from the top-level project package, discussed in
-//! RFC 7027.
+//! The agent Core Library
+//!agent 核心库是构建 agent 所需的基础组件集合
+
 
 #![deny(warnings)]
 #![deny(clippy::all)]
@@ -23,7 +17,7 @@
 #![allow(clippy::match_wildcard_for_single_variants)]
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::must_use_candidate)] // many false positives in this package
-#![allow(clippy::non_ascii_literal)] // using unicode literals is a-okay in vector
+#![allow(clippy::non_ascii_literal)] // using unicode literals is a-okay
 #![allow(clippy::unnested_or_patterns)] // nightly-only feature as of 1.51.0
 #![allow(clippy::type_complexity)] // long-types happen, especially in async code
 
