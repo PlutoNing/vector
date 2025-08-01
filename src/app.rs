@@ -14,19 +14,19 @@ use std::{
 use clap::{ArgAction, CommandFactory, FromArgMatches, Parser};
 use tokio::time::interval;
 
-use crate::{ get_version};
-/// opts end
-/// signal start
-use snafu::Snafu;
-use tokio::{runtime::Runtime};
-use tokio_stream::{Stream};
-use super::config::{ComponentKey};
+use super::config::ComponentKey;
+use crate::get_version;
 /// signal end
 use exitcode::ExitCode;
 use futures::StreamExt;
+/// opts end
+/// signal start
+use snafu::Snafu;
+use tokio::runtime::Runtime;
 use tokio::runtime::{self};
-use tokio::sync::broadcast::{error::RecvError,Receiver,Sender,channel};
+use tokio::sync::broadcast::{channel, error::RecvError, Receiver, Sender};
 use tokio_stream::wrappers::UnboundedReceiverStream;
+use tokio_stream::Stream;
 
 use crate::{
     config::{self, Config, ConfigPath},
@@ -77,8 +77,6 @@ impl PartialEq for SignalTo {
         }
     }
 }
-
-
 
 #[derive(Clone, Debug, Snafu, PartialEq, Eq)]
 pub enum ShutdownError {
@@ -247,9 +245,7 @@ fn os_signals(runtime: &Runtime) -> impl Stream<Item = SignalTo> {
     })
 }
 
-
 /// signal end
-
 
 /* 定义app的config */
 pub struct ApplicationConfig {
@@ -312,13 +308,7 @@ impl Opts {
 pub struct RootOpts {
     /// Read configuration from one or more files. Wildcard paths are supported.
     /// File format is detected from the file name.
-    #[arg(
-        id = "config",
-        short,
-        long,
-        env = "agent_config",
-        value_delimiter(',')
-    )]
+    #[arg(id = "config", short, long, env = "agent_config", value_delimiter(','))]
     pub config_paths: Vec<PathBuf>,
 
     /// Read configuration from files in one or more directories.
@@ -440,7 +430,7 @@ impl RootOpts {
 /// opts end
 
 impl ApplicationConfig {
-      pub async fn from_opts(
+    pub async fn from_opts(
         opts: &RootOpts,
         signal_handler: &mut SignalHandler,
     ) -> Result<Self, ExitCode> {
@@ -506,34 +496,28 @@ impl Application {
 
         runtime.block_on(app.run())
     }
-    /* 运行调用层次: main->run->prepare_start */
+
     pub fn prepare_start() -> Result<(Runtime, StartedApplication), ExitCode> {
-        /* 返回一个 Result 类型，表示操作的结果。成功时返回一个包含 Runtime 和 StartedApplication 的元组，失败时返回一个 ExitCode */
-        Self::prepare() /* prepare 方法返回一个 Result<(Runtime, Application), ExitCode> */
+        Self::prepare()
             .and_then(|(runtime, app)| app.start(runtime.handle()).map(|app| (runtime, app)))
-        /* and_then 是 Result 类型的方法，用于链式处理成功的结果。如果 prepare 方法成功，and_then 会接收一个包含 runtime 和 app 的元组，并执行闭包中的代码。 */
     }
-    /*main->run->prepare_start->prepare ; 返回rt和app, 然后app.start(runtime.handle()).map(|app| (runtime, app)) */
+
     pub fn prepare() -> Result<(Runtime, Self), ExitCode> {
         let opts = Opts::get_matches().map_err(|error| {
-            /* opts 是一个类型为 Opts 的变量。它通常用于存储从命令行解析得到的选项和参数 */
-            // Printing to stdout/err can itself fail; ignore it.
             _ = error.print();
             exitcode::USAGE
         })?;
-        /* 程序刚运行时一直来到这里 */
+
         Self::prepare_from_opts(opts)
     }
-    /* main->run->prepare_start->prepare->prepare_from_opts */
+
     pub fn prepare_from_opts(opts: Opts) -> Result<(Runtime, Self), ExitCode> {
         opts.root.init_global();
 
         init_logging(true, opts.log_level(), opts.root.internal_log_rate_limit);
 
-        /* 构建rt */
         let runtime = build_runtime(opts.root.threads, "vector-worker")?;
 
-        // Signal handler for OS and provider messages.
         let mut signals = SignalPair::new(&runtime);
 
         let config = runtime.block_on(ApplicationConfig::from_opts(
