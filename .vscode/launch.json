@@ -8,7 +8,7 @@
             "type": "lldb",
             "request": "launch",
             "name": "Cargo launch",
-            "program": "${workspaceFolder}/target/debug/vector",
+            "program": "${workspaceFolder}/target/debug/scx_agent",
             "cwd": "${workspaceFolder}",
             "args": [],
             "stopOnEntry": false,
