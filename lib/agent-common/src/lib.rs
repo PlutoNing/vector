@@ -38,8 +38,6 @@ pub mod finalization;
 
 pub mod id;
 
-pub mod trigger;
-
 #[macro_use]
 extern crate tracing;
 

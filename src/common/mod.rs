@@ -15,9 +15,44 @@ use futures::FutureExt;
 use stream_cancel::{Trigger, Tripwire};
 use tokio::time::{timeout_at, Instant};
 
-// use crate::{config::ComponentKey, trigger::DisabledTrigger};
-use agent_common::trigger::DisabledTrigger;
 use agent_lib::config::ComponentKey;
+
+
+#[allow(clippy::module_name_repetitions)]
+pub struct DisabledTrigger {
+    trigger: Option<Trigger>,
+}
+
+impl DisabledTrigger {
+    #[must_use]
+    pub fn new(t: Trigger) -> Self {
+        Self { trigger: Some(t) }
+    }
+
+    #[must_use]
+    pub fn into_inner(mut self) -> Trigger {
+        self.trigger.take().unwrap_or_else(|| unreachable!())
+    }
+}
+
+impl Drop for DisabledTrigger {
+    fn drop(&mut self) {
+        if let Some(trigger) = self.trigger.take() {
+            trigger.disable();
+        }
+    }
+}
+
+impl From<Trigger> for DisabledTrigger {
+    fn from(t: Trigger) -> Self {
+        Self::new(t)
+    }
+}
+
+
+
+
+
 pub async fn tripwire_handler(closed: bool) {
     std::future::poll_fn(|_| {
         if closed {
