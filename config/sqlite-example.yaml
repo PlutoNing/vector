@@ -1,5 +1,5 @@
 ---
-# Vector SQLite Sink Example Configuration
+# agent SQLite Sink Example Configuration
 # This configuration demonstrates how to use the SQLite sink
 
 sources:
@@ -23,7 +23,7 @@ sinks:
     type: sqlite
     inputs:
       - add_metadata
-    path: "/tmp/vector_logs.db"
+    path: "/tmp/agent_logs.db"
     table: "application_logs"
     encoding:
       codec: json

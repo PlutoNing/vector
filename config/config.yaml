@@ -1,0 +1,28 @@
+sinks:
+  out:
+    inputs:
+      - "my_source_id"
+    type: "console"
+    encoding:
+      codec: "text"
+  my_sink_id:
+    type: file
+    inputs:
+      - my_source_id
+    path: /tmp/agent-%Y-%m-%d.log
+    compression: gzip
+    # compression: none
+    encoding:
+      codec: json
+  # sqlite_logs:
+  #   type: sqlite
+  #   inputs:
+  #     - my_source_id
+  #   path: "/tmp/agent_logs.db"
+  #   table: "application_logs"
+  #   encoding:
+  #     codec: json
+  #   idle_timeout_secs: 300
+sources:
+  my_source_id:
+    type: host_metrics

@@ -112,7 +112,7 @@ pub fn process_paths(config_paths: &[ConfigPath]) -> Option<Vec<ConfigPath>> {
             .lock()
             .map(|mut guard| guard.clone_from(&paths)),
     );
-/* paths里面就是找到的配置文件路径, 比如/etc/vector/vector.yaml */
+/* paths里面就是找到的配置文件路径, 比如/etc/scx_agent/config.yaml */
     Some(paths)
 }
 
@@ -258,7 +258,7 @@ where
 /* 默认的配置文件路径 */
 #[cfg(not(windows))]
 fn default_path() -> PathBuf {
-    "/etc/vector/vector.yaml".into()
+    "/etc/scx_agent/config.yaml".into()
 }
 /* 获取默认的配置文件路径 */
 fn default_config_paths() -> Vec<ConfigPath> {
