@@ -26,6 +26,5 @@ pub mod config {
     pub use agent_core::serde::{is_default};
     pub use agent_core::schema::Requirement;
     pub use agent_core::buffer::{WhenFull,InMemoryBufferable,Encodable,
-    EventCount,Bufferable,spawn_named};
-    // pub use crate::config::spawn_named;
+    EventCount,Bufferable};
 }
