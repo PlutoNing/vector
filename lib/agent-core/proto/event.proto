@@ -88,7 +88,6 @@ message OutputId {
 
 message Metadata {
   Value value = 1;
-  DatadogOriginMetadata datadog_origin_metadata = 2;
   optional string source_id = 3;
   optional string source_type = 4;
   OutputId upstream_id = 5;

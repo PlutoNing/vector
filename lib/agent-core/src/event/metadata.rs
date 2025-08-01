@@ -70,56 +70,9 @@ pub(super) struct Inner {
     /// we have to use `String`.
     dropped_fields: ObjectMap,
 
-    /// Metadata to track the origin of metrics. This is always `None` for log and trace events.
-    /// Only a small set of Vector sources and transforms explicitly set this field.
-    #[serde(default)]
-    pub(crate) datadog_origin_metadata: Option<DatadogMetricOriginMetadata>,
-
     /// An internal vector id that can be used to identify this event across all components.
     #[derivative(PartialEq = "ignore")]
     pub(crate) source_event_id: Option<Uuid>,
-}
-
-/// Metric Origin metadata for submission to Datadog.
-#[derive(Clone, Default, Debug, Deserialize, PartialEq, Serialize)]
-pub struct DatadogMetricOriginMetadata {
-    /// `OriginProduct`
-    origin_product: Option<u32>,
-    /// `OriginCategory`
-    origin_category: Option<u32>,
-    /// `OriginService`
-    origin_service: Option<u32>,
-}
-
-impl DatadogMetricOriginMetadata {
-    /// Creates a new `DatadogMetricOriginMetadata`.
-    /// When Vector sends out metrics containing the Origin metadata, it should do so with
-    /// all of the fields defined.
-    /// The edge case where the Origin metadata is created within a component and does not
-    /// initially contain all of the metadata fields, is in the `log_to_metric` transform.
-    #[must_use]
-    pub fn new(product: Option<u32>, category: Option<u32>, service: Option<u32>) -> Self {
-        Self {
-            origin_product: product,
-            origin_category: category,
-            origin_service: service,
-        }
-    }
-
-    /// Returns a reference to the `OriginProduct`.
-    pub fn product(&self) -> Option<u32> {
-        self.origin_product
-    }
-
-    /// Returns a reference to the `OriginCategory`.
-    pub fn category(&self) -> Option<u32> {
-        self.origin_category
-    }
-
-    /// Returns a reference to the `OriginService`.
-    pub fn service(&self) -> Option<u32> {
-        self.origin_service
-    }
 }
 
 fn default_metadata_value() -> Value {
@@ -230,11 +183,6 @@ impl EventMetadata {
         self.0.dropped_fields.get(meaning.as_ref())
     }
 
-    /// Returns a reference to the `DatadogMetricOriginMetadata`.
-    pub fn datadog_origin_metadata(&self) -> Option<&DatadogMetricOriginMetadata> {
-        self.0.datadog_origin_metadata.as_ref()
-    }
-
     /// Returns a reference to the event id.
     pub fn source_event_id(&self) -> Option<Uuid> {
         self.0.source_event_id
@@ -252,7 +200,6 @@ impl Default for Inner {
             source_type: None,
             upstream_id: None,
             dropped_fields: ObjectMap::new(),
-            datadog_origin_metadata: None,
             source_event_id: Some(Uuid::now_v7()),
         }
     }
@@ -321,13 +268,6 @@ impl EventMetadata {
     #[must_use]
     pub fn with_source_type<S: Into<Cow<'static, str>>>(mut self, source_type: S) -> Self {
         self.get_mut().source_type = Some(source_type.into());
-        self
-    }
-
-    /// Replaces the existing `DatadogMetricOriginMetadata` with the given one.
-    #[must_use]
-    pub fn with_origin_metadata(mut self, origin_metadata: DatadogMetricOriginMetadata) -> Self {
-        self.get_mut().datadog_origin_metadata = Some(origin_metadata);
         self
     }
 
