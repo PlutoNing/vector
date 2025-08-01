@@ -19,8 +19,6 @@ use super::{
     EventFinalizers, EventMetadata, Finalizable,
 };
 
-#[cfg(any(test, feature = "test"))]
-mod arbitrary;
 
 mod data;
 pub use self::data::*;

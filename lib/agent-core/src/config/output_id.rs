@@ -84,17 +84,3 @@ impl From<(String, Option<String>)> for OutputId {
         }
     }
 }
-
-// This panicking implementation is convenient for testing, but should never be enabled for use
-// outside of tests.
-#[cfg(any(test, feature = "test"))]
-impl From<&str> for OutputId {
-    fn from(s: &str) -> Self {
-        assert!(
-            !s.contains('.'),
-            "Cannot convert dotted paths to strings without more context"
-        );
-        let component = ComponentKey::from(s);
-        component.into()
-    }
-}

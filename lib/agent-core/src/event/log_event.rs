@@ -648,21 +648,6 @@ impl TryInto<serde_json::Value> for LogEvent {
     }
 }
 
-#[cfg(any(test, feature = "test"))]
-impl<T> std::ops::Index<T> for LogEvent
-where
-    T: AsRef<str>,
-{
-    type Output = Value;
-
-    fn index(&self, key: T) -> &Value {
-        self.parse_path_and_get_value(key.as_ref())
-            .ok()
-            .flatten()
-            .unwrap_or_else(|| panic!("Key is not found: {:?}", key.as_ref()))
-    }
-}
-
 impl<K, V> Extend<(K, V)> for LogEvent
 where
     K: AsRef<str>,
