@@ -75,47 +75,23 @@ pub fn get_slugified_app_name() -> String {
 
 
 pub fn vector_version() -> impl std::fmt::Display {
-    let pkg_version = match built_info::DEBUG {
-        // If any debug info is included, consider it a non-release build.
-        "1" | "2" | "true" => {
-            format!(
-                "{}-custom-{}",
-                built_info::PKG_VERSION,
-                built_info::GIT_SHORT_HASH
-            )
-        }
-        _ => built_info::PKG_VERSION.to_string(),
-    };
-
-    pkg_version
+    env!("CARGO_PKG_VERSION")
 }
 
 /// Returns a string containing full version information of the current build.
 pub fn get_version() -> String {
     let pkg_version = vector_version();
-    let build_desc = built_info::VECTOR_BUILD_DESC;
-    let build_string = match build_desc {
-        Some(desc) => format!("{} {}", built_info::TARGET, desc),
-        None => built_info::TARGET.into(),
+    
+    // 检查是否为调试构建
+    let debug_info = if cfg!(debug_assertions) {
+        " debug"
+    } else {
+        ""
     };
-
-    // We do not add 'debug' to the BUILD_DESC unless the caller has flagged on line
-    // or full debug symbols. See the Cargo Book profiling section for value meaning:
-    // https://doc.rust-lang.org/cargo/reference/profiles.html#debug
-    let build_string = match built_info::DEBUG {
-        "1" => format!("{} debug=line", build_string),
-        "2" | "true" => format!("{} debug=full", build_string),
-        _ => build_string,
-    };
-
-    format!("{} ({})", pkg_version, build_string)
+    
+    format!("{} ({})", pkg_version, debug_info)
 }
 
-/// Includes information about the current build.
-#[allow(warnings)]
-pub mod built_info {
-    include!(concat!(env!("OUT_DIR"), "/built.rs"));
-}
 
 pub fn get_hostname() -> std::io::Result<String> {
     Ok(if let Ok(hostname) = std::env::var("VECTOR_HOSTNAME") {
