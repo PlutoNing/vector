@@ -16,10 +16,11 @@ use super::{
 use crate::{
     app::ShutdownError,
     common::{DisabledTrigger, SourceShutdownCoordinator},
-    config::{ComponentKey, Config, ConfigDiff, Inputs, OutputId, Resource},
+    config::{ComponentKey, Config, ConfigDiff, OutputId, Resource},
     event::EventArray,
     spawn_named,
 };
+use crate::common::Inputs;
 use futures::{future, Future, FutureExt};
 
 use crate::buffers::topology::channel::BufferSender;

@@ -59,9 +59,7 @@ pub use agent_lib::{
         init_log_schema, log_schema, proxy::ProxyConfig, ComponentKey,
         LogSchema, OutputId,
     },
-    id::Inputs,
 };
-
 #[derive(Debug, Clone, Ord, PartialOrd, Eq, PartialEq)]
 pub struct ComponentConfig {
     pub config_paths: Vec<PathBuf>,

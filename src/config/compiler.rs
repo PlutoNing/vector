@@ -5,7 +5,7 @@ use super::{
 };
 
 use indexmap::{IndexMap, IndexSet};
-use agent_lib::id::Inputs;
+use crate::common::Inputs;
 /* 什么是compile, builder包含了配置项 */
 pub fn compile(mut builder: ConfigBuilder) -> Result<(Config, Vec<String>), Vec<String>> {
     let mut errors = Vec::new();

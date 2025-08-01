@@ -11,8 +11,8 @@ use agent_lib::configurable::{
 };
 use agent_lib::{
     config::{Input},
-    id::Inputs,
 };
+use crate::common::Inputs;
 use crate::core::global_options::GlobalOptions;
 use crate::core::sink::VectorSink;
 

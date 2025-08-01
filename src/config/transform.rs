@@ -13,10 +13,10 @@ use agent_lib::configurable::{
 };
 use agent_lib::{
     config::{Input, LogNamespace, TransformOutput},
-    id::Inputs,
     schema,
     transform::Transform,
 };
+use crate::common::Inputs;
 use crate::core::global_options::GlobalOptions;
 use super::dot_graph::GraphConfig;
 use super::schema::Options as SchemaOptions;

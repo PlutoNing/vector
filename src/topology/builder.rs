@@ -26,10 +26,11 @@ use super::{
 use crate::buffers::{topology::channel::BufferSender, BufferType};
 use crate::core::fanout::{self, Fanout};
 use crate::internal_event::EventsReceived;
+use crate::common::Inputs;
 use crate::{
     common::SourceShutdownCoordinator,
     config::{
-        ComponentKey, Config, DataType, EnrichmentTableConfig, Inputs, OutputId, ProxyConfig,
+        ComponentKey, Config, DataType, EnrichmentTableConfig, OutputId, ProxyConfig,
         SinkContext, SourceContext,
     },
     event::{EventArray, EventContainer},
