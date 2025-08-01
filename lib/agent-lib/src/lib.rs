@@ -6,7 +6,7 @@ pub use agent_common::{
 pub use agent_config as configurable;
 pub use agent_config::impl_generate_config_from_default;
 pub use agent_core::{
-    buckets, config::metrics_expiration::PerMetricSetExpiration, emit, event, metric_tags,
+    buckets, emit, event, metric_tags,
     quantiles, samples, schema, serde, transform, EstimatedJsonEncodedSizeOf,
 };
 #[cfg(feature = "vrl")]

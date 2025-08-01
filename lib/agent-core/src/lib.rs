@@ -29,7 +29,7 @@ pub mod transform;
 
 use float_eq::FloatEq;
 
-pub use config::metrics_expiration::PerMetricSetExpiration;
+
 pub use event::EstimatedJsonEncodedSizeOf;
 
 pub(crate) use agent_common::{Error, Result};
