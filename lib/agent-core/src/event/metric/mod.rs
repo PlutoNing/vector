@@ -450,7 +450,7 @@ impl EstimatedJsonEncodedSizeOf for Metric {
         self.size_of().into()
     }
 }
-/* 有调用 */
+/* 事件被输出之前, 会被take finalizer */
 impl Finalizable for Metric {
     fn take_finalizers(&mut self) -> EventFinalizers {
         self.metadata.take_finalizers()

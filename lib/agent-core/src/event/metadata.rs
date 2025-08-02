@@ -21,6 +21,7 @@ use crate::{
 const DATADOG_API_KEY: &str = "datadog_api_key";
 const SPLUNK_HEC_TOKEN: &str = "splunk_hec_token";
 
+/* 可以作为metric event的meta */
 /// The event metadata structure is a `Arc` wrapper around the actual metadata to avoid cloning the
 /// underlying data until it becomes necessary to provide a `mut` copy.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]

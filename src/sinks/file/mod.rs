@@ -102,7 +102,7 @@ pub struct FileSinkConfig {
     #[configurable(metadata(docs::examples = 104857600))] // 100MB
     pub max_file_size_bytes: u64,
 }
-
+/* 生成默认配置 */
 impl GenerateConfig for FileSinkConfig {
     fn generate_config() -> toml::Value {
         toml::Value::try_from(Self {
@@ -242,7 +242,6 @@ impl FileSink {
         let template_str = self.path.get_ref();
         info!("原始模板: {}", template_str);
 
-
         // 3. 获取模板中的字段引用
         let fields = self.path.get_fields();
         info!("模板字段: {:?}", fields);
@@ -259,10 +258,7 @@ impl FileSink {
 
                 Some(rendered_path)
             }
-            Err(_error) => {
-
-                None
-            }
+            Err(_error) => None,
         }
     }
 
@@ -272,9 +268,11 @@ impl FileSink {
             .expect("unable to compute next deadline")
     }
 
+    /* 是StreamSink<Event> 的run接口的input */
     async fn run(&mut self, mut input: BoxStream<'_, Event>) -> crate::Result<()> {
         loop {
             tokio::select! {
+                /* 从input获取event */
                 event = input.next() => {
                     match event {
                         Some(event) => self.process_event(event).await,
@@ -299,6 +297,7 @@ impl FileSink {
                         }
                     }
                 }
+                /* 关闭过期文件 */
                 result = self.files.next_expired(), if !self.files.is_empty() => {
                     match result {
                         // We do not poll map when it's empty, so we should
@@ -322,13 +321,15 @@ impl FileSink {
         Ok(())
     }
 
+    /* 处理从input读取的event */
     async fn process_event(&mut self, mut event: Event) {
+        /* 要输出到的文件路径 */
         let path = match self.partition_event(&event) {
             Some(path) => path,
             None => {
                 // We weren't able to find the path to use for the
                 // file.
-                // The error is already handled at `partition_event`, so
+                // The error is already handled at `Partition_event`, so
                 // here we just skip the event.
                 event.metadata().update_status(EventStatus::Errored);
                 return;
@@ -339,9 +340,11 @@ impl FileSink {
         trace!(message = "Computed next deadline.", next_deadline = ?next_deadline, path = ?path);
 
         let file = if let Some(file) = self.files.reset_at(&path, next_deadline) {
+            /* 如果文件已经存在了 */
             trace!(message = "Working with an already opened file.", path = ?path);
             file
         } else {
+            /* 打开新日志文件 */
             trace!(message = "Opening new file.", ?path);
             let file = match open_file(BytesPath::new(path.clone())).await {
                 Ok(file) => file,
@@ -355,8 +358,10 @@ impl FileSink {
                 }
             };
 
+            /* 新建一个输出到file的outfile */
             let outfile = OutFile::new(file, self.compression);
 
+            /* outfile加入filesink的文件哈希表集合 */
             self.files.insert_at(path.clone(), outfile, next_deadline);
             debug!(
                 "File operation completed, total open files: {}",
@@ -366,9 +371,11 @@ impl FileSink {
             self.files.get_mut(&path).unwrap()
         };
 
+        /* 现在把event写入刚刚获取的file */
         trace!(message = "Writing an event to file.", path = ?path);
         let event_size = event.estimated_json_encoded_size_of();
         let finalizers = event.take_finalizers();
+        /* 写出到outfile */
         match write_event_to_file(file, event, &self.transformer, &mut self.encoder).await {
             Ok(byte_size) => {
                 finalizers.update_status(EventStatus::Delivered);
@@ -387,6 +394,8 @@ impl FileSink {
     }
 }
 
+/* 用于打开作为指标输出文件的文件
+或者打开项目的配置文件 */
 async fn open_file(path: impl AsRef<std::path::Path>) -> std::io::Result<File> {
     let parent = path.as_ref().parent();
 
@@ -402,7 +411,8 @@ async fn open_file(path: impl AsRef<std::path::Path>) -> std::io::Result<File> {
         .open(path)
         .await
 }
-
+/* 把事件写入到outfile
+先transform, 然后encoder */
 async fn write_event_to_file(
     file: &mut OutFile,
     mut event: Event,
@@ -410,13 +420,17 @@ async fn write_event_to_file(
     encoder: &mut Encoder<Framer>,
 ) -> Result<usize, std::io::Error> {
     transformer.transform(&mut event);
+    /* 转换 */
     let mut buffer = BytesMut::new();
+    /* 编码 */
     encoder
         .encode(event, &mut buffer)
         .map_err(|error| std::io::Error::new(std::io::ErrorKind::InvalidData, error))?;
+    /* 写入 */
     file.write_all(&buffer).await.map(|()| buffer.len())
 }
 
+/* 实现filesink的streamsink接口. 接受一个input, 处理内容 */
 #[async_trait]
 impl StreamSink<Event> for FileSink {
     async fn run(mut self: Box<Self>, input: BoxStream<'_, Event>) -> Result<(), ()> {

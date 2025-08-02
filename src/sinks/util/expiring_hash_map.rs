@@ -14,7 +14,7 @@ use tokio_util::time::{delay_queue, DelayQueue};
 
 /// An expired item, holding the value and the key with an expiration information.
 pub type ExpiredItem<K, V> = (V, delay_queue::Expired<K>);
-
+/* 是一个带过期时间的哈希映射，结合了 HashMap 和 DelayQueue 来实现键值对的自动过期清理。 */
 /// A [`HashMap`] that maintains deadlines for the keys via a [`DelayQueue`].
 pub struct ExpiringHashMap<K, V> {
     map: HashMap<K, (V, delay_queue::Key)>,
@@ -59,7 +59,8 @@ where
         self.map.get_mut(k).map(|&mut (ref mut v, _)| v)
     }
 
-    /// Reset the deadline for a key, and return a mut ref to the value.
+    /* 实现了"访问即续期"的语义，文件句柄管理、连接池等场景 */
+    /// 重置已存在键的过期时间，并返回该键对应值的可变引用
     pub fn reset_at<Q>(&mut self, k: &Q, when: Instant) -> Option<&mut V>
     where
         K: Borrow<Q>,
