@@ -10,7 +10,6 @@ pub use events_sent::{EventsSent, DEFAULT_OUTPUT};
 
 use metrics::{counter, Counter};
 
-
 crate::registered_event!(
     BytesSent {
         protocol: SharedString,
@@ -31,10 +30,6 @@ impl From<Protocol> for BytesSent {
         }
     }
 }
-
-
-
-
 
 /* 有调用 */
 crate::registered_event!(
@@ -58,7 +53,6 @@ impl From<Protocol> for BytesReceived {
         }
     }
 }
-
 
 /// The user can configure whether a tag should be emitted. If they configure it to
 /// be emitted, but the value doesn't exist - we should emit the tag but with a value

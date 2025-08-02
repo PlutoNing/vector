@@ -14,6 +14,7 @@ pub mod service;
 pub mod sink;
 pub mod statistic;
 pub mod expiring_hash_map;
+pub mod sqlite_service;
 use std::borrow::Cow;
 
 pub use batch::{
