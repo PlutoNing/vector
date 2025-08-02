@@ -93,7 +93,12 @@ pub enum ShutdownError {
     #[snafu(display(r#"The task for sink "{key}" died during execution: {error}"#))]
     SinkAborted { key: ComponentKey, error: String },
 }
-/* 20250717151013 */
+/* - __接收操作系统信号__（SIGINT, SIGTERM等）
+
+- __管理优雅关闭流程__
+
+- __协调组件生命周期__
+ */
 /// Convenience struct for app setup handling.
 pub struct SignalPair {
     pub handler: SignalHandler,
@@ -101,7 +106,6 @@ pub struct SignalPair {
 }
 
 impl SignalPair {
-    /// Create a new signal handler pair, and set them up to receive OS signals.
     pub fn new(runtime: &Runtime) -> Self {
         let (handler, receiver) = SignalHandler::new();
         let signals = os_signals(runtime);
@@ -118,6 +122,7 @@ pub struct SignalHandler {
 }
 
 impl SignalHandler {
+    /* 生成一个receiver(往这里发信号)和handler(接受,进行对应的处理) */
     /// Create a new signal handler with space for 128 control messages at a time, to
     /// ensure the channel doesn't overflow and drop signals.
     fn new() -> (Self, SignalRx) {
