@@ -1,50 +1,48 @@
 use std::convert::TryFrom;
-use std::path::Path;
-use std::sync::Arc;
-use std::time::Duration;
+use std::time::{Duration};
 
-use async_trait::async_trait;
-use bytes::BytesMut;
-use futures::stream::{BoxStream, StreamExt};
-use serde_with::serde_as;
-use sqlx::{sqlite::SqlitePoolOptions, Pool, Sqlite, Row};
-use tokio::sync::Mutex;
-use codecs::{
-    encoding::{Framer, FramingConfig},
-    TextSerializerConfig,
+use crate::codecs::{Framer, FramingConfig, TextSerializerConfig};
+use crate::internal_event::{
+    CountByteSize, EventsSent, InternalEventHandle as _, Output, Registered,
 };
-use agent_lib::configurable::configurable_component;
-use agent_lib::{
-    internal_event::{CountByteSize, EventsSent, InternalEventHandle as _, Output, Registered},
-    EstimatedJsonEncodedSizeOf, TimeZone,
-};
-
 use crate::{
     codecs::{Encoder, EncodingConfigWithFraming, SinkType, Transformer},
     config::{GenerateConfig, Input, SinkConfig, SinkContext},
-    event::{Event, EventStatus, Finalizable, Value},
-    expiring_hash_map::ExpiringHashMap,
+    event::{Event, EventStatus},
+    register,
     sinks::util::{timezone_to_offset, StreamSink},
     template::Template,
+    core::sink::VectorSink,
 };
+pub use agent_lib::config::is_default;
+use agent_lib::configurable::configurable_component;
+use agent_lib::{
 
-mod bytes_path;
-use bytes_path::BytesPath;
+    TimeZone,
+};
+use async_trait::async_trait;
+use bytes::{BytesMut};
+use futures::stream::{BoxStream, StreamExt};
+use serde_with::serde_as;
+use tokio_util::codec::Encoder as _;
+use tracing::{debug, error};
+
+use crate::sinks::util::sqlite_service::SqliteService;
 
 /// Configuration for the `sqlite` sink.
 #[serde_as]
-#[configurable_component(sink("sqlite", "Deliver log data to a SQLite database."))]
+#[configurable_component(sink("sqlite", "Output observability events into SQLite database."))]
 #[derive(Clone, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct SqliteSinkConfig {
-    /// SQLite database file path.
-    #[configurable(metadata(docs::examples = "/tmp/vector.db"))]
-    #[configurable(metadata(docs::examples = "./data/logs.db"))]
+    /// Database file path.
+    #[configurable(metadata(docs::examples = "/tmp/events.db"))]
+    #[configurable(metadata(docs::examples = "./data/events.db"))]
     pub path: Template,
 
     /// Table name to write events to.
-    #[configurable(metadata(docs::examples = "logs"))]
     #[configurable(metadata(docs::examples = "events"))]
+    #[configurable(metadata(docs::examples = "logs"))]
     pub table: Template,
 
     /// The amount of time that a database connection can be idle and stay open.
@@ -66,11 +64,10 @@ pub struct SqliteSinkConfig {
 impl GenerateConfig for SqliteSinkConfig {
     fn generate_config() -> toml::Value {
         toml::Value::try_from(Self {
-            path: Template::try_from("/tmp/vector.db").unwrap(),
-            table: Template::try_from("logs").unwrap(),
+            path: Template::try_from("/tmp/events.db").unwrap(),
+            table: Template::try_from("events").unwrap(),
             idle_timeout: default_idle_timeout(),
             encoding: (None::<FramingConfig>, TextSerializerConfig::default()).into(),
-            acknowledgements: Default::default(),
             timezone: Default::default(),
         })
         .unwrap()
@@ -78,18 +75,15 @@ impl GenerateConfig for SqliteSinkConfig {
 }
 
 const fn default_idle_timeout() -> Duration {
-    Duration::from_secs(300)
+    Duration::from_secs(30)
 }
 
 #[async_trait::async_trait]
 #[typetag::serde(name = "sqlite")]
 impl SinkConfig for SqliteSinkConfig {
-    async fn build(
-        &self,
-        cx: SinkContext,
-    ) -> crate::Result<super::VectorSink> {
+    async fn build(&self, cx: SinkContext) -> crate::Result<VectorSink> {
         let sink = SqliteSink::new(self, cx)?;
-        Ok(super::VectorSink::from_event_streamsink(sink))
+        Ok(VectorSink::from_event_streamsink(sink))
     }
 
     fn input(&self) -> Input {
@@ -97,18 +91,12 @@ impl SinkConfig for SqliteSinkConfig {
     }
 }
 
-struct DatabaseConnection {
-    pool: Pool<Sqlite>,
-    table_name: String,
-}
-
 pub struct SqliteSink {
     path: Template,
     table: Template,
     transformer: Transformer,
     encoder: Encoder<Framer>,
-    idle_timeout: Duration,
-    connections: ExpiringHashMap<Bytes, Arc<Mutex<DatabaseConnection>>>,
+    services: std::collections::HashMap<String, SqliteService>,
     events_sent: Registered<EventsSent>,
 }
 
@@ -128,28 +116,79 @@ impl SqliteSink {
             table: config.table.clone().with_tz_offset(offset),
             transformer,
             encoder,
-            idle_timeout: config.idle_timeout,
-            connections: ExpiringHashMap::default(),
+            services: std::collections::HashMap::new(),
             events_sent: register!(EventsSent::from(Output(None))),
         })
     }
 
-    fn partition_event(&mut self, event: &Event) -> Option<(Bytes, Bytes)> {
-        let path_bytes = match self.path.render(event) {
-            Ok(b) => b,
-            Err(_error) => {
-                return None;
+    fn partition_event(&mut self, event: &Event) -> Option<(String, String)> {
+        let path = match self.path.render(event) {
+            Ok(path) => String::from_utf8_lossy(&path).to_string(),
+            Err(_) => return None,
+        };
+
+        let table = match self.table.render(event) {
+            Ok(table) => String::from_utf8_lossy(&table).to_string(),
+            Err(_) => return None,
+        };
+
+        Some((path, table))
+    }
+
+    async fn get_or_create_service(&mut self, path: &str, table: &str) -> crate::Result<&mut SqliteService> {
+        let key = format!("{}:{}", path, table);
+        
+        if !self.services.contains_key(&key) {
+            let service = SqliteService::new(path, table)
+                .await
+                .map_err(|e| crate::Error::from(format!("Failed to create SQLite service: {}", e)))?;
+            self.services.insert(key.clone(), service);
+        }
+        
+        Ok(self.services.get_mut(&key).unwrap())
+    }
+
+    async fn process_event(&mut self, mut event: Event) {
+        let (path, table) = match self.partition_event(&event) {
+            Some(parts) => parts,
+            None => {
+                event.metadata().update_status(EventStatus::Errored);
+                return;
             }
         };
 
-        let table_bytes = match self.table.render(event) {
-            Ok(b) => b,
-            Err(_error) => {
-                return None;
-            }
-        };
+        self.transformer.transform(&mut event);
+        
+        let mut buffer = BytesMut::new();
+        if let Err(error) = self.encoder.encode(event.clone(), &mut buffer) {
+            error!("Failed to encode event: {}", error);
+            event.metadata().update_status(EventStatus::Errored);
+            return;
+        }
 
-        Some((path_bytes, table_bytes))
+        let data = String::from_utf8_lossy(&buffer).to_string();
+        let event_type = event.as_log().get("event_type").map(|v| v.to_string_lossy().to_string());
+        let source = event.as_log().get("source").map(|v| v.to_string_lossy().to_string());
+
+        match self.get_or_create_service(&path, &table).await {
+            Ok(service) => {
+                match service.write_event(&data, event_type.as_deref(), source.as_deref()).await {
+                    Ok(rows) => {
+                        self.events_sent.emit(CountByteSize(1, buffer.len().into()));
+                        debug!("Wrote {} rows to SQLite table {} in {}", rows, table, path);
+                        event.metadata().update_status(EventStatus::Delivered);
+                    }
+                    Err(error) => {
+                        error!("Failed to write to SQLite: {}", error);
+                        event.metadata().update_status(EventStatus::Errored);
+                    }
+                }
+            }
+            Err(error) => {
+                error!("Failed to get SQLite service: {}", error);
+                event.metadata().update_status(EventStatus::Errored);
+            }
+        }
     }
 
     async fn run(&mut self, mut input: BoxStream<'_, Event>) -> crate::Result<()> {
@@ -159,145 +198,21 @@ impl SqliteSink {
                     match event {
                         Some(event) => self.process_event(event).await,
                         None => {
-                            debug!(message = "Receiver exhausted, terminating the processing loop.");
+                            debug!("Receiver exhausted, terminating the processing loop.");
+                            
+                            // Close all SQLite services
+                            for (_, service) in &mut self.services {
+                                if let Err(error) = service.close().await {
+                                    error!("Failed to close SQLite service: {}", error);
+                                }
+                            }
+                            
                             break;
                         }
                     }
                 }
-                result = self.connections.next_expired(), if !self.connections.is_empty() => {
-                    match result {
-                        None => unreachable!(),
-                        Some((_, _)) => {
-                            // Connection expired and was automatically removed
-                        }
-                    }
-                }
             }
         }
-        Ok(())
-    }
-
-    async fn process_event(&mut self, mut event: Event) {
-        let (path_bytes, table_bytes) = match self.partition_event(&event) {
-            Some(parts) => parts,
-            None => {
-                event.metadata().update_status(EventStatus::Errored);
-                return;
-            }
-        };
-
-        let next_deadline = tokio::time::Instant::now() + self.idle_timeout;
-        
-        let connection_key = {
-            let mut combined = BytesMut::with_capacity(path_bytes.len() + table_bytes.len() + 1);
-            combined.extend_from_slice(&path_bytes);
-            combined.extend_from_slice(b"|");
-            combined.extend_from_slice(&table_bytes);
-            combined.freeze()
-        };
-
-        let conn_arc = if let Some(conn) = self.connections.reset_at(&connection_key, next_deadline) {
-            conn
-        } else {
-            let path_str = String::from_utf8_lossy(&path_bytes);
-            let table_str = String::from_utf8_lossy(&table_bytes);
-            
-            match self.create_connection(&path_str, &table_str).await {
-                Ok(conn) => {
-                    let conn_arc = Arc::new(Mutex::new(conn));
-                    self.connections.insert_at(connection_key.clone(), conn_arc.clone(), next_deadline);
-                    conn_arc
-                }
-                Err(error) => {
-                    error!(message = "Failed to create SQLite connection", %error);
-                    event.metadata().update_status(EventStatus::Errored);
-                    return;
-                }
-            }
-        };
-
-        let event_size = event.estimated_json_encoded_size_of();
-        let finalizers = event.take_finalizers();
-        
-        match self.write_event_to_sqlite(&conn_arc, event).await {
-            Ok(_) => {
-                finalizers.update_status(EventStatus::Delivered);
-                self.events_sent.emit(CountByteSize(1, event_size));
-            }
-            Err(error) => {
-                error!(message = "Failed to write event to SQLite", %error);
-                finalizers.update_status(EventStatus::Errored);
-            }
-        }
-    }
-
-    async fn create_connection(&self, db_path: &str, table_name: &str) -> crate::Result<DatabaseConnection> {
-        let pool = SqlitePoolOptions::new()
-            .max_connections(5)
-            .connect(&format!("sqlite:{}", db_path))
-            .await
-            .map_err(|e| crate::Error::from(e))?;
-
-        // Create table if not exists
-        let create_table_sql = format!(
-            r#"
-            CREATE TABLE IF NOT EXISTS {} (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                message TEXT,
-                level TEXT,
-                fields TEXT
-            )
-            "#,
-            table_name
-        );
-
-        sqlx::query(&create_table_sql)
-            .execute(&pool)
-            .await
-            .map_err(|e| crate::Error::from(e))?;
-
-        Ok(DatabaseConnection {
-            pool,
-            table_name: table_name.to_string(),
-        })
-    }
-
-    async fn write_event_to_sqlite(
-        &self,
-        conn: &Arc<Mutex<DatabaseConnection>>,
-        mut event: Event,
-    ) -> crate::Result<()> {
-        self.transformer.transform(&mut event);
-        
-        let mut buffer = BytesMut::new();
-        self.encoder
-            .encode(event.clone(), &mut buffer)
-            .map_err(|e| crate::Error::from(e))?;
-
-        let message = String::from_utf8_lossy(&buffer).to_string();
-        let level = event
-            .as_log()
-            .get("level")
-            .map(|v| v.to_string_lossy())
-            .unwrap_or_else(|| "info".to_string());
-        
-        let fields = serde_json::to_string(event.as_log().all_fields())
-            .unwrap_or_else(|_| "{}".to_string());
-
-        let conn = conn.lock().await;
-        let insert_sql = format!(
-            "INSERT INTO {} (message, level, fields) VALUES (?, ?, ?)",
-            conn.table_name
-        );
-
-        sqlx::query(&insert_sql)
-            .bind(message)
-            .bind(level)
-            .bind(fields)
-            .execute(&conn.pool)
-            .await
-            .map_err(|e| crate::Error::from(e))?;
 
         Ok(())
     }

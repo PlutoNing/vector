@@ -12,6 +12,7 @@ use crate::{
     register,
     sinks::util::{expiring_hash_map::ExpiringHashMap, timezone_to_offset, StreamSink},
     template::Template,
+    core::sink::VectorSink,
 };
 pub use agent_lib::config::is_default;
 use agent_lib::configurable::configurable_component;
@@ -183,10 +184,10 @@ impl OutFile {
 #[async_trait::async_trait]
 #[typetag::serde(name = "file")]
 impl SinkConfig for FileSinkConfig {
-    async fn build(&self, cx: SinkContext) -> crate::Result<super::VectorSink> {
+    async fn build(&self, cx: SinkContext) -> crate::Result<VectorSink> {
         let sink = FileSink::new(self, cx)?; /* 这里构建filesink的各种成员实例 */
         Ok(
-            super::VectorSink::from_event_streamsink(sink), /* 从FileSink到vectorSink */
+            VectorSink::from_event_streamsink(sink), /* 从FileSink到vectorSink */
         )
     }
 

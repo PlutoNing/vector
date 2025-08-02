@@ -7,7 +7,8 @@ use crate::{
         Encoder, EncodingConfigWithFraming, Framer, FramingConfig, JsonSerializerConfig, SinkType,
     },
     config::{GenerateConfig, Input, SinkConfig, SinkContext},
-    sinks::{console::sink::WriterSink, VectorSink},
+    sinks::{console::sink::WriterSink},
+    core::sink::VectorSink,
 };
 
 /// The [standard stream][standard_streams] to write to.

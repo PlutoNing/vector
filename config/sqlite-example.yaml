@@ -1,30 +1,27 @@
----
-# agent SQLite Sink Example Configuration
-# This configuration demonstrates how to use the SQLite sink
-
-sources:
-  demo_logs:
-    type: demo_logs
-    format: json
-    interval: 1.0
-
-transforms:
-  add_metadata:
-    inputs:
-      - demo_logs
-    type: remap
-    source: |
-      .timestamp = now()
-      .level = "info"
-      .source = "demo"
+# SQLite Sink 配置示例
+# 将事件写入SQLite数据库
 
 sinks:
-  sqlite_logs:
+  sqlite_output:
     type: sqlite
-    inputs:
-      - add_metadata
-    path: "/tmp/agent_logs.db"
-    table: "application_logs"
+    inputs: ["my-source-or-transform"]
+    
+    # 数据库文件路径
+    path: "/tmp/events.db"
+    
+    # 表名
+    table: "events"
+    
+    # 空闲超时时间（秒）
+    idle_timeout_secs: 300
+    
+    # 编码配置
     encoding:
       codec: json
-    idle_timeout_secs: 300
+    
+    # 时区设置
+    timezone: local
+    
+    # 示例：使用模板变量
+    # path: "/tmp/{{ service_name }}-events.db"
+    # table: "{{ log_level }}_events"
