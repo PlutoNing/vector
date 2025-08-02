@@ -8,11 +8,11 @@ use crate::internal_event::{
 use crate::{
     codecs::{Encoder, EncodingConfigWithFraming, SinkType, Transformer},
     config::{GenerateConfig, Input, SinkConfig, SinkContext},
+    core::sink::VectorSink,
     event::{Event, EventStatus, Finalizable},
     register,
     sinks::util::{expiring_hash_map::ExpiringHashMap, timezone_to_offset, StreamSink},
     template::Template,
-    core::sink::VectorSink,
 };
 pub use agent_lib::config::is_default;
 use agent_lib::configurable::configurable_component;
@@ -439,5 +439,146 @@ impl StreamSink<Event> for FileSink {
             .await
             .expect("file sink error");
         Ok(())
+    }
+}
+mod tests {
+    use std::convert::TryInto;
+
+    use crate::{
+        codecs::JsonSerializerConfig,
+        core::sink::VectorSink,
+        event::{LogEvent, TraceEvent},
+    };
+    use chrono::{SubsecRound, Utc};
+    use futures::{stream, SinkExt};
+    use similar_asserts::assert_eq;
+
+    use super::*;
+    use crate::{
+        config::log_schema,
+        test_util::{
+            components::{assert_sink_compliance, FILE_SINK_TAGS},
+            lines_from_file, lines_from_gzip_file, lines_from_zstd_file, random_events_with_stream,
+            random_lines_with_stream, random_metrics_with_stream,
+            random_metrics_with_stream_timestamp, temp_dir, temp_file, trace_init,
+        },
+    };
+
+    #[test]
+    fn generate_config() {
+        crate::test_util::test_generate_config::<FileSinkConfig>();
+    }
+
+    #[tokio::test]
+    async fn metric_single_partition() {
+        let template = temp_file();
+
+        let config = FileSinkConfig {
+            path: template.clone().try_into().unwrap(),
+            idle_timeout: default_idle_timeout(),
+            encoding: (None::<FramingConfig>, TextSerializerConfig::default()).into(),
+            compression: Compression::None,
+            acknowledgements: Default::default(),
+            timezone: Default::default(),
+            internal_metrics: FileInternalMetricsConfig {
+                include_file_tag: true,
+            },
+        };
+
+        let (input, _events) = random_metrics_with_stream(100, None, None);
+
+        run_assert_sink(&config, input.clone().into_iter()).await;
+
+        let output = lines_from_file(template);
+        for (input, output) in input.into_iter().zip(output) {
+            let metric_name = input.as_metric().name();
+            assert!(output.contains(metric_name));
+        }
+    }
+
+    #[tokio::test]
+    async fn metric_many_partitions() {
+        let directory = temp_dir();
+
+        let format = "%Y-%m-%d-%H-%M-%S";
+        let mut template = directory.to_string_lossy().to_string();
+        template.push_str(&format!("/{}.log", format));
+
+        let config = FileSinkConfig {
+            path: template.try_into().unwrap(),
+            idle_timeout: default_idle_timeout(),
+            encoding: (None::<FramingConfig>, TextSerializerConfig::default()).into(),
+            compression: Compression::None,
+            acknowledgements: Default::default(),
+            timezone: Default::default(),
+            internal_metrics: FileInternalMetricsConfig {
+                include_file_tag: true,
+            },
+        };
+
+        let metric_count = 3;
+        let timestamp = Utc::now().trunc_subsecs(3);
+        let timestamp_offset = Duration::from_secs(1);
+
+        let (input, _events) = random_metrics_with_stream_timestamp(
+            metric_count,
+            None,
+            None,
+            timestamp,
+            timestamp_offset,
+        );
+
+        run_assert_sink(&config, input.clone().into_iter()).await;
+
+        let output = (0..metric_count).map(|index| {
+            let expected_timestamp = timestamp + (timestamp_offset * index as u32);
+            let expected_filename =
+                directory.join(format!("{}.log", expected_timestamp.format(format)));
+
+            lines_from_file(expected_filename)
+        });
+        for (input, output) in input.iter().zip(output) {
+            // The format will partition by second and metrics are a second apart.
+            assert_eq!(
+                output.len(),
+                1,
+                "Expected the output file to contain one metric"
+            );
+            let output = &output[0];
+
+            let metric_name = input.as_metric().name();
+            assert!(output.contains(metric_name));
+        }
+    }
+
+    async fn run_assert_log_sink(config: &FileSinkConfig, events: Vec<String>) {
+        run_assert_sink(
+            config,
+            events.into_iter().map(LogEvent::from).map(Event::Log),
+        )
+        .await;
+    }
+
+    async fn run_assert_trace_sink(config: &FileSinkConfig, events: Vec<String>) {
+        run_assert_sink(
+            config,
+            events
+                .into_iter()
+                .map(LogEvent::from)
+                .map(TraceEvent::from)
+                .map(Event::Trace),
+        )
+        .await;
+    }
+
+    async fn run_assert_sink(config: &FileSinkConfig, events: impl Iterator<Item = Event> + Send) {
+        assert_sink_compliance(&FILE_SINK_TAGS, async move {
+            let sink = FileSink::new(config, SinkContext::default()).unwrap();
+            VectorSink::from_event_streamsink(sink)
+                .run(Box::pin(stream::iter(events.map(Into::into))))
+                .await
+                .expect("Running sink failed")
+        })
+        .await;
     }
 }

@@ -138,6 +138,7 @@ byteorder = "1.5.0"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 rusqlite = "0.32.1"
 tempfile.workspace = true
+similar-asserts = "1.7.0"
 
 [target.'cfg(unix)'.dependencies]
 nix = { version = "0.26.2", default-features = false, features = ["socket", "signal"] }

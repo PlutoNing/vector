@@ -4761,6 +4761,7 @@ dependencies = [
  "serde_json",
  "serde_with",
  "serde_yaml",
+ "similar-asserts",
  "smallvec",
  "snafu 0.8.6",
  "snap",
