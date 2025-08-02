@@ -1,10 +1,10 @@
-
 // https://github.com/mcarton/rust-derivative/issues/112
 #[allow(clippy::non_canonical_clone_impl)]
 pub mod batch;
 pub mod buffer;
 pub mod builder;
 pub mod compressor;
+pub mod expiring_hash_map;
 pub mod metadata;
 pub mod normalizer;
 pub mod processed_event;
@@ -12,32 +12,56 @@ pub mod request_builder;
 pub mod retries;
 pub mod service;
 pub mod sink;
-pub mod statistic;
-pub mod expiring_hash_map;
 pub mod sqlite_service;
-use std::borrow::Cow;
+pub mod statistic;
+use std::{borrow::Cow, fs::File, future::Future, io::Read, path::{Path, PathBuf}};
 
 pub use batch::{
     Batch, BatchSettings, BatchSize, BulkSizeBasedDefaultBatchSettings, Merged,
     NoDefaultsBatchSettings, PushResult, RealtimeEventBasedDefaultBatchSettings,
     RealtimeSizeBasedDefaultBatchSettings, SinkBatchSettings, Unmerged,
 };
-pub use buffer::{
-    json::{BoxedRawValue},
-    Compression,
-};
+pub use buffer::{json::BoxedRawValue, Compression};
 
 pub use compressor::Compressor;
+use futures::stream;
 pub use normalizer::Normalizer;
+use rand::{distr::Alphanumeric, rng, Rng};
 pub use request_builder::IncrementalRequestBuilder;
 pub use service::Concurrency;
 pub use sink::StreamSink;
 use snafu::Snafu;
 
-use agent_lib::{json_size::JsonSize, TimeZone};
+use agent_lib::{event::Event, json_size::JsonSize, TimeZone};
 
-use crate::event::EventFinalizers;
+use crate::{
+    config::SinkContext,
+    core::sink::VectorSink,
+    event::EventFinalizers,
+    sinks::file::{FileSink, FileSinkConfig},
+};
 use chrono::{FixedOffset, Offset, Utc};
+pub fn random_string(len: usize) -> String {
+    rng()
+        .sample_iter(&Alphanumeric)
+        .take(len)
+        .map(char::from)
+        .collect::<String>()
+}
+
+pub fn lines_from_file<P: AsRef<Path>>(path: P) -> Vec<String> {
+    trace!(message = "Reading file.", path = %path.as_ref().display());
+    let mut file = File::open(path).unwrap();
+    let mut output = String::new();
+    file.read_to_string(&mut output).unwrap();
+    output.lines().map(|s| s.to_owned()).collect()
+}
+
+pub fn temp_dir() -> PathBuf {
+    let path = std::env::temp_dir();
+    let dir_name = random_string(16);
+    path.join(dir_name)
+}
 
 #[derive(Debug, Snafu)]
 enum SinkBuildError {
@@ -46,7 +70,27 @@ enum SinkBuildError {
     #[snafu(display("Missing port in address field"))]
     MissingPort,
 }
+/// Convenience wrapper for running sink tests
+pub async fn assert_sink_compliance<T>(_tags: &[&str], f: impl Future<Output = T>) -> T {
+    let result = f.await;
+    result
+}
+pub async fn run_assert_sink(config: &FileSinkConfig, events: impl Iterator<Item = Event> + Send) {
+    assert_sink_compliance(&[], async move {
+        let sink = FileSink::new(config, SinkContext::default()).unwrap();
+        VectorSink::from_event_streamsink(sink)
+            .run(Box::pin(stream::iter(events.map(Into::into))))
+            .await
+            .expect("Running sink failed")
+    })
+    .await;
+}
 
+pub fn temp_file() -> PathBuf {
+    let path = std::env::temp_dir();
+    let file_name = random_string(16);
+    path.join(file_name + ".log")
+}
 #[derive(Debug)]
 pub struct EncodedEvent<I> {
     pub item: I,

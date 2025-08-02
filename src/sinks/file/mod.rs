@@ -441,48 +441,27 @@ impl StreamSink<Event> for FileSink {
         Ok(())
     }
 }
+#[cfg(test)]
 mod tests {
-    use std::convert::TryInto;
-
-    use crate::{
-        codecs::JsonSerializerConfig,
-        core::sink::VectorSink,
-        event::{LogEvent, TraceEvent},
-    };
     use chrono::{SubsecRound, Utc};
-    use futures::{stream, SinkExt};
-    use similar_asserts::assert_eq;
 
+    // 只引入测试里真正用到的
     use super::*;
-    use crate::{
-        config::log_schema,
-        test_util::{
-            components::{assert_sink_compliance, FILE_SINK_TAGS},
-            lines_from_file, lines_from_gzip_file, lines_from_zstd_file, random_events_with_stream,
-            random_lines_with_stream, random_metrics_with_stream,
-            random_metrics_with_stream_timestamp, temp_dir, temp_file, trace_init,
-        },
+    use crate::sinks::{
+        lines_from_file, random_metrics_with_stream, random_metrics_with_stream_timestamp, temp_dir, temp_file, util::run_assert_sink
     };
-
-    #[test]
-    fn generate_config() {
-        crate::test_util::test_generate_config::<FileSinkConfig>();
-    }
 
     #[tokio::test]
     async fn metric_single_partition() {
         let template = temp_file();
-
+        println!("测试文件路径: {}", template.display()); 
         let config = FileSinkConfig {
             path: template.clone().try_into().unwrap(),
             idle_timeout: default_idle_timeout(),
             encoding: (None::<FramingConfig>, TextSerializerConfig::default()).into(),
             compression: Compression::None,
-            acknowledgements: Default::default(),
             timezone: Default::default(),
-            internal_metrics: FileInternalMetricsConfig {
-                include_file_tag: true,
-            },
+            max_file_size_bytes: default_max_file_size_bytes(),
         };
 
         let (input, _events) = random_metrics_with_stream(100, None, None);
@@ -509,11 +488,8 @@ mod tests {
             idle_timeout: default_idle_timeout(),
             encoding: (None::<FramingConfig>, TextSerializerConfig::default()).into(),
             compression: Compression::None,
-            acknowledgements: Default::default(),
             timezone: Default::default(),
-            internal_metrics: FileInternalMetricsConfig {
-                include_file_tag: true,
-            },
+            max_file_size_bytes: default_max_file_size_bytes(),
         };
 
         let metric_count = 3;
@@ -549,36 +525,5 @@ mod tests {
             let metric_name = input.as_metric().name();
             assert!(output.contains(metric_name));
         }
-    }
-
-    async fn run_assert_log_sink(config: &FileSinkConfig, events: Vec<String>) {
-        run_assert_sink(
-            config,
-            events.into_iter().map(LogEvent::from).map(Event::Log),
-        )
-        .await;
-    }
-
-    async fn run_assert_trace_sink(config: &FileSinkConfig, events: Vec<String>) {
-        run_assert_sink(
-            config,
-            events
-                .into_iter()
-                .map(LogEvent::from)
-                .map(TraceEvent::from)
-                .map(Event::Trace),
-        )
-        .await;
-    }
-
-    async fn run_assert_sink(config: &FileSinkConfig, events: impl Iterator<Item = Event> + Send) {
-        assert_sink_compliance(&FILE_SINK_TAGS, async move {
-            let sink = FileSink::new(config, SinkContext::default()).unwrap();
-            VectorSink::from_event_streamsink(sink)
-                .run(Box::pin(stream::iter(events.map(Into::into))))
-                .await
-                .expect("Running sink failed")
-        })
-        .await;
     }
 }

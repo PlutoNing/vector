@@ -4,12 +4,13 @@ pub mod sqlite;
 pub mod util;
 
 use agent_lib::event::{BatchNotifier, Event, EventArray, Metric, MetricKind, MetricTags, MetricValue};
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, SubsecRound, Utc};
 pub use console::*;
-use futures::Stream;
+use futures::{stream, Stream};
 use rand::{rng, Rng};
 pub use sqlite::*;
 pub use util::*;
+use futures::stream::{StreamExt};   // ← 新增 StreamExt
 
 
 pub fn random_metrics_with_stream_timestamp(
