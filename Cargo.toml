@@ -132,6 +132,7 @@ warp = { version = "0.3.7", default-features = false }
 heim = { git = "https://github.com/vectordotdev/heim.git", branch = "update-nix", default-features = false, features = ["disk"] }
 sysinfo = "0.34.2"
 byteorder = "1.5.0"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 
 [target.'cfg(unix)'.dependencies]
 nix = { version = "0.26.2", default-features = false, features = ["socket", "signal"] }

@@ -3,7 +3,7 @@ use std::{fmt, iter::IntoIterator, pin::Pin};
 use futures::{stream, task::Context, task::Poll, Sink, SinkExt, Stream, StreamExt};
 
 use crate::event::{into_event_stream, Event, EventArray, EventContainer};
-/* 一个输出的sink? */
+/* 一个输出的sink, 由sinkconfig的build返回 */
 /// doc
 pub enum VectorSink {
     Sink(Box<dyn Sink<EventArray, Error = ()> + Send + Unpin>),

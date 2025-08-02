@@ -1,12 +1,29 @@
 use std::convert::TryFrom;
 use std::time::{Duration, Instant};
 
-use async_compression::tokio::write::{GzipEncoder};
+use crate::codecs::{Framer, FramingConfig, TextSerializerConfig};
+use crate::internal_event::{
+    CountByteSize, EventsSent, InternalEventHandle as _, Output, Registered,
+};
+use crate::{
+    codecs::{Encoder, EncodingConfigWithFraming, SinkType, Transformer},
+    config::{GenerateConfig, Input, SinkConfig, SinkContext},
+    event::{Event, EventStatus, Finalizable},
+    register,
+    sinks::util::{expiring_hash_map::ExpiringHashMap, timezone_to_offset, StreamSink},
+    template::Template,
+};
+pub use agent_lib::config::is_default;
+use agent_lib::configurable::configurable_component;
+use agent_lib::{
+    // internal_event::{CountByteSize, EventsSent, InternalEventHandle as _, Output, Registered},
+    EstimatedJsonEncodedSizeOf,
+    TimeZone,
+};
+use async_compression::tokio::write::GzipEncoder;
 use async_trait::async_trait;
 use bytes::{Bytes, BytesMut};
-use futures::{
-    stream::{BoxStream, StreamExt},
-};
+use futures::stream::{BoxStream, StreamExt};
 use serde_with::serde_as;
 use tokio::{
     fs::{self, File},
@@ -14,27 +31,6 @@ use tokio::{
 };
 use tokio_util::codec::Encoder as _;
 use tracing::{debug, error, trace};
-use crate::codecs::{
-    Framer, FramingConfig,
-    TextSerializerConfig,
-};
-use agent_lib::configurable::configurable_component;
-use agent_lib::{
-    // internal_event::{CountByteSize, EventsSent, InternalEventHandle as _, Output, Registered},
-    EstimatedJsonEncodedSizeOf, TimeZone,
-};
-use crate::internal_event::{CountByteSize, EventsSent, InternalEventHandle as _, Output, Registered};
-pub use agent_lib::config::is_default;
-use crate::{
-    register,
-    codecs::{Encoder, EncodingConfigWithFraming, SinkType, Transformer},
-    config::{GenerateConfig, Input, SinkConfig, SinkContext},
-    event::{Event, EventStatus, Finalizable},
-    
-    sinks::util::{expiring_hash_map::ExpiringHashMap,timezone_to_offset, StreamSink},
-    template::Template,
-};
-
 
 use std::path::Path;
 
@@ -59,8 +55,9 @@ impl AsRef<Path> for BytesPath {
         Path::new(os_str)
     }
 }
-
-
+const fn default_max_file_size_bytes() -> u64 {
+    104_857_600 // 100MB
+}
 /* 输出到文件的时候, 走到这里构建file sink config */
 /// Configuration for the `file` sink.
 #[serde_as]
@@ -91,13 +88,19 @@ pub struct FileSinkConfig {
     #[serde(flatten)]
     pub encoding: EncodingConfigWithFraming,
 
+    /* yaml定义的压缩方式 */
     #[configurable(derived)]
     #[serde(default, skip_serializing_if = "is_default")]
     pub compression: Compression,
 
     #[configurable(derived)]
     #[serde(default)]
-    pub timezone: Option<TimeZone>
+    pub timezone: Option<TimeZone>,
+
+    /// Maximum file size in bytes before rotation.
+    #[serde(default = "default_max_file_size_bytes")]
+    #[configurable(metadata(docs::examples = 104857600))] // 100MB
+    pub max_file_size_bytes: u64,
 }
 
 impl GenerateConfig for FileSinkConfig {
@@ -108,6 +111,7 @@ impl GenerateConfig for FileSinkConfig {
             encoding: (None::<FramingConfig>, TextSerializerConfig::default()).into(),
             compression: Default::default(),
             timezone: Default::default(),
+            max_file_size_bytes: default_max_file_size_bytes(),
         })
         .unwrap()
     }
@@ -117,22 +121,22 @@ const fn default_idle_timeout() -> Duration {
     Duration::from_secs(30)
 }
 
-/// Compression configuration.
-// TODO: Why doesn't this already use `crate::sinks::util::Compression`
+/// 压缩方式
 #[configurable_component]
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum Compression {
     /// [Gzip][gzip] compression.
-    ///
-    /// [gzip]: https://www.gzip.org/
     Gzip,
 
     /// No compression.
     #[default]
     None,
 }
-
+/*
+一个输出到文件的wrapper
+内部是个文件
+或者是个gzip encoder */
 enum OutFile {
     Regular(File),
     Gzip(GzipEncoder<File>),
@@ -160,6 +164,7 @@ impl OutFile {
         }
     }
 
+    /* 把src写入到outfile */
     async fn write_all(&mut self, src: &[u8]) -> Result<(), std::io::Error> {
         match self {
             OutFile::Regular(file) => file.write_all(src).await,
@@ -178,14 +183,10 @@ impl OutFile {
 #[async_trait::async_trait]
 #[typetag::serde(name = "file")]
 impl SinkConfig for FileSinkConfig {
-    async fn build(
-        &self,
-        cx: SinkContext,
-    ) -> crate::Result<super::VectorSink> {
-        let sink = FileSink::new(self, cx)?;/* 这里构建filesink的各种成员实例 */
+    async fn build(&self, cx: SinkContext) -> crate::Result<super::VectorSink> {
+        let sink = FileSink::new(self, cx)?; /* 这里构建filesink的各种成员实例 */
         Ok(
-            super::VectorSink::from_event_streamsink(sink) /* 从FileSink到vectorSink */
-      
+            super::VectorSink::from_event_streamsink(sink), /* 从FileSink到vectorSink */
         )
     }
 
@@ -193,21 +194,29 @@ impl SinkConfig for FileSinkConfig {
         Input::new(self.encoding.config().1.input_type())
     }
 }
-
+/* 一个filesink的实现 */
 pub struct FileSink {
+    /// 文件路径模板,定义了输出文件的模式,如%Y-%m-%d和{{field}}
     path: Template,
+    /// 事件转换器，用于在写入前修改事件数据
     transformer: Transformer,
+    /// 编码器，将事件序列化为字节流（支持JSON、文本等格式）
     encoder: Encoder<Framer>,
+    /// 文件空闲超时时间，超过此时间未收到事件则关闭文件?
     idle_timeout: Duration,
+    /// 文件句柄缓存，按路径缓存打开的文件，自动过期清理
     files: ExpiringHashMap<Bytes, OutFile>,
+    /// 压缩方式（None/Gzip），决定文件写入方式
     compression: Compression,
+    /// 内部指标：记录发送的事件数量和字节数
     events_sent: Registered<EventsSent>,
 }
 
-impl FileSink {/* 新建一个file sink */
+impl FileSink {
+    /* 根据config新建一个file sink, 定义内部的encoder, transformer之类的成员 */
     pub fn new(config: &FileSinkConfig, cx: SinkContext) -> crate::Result<Self> {
         let transformer = config.encoding.transformer();
-        let (framer, serializer) = config.encoding.build(SinkType::StreamBased)?;/* 构建这个config.encoding的framer和encoder */
+        let (framer, serializer) = config.encoding.build(SinkType::StreamBased)?;
         let encoder = Encoder::<Framer>::new(framer, serializer);
 
         let offset = config
@@ -229,10 +238,29 @@ impl FileSink {/* 新建一个file sink */
     /// Uses pass the `event` to `self.path` template to obtain the file path
     /// to store the event as.
     fn partition_event(&mut self, event: &Event) -> Option<bytes::Bytes> {
-        match self.path.render(event) {
-            Ok(b) => Some(b),
-            Err(error) => {
-                error!("Failed to render path template: {}", error);
+        // 1. 原始模板字符串
+        let template_str = self.path.get_ref();
+        info!("原始模板: {}", template_str);
+
+
+        // 3. 获取模板中的字段引用
+        let fields = self.path.get_fields();
+        info!("模板字段: {:?}", fields);
+
+        // 4. 渲染模板
+        let render_result = self.path.render(event);
+
+        match render_result {
+            Ok(rendered_path) => {
+                // 5. 成功渲染的路径
+                let path_str = String::from_utf8_lossy(&rendered_path);
+                info!("渲染成功: {}", path_str);
+                info!("渲染结果长度: {} bytes", rendered_path.len());
+
+                Some(rendered_path)
+            }
+            Err(_error) => {
+
                 None
             }
         }
@@ -330,7 +358,10 @@ impl FileSink {/* 新建一个file sink */
             let outfile = OutFile::new(file, self.compression);
 
             self.files.insert_at(path.clone(), outfile, next_deadline);
-            debug!("File operation completed, total open files: {}", self.files.len());
+            debug!(
+                "File operation completed, total open files: {}",
+                self.files.len()
+            );
 
             self.files.get_mut(&path).unwrap()
         };
@@ -342,7 +373,11 @@ impl FileSink {/* 新建一个file sink */
             Ok(byte_size) => {
                 finalizers.update_status(EventStatus::Delivered);
                 self.events_sent.emit(CountByteSize(1, event_size));
-                debug!("Sent {} bytes to file: {}", byte_size, String::from_utf8_lossy(&path));
+                debug!(
+                    "Sent {} bytes to file: {}",
+                    byte_size,
+                    String::from_utf8_lossy(&path)
+                );
             }
             Err(error) => {
                 finalizers.update_status(EventStatus::Errored);

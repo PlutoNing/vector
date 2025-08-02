@@ -116,7 +116,7 @@ where
     }
 }
 
-
+/* 一个sink的实现(到文件,到console,到db,或者到远程)需要实现这个接口 */
 /// Generalized interface for describing and building sink components.
 #[async_trait]
 #[typetag::serde(tag = "type")]

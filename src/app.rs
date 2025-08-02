@@ -774,7 +774,14 @@ pub async fn load_configs(
 
 pub fn init_logging(_color: bool, log_level: &str, _rate: u64) {
     let level = get_log_levels(log_level);
-    debug!(message = "Internal log rate limit configured.",);
+    use tracing_subscriber::{fmt, EnvFilter};
+    
+
+    let filter = EnvFilter::new(log_level);
+    
+    fmt().with_env_filter(filter).init();
+    
+    info!("日志系统已初始化");
     info!(message = "Log level is enabled.", level = ?level);
 }
 
