@@ -1,10 +1,10 @@
-use std::{num::ParseIntError, str::FromStr};
-
 use agent_lib::{event::MetricTags, metric_tags};
 use futures::StreamExt;
-#[cfg(target_os = "linux")]
 use heim::cpu::os::linux::CpuTimeExt;
 use heim::units::time::second;
+use std::io;
+use std::num::ParseIntError;
+use tokio::fs;
 
 use super::{filter_result, HostMetrics};
 
@@ -19,10 +19,9 @@ pub struct ProcStat {
     pub cpu_times: Vec<CpuTime>,
     /// 系统级统计
     pub system_stats: SystemStats,
-    /// 软中断分类统计
-    pub softirq_breakdown: SoftirqBreakdown,
     /// 中断统计（总中断数）
     pub interrupts_total: u64,
+    pub softirq_per_cpu: Vec<CpuSoftirqBreakdown>, // 每个CPU的软中断
 }
 #[allow(dead_code)]
 #[derive(Debug, Default, Clone)]
@@ -52,91 +51,90 @@ pub struct SystemStats {
     pub procs_blocked: u64,    // 当前阻塞进程数
 }
 
-/// 软中断分类统计
+/// 每个CPU的软中断分类统计
 #[allow(dead_code)]
 #[derive(Debug, Default, Clone)]
-pub struct SoftirqBreakdown {
-    pub hi: u64,       // 高优先级软中断
-    pub timer: u64,    // 定时器软中断
-    pub net_tx: u64,   // 网络发送软中断
-    pub net_rx: u64,   // 网络接收软中断
-    pub block: u64,    // 块设备软中断
-    pub irq_poll: u64, // IRQ轮询软中断
-    pub tasklet: u64,  // 任务队列软中断
-    pub sched: u64,    // 调度软中断
-    pub hrtimer: u64,  // 高精度定时器软中断
-    pub rcu: u64,      // RCU软中断
+pub struct CpuSoftirqBreakdown {
+    pub hi: u64,
+    pub timer: u64,
+    pub net_tx: u64,
+    pub net_rx: u64,
+    pub block: u64,
+    pub irq_poll: u64,
+    pub tasklet: u64,
+    pub sched: u64,
+    pub hrtimer: u64,
+    pub rcu: u64,
+}
+/// 统一的错误类型
+#[derive(Debug)]
+pub enum ProcStatError {
+    Io(io::Error),
+    Parse(ParseIntError),
 }
 
-impl FromStr for ProcStat {
-    type Err = ParseIntError;
+impl std::fmt::Display for ProcStatError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ProcStatError::Io(e) => write!(f, "IO错误: {}", e),
+            ProcStatError::Parse(e) => write!(f, "解析错误: {}", e),
+        }
+    }
+}
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+impl std::error::Error for ProcStatError {}
+impl From<ParseIntError> for ProcStatError {
+    fn from(err: ParseIntError) -> Self {
+        ProcStatError::Parse(err)
+    }
+}
+
+impl ProcStat {
+    /// 从文件内容创建 ProcStat 实例
+    pub fn parse_from_files(stat_content: &str, softirq_content: &str) -> Result<Self, ProcStatError> {
         let mut proc_stat = ProcStat::default();
-        let mut lines = s.lines();
-
+        
         // 解析CPU时间
-        for line in &mut lines {
+        for line in stat_content.lines() {
             if line.starts_with("cpu") {
-                let cpu_time = CpuTime::from_str(line)?;
+                let cpu_time = parse_cpu_time_line(line)?;
                 proc_stat.cpu_times.push(cpu_time);
-            } else {
-                break; // CPU部分结束
             }
         }
 
-        // 解析剩余行
-        for line in lines {
+        // 解析系统级统计
+        for line in stat_content.lines() {
             let mut parts = line.split_whitespace();
             if let Some(key) = parts.next() {
                 match key {
                     "ctxt" => {
                         if let Some(value) = parts.next() {
-                            proc_stat.system_stats.context_switches = value.parse()?;
+                            proc_stat.system_stats.context_switches = value.parse().map_err(ProcStatError::Parse)?;
                         }
                     }
                     "btime" => {
                         if let Some(value) = parts.next() {
-                            proc_stat.system_stats.boot_time = value.parse()?;
+                            proc_stat.system_stats.boot_time = value.parse().map_err(ProcStatError::Parse)?;
                         }
                     }
                     "processes" => {
                         if let Some(value) = parts.next() {
-                            proc_stat.system_stats.processes_total = value.parse()?;
+                            proc_stat.system_stats.processes_total = value.parse().map_err(ProcStatError::Parse)?;
                         }
                     }
                     "procs_running" => {
                         if let Some(value) = parts.next() {
-                            proc_stat.system_stats.procs_running = value.parse()?;
+                            proc_stat.system_stats.procs_running = value.parse().map_err(ProcStatError::Parse)?;
                         }
                     }
                     "procs_blocked" => {
                         if let Some(value) = parts.next() {
-                            proc_stat.system_stats.procs_blocked = value.parse()?;
+                            proc_stat.system_stats.procs_blocked = value.parse().map_err(ProcStatError::Parse)?;
                         }
                     }
                     "intr" => {
                         if let Some(value) = parts.next() {
-                            proc_stat.interrupts_total = value.parse()?;
-                        }
-                    }
-                    "softirq" => {
-                        let values: Vec<u64> =
-                            parts.take(10).filter_map(|v| v.parse().ok()).collect();
-
-                        if values.len() >= 10 {
-                            proc_stat.softirq_breakdown = SoftirqBreakdown {
-                                hi: values[0],
-                                timer: values[1],
-                                net_tx: values[2],
-                                net_rx: values[3],
-                                block: values[4],
-                                irq_poll: values[5],
-                                tasklet: values[6],
-                                sched: values[7],
-                                hrtimer: values[8],
-                                rcu: values[9],
-                            };
+                            proc_stat.interrupts_total = value.parse().map_err(ProcStatError::Parse)?;
                         }
                     }
                     _ => {}
@@ -144,61 +142,218 @@ impl FromStr for ProcStat {
             }
         }
 
+        // 从 /proc/softirqs 解析 per-CPU 软中断
+        proc_stat.softirq_per_cpu = parse_softirq_content(softirq_content)?;
+
         Ok(proc_stat)
     }
-}
 
-impl FromStr for CpuTime {
-    type Err = ParseIntError;
+    /// 从 `/proc/stat` 和 `/proc/softirqs` 文件创建新的 ProcStat 实例
+    pub async fn new() -> Result<Self, ProcStatError> {
+        let stat_content = fs::read_to_string("/proc/stat")
+            .await
+            .map_err(ProcStatError::Io)?;
+        let softirq_content = fs::read_to_string("/proc/softirqs")
+            .await
+            .map_err(ProcStatError::Io)?;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut parts = s.split_whitespace();
-        let cpu_id = parts.next().unwrap_or("cpu").to_string();
+        ProcStat::parse_from_files(&stat_content, &softirq_content)
+    }
 
-        let values: Vec<u64> = parts.take(10).filter_map(|v| v.parse().ok()).collect();
+    /// 从指定路径创建（用于测试）
+    #[allow(dead_code)]
+    pub async fn from_path<P: AsRef<std::path::Path>>(
+        stat_path: P,
+        softirq_path: P,
+    ) -> Result<Self, ProcStatError> {
+        let stat_content = fs::read_to_string(stat_path).await.map_err(ProcStatError::Io)?;
+        let softirq_content = fs::read_to_string(softirq_path).await.map_err(ProcStatError::Io)?;
 
-        // 填充默认值，防止数据不足
-        let mut cpu_time = CpuTime {
-            cpu_id,
-            ..Default::default()
-        };
-
-        if values.len() >= 1 {
-            cpu_time.user = values[0];
-        }
-        if values.len() >= 2 {
-            cpu_time.nice = values[1];
-        }
-        if values.len() >= 3 {
-            cpu_time.system = values[2];
-        }
-        if values.len() >= 4 {
-            cpu_time.idle = values[3];
-        }
-        if values.len() >= 5 {
-            cpu_time.iowait = values[4];
-        }
-        if values.len() >= 6 {
-            cpu_time.irq = values[5];
-        }
-        if values.len() >= 7 {
-            cpu_time.softirq = values[6];
-        }
-        if values.len() >= 8 {
-            cpu_time.steal = values[7];
-        }
-        if values.len() >= 9 {
-            cpu_time.guest = values[8];
-        }
-        if values.len() >= 10 {
-            cpu_time.guest_nice = values[9];
-        }
-
-        Ok(cpu_time)
+        ProcStat::parse_from_files(&stat_content, &softirq_content)
     }
 }
 
+fn parse_cpu_time_line(line: &str) -> Result<CpuTime, ProcStatError> {
+    let mut parts = line.split_whitespace();
+    let cpu_id = parts.next().unwrap_or("cpu").to_string();
+
+    let values: Vec<u64> = parts.take(10).filter_map(|v| v.parse().ok()).collect();
+
+    let mut cpu_time = CpuTime {
+        cpu_id,
+        ..Default::default()
+    };
+
+    if values.len() >= 1 { cpu_time.user = values[0]; }
+    if values.len() >= 2 { cpu_time.nice = values[1]; }
+    if values.len() >= 3 { cpu_time.system = values[2]; }
+    if values.len() >= 4 { cpu_time.idle = values[3]; }
+    if values.len() >= 5 { cpu_time.iowait = values[4]; }
+    if values.len() >= 6 { cpu_time.irq = values[5]; }
+    if values.len() >= 7 { cpu_time.softirq = values[6]; }
+    if values.len() >= 8 { cpu_time.steal = values[7]; }
+    if values.len() >= 9 { cpu_time.guest = values[8]; }
+    if values.len() >= 10 { cpu_time.guest_nice = values[9]; }
+
+    Ok(cpu_time)
+}
+
+fn parse_softirq_content(content: &str) -> Result<Vec<CpuSoftirqBreakdown>, ProcStatError> {
+    let lines: Vec<&str> = content.lines().collect();
+    if lines.is_empty() {
+        return Ok(Vec::new());
+    }
+
+    // 第一行是表头，格式: "                CPU0       CPU1       CPU2 ..."
+    let header_line = lines[0];
+    let cpu_count = header_line.split_whitespace().count();
+    
+    if cpu_count == 0 {
+        return Ok(Vec::new());
+    }
+
+    let mut softirq_data = vec![CpuSoftirqBreakdown::default(); cpu_count];
+
+    // 解析每种软中断类型
+    for line in &lines[1..] {
+        let parts: Vec<&str> = line.split_whitespace().collect();
+        if parts.len() < cpu_count + 1 {
+            continue;
+        }
+
+        let irq_type = parts[0];
+        let values: Vec<u64> = parts[1..=cpu_count]
+            .iter()
+            .filter_map(|v| v.parse().ok())
+            .collect();
+
+        if values.len() != cpu_count {
+            continue;
+        }
+
+        // 根据软中断类型填充对应字段
+        for (cpu_idx, &value) in values.iter().enumerate() {
+            match irq_type.trim_end_matches(':') {
+                "HI" => softirq_data[cpu_idx].hi = value,
+                "TIMER" => softirq_data[cpu_idx].timer = value,
+                "NET_TX" => softirq_data[cpu_idx].net_tx = value,
+                "NET_RX" => softirq_data[cpu_idx].net_rx = value,
+                "BLOCK" => softirq_data[cpu_idx].block = value,
+                "IRQ_POLL" => softirq_data[cpu_idx].irq_poll = value,
+                "TASKLET" => softirq_data[cpu_idx].tasklet = value,
+                "SCHED" => softirq_data[cpu_idx].sched = value,
+                "HRTIMER" => softirq_data[cpu_idx].hrtimer = value,
+                "RCU" => softirq_data[cpu_idx].rcu = value,
+                _ => {}
+            }
+        }
+    }
+
+    Ok(softirq_data)
+}
+
+
+
 impl HostMetrics {
+     /// 采集Per-CPU软中断指标（每个软中断类型一个指标，包含per-CPU计数）
+    pub fn cpu_softirq_per_cpu(proc_stat: &ProcStat, output: &mut super::MetricsBuffer) {
+        if proc_stat.softirq_per_cpu.is_empty() {
+            return;
+        }
+
+        // 使用match表达式代替闭包数组，避免类型不匹配问题
+        let softirq_names = [
+            "hi", "timer", "net_tx", "net_rx", "block", "irq_poll", "tasklet", "sched", "hrtimer", "rcu"
+        ];
+
+        for (type_idx, type_name) in softirq_names.iter().enumerate() {
+            let mut tags = MetricTags::default();
+            
+            // 计算该软中断类型的总值
+            let mut total = 0u64;
+            
+            // 为每个CPU添加该软中断类型的值
+            for (cpu_idx, cpu_softirq) in proc_stat.softirq_per_cpu.iter().enumerate() {
+                let cpu_key = format!("cpu{}", cpu_idx);
+                let value = match type_idx {
+                    0 => cpu_softirq.hi,
+                    1 => cpu_softirq.timer,
+                    2 => cpu_softirq.net_tx,
+                    3 => cpu_softirq.net_rx,
+                    4 => cpu_softirq.block,
+                    5 => cpu_softirq.irq_poll,
+                    6 => cpu_softirq.tasklet,
+                    7 => cpu_softirq.sched,
+                    8 => cpu_softirq.hrtimer,
+                    9 => cpu_softirq.rcu,
+                    _ => 0,
+                };
+                tags.insert(cpu_key, value.to_string());
+                total += value;
+            }
+
+            // 输出该软中断类型的指标，包含per-CPU计数
+            output.counter(
+                &format!("cpu_softirq_{}_total", type_name),
+                total as f64,
+                tags,
+            );
+        }
+    }
+    /// 采集全局软中断指标
+    ///
+    /// 生成单个指标 `cpu_softirq_all`，值为所有软中断类型的总和，
+    /// 每个软中断类型的全局总值作为标签
+    pub fn cpu_softirq_all(proc_stat: &ProcStat, output: &mut super::MetricsBuffer) {
+        if proc_stat.softirq_per_cpu.is_empty() {
+            return;
+        }
+
+        // 计算全局软中断值（从所有CPU求和）
+        let mut global_softirq = CpuSoftirqBreakdown::default();
+        for cpu_softirq in &proc_stat.softirq_per_cpu {
+            global_softirq.hi += cpu_softirq.hi;
+            global_softirq.timer += cpu_softirq.timer;
+            global_softirq.net_tx += cpu_softirq.net_tx;
+            global_softirq.net_rx += cpu_softirq.net_rx;
+            global_softirq.block += cpu_softirq.block;
+            global_softirq.irq_poll += cpu_softirq.irq_poll;
+            global_softirq.tasklet += cpu_softirq.tasklet;
+            global_softirq.sched += cpu_softirq.sched;
+            global_softirq.hrtimer += cpu_softirq.hrtimer;
+            global_softirq.rcu += cpu_softirq.rcu;
+        }
+
+        // 计算总软中断数
+        let total_softirq = global_softirq.hi
+            + global_softirq.timer
+            + global_softirq.net_tx
+            + global_softirq.net_rx
+            + global_softirq.block
+            + global_softirq.irq_poll
+            + global_softirq.tasklet
+            + global_softirq.sched
+            + global_softirq.hrtimer
+            + global_softirq.rcu;
+
+        // 构建标签：每个软中断类型的全局总值
+        let softirq_tags = metric_tags!(
+            "hi" => global_softirq.hi.to_string(),
+            "timer" => global_softirq.timer.to_string(),
+            "net_tx" => global_softirq.net_tx.to_string(),
+            "net_rx" => global_softirq.net_rx.to_string(),
+            "block" => global_softirq.block.to_string(),
+            "irq_poll" => global_softirq.irq_poll.to_string(),
+            "tasklet" => global_softirq.tasklet.to_string(),
+            "sched" => global_softirq.sched.to_string(),
+            "hrtimer" => global_softirq.hrtimer.to_string(),
+            "rcu" => global_softirq.rcu.to_string()
+        );
+
+        // 使用counter类型，值为总软中断数，所有分类作为标签
+        output.counter("cpu_softirq_all", total_softirq as f64, softirq_tags);
+    }
+
     pub async fn cpu_metrics(&self, output: &mut super::MetricsBuffer) {
         // adds the metrics from cpu time for each cpu
         match heim::cpu::times().await {
@@ -248,162 +403,154 @@ impl HostMetrics {
                 error!("Failed to load physical CPU count: {}", error);
             }
         }
+        // 添加对自定义指标的采集
+        match ProcStat::new().await {
+            Ok(proc_stat) => {
+                output.name = "cpu";
+
+                // 1. CPU时间指标（每个CPU核心，每种模式一个指标）
+                for cpu_time in &proc_stat.cpu_times {
+                    if cpu_time.cpu_id == "cpu" {
+                        continue; // 跳过总CPU行
+                    }
+
+                    let cpu_index = cpu_time.cpu_id.trim_start_matches("cpu");
+
+                    // 为每个CPU核心生成7种模式的指标
+                    let modes = [
+                        ("user", cpu_time.user),
+                        ("nice", cpu_time.nice),
+                        ("system", cpu_time.system),
+                        ("idle", cpu_time.idle),
+                        ("iowait", cpu_time.iowait),
+                        ("irq", cpu_time.irq),
+                        ("softirq", cpu_time.softirq),
+                    ];
+
+                    for (mode, value) in modes {
+                        let tags = metric_tags!(
+                            "cpu" => cpu_index,
+                            "mode" => mode
+                        );
+                        output.counter("cpu_seconds_total", value as f64, tags);
+                    }
+                }
+
+                Self::cpu_softirq_per_cpu(&proc_stat, output);
+                // Self::cpu_softirq_per_cpu(&proc_stat, output);
+                Self::cpu_softirq_all(&proc_stat, output);
+                // 3. 系统级指标
+                output.counter(
+                    "context_switches_total",
+                    proc_stat.system_stats.context_switches as f64,
+                    MetricTags::default(),
+                );
+                output.counter(
+                    "interrupts_total",
+                    proc_stat.interrupts_total as f64,
+                    MetricTags::default(),
+                );
+                output.counter(
+                    "processes_total",
+                    proc_stat.system_stats.processes_total as f64,
+                    MetricTags::default(),
+                );
+                output.gauge(
+                    "procs_running",
+                    proc_stat.system_stats.procs_running as f64,
+                    MetricTags::default(),
+                );
+                output.gauge(
+                    "procs_blocked",
+                    proc_stat.system_stats.procs_blocked as f64,
+                    MetricTags::default(),
+                );
+
+                info!(
+                    "成功采集自定义CPU指标: {}个CPU核心, {}个软中断类型",
+                    proc_stat.cpu_times.len().saturating_sub(1),
+                    10
+                );
+            }
+            Err(e) => {
+                error!("自定义CPU指标采集失败: {}", e);
+            }
+        }
     }
 }
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_parse_proc_stat() {
-        let stat_content = r#"cpu  2777199 646 1642986 386905069 191059 0 88252 0 0 0
-cpu0 66367 0 55457 16167661 14867 0 67928 0 0 0
-cpu1 156028 200 63934 16074338 18177 0 7385 0 0 0
-ctxt 332762667
-btime 1754053669
-processes 1197085
-procs_running 1
-procs_blocked 0
-softirq 82482587 0 8357413 5 2059072 0 0 5088815 35665091 562 31311629"#;
+    fn test_parse_softirq_content() {
+        let softirq_content = r#"                CPU0       CPU1       CPU2       CPU3
+HI:          1000       1100       1200       1300
+TIMER:       2000       2100       2200       2300
+NET_TX:      3000       3100       3200       3300
+NET_RX:      4000       4100       4200       4300
+BLOCK:       5000       5100       5200       5300
+IRQ_POLL:    6000       6100       6200       6300
+TASKLET:     7000       7100       7200       7300
+SCHED:       8000       8100       8200       8300
+HRTIMER:     9000       9100       9200       9300
+RCU:        10000      10100      10200      10300"#;
 
-        let proc_stat = ProcStat::from_str(stat_content).unwrap();
-
-        println!("=== ProcStat 解析结果 ===");
-        println!("CPU核心数: {}", proc_stat.cpu_times.len());
-
-        println!("\n=== CPU时间统计 ===");
-        for cpu_time in &proc_stat.cpu_times {
-            println!("{}: user={}, nice={}, system={}, idle={}, iowait={}, irq={}, softirq={}, steal={}, guest={}, guest_nice={}",
-                cpu_time.cpu_id,
-                cpu_time.user, cpu_time.nice, cpu_time.system, cpu_time.idle,
-                cpu_time.iowait, cpu_time.irq, cpu_time.softirq, cpu_time.steal,
-                cpu_time.guest, cpu_time.guest_nice);
-        }
-
-        println!("\n=== 系统级统计 ===");
-        println!("上下文切换: {}", proc_stat.system_stats.context_switches);
-        println!("启动时间: {}", proc_stat.system_stats.boot_time);
-        println!("进程总数: {}", proc_stat.system_stats.processes_total);
-        println!("运行进程: {}", proc_stat.system_stats.procs_running);
-        println!("阻塞进程: {}", proc_stat.system_stats.procs_blocked);
-
-        println!("\n=== 软中断分类 ===");
-        println!("HI: {}", proc_stat.softirq_breakdown.hi);
-        println!("TIMER: {}", proc_stat.softirq_breakdown.timer);
-        println!("NET_TX: {}", proc_stat.softirq_breakdown.net_tx);
-        println!("NET_RX: {}", proc_stat.softirq_breakdown.net_rx);
-        println!("BLOCK: {}", proc_stat.softirq_breakdown.block);
-        println!("IRQ_POLL: {}", proc_stat.softirq_breakdown.irq_poll);
-        println!("TASKLET: {}", proc_stat.softirq_breakdown.tasklet);
-        println!("SCHED: {}", proc_stat.softirq_breakdown.sched);
-        println!("HRTIMER: {}", proc_stat.softirq_breakdown.hrtimer);
-        println!("RCU: {}", proc_stat.softirq_breakdown.rcu);
-
-        println!("\n=== 中断统计 ===");
-        println!("总中断数: {}", proc_stat.interrupts_total);
-    }
-    #[test]
-    fn test_parse_real_proc_stat() {
-        use std::fs;
-        // 读取真实的 /proc/stat 文件
-        let stat_content = match fs::read_to_string("/proc/stat") {
-            Ok(content) => content,
-            Err(e) => {
-                eprintln!("无法读取 /proc/stat: {}", e);
-                return;
-            }
-        };
-
-        println!("=== 真实系统 /proc/stat 解析 ===");
-        println!("文件大小: {} 字节", stat_content.len());
-        println!("文件内容预览:");
-        println!("{}", stat_content.lines().take(5).collect::<Vec<_>>().join("\n"));
-        println!("...");
-
-        match ProcStat::from_str(&stat_content) {
-            Ok(proc_stat) => {
-                println!("\n=== 解析成功 ===");
-                println!("CPU核心数: {}", proc_stat.cpu_times.len());
-                
-                if !proc_stat.cpu_times.is_empty() {
-                    println!("\n=== 第一个CPU统计 ===");
-                    let first_cpu = &proc_stat.cpu_times[0];
-                    println!("CPU: {}", first_cpu.cpu_id);
-                    println!("用户态时间: {} ticks", first_cpu.user);
-                    println!("系统态时间: {} ticks", first_cpu.system);
-                    println!("空闲时间: {} ticks", first_cpu.idle);
-                    println!("I/O等待: {} ticks", first_cpu.iowait);
-                }
-
-                if proc_stat.cpu_times.len() > 1 {
-                    println!("\n=== 物理CPU统计 ===");
-                    for (i, cpu_time) in proc_stat.cpu_times.iter().skip(1).take(3).enumerate() {
-                        println!("CPU{}: user={}, system={}, idle={}", 
-                            i, cpu_time.user, cpu_time.system, cpu_time.idle);
-                    }
-                    
-                    if proc_stat.cpu_times.len() > 4 {
-                        println!("... 还有 {} 个CPU核心", proc_stat.cpu_times.len() - 4);
-                    }
-                }
-
-                println!("\n=== 系统级统计 ===");
-                println!("上下文切换总数: {}", proc_stat.system_stats.context_switches);
-                println!("系统启动时间: {} (Unix时间戳)", proc_stat.system_stats.boot_time);
-                println!("启动时间转换: {}", {
-                    use std::time::{SystemTime, UNIX_EPOCH};
-                    let duration = SystemTime::now()
-                        .duration_since(UNIX_EPOCH)
-                        .unwrap()
-                        .as_secs();
-                    let uptime = duration.saturating_sub(proc_stat.system_stats.boot_time);
-                    format!("{}天{}小时{}分钟", 
-                        uptime / 86400, 
-                        (uptime % 86400) / 3600, 
-                        (uptime % 3600) / 60)
-                });
-                println!("进程总数: {}", proc_stat.system_stats.processes_total);
-                println!("当前运行进程: {}", proc_stat.system_stats.procs_running);
-                println!("当前阻塞进程: {}", proc_stat.system_stats.procs_blocked);
-
-                println!("\n=== 软中断统计 ===");
-                let softirq = &proc_stat.softirq_breakdown;
-                let total_softirq = softirq.hi + softirq.timer + softirq.net_tx + 
-                                  softirq.net_rx + softirq.block + softirq.irq_poll + 
-                                  softirq.tasklet + softirq.sched + softirq.hrtimer + 
-                                  softirq.rcu;
-                println!("软中断总数: {}", total_softirq);
-                println!("网络接收: {} ({:.1}%)", softirq.net_rx, 
-                    softirq.net_rx as f64 / total_softirq as f64 * 100.0);
-                println!("RCU: {} ({:.1}%)", softirq.rcu, 
-                    softirq.rcu as f64 / total_softirq as f64 * 100.0);
-                println!("定时器: {} ({:.1}%)", softirq.timer, 
-                    softirq.timer as f64 / total_softirq as f64 * 100.0);
-
-                println!("\n=== 中断统计 ===");
-                println!("总中断数: {}", proc_stat.interrupts_total);
-
-                // 计算CPU使用率（基于第一个CPU）
-                if proc_stat.cpu_times.len() > 1 {
-                    let cpu0 = &proc_stat.cpu_times[1]; // 跳过总CPU行
-                    let total = cpu0.user + cpu0.nice + cpu0.system + cpu0.idle + 
-                               cpu0.iowait + cpu0.irq + cpu0.softirq + cpu0.steal;
-                    let usage = (cpu0.user + cpu0.nice + cpu0.system) as f64 / total as f64 * 100.0;
-                    println!("CPU0使用率: {:.2}%", usage);
-                }
-            }
-            Err(e) => {
-                eprintln!("解析失败: {}", e);
-            }
-        }
+        let result = parse_softirq_content(softirq_content).unwrap();
+        assert_eq!(result.len(), 4);
+        
+        assert_eq!(result[0].hi, 1000);
+        assert_eq!(result[0].timer, 2000);
+        assert_eq!(result[0].net_rx, 4000);
+        
+        assert_eq!(result[1].hi, 1100);
+        assert_eq!(result[1].timer, 2100);
+        assert_eq!(result[1].net_rx, 4100);
     }
 
     #[test]
     fn test_empty_stat() {
         let empty = "";
-        let proc_stat = ProcStat::from_str(empty).unwrap();
+        let proc_stat = ProcStat::parse_from_files(empty, "").unwrap();
         assert!(proc_stat.cpu_times.is_empty());
+        assert!(proc_stat.softirq_per_cpu.is_empty());
         assert_eq!(proc_stat.system_stats.context_switches, 0);
     }
+
+    #[test]
+    fn test_parse_from_files() {
+        let stat_content = r#"cpu  100 200 300 400 500 600 700 800 900 1000
+cpu0 10 20 30 40 50 60 70 80 90 100
+cpu1 15 25 35 45 55 65 75 85 95 105
+ctxt 123456
+btime 1609459200
+processes 1000
+procs_running 2
+procs_blocked 0
+intr 500000"#;
+
+        let softirq_content = r#"                CPU0       CPU1
+HI:          1000       1100
+TIMER:       2000       2100
+NET_TX:      3000       3100
+NET_RX:      4000       4100
+BLOCK:       5000       5100
+IRQ_POLL:    6000       6100
+TASKLET:     7000       7100
+SCHED:       8000       8100
+HRTIMER:     9000       9100
+RCU:        10000      10100"#;
+
+        let proc_stat = ProcStat::parse_from_files(stat_content, softirq_content).unwrap();
+        
+        assert_eq!(proc_stat.cpu_times.len(), 3); // cpu + cpu0 + cpu1
+        assert_eq!(proc_stat.softirq_per_cpu.len(), 2);
+        assert_eq!(proc_stat.system_stats.context_switches, 123456);
+        
+        assert_eq!(proc_stat.softirq_per_cpu[0].hi, 1000);
+        assert_eq!(proc_stat.softirq_per_cpu[0].net_rx, 4000);
+        assert_eq!(proc_stat.softirq_per_cpu[1].timer, 2100);
+        assert_eq!(proc_stat.softirq_per_cpu[1].rcu, 10100);
+    }
+
 }

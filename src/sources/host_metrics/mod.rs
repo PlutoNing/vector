@@ -461,7 +461,7 @@ pub struct MetricsBuffer {
 }
 
 impl MetricsBuffer {
-    /* 新建一个metrics数组 */
+    /*  */
     fn new(namespace: Option<String>) -> Self {
         Self {
             metrics: Vec::new(),
