@@ -109,6 +109,7 @@ pub struct HostMetricsConfig {
     #[serde(default = "default_collectors")]
     pub collectors: Option<Vec<Collector>>,
 
+    /* 默认为host */
     /// Overrides the default namespace for the metrics emitted by the source.
     #[derivative(Default(value = "default_namespace()"))]
     #[serde(default = "default_namespace")]
@@ -277,16 +278,6 @@ impl SourceConfig for HostMetricsConfig {
     /* source ctx包含了各种东西 */
     async fn build(&self, cx: SourceContext) -> crate::Result<super::Source> {
         init_roots();
-        #[cfg(not(target_os = "linux"))]
-        {
-            if self.cgroups.is_some() || self.has_collector(Collector::CGroups) {
-                return Err("CGroups collector is only available on Linux systems".into());
-            }
-            if self.has_collector(Collector::TCP) {
-                return Err("TCP collector is only available on Linux systems".into());
-            }
-        }
-
         let mut config = self.clone();
         config.namespace = config.namespace.filter(|namespace| !namespace.is_empty());
         /* run是个异步函数 */
