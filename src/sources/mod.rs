@@ -333,6 +333,7 @@ impl SourceSender {
 
     /// Send a batch of events to the default output.
     /// 发送指标出去
+    /// 比如HostMetrics的capture_metrics获取的host metrics
     /// This internally handles emitting [EventsSent] events.
     pub async fn send_batch<I, E>(&mut self, events: I) -> Result<(), ClosedError>
     where

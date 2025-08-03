@@ -102,6 +102,7 @@ impl Input {
 #[derive(Debug, Clone, PartialEq)]
 pub struct SourceOutput {
     pub port: Option<String>,
+    /* 源的类型, metric, log还是trace */
     pub ty: DataType,
 
     // NOTE: schema definitions are only implemented/supported for log-type events. There is no
@@ -127,6 +128,7 @@ impl SourceOutput {
         }
     }
 
+    /* 新建一个metrics的source output */
     /// Create a `SourceOutput` of the given data type that contains no output `Definition`s.
     /// Designed for use in metrics sources.
     ///
