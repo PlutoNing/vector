@@ -10,9 +10,9 @@ sinks:
     inputs:
       - my_source_id
     path: /tmp/agent-%Y-%m-%d.log
-    compression: gzip
+    # compression: gzip
     max_file_size_bytes: 52428800
-    # compression: none
+    compression: none
     encoding:
       codec: json
   sqlite_output:
