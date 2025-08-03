@@ -8,6 +8,13 @@ name = "scx_agent"
 [[bin]]
 name = "sqlite-test-tool"
 path = "src/bin/sqlite-test-tool.rs"
+[[bin]]
+name = "grpc-server"
+path = "src/bin/grpc-server.rs"
+
+[[bin]]
+name = "grpc-cmd"
+path = "src/bin/grpc-cmd.rs"
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(tokio_unstable)'] }
@@ -47,6 +54,7 @@ tempfile = "3.20.0"
 tokio = { version = "1.45.1", default-features = false, features = ["full"] }
 toml = { version = "0.8.23", default-features = false, features = ["display", "parse"] }
 tonic = { version = "0.11", default-features = false, features = ["transport", "codegen", "prost", "tls", "tls-roots", "gzip"] }
+tonic-build = { version = "0.11", default-features = false }
 uuid = { version = "1.17.0", features = ["v4", "v7", "serde"] }
 agent-lib = { path = "lib/agent-lib", default-features = false, features = ["vrl"] }
 agent-config = { path = "lib/agent-config" }
@@ -86,7 +94,7 @@ serde-toml-merge = { version = "0.3.9", default-features = false }
 serde_json.workspace = true
 serde_with = { version = "3.14.0", default-features = false, features = ["macros", "std"] }
 serde_yaml = { version = "0.9.34", default-features = false }
-prost = { workspace = true, optional = true }
+prost = { workspace = true, optional = true}
 hex = { version = "0.4.3", default-features = false, optional = true }
 arc-swap = { version = "1.7", default-features = false }
 async-compression = { version = "0.4.25", default-features = false, features = ["tokio", "gzip"], optional = true }
@@ -127,7 +135,7 @@ sqlx = { version = "0.8.6", default-features = false, features = ["derive", "pos
 stream-cancel = { version = "0.8.2", default-features = false }
 tikv-jemallocator = { version = "0.6.0", default-features = false, features = ["unprefixed_malloc_on_supported_platforms"], optional = true }
 toml.workspace = true
-tonic = { workspace = true, optional = true }
+tonic = { workspace = true }
 thread_local = { version = "1.1.9", default-features = false, optional = true }
 typetag = { version = "0.2.20", default-features = false }
 url = { version = "2.5.4", default-features = false, features = ["serde"] }
@@ -149,8 +157,8 @@ netlink-packet-core = "0.7.0"
 netlink-sys = { version = "0.8.7", features = ["tokio_socket"] }
 
 [build-dependencies]
-prost-build = { workspace = true, optional = true }
-
+prost-build = { workspace = true}
+tonic-build = { workspace = true, features = ["prost"] }
 [dev-dependencies]
 base64 = "0.22.1"
 libc = "0.2.174"

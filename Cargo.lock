@@ -3951,6 +3951,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "prettyplease"
+version = "0.2.36"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ff24dfcda44452b9816fff4cd4227e1bb73ff5a2f1bc1105aa92fb8565ce44d2"
+dependencies = [
+ "proc-macro2",
+ "syn 2.0.104",
+]
+
+[[package]]
 name = "prettytable-rs"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4046,9 +4056,11 @@ dependencies = [
  "multimap",
  "once_cell",
  "petgraph",
+ "prettyplease",
  "prost 0.12.6",
  "prost-types 0.12.6",
  "regex",
+ "syn 2.0.104",
  "tempfile",
 ]
 
@@ -4777,6 +4789,7 @@ dependencies = [
  "tokio-util",
  "toml",
  "tonic",
+ "tonic-build",
  "tower 0.5.2",
  "tracing",
  "tracing-subscriber",
@@ -5914,6 +5927,19 @@ dependencies = [
  "tower-layer",
  "tower-service",
  "tracing",
+]
+
+[[package]]
+name = "tonic-build"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "be4ef6dd70a610078cb4e338a0f79d06bc759ff1b22d2120c2ff02ae264ba9c2"
+dependencies = [
+ "prettyplease",
+ "proc-macro2",
+ "prost-build",
+ "quote",
+ "syn 2.0.104",
 ]
 
 [[package]]
