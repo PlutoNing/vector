@@ -15,15 +15,16 @@ sinks:
     # compression: none
     encoding:
       codec: json
-  # sqlite_logs:
-  #   type: sqlite
-  #   inputs:
-  #     - my_source_id
-  #   path: "/tmp/agent_logs.db"
-  #   table: "application_logs"
-  #   encoding:
-  #     codec: json
-  #   idle_timeout_secs: 300
+  sqlite_output:
+    type: sqlite
+    inputs:
+      - my_source_id
+    path: /tmp/scx_agent-%Y-%m-%d.db
+    table: "events"
+    idle_timeout_secs: 300
+    encoding:
+      codec: json
+    timezone: local
 sources:
   my_source_id:
     type: host_metrics
