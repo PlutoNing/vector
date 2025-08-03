@@ -240,12 +240,12 @@ impl FileSink {
     /// to store the event as.
     fn partition_event(&mut self, event: &Event) -> Option<bytes::Bytes> {
         // 1. 原始模板字符串
-        let template_str = self.path.get_ref();
-        info!("原始模板: {}", template_str);
+        let _template_str = self.path.get_ref();
+        // info!("原始模板: {}", template_str);
         // println!("原始模板: {}", template_str);
         // 3. 获取模板中的字段引用
-        let fields = self.path.get_fields();
-        info!("模板字段: {:?}", fields);
+        let _fields = self.path.get_fields();
+        // info!("模板字段: {:?}", fields);
         // println!("模板字段: {:?}", fields);
         // 4. 渲染模板
         let render_result = self.path.render(event);
@@ -253,9 +253,9 @@ impl FileSink {
         match render_result {
             Ok(rendered_path) => {
                 // 5. 成功渲染的路径
-                let path_str = String::from_utf8_lossy(&rendered_path);
-                info!("渲染成功: {}", path_str);
-                info!("渲染结果长度: {} bytes", rendered_path.len());
+                let _path_str = String::from_utf8_lossy(&rendered_path);
+                // info!("渲染成功: {}", path_str);
+                // info!("渲染结果长度: {} bytes", rendered_path.len());
                 // println!("事件输出到文件 {}", path_str);
                 Some(rendered_path)
             }

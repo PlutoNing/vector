@@ -20,6 +20,7 @@ use agent_lib::TimeZone;
 use async_trait::async_trait;
 use bytes::BytesMut;
 use futures::stream::{BoxStream, StreamExt};
+use serde_json::Value;
 use serde_with::serde_as;
 use tokio_util::codec::Encoder as _;
 use tracing::{debug, error};
@@ -124,15 +125,36 @@ impl SqliteSink {
             Ok(path) => String::from_utf8_lossy(&path).to_string(),
             Err(_) => return None,
         };
-        println!("db path {}", path);
+        // println!("db path {}", path);
         let table = match self.table.render(event) {
             Ok(table) => String::from_utf8_lossy(&table).to_string(),
             Err(_) => return None,
         };
-        println!("event db table {}", table);
+        // println!("event db table {}", table);
         Some((path, table))
     }
+    // 新增方法：从JSON数据中提取event type和source
+    fn extract_event_info(&self, data: &str) -> (Option<String>, Option<String>) {
+        match serde_json::from_str::<Value>(data) {
+            Ok(json) => {
+                let event_type = json
+                    .get("name")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string());
 
+                let source = json
+                    .get("namespace")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string());
+
+                (event_type, source)
+            }
+            Err(_) => {
+                // 如果不是有效的JSON，返回None
+                (None, None)
+            }
+        }
+    }
     async fn get_or_create_service(
         &mut self,
         path: &str,
@@ -159,7 +181,7 @@ impl SqliteSink {
                 return;
             }
         };
-        println!("event sink to table {}:{}", path, table);
+        // println!("event sink to table {}:{}", path, table);
         self.transformer.transform(&mut event);
 
         let mut buffer = BytesMut::new();
@@ -170,11 +192,12 @@ impl SqliteSink {
         }
 
         let data = String::from_utf8_lossy(&buffer).to_string();
-        let event_type = None;
-        let source = None;
+        // println!("data is {}",data);
+        // 解析JSON并提取event type
+        let (event_type, source) = self.extract_event_info(&data);
 
         match self.get_or_create_service(&path, &table).await {
-            Ok(service) => match service.write_event(&data, event_type, source).await {
+            Ok(service) => match service.write_event(&data, event_type.as_deref(), source.as_deref()).await {
                 Ok(rows) => {
                     self.events_sent.emit(CountByteSize(1, buffer.len().into()));
                     debug!("Wrote {} rows to SQLite table {} in {}", rows, table, path);
