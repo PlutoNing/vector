@@ -1,5 +1,4 @@
 use futures::StreamExt;
-#[cfg(target_os = "linux")]
 use heim::net::os::linux::IoCountersExt;
 use heim::units::information::byte;
 use agent_lib::configurable::configurable_component;
@@ -63,13 +62,11 @@ impl HostMetrics {
                         counter.bytes_sent().get::<byte>() as f64,
                         tags.clone(),
                     );
-                    #[cfg(any(target_os = "linux", windows))]
                     output.counter(
                         "network_transmit_packets_drop_total",
                         counter.drop_sent() as f64,
                         tags.clone(),
                     );
-                    #[cfg(any(target_os = "linux", windows))]
                     output.counter(
                         "network_transmit_packets_total",
                         counter.packets_sent() as f64,

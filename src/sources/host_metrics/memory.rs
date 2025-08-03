@@ -1,4 +1,3 @@
-#[cfg(target_os = "linux")]
 use heim::memory::os::linux::MemoryExt;
 #[cfg(target_os = "macos")]
 use heim::memory::os::macos::MemoryExt;
@@ -29,46 +28,29 @@ impl HostMetrics {
                     memory.available().get::<byte>() as f64,
                     MetricTags::default(),
                 );
-                #[cfg(any(target_os = "linux", target_os = "macos"))]
                 output.gauge(
                     "memory_active_bytes",
                     memory.active().get::<byte>() as f64,
                     MetricTags::default(),
                 );
-                #[cfg(target_os = "linux")]
                 output.gauge(
                     "memory_buffers_bytes",
                     memory.buffers().get::<byte>() as f64,
                     MetricTags::default(),
                 );
-                #[cfg(target_os = "linux")]
                 output.gauge(
                     "memory_cached_bytes",
                     memory.cached().get::<byte>() as f64,
                     MetricTags::default(),
                 );
-                #[cfg(target_os = "linux")]
                 output.gauge(
                     "memory_shared_bytes",
                     memory.shared().get::<byte>() as f64,
                     MetricTags::default(),
                 );
-                #[cfg(target_os = "linux")]
                 output.gauge(
                     "memory_used_bytes",
                     memory.used().get::<byte>() as f64,
-                    MetricTags::default(),
-                );
-                #[cfg(target_os = "macos")]
-                output.gauge(
-                    "memory_inactive_bytes",
-                    memory.inactive().get::<byte>() as f64,
-                    MetricTags::default(),
-                );
-                #[cfg(target_os = "macos")]
-                output.gauge(
-                    "memory_wired_bytes",
-                    memory.wire().get::<byte>() as f64,
                     MetricTags::default(),
                 );
             }

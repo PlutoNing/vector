@@ -27,7 +27,7 @@ use crate::{
     event::metric::{Metric, MetricKind, MetricTags, MetricValue},
     register, SourceSender,
 };
-#[cfg(target_os = "linux")]
+
 mod cgroups;
 mod cpu;
 mod disk;
@@ -35,7 +35,6 @@ mod filesystem;
 mod memory;
 mod network;
 mod process;
-#[cfg(target_os = "linux")]
 mod tcp;
 
 /// Collector types.
@@ -517,7 +516,6 @@ where
 /* 构建一些fs root */
 #[allow(clippy::missing_const_for_fn)]
 fn init_roots() {
-    #[cfg(target_os = "linux")]
     {
         use std::sync::Once;
 
