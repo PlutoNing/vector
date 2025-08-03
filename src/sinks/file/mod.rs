@@ -242,11 +242,11 @@ impl FileSink {
         // 1. 原始模板字符串
         let template_str = self.path.get_ref();
         info!("原始模板: {}", template_str);
-
+        // println!("原始模板: {}", template_str);
         // 3. 获取模板中的字段引用
         let fields = self.path.get_fields();
         info!("模板字段: {:?}", fields);
-
+        // println!("模板字段: {:?}", fields);
         // 4. 渲染模板
         let render_result = self.path.render(event);
 
@@ -256,7 +256,7 @@ impl FileSink {
                 let path_str = String::from_utf8_lossy(&rendered_path);
                 info!("渲染成功: {}", path_str);
                 info!("渲染结果长度: {} bytes", rendered_path.len());
-
+                // println!("事件输出到文件 {}", path_str);
                 Some(rendered_path)
             }
             Err(_error) => None,
@@ -448,13 +448,14 @@ mod tests {
     // 只引入测试里真正用到的
     use super::*;
     use crate::sinks::{
-        lines_from_file, random_metrics_with_stream, random_metrics_with_stream_timestamp, temp_dir, temp_file, util::run_assert_sink
+        lines_from_file, random_metrics_with_stream, random_metrics_with_stream_timestamp,
+        temp_dir, temp_file, util::run_sink_test,
     };
 
     #[tokio::test]
     async fn metric_single_partition() {
         let template = temp_file();
-        println!("测试文件路径: {}", template.display()); 
+        println!("测试文件路径: {}", template.display());
         let config = FileSinkConfig {
             path: template.clone().try_into().unwrap(),
             idle_timeout: default_idle_timeout(),
@@ -466,7 +467,7 @@ mod tests {
 
         let (input, _events) = random_metrics_with_stream(100, None, None);
 
-        run_assert_sink(&config, input.clone().into_iter()).await;
+        run_sink_test(&config, input.clone().into_iter()).await;
 
         let output = lines_from_file(template);
         for (input, output) in input.into_iter().zip(output) {
@@ -504,7 +505,7 @@ mod tests {
             timestamp_offset,
         );
 
-        run_assert_sink(&config, input.clone().into_iter()).await;
+        run_sink_test(&config, input.clone().into_iter()).await;
 
         let output = (0..metric_count).map(|index| {
             let expected_timestamp = timestamp + (timestamp_offset * index as u32);

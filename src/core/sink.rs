@@ -17,6 +17,7 @@ impl VectorSink {
     ///
     /// It is unclear under what conditions this function will error.
     pub async fn run(self, input: impl Stream<Item = EventArray> + Send) -> Result<(), ()> {
+        println!("VectorSink.run start");
         match self {
             Self::Sink(sink) => input.map(Ok).forward(sink).await,
             Self::Stream(s) => s.run(Box::pin(input)).await,

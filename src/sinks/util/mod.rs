@@ -35,12 +35,13 @@ use snafu::Snafu;
 use agent_lib::{event::Event, json_size::JsonSize, TimeZone};
 
 use crate::{
-    config::SinkContext,
+    config::{SinkConfig, SinkContext},
     core::sink::VectorSink,
     event::EventFinalizers,
-    sinks::file::{FileSink, FileSinkConfig},
+    sinks::{file::{FileSink, FileSinkConfig}, SqliteSink, SqliteSinkConfig},
 };
 use chrono::{FixedOffset, Offset, Utc};
+
 pub fn random_string(len: usize) -> String {
     rng()
         .sample_iter(&Alphanumeric)
@@ -63,6 +64,12 @@ pub fn temp_dir() -> PathBuf {
     path.join(dir_name)
 }
 
+pub fn temp_file() -> PathBuf {
+    let path = std::env::temp_dir();
+    let file_name = random_string(16);
+    path.join(file_name)
+}
+
 #[derive(Debug, Snafu)]
 enum SinkBuildError {
     #[snafu(display("Missing host in address field"))]
@@ -70,11 +77,26 @@ enum SinkBuildError {
     #[snafu(display("Missing port in address field"))]
     MissingPort,
 }
+
 /// Convenience wrapper for running sink tests
 pub async fn assert_sink_compliance<T>(_tags: &[&str], f: impl Future<Output = T>) -> T {
     let result = f.await;
     result
 }
+/*  */
+pub async fn run_assert_sqlite_sink(config: &SqliteSinkConfig, events: impl Iterator<Item = Event> + Send) {
+    assert_sink_compliance(&[], async move {
+        println!("assert_sink_compliance start");
+        let sink = SqliteSink::new(config, SinkContext::default()).unwrap();
+        println!("SqliteSink initialized");
+        VectorSink::from_event_streamsink(sink)
+            .run(Box::pin(stream::iter(events.map(Into::into))))
+            .await
+            .expect("Running sqlite sink failed")
+    })
+    .await;
+}
+/*  */
 pub async fn run_assert_sink(config: &FileSinkConfig, events: impl Iterator<Item = Event> + Send) {
     assert_sink_compliance(&[], async move {
         let sink = FileSink::new(config, SinkContext::default()).unwrap();
@@ -86,11 +108,24 @@ pub async fn run_assert_sink(config: &FileSinkConfig, events: impl Iterator<Item
     .await;
 }
 
-pub fn temp_file() -> PathBuf {
-    let path = std::env::temp_dir();
-    let file_name = random_string(16);
-    path.join(file_name + ".log")
+/// 通用测试辅助函数：运行任意 sink
+pub async fn run_sink_test<C>(
+    config: &C,
+    events: impl Iterator<Item = Event> + Send,
+) where
+    C: SinkConfig,
+{
+    assert_sink_compliance(&[], async move {
+        let sink = config.build(SinkContext::default())
+            .await
+            .expect("build sink");
+        sink.run(Box::pin(stream::iter(events.map(Into::into))))
+            .await
+            .expect("run sink")
+    })
+    .await;
 }
+
 #[derive(Debug)]
 pub struct EncodedEvent<I> {
     pub item: I,

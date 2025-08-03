@@ -1,5 +1,5 @@
 use std::convert::TryFrom;
-use std::time::{Duration};
+use std::time::Duration;
 
 use crate::codecs::{Framer, FramingConfig, TextSerializerConfig};
 use crate::internal_event::{
@@ -8,20 +8,17 @@ use crate::internal_event::{
 use crate::{
     codecs::{Encoder, EncodingConfigWithFraming, SinkType, Transformer},
     config::{GenerateConfig, Input, SinkConfig, SinkContext},
+    core::sink::VectorSink,
     event::{Event, EventStatus},
     register,
     sinks::util::{timezone_to_offset, StreamSink},
     template::Template,
-    core::sink::VectorSink,
 };
 pub use agent_lib::config::is_default;
 use agent_lib::configurable::configurable_component;
-use agent_lib::{
-
-    TimeZone,
-};
+use agent_lib::TimeZone;
 use async_trait::async_trait;
-use bytes::{BytesMut};
+use bytes::BytesMut;
 use futures::stream::{BoxStream, StreamExt};
 use serde_with::serde_as;
 use tokio_util::codec::Encoder as _;
@@ -96,6 +93,7 @@ pub struct SqliteSink {
     table: Template,
     transformer: Transformer,
     encoder: Encoder<Framer>,
+    /* 每个文件每个表对应一个sqlite service */
     services: std::collections::HashMap<String, SqliteService>,
     events_sent: Registered<EventsSent>,
 }
@@ -126,25 +124,30 @@ impl SqliteSink {
             Ok(path) => String::from_utf8_lossy(&path).to_string(),
             Err(_) => return None,
         };
-
+        println!("db path {}", path);
         let table = match self.table.render(event) {
             Ok(table) => String::from_utf8_lossy(&table).to_string(),
             Err(_) => return None,
         };
-
+        println!("event db table {}", table);
         Some((path, table))
     }
 
-    async fn get_or_create_service(&mut self, path: &str, table: &str) -> crate::Result<&mut SqliteService> {
+    async fn get_or_create_service(
+        &mut self,
+        path: &str,
+        table: &str,
+    ) -> crate::Result<&mut SqliteService> {
         let key = format!("{}:{}", path, table);
-        
+
         if !self.services.contains_key(&key) {
-            let service = SqliteService::new(path, table)
-                .await
-                .map_err(|e| crate::Error::from(format!("Failed to create SQLite service: {}", e)))?;
+            let service = SqliteService::new(path, table).await.map_err(|e| {
+                crate::Error::from(format!("Failed to create SQLite service: {}", e))
+            })?;
+            println!("new sqlite service created for {}:{}", path, table);
             self.services.insert(key.clone(), service);
         }
-        
+
         Ok(self.services.get_mut(&key).unwrap())
     }
 
@@ -156,9 +159,9 @@ impl SqliteSink {
                 return;
             }
         };
-
+        println!("event sink to table {}:{}", path, table);
         self.transformer.transform(&mut event);
-        
+
         let mut buffer = BytesMut::new();
         if let Err(error) = self.encoder.encode(event.clone(), &mut buffer) {
             error!("Failed to encode event: {}", error);
@@ -167,24 +170,23 @@ impl SqliteSink {
         }
 
         let data = String::from_utf8_lossy(&buffer).to_string();
-        let event_type = event.as_log().get("event_type").map(|v| v.to_string_lossy().to_string());
-        let source = event.as_log().get("source").map(|v| v.to_string_lossy().to_string());
+        let event_type = None;
+        let source = None;
 
         match self.get_or_create_service(&path, &table).await {
-            Ok(service) => {
-                match service.write_event(&data, event_type.as_deref(), source.as_deref()).await {
-                    Ok(rows) => {
-                        self.events_sent.emit(CountByteSize(1, buffer.len().into()));
-                        debug!("Wrote {} rows to SQLite table {} in {}", rows, table, path);
-                        event.metadata().update_status(EventStatus::Delivered);
-                    }
-                    Err(error) => {
-                        error!("Failed to write to SQLite: {}", error);
-                        event.metadata().update_status(EventStatus::Errored);
-                    }
+            Ok(service) => match service.write_event(&data, event_type, source).await {
+                Ok(rows) => {
+                    self.events_sent.emit(CountByteSize(1, buffer.len().into()));
+                    debug!("Wrote {} rows to SQLite table {} in {}", rows, table, path);
+                    event.metadata().update_status(EventStatus::Delivered);
                 }
-            }
+                Err(error) => {
+                    error!("Failed to write to SQLite: {}", error);
+                    event.metadata().update_status(EventStatus::Errored);
+                }
+            },
             Err(error) => {
+                println!("Failed to get SQLite service: {}", error);
                 error!("Failed to get SQLite service: {}", error);
                 event.metadata().update_status(EventStatus::Errored);
             }
@@ -199,14 +201,14 @@ impl SqliteSink {
                         Some(event) => self.process_event(event).await,
                         None => {
                             debug!("Receiver exhausted, terminating the processing loop.");
-                            
+
                             // Close all SQLite services
                             for (_, service) in &mut self.services {
                                 if let Err(error) = service.close().await {
                                     error!("Failed to close SQLite service: {}", error);
                                 }
                             }
-                            
+
                             break;
                         }
                     }
@@ -225,5 +227,95 @@ impl StreamSink<Event> for SqliteSink {
             .await
             .expect("sqlite sink error");
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use chrono::{SubsecRound, Utc};
+
+    // 只引入测试里真正用到的
+    use super::*;
+    use crate::sinks::{
+        random_metrics_with_stream, random_metrics_with_stream_timestamp, run_assert_sqlite_sink,
+        temp_dir, temp_file,
+    };
+
+    #[tokio::test]
+    async fn sqlite_single_partition() {
+        let db_path = temp_file();
+        println!("测试数据库路径: {}", db_path.display());
+
+        let config = SqliteSinkConfig {
+            path: Template::try_from(db_path.to_str().unwrap()).unwrap(),
+            table: Template::try_from("events").unwrap(),
+            idle_timeout: default_idle_timeout(),
+            encoding: (None::<FramingConfig>, TextSerializerConfig::default()).into(),
+            timezone: Default::default(),
+        };
+        println!("SqliteSinkConfig initialized");
+        let (input, _events) = random_metrics_with_stream(10, None, None);
+        println!("random_metrics_with_stream initialized");
+        run_assert_sqlite_sink(&config, input.clone().into_iter()).await;
+        println!("run_assert_sqlite_sink initialized");
+        // 验证数据库文件已创建
+        assert!(db_path.exists(), "数据库文件应已创建");
+    }
+
+    #[tokio::test]
+    async fn sqlite_many_partitions() {
+        let directory = temp_dir();
+
+        // 修改这里：使用正确的时间戳格式，而不是{}
+        let format = "%Y-%m-%d-%H-%M-%S";
+        let mut template = directory.to_string_lossy().to_string();
+        template.push_str(&format!("/{}.db", format));
+
+        let config = SqliteSinkConfig {
+            path: template.try_into().unwrap(),
+            table: Template::try_from("events").unwrap(),
+            idle_timeout: default_idle_timeout(),
+            encoding: (None::<FramingConfig>, TextSerializerConfig::default()).into(),
+            timezone: Default::default(),
+        };
+
+        let metric_count = 3;
+        let timestamp = Utc::now().trunc_subsecs(3);
+        let timestamp_offset = Duration::from_secs(1);
+
+        let (input, _events) = random_metrics_with_stream_timestamp(
+            metric_count,
+            None,
+            None,
+            timestamp,
+            timestamp_offset,
+        );
+
+        run_assert_sqlite_sink(&config, input.clone().into_iter()).await;
+        println!("=== run_assert_sqlite_sink returned ===");
+        println!(
+            "=== 开始验证数据库文件，期望创建 {} 个文件 ===",
+            metric_count
+        );
+        // 验证多个数据库文件已创建
+        for index in 0..metric_count {
+            let expected_timestamp = timestamp + (timestamp_offset * index as u32);
+            let expected_filename = directory.join(format!(
+                "{}.db",
+                expected_timestamp.format("%Y-%m-%d-%H-%M-%S")
+            ));
+            println!(
+                "检查文件 {}: {} (时间戳: {:?})",
+                index + 1,
+                expected_filename.display(),
+                expected_timestamp
+            );
+            assert!(
+                expected_filename.exists(),
+                "数据库文件应已创建: {}",
+                expected_filename.display()
+            );
+            println!("文件 {} 存在", index + 1);
+        }
     }
 }

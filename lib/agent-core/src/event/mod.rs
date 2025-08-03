@@ -87,7 +87,7 @@ impl Event {
     pub fn as_log(&self) -> &LogEvent {
         match self {
             Event::Log(log) => log,
-            _ => panic!("Failed type coercion, {self:?} is not a log event"),
+            _ => panic!("as_log Failed type coercion, {self:?} is not a log event"),
         }
     }
 
@@ -99,7 +99,7 @@ impl Event {
     pub fn as_mut_log(&mut self) -> &mut LogEvent {
         match self {
             Event::Log(log) => log,
-            _ => panic!("Failed type coercion, {self:?} is not a log event"),
+            _ => panic!("as_mut_log Failed type coercion, {self:?} is not a log event"),
         }
     }
 
@@ -111,7 +111,7 @@ impl Event {
     pub fn into_log(self) -> LogEvent {
         match self {
             Event::Log(log) => log,
-            _ => panic!("Failed type coercion, {self:?} is not a log event"),
+            _ => panic!("into_log Failed type coercion, {self:?} is not a log event"),
         }
     }
 
