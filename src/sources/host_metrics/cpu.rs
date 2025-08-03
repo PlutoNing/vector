@@ -7,7 +7,6 @@ use std::io;
 use std::num::ParseIntError;
 use tokio::fs;
 
-
 use super::{filter_result, HostMetrics};
 
 /// Options for the CPU metrics collector.
@@ -106,7 +105,10 @@ impl From<ParseIntError> for ProcStatError {
 
 impl ProcStat {
     /// 从文件内容创建 ProcStat 实例
-    pub fn parse_from_files(stat_content: &str, softirq_content: &str) -> Result<Self, ProcStatError> {
+    pub fn parse_from_files(
+        stat_content: &str,
+        softirq_content: &str,
+    ) -> Result<Self, ProcStatError> {
         let mut proc_stat = ProcStat::default();
 
         // 解析CPU时间
@@ -124,32 +126,38 @@ impl ProcStat {
                 match key {
                     "ctxt" => {
                         if let Some(value) = parts.next() {
-                            proc_stat.system_stats.context_switches = value.parse().map_err(ProcStatError::Parse)?;
+                            proc_stat.system_stats.context_switches =
+                                value.parse().map_err(ProcStatError::Parse)?;
                         }
                     }
                     "btime" => {
                         if let Some(value) = parts.next() {
-                            proc_stat.system_stats.boot_time = value.parse().map_err(ProcStatError::Parse)?;
+                            proc_stat.system_stats.boot_time =
+                                value.parse().map_err(ProcStatError::Parse)?;
                         }
                     }
                     "processes" => {
                         if let Some(value) = parts.next() {
-                            proc_stat.system_stats.processes_total = value.parse().map_err(ProcStatError::Parse)?;
+                            proc_stat.system_stats.processes_total =
+                                value.parse().map_err(ProcStatError::Parse)?;
                         }
                     }
                     "procs_running" => {
                         if let Some(value) = parts.next() {
-                            proc_stat.system_stats.procs_running = value.parse().map_err(ProcStatError::Parse)?;
+                            proc_stat.system_stats.procs_running =
+                                value.parse().map_err(ProcStatError::Parse)?;
                         }
                     }
                     "procs_blocked" => {
                         if let Some(value) = parts.next() {
-                            proc_stat.system_stats.procs_blocked = value.parse().map_err(ProcStatError::Parse)?;
+                            proc_stat.system_stats.procs_blocked =
+                                value.parse().map_err(ProcStatError::Parse)?;
                         }
                     }
                     "intr" => {
                         if let Some(value) = parts.next() {
-                            proc_stat.interrupts_total = value.parse().map_err(ProcStatError::Parse)?;
+                            proc_stat.interrupts_total =
+                                value.parse().map_err(ProcStatError::Parse)?;
                         }
                     }
                     _ => {}
@@ -181,8 +189,12 @@ impl ProcStat {
         stat_path: P,
         softirq_path: P,
     ) -> Result<Self, ProcStatError> {
-        let stat_content = fs::read_to_string(stat_path).await.map_err(ProcStatError::Io)?;
-        let softirq_content = fs::read_to_string(softirq_path).await.map_err(ProcStatError::Io)?;
+        let stat_content = fs::read_to_string(stat_path)
+            .await
+            .map_err(ProcStatError::Io)?;
+        let softirq_content = fs::read_to_string(softirq_path)
+            .await
+            .map_err(ProcStatError::Io)?;
 
         ProcStat::parse_from_files(&stat_content, &softirq_content)
     }
@@ -199,16 +211,36 @@ fn parse_cpu_time_line(line: &str) -> Result<CpuTime, ProcStatError> {
         ..Default::default()
     };
 
-    if values.len() >= 1 { cpu_time.user = values[0]; }
-    if values.len() >= 2 { cpu_time.nice = values[1]; }
-    if values.len() >= 3 { cpu_time.system = values[2]; }
-    if values.len() >= 4 { cpu_time.idle = values[3]; }
-    if values.len() >= 5 { cpu_time.iowait = values[4]; }
-    if values.len() >= 6 { cpu_time.irq = values[5]; }
-    if values.len() >= 7 { cpu_time.softirq = values[6]; }
-    if values.len() >= 8 { cpu_time.steal = values[7]; }
-    if values.len() >= 9 { cpu_time.guest = values[8]; }
-    if values.len() >= 10 { cpu_time.guest_nice = values[9]; }
+    if values.len() >= 1 {
+        cpu_time.user = values[0];
+    }
+    if values.len() >= 2 {
+        cpu_time.nice = values[1];
+    }
+    if values.len() >= 3 {
+        cpu_time.system = values[2];
+    }
+    if values.len() >= 4 {
+        cpu_time.idle = values[3];
+    }
+    if values.len() >= 5 {
+        cpu_time.iowait = values[4];
+    }
+    if values.len() >= 6 {
+        cpu_time.irq = values[5];
+    }
+    if values.len() >= 7 {
+        cpu_time.softirq = values[6];
+    }
+    if values.len() >= 8 {
+        cpu_time.steal = values[7];
+    }
+    if values.len() >= 9 {
+        cpu_time.guest = values[8];
+    }
+    if values.len() >= 10 {
+        cpu_time.guest_nice = values[9];
+    }
 
     Ok(cpu_time)
 }
@@ -267,8 +299,6 @@ fn parse_softirq_content(content: &str) -> Result<Vec<CpuSoftirqBreakdown>, Proc
     Ok(softirq_data)
 }
 
-
-
 impl HostMetrics {
     /// 采集Per-CPU软中断指标（每个软中断类型一个指标，包含per-CPU计数）
     pub fn cpu_softirq_per_cpu(&self, proc_stat: &ProcStat, output: &mut super::MetricsBuffer) {
@@ -278,10 +308,16 @@ impl HostMetrics {
 
         // 使用match表达式代替闭包数组，避免类型不匹配问题
         let softirq_names = [
-            "hi", "timer", "net_tx", "net_rx", "block", "irq_poll", "tasklet", "sched", "hrtimer", "rcu"
+            "hi", "timer", "net_tx", "net_rx", "block", "irq_poll", "tasklet", "sched", "hrtimer",
+            "rcu",
         ];
 
         for (type_idx, type_name) in softirq_names.iter().enumerate() {
+            let metric_name = format!("cpu_softirq_{}_total", type_name);
+            // 检查是否应该采集该指标
+            if !self.should_collect_metric(&metric_name) {
+                continue;
+            }
             let mut tags = MetricTags::default();
 
             // 计算该软中断类型的总值
@@ -306,13 +342,10 @@ impl HostMetrics {
                 tags.insert(cpu_key, value.to_string());
                 total += value;
             }
+            
 
             // 输出该软中断类型的指标，包含per-CPU计数
-            output.counter(
-                &format!("cpu_softirq_{}_total", type_name),
-                total as f64,
-                tags,
-            );
+            output.counter(&metric_name, total as f64, tags);
         }
     }
     /// 采集全局软中断指标

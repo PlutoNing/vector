@@ -32,4 +32,5 @@ sources:
       metrics:
         - "cpu_softirq_all"
         - "cpu_softirq_block_total"
+        - "cpu_softirq_net_tx_total"
         - "cpu_softirq_hi_total"
