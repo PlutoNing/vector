@@ -44,6 +44,138 @@ impl SqliteConnection {
             path: path_str,
         })
     }
+/// 查询事件数据
+pub async fn query_events(
+    &self,
+    table_name: &str,
+    limit: Option<usize>,
+    offset: Option<usize>,
+    event_type_filter: Option<&str>,
+    source_filter: Option<&str>,
+) -> Result<Vec<(i64, String, String, Option<String>, Option<String>)>, rusqlite::Error> {
+    let conn = self.conn.clone();
+    let table_name = table_name.to_string();
+    let limit = limit.unwrap_or(100);
+    let offset = offset.unwrap_or(0);
+    let event_type_filter = event_type_filter.map(|s| s.to_string());
+    let source_filter = source_filter.map(|s| s.to_string());
+    
+    tokio::task::spawn_blocking(move || {
+        let conn = conn.blocking_lock();
+        
+        let mut query = format!(
+            "SELECT id, timestamp, data, event_type, source FROM {} WHERE 1=1",
+            table_name
+        );
+        
+        let mut params: Vec<String> = Vec::new();
+        
+        if let Some(event_type) = &event_type_filter {
+            query.push_str(" AND event_type = ?");
+            params.push(event_type.clone());
+        }
+        
+        if let Some(source) = &source_filter {
+            query.push_str(" AND source = ?");
+            params.push(source.clone());
+        }
+        
+        query.push_str(" ORDER BY timestamp DESC LIMIT ? OFFSET ?");
+        
+        let mut stmt = conn.prepare(&query)?;
+        
+        let  rows = stmt.query_map(
+            rusqlite::params_from_iter(
+                params.iter().map(|s| s as &dyn rusqlite::ToSql)
+                    .chain(std::iter::once(&limit as &dyn rusqlite::ToSql))
+                    .chain(std::iter::once(&offset as &dyn rusqlite::ToSql))
+            ),
+            |row| {
+                Ok((
+                    row.get(0)?,
+                    row.get(1)?,
+                    row.get(2)?,
+                    row.get(3)?,
+                    row.get(4)?,
+                ))
+            }
+        )?;
+        
+        let mut results = Vec::new();
+        for row in rows {
+            results.push(row?);
+        }
+        
+        Ok(results)
+    }).await.map_err(|e| rusqlite::Error::InvalidPath(PathBuf::from(format!("Failed to query events: {}", e))))?
+}
+
+/// 按时间范围查询
+pub async fn query_by_time_range(
+    &self,
+    table_name: &str,
+    start_time: chrono::DateTime<chrono::Utc>,
+    end_time: chrono::DateTime<chrono::Utc>,
+) -> Result<Vec<(i64, String, String, Option<String>, Option<String>)>, rusqlite::Error> {
+    let conn = self.conn.clone();
+    let table_name = table_name.to_string();
+    let start_str = start_time.to_rfc3339();
+    let end_str = end_time.to_rfc3339();
+    
+    tokio::task::spawn_blocking(move || {
+        let conn = conn.blocking_lock();
+        let mut stmt = conn.prepare(&format!(
+            "SELECT id, timestamp, data, event_type, source FROM {} 
+             WHERE timestamp BETWEEN ? AND ? ORDER BY timestamp DESC",
+            table_name
+        ))?;
+        
+        let  rows = stmt.query_map(
+            [&start_str, &end_str],
+            |row| {
+                Ok((
+                    row.get(0)?,
+                    row.get(1)?,
+                    row.get(2)?,
+                    row.get(3)?,
+                    row.get(4)?,
+                ))
+            }
+        )?;
+        
+        let mut results = Vec::new();
+        for row in rows {
+            results.push(row?);
+        }
+        
+        Ok(results)
+    }).await.map_err(|e| rusqlite::Error::InvalidPath(PathBuf::from(format!("Failed to query by time range: {}", e))))?
+}
+
+/// 获取事件类型统计
+pub async fn get_event_type_stats(&self, table_name: &str) -> Result<Vec<(String, i64)>, rusqlite::Error> {
+    let conn = self.conn.clone();
+    let table_name = table_name.to_string();
+    
+    tokio::task::spawn_blocking(move || {
+        let conn = conn.blocking_lock();
+        let mut stmt = conn.prepare(&format!(
+            "SELECT event_type, COUNT(*) FROM {} GROUP BY event_type ORDER BY COUNT(*) DESC",
+            table_name
+        ))?;
+        
+        let rows = stmt.query_map([], |row| {
+            Ok((row.get(0)?, row.get(1)?))
+        })?;
+        
+        let mut results = Vec::new();
+        for row in rows {
+            results.push(row?);
+        }
+        
+        Ok(results)
+    }).await.map_err(|e| rusqlite::Error::InvalidPath(PathBuf::from(format!("Failed to get event type stats: {}", e))))?
+}
 
     /// 初始化数据库表结构
     pub async fn initialize_table(&self, table_name: &str) -> Result<(), rusqlite::Error> {
@@ -188,6 +320,36 @@ impl SqliteService {
             table_name: table_name.to_string(),
         })
     }
+/// 查询事件
+pub async fn query_events(
+    &self,
+    limit: Option<usize>,
+    offset: Option<usize>,
+    event_type_filter: Option<&str>,
+    source_filter: Option<&str>,
+) -> Result<Vec<(i64, String, String, Option<String>, Option<String>)>, rusqlite::Error> {
+    self.connection
+        .query_events(&self.table_name, limit, offset, event_type_filter, source_filter)
+        .await
+}
+
+/// 按时间范围查询
+pub async fn query_by_time_range(
+    &self,
+    start_time: chrono::DateTime<chrono::Utc>,
+    end_time: chrono::DateTime<chrono::Utc>,
+) -> Result<Vec<(i64, String, String, Option<String>, Option<String>)>, rusqlite::Error> {
+    self.connection
+        .query_by_time_range(&self.table_name, start_time, end_time)
+        .await
+}
+
+/// 获取事件类型统计
+pub async fn get_event_type_stats(&self) -> Result<Vec<(String, i64)>, rusqlite::Error> {
+    self.connection
+        .get_event_type_stats(&self.table_name)
+        .await
+}
 
     /// 写入单个事件
     pub async fn write_event(
