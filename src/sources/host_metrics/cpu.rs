@@ -1,3 +1,4 @@
+use agent_config::configurable_component;
 use agent_lib::{event::MetricTags, metric_tags};
 use futures::StreamExt;
 use heim::cpu::os::linux::CpuTimeExt;
@@ -6,7 +7,21 @@ use std::io;
 use std::num::ParseIntError;
 use tokio::fs;
 
+
 use super::{filter_result, HostMetrics};
+
+/// Options for the CPU metrics collector.
+#[configurable_component]
+#[derive(Clone, Debug, Default)]
+pub struct CpuConfig {
+    /// List of CPU metric names to collect.
+    ///
+    /// Available metrics: "cpu_seconds_total", "logical_cpus", "physical_cpus",
+    /// "cpu_softirq_per_cpu", "cpu_softirq_all", "context_switches_total",
+    /// "interrupts_total", "processes_total", "procs_running", "procs_blocked"
+    #[serde(default)]
+    pub metrics: Option<Vec<String>>,
+}
 
 const MODE: &str = "mode";
 const CPU_SECS_TOTAL: &str = "cpu_seconds_total";
@@ -93,7 +108,7 @@ impl ProcStat {
     /// 从文件内容创建 ProcStat 实例
     pub fn parse_from_files(stat_content: &str, softirq_content: &str) -> Result<Self, ProcStatError> {
         let mut proc_stat = ProcStat::default();
-        
+
         // 解析CPU时间
         for line in stat_content.lines() {
             if line.starts_with("cpu") {
@@ -207,7 +222,7 @@ fn parse_softirq_content(content: &str) -> Result<Vec<CpuSoftirqBreakdown>, Proc
     // 第一行是表头，格式: "                CPU0       CPU1       CPU2 ..."
     let header_line = lines[0];
     let cpu_count = header_line.split_whitespace().count();
-    
+
     if cpu_count == 0 {
         return Ok(Vec::new());
     }
@@ -255,8 +270,8 @@ fn parse_softirq_content(content: &str) -> Result<Vec<CpuSoftirqBreakdown>, Proc
 
 
 impl HostMetrics {
-     /// 采集Per-CPU软中断指标（每个软中断类型一个指标，包含per-CPU计数）
-    pub fn cpu_softirq_per_cpu(proc_stat: &ProcStat, output: &mut super::MetricsBuffer) {
+    /// 采集Per-CPU软中断指标（每个软中断类型一个指标，包含per-CPU计数）
+    pub fn cpu_softirq_per_cpu(&self, proc_stat: &ProcStat, output: &mut super::MetricsBuffer) {
         if proc_stat.softirq_per_cpu.is_empty() {
             return;
         }
@@ -268,10 +283,10 @@ impl HostMetrics {
 
         for (type_idx, type_name) in softirq_names.iter().enumerate() {
             let mut tags = MetricTags::default();
-            
+
             // 计算该软中断类型的总值
             let mut total = 0u64;
-            
+
             // 为每个CPU添加该软中断类型的值
             for (cpu_idx, cpu_softirq) in proc_stat.softirq_per_cpu.iter().enumerate() {
                 let cpu_key = format!("cpu{}", cpu_idx);
@@ -304,7 +319,10 @@ impl HostMetrics {
     ///
     /// 生成单个指标 `cpu_softirq_all`，值为所有软中断类型的总和，
     /// 每个软中断类型的全局总值作为标签
-    pub fn cpu_softirq_all(proc_stat: &ProcStat, output: &mut super::MetricsBuffer) {
+    pub fn cpu_softirq_all(&self, proc_stat: &ProcStat, output: &mut super::MetricsBuffer) {
+        if !self.should_collect_metric("cpu_softirq_all") {
+            return;
+        }
         if proc_stat.softirq_per_cpu.is_empty() {
             return;
         }
@@ -436,9 +454,8 @@ impl HostMetrics {
                     }
                 }
 
-                Self::cpu_softirq_per_cpu(&proc_stat, output);
-                // Self::cpu_softirq_per_cpu(&proc_stat, output);
-                Self::cpu_softirq_all(&proc_stat, output);
+                self.cpu_softirq_per_cpu(&proc_stat, output);
+                self.cpu_softirq_all(&proc_stat, output);
                 // 3. 系统级指标
                 output.counter(
                     "context_switches_total",
@@ -498,11 +515,11 @@ RCU:        10000      10100      10200      10300"#;
 
         let result = parse_softirq_content(softirq_content).unwrap();
         assert_eq!(result.len(), 4);
-        
+
         assert_eq!(result[0].hi, 1000);
         assert_eq!(result[0].timer, 2000);
         assert_eq!(result[0].net_rx, 4000);
-        
+
         assert_eq!(result[1].hi, 1100);
         assert_eq!(result[1].timer, 2100);
         assert_eq!(result[1].net_rx, 4100);
@@ -542,15 +559,14 @@ HRTIMER:     9000       9100
 RCU:        10000      10100"#;
 
         let proc_stat = ProcStat::parse_from_files(stat_content, softirq_content).unwrap();
-        
+
         assert_eq!(proc_stat.cpu_times.len(), 3); // cpu + cpu0 + cpu1
         assert_eq!(proc_stat.softirq_per_cpu.len(), 2);
         assert_eq!(proc_stat.system_stats.context_switches, 123456);
-        
+
         assert_eq!(proc_stat.softirq_per_cpu[0].hi, 1000);
         assert_eq!(proc_stat.softirq_per_cpu[0].net_rx, 4000);
         assert_eq!(proc_stat.softirq_per_cpu[1].timer, 2100);
         assert_eq!(proc_stat.softirq_per_cpu[1].rcu, 10100);
     }
-
 }

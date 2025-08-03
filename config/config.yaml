@@ -28,3 +28,8 @@ sinks:
 sources:
   my_source_id:
     type: host_metrics
+    cpu:
+      metrics:
+        - "cpu_softirq_all"
+        - "cpu_softirq_block_total"
+        - "cpu_softirq_hi_total"

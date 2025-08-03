@@ -122,6 +122,9 @@ pub struct HostMetricsConfig {
     #[configurable(derived)]
     #[serde(default)]
     pub disk: disk::DiskConfig,
+    #[configurable(derived)]
+    #[serde(default)]
+    pub cpu: cpu::CpuConfig,
 
     #[configurable(derived)]
     #[serde(default)]
@@ -329,6 +332,16 @@ impl HostMetricsConfig {
         }
     }
 }
+#[derive(Clone, Debug, Default)]
+pub struct MetricsFilter {
+    pub cpu: Option<Vec<String>>,
+    pub memory: Option<Vec<String>>,
+    pub network: Option<Vec<String>>,
+    pub disk: Option<Vec<String>>,
+    pub filesystem: Option<Vec<String>>,
+    pub process: Option<Vec<String>>,
+}
+
 /* 代表一个HostMetrics的获取器
 HostMetrics config的run函数定时调用, 用来获取metrics */
 pub struct HostMetrics {
@@ -336,17 +349,33 @@ pub struct HostMetrics {
     system: System,
     root_cgroup: Option<cgroups::CGroupRoot>,
     events_received: Registered<EventsReceived>,
+    metrics_filter: MetricsFilter,
 }
 
 impl HostMetrics {
+    fn should_collect_metric(&self, metric_name: &str) -> bool {
+    match &self.metrics_filter.cpu {
+        None => true, // 如果没有指定，采集所有指标
+        Some(metrics) => metrics.contains(&metric_name.to_string()),
+    }
+}
     pub fn new(config: HostMetricsConfig) -> Self {
         let cgroups = config.cgroups.clone().unwrap_or_default();
         let root_cgroup = cgroups::CGroupRoot::new(&cgroups);
+        let metrics_filter = MetricsFilter {
+            cpu: config.cpu.metrics.clone(),
+            memory: None, // 后续扩展
+            network: None,
+            disk: None,
+            filesystem: None,
+            process: None,
+        };
         Self {
             config,
             system: System::new(),
             root_cgroup,
             events_received: register!(EventsReceived),
+            metrics_filter,
         }
     }
 
