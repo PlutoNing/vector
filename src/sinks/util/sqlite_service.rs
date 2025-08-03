@@ -449,4 +449,41 @@ mod tests {
         let (count, _) = service.get_stats().await.unwrap();
         assert_eq!(count, 100);
     }
+
+
+#[tokio::test]
+async fn test_query_existing_database() {
+    let db_path = "/tmp/scx_agent-2025-08-04.db";
+    
+    // 创建服务连接到现有数据库
+    let service = SqliteService::new(db_path, "events").await.unwrap();
+    
+    // 测试1: 查询所有事件
+    let all_events = service.query_events(Some(10), None, None, None).await.unwrap();
+    println!("总事件数: {}", all_events.len());
+    for (id, timestamp, data, event_type, source) in &all_events[..5] {
+        println!("ID: {}, 时间: {}, 类型: {:?}, 来源: {:?}, 数据: {}", 
+                 id, timestamp, event_type, source, data.len());
+    }
+    
+    // 测试2: 查询特定类型的事件
+    let cpu_events = service.query_events(Some(5), None, Some("cpu_seconds_total"), None).await.unwrap();
+    println!("CPU事件数: {}", cpu_events.len());
+    
+    // 测试3: 获取事件类型统计
+    let type_stats = service.get_event_type_stats().await.unwrap();
+    println!("事件类型分布:");
+    for (event_type, count) in type_stats {
+        println!("  {}: {}", event_type, count);
+    }
+    
+    // 测试4: 按时间范围查询（最近1小时）
+    let end_time = chrono::Utc::now();
+    let start_time = end_time - chrono::Duration::hours(1);
+    let recent_events = service.query_by_time_range(start_time, end_time).await.unwrap();
+    println!("最近1小时事件数: {}", recent_events.len());
+    
+    service.close().await.unwrap();
+}
+
 }
