@@ -14,11 +14,15 @@ enum BuildError {
 }
 use std::{collections::HashMap, fmt, sync::Arc, time::Instant};
 
-use chrono::Utc;
-use futures::{Stream, StreamExt};
-use metrics::{histogram, Histogram};
-use tracing::Span;
 use crate::buffers::topology::channel::{self, LimitedReceiver, LimitedSender};
+use crate::config::{ComponentKey, OutputId};
+use crate::schema::Definition;
+use crate::{
+    internal_event::{
+        self, CountByteSize, EventsSent, InternalEventHandle as _, Registered, DEFAULT_OUTPUT,
+    },
+    register,
+};
 use agent_lib::config::EventCount;
 use agent_lib::event::array::EventArrayIntoIter;
 #[cfg(any(test))]
@@ -27,26 +31,16 @@ use agent_lib::json_size::JsonSize;
 use agent_lib::{
     config::{log_schema, SourceOutput},
     event::{array, Event, EventArray, EventContainer, EventRef},
-
     ByteSizeOf, EstimatedJsonEncodedSizeOf,
 };
-use crate::{
-    register,
-        internal_event::{
-        self, CountByteSize, EventsSent, InternalEventHandle as _, Registered, DEFAULT_OUTPUT,
-    },
-};
+use chrono::Utc;
+use futures::{Stream, StreamExt};
+use metrics::{histogram, Histogram};
+use tracing::Span;
 use vrl::value::Value;
-use crate::config::{ComponentKey, OutputId};
-use crate::schema::Definition;
 
-use tokio::sync::mpsc;
 use crate::buffers::topology::channel::SendError;
-
-
-
-
-
+use tokio::sync::mpsc;
 
 pub const CHUNK_SIZE: usize = 1000;
 
@@ -82,6 +76,7 @@ impl<T> From<SendError<T>> for ClosedError {
         Self
     }
 }
+/* 作为一个source event的实体 */
 /// SourceSenderItem is a thin wrapper around [EventArray] used to track the send duration of a batch.
 ///
 /// This is needed because the send duration is calculated as the difference between when the batch
@@ -125,17 +120,21 @@ impl EventContainer for SourceSenderItem {
         self.events.into_events()
     }
 }
-
+/* 从source sender item转为event array */
 impl From<SourceSenderItem> for EventArray {
     fn from(val: SourceSenderItem) -> Self {
         val.events
     }
 }
-/* 感觉像是个buf? */
+
 pub struct Builder {
+    // 缓冲区大小，默认1000个事件
     buf_size: usize,
+    // 默认输出通道（可选）
     default_output: Option<Output>, /* 是channel的tx */
+    // 命名输出通道映射表
     named_outputs: HashMap<String, Output>,
+    // 延迟监控直方图
     lag_time: Option<Histogram>,
 }
 
@@ -151,6 +150,7 @@ impl Default for Builder {
 }
 
 impl Builder {
+    /* 初始化一个指定buf大小的builder */
     pub const fn with_buffer(mut self, n: usize) -> Self {
         self.buf_size = n;
         self
@@ -201,10 +201,10 @@ impl Builder {
     }
 }
 
+/* 用于发送事件出去
+调用内部default_output的send接口 */
 #[derive(Debug, Clone)]
 pub struct SourceSender {
-    // The default output is optional because some sources, e.g. `datadog_agent`
-    // , can be configured to only output to named outputs.
     default_output: Option<Output>,
     named_outputs: HashMap<String, Output>,
 }
@@ -313,15 +313,15 @@ impl SourceSender {
         self.default_output.as_mut().expect("no default output")
     }
 
-    /// Send an event to the default output.
+    /// 发送一个事件到默认输出( self.default_output)
     ///
     /// This internally handles emitting [EventsSent]  events.
     pub async fn send_event(&mut self, event: impl Into<EventArray>) -> Result<(), ClosedError> {
         self.default_output_mut().send_event(event).await
     }
 
-    /// Send a stream of events to the default output.
-    ///
+    /// 发送stream事件到默认输出
+    /// 使用的是Output的能力
     /// This internally handles emitting [EventsSent] events.
     pub async fn send_event_stream<S, E>(&mut self, events: S) -> Result<(), ClosedError>
     where
@@ -361,13 +361,9 @@ impl SourceSender {
     }
 }
 
-/// UnsentEvents tracks the number of events yet to be sent in the buffer. This is used to
-/// increment the appropriate counters when a future is not polled to completion. Particularly,
-/// this is known to happen in a Warp server when a client sends a new HTTP request on a TCP
-/// connection that already has a pending request.
-///
-/// If its internal count is greater than 0 when dropped, the appropriate [ComponentEventsDropped]
-/// event is emitted.
+/// __跟踪未发送事件__：记录还有多少事件在缓冲区中
+/// __异常处理__：当发送操作被中断时，自动统计丢失的事件数量
+/// __监控告警__：发出 `ComponentEventsDropped` 事件，便于监控和调试
 struct UnsentEventCount {
     count: usize,
     span: Span,
@@ -397,7 +393,8 @@ impl Drop for UnsentEventCount {
         }
     }
 }
-/* 表示一个output? */
+/* 表示一个output?
+一个source sender包裹一个Output用于输出事件 */
 #[derive(Clone)]
 struct Output {
     sender: LimitedSender<SourceSenderItem>, /* 是tx channel */
@@ -429,7 +426,7 @@ impl Output {
         log_definition: Option<Arc<Definition>>,
         output_id: OutputId,
     ) -> (Self, LimitedReceiver<SourceSenderItem>) {
-        /* 看来output是基于channel的 */
+
         let (tx, rx) = channel::limited(n);
         (
             Self {
@@ -445,6 +442,7 @@ impl Output {
         )
     }
 
+    /* 发送一个source event出去 */
     async fn send(
         &mut self,
         mut events: EventArray,
@@ -456,11 +454,14 @@ impl Output {
             .iter_events()
             .for_each(|event| self.emit_lag_time(event, reference));
 
+        /* 初始化数组里的event的meta里的source id等信息 */
         events.iter_events_mut().for_each(|mut event| {
             // attach runtime schema definitions from the source
+            // 设置log schema
             if let Some(log_definition) = &self.log_definition {
                 event.metadata_mut().set_schema_definition(log_definition);
             }
+            /* 设置source id */
             event
                 .metadata_mut()
                 .set_upstream_id(Arc::clone(&self.output_id));
@@ -468,6 +469,8 @@ impl Output {
 
         let byte_size = events.estimated_json_encoded_size_of();
         let count = events.len();
+        /* 调用Output的tx channel来发送出去
+        先加入sender的inner array */
         self.sender
             .send(SourceSenderItem {
                 events,
@@ -475,11 +478,13 @@ impl Output {
             })
             .await
             .map_err(|_| ClosedError)?;
+        /* 记录一个trace */
         self.events_sent.emit(CountByteSize(count, byte_size));
         unsent_event_count.decr(count);
         Ok(())
     }
 
+    /* 发送事件 */
     async fn send_event(&mut self, event: impl Into<EventArray>) -> Result<(), ClosedError> {
         let event: EventArray = event.into();
         // It's possible that the caller stops polling this future while it is blocked waiting

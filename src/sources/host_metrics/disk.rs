@@ -5,6 +5,12 @@ use agent_lib::metric_tags;
 
 use super::{default_all_devices, example_devices, filter_result, FilterList, HostMetrics};
 
+/* host metrics的disk相关的子config
+disk:
+  devices:
+    includes: ["sda", "sdb"]
+    excludes: ["loop*", "dm-*"]
+ */
 /// Options for the disk metrics collector.
 #[configurable_component]
 #[derive(Clone, Debug, Default)]

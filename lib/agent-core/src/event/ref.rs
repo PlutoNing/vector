@@ -175,6 +175,8 @@ impl<'a> EventMutRef<'a> {
         }
     }
 
+    /* 获取event的meta
+    比如可以用来记录event的一些属性 */
     /// Access the metadata mutably in this reference.
     pub fn metadata_mut(&mut self) -> &mut EventMetadata {
         match self {

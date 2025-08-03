@@ -44,36 +44,34 @@ mod tcp;
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum Collector {
-    /// Metrics related to Linux control groups.
-    ///
-    /// Only available on Linux.
+    /// cgroup的metrics
     CGroups,
 
-    /// Metrics related to CPU utilize.
+    /// CPU utilize.
     Cpu,
 
-    /// Metrics related to Process utilize.
+    /// Process utilize.
     Process,
 
-    /// Metrics related to disk I/O utilize.
+    /// disk I/O utilize.
     Disk,
 
-    /// Metrics related to filesystem space utilize.
+    /// filesystem space utilize.
     Filesystem,
 
-    /// Metrics related to the system load average.
+    /// system load average.
     Load,
 
-    /// Metrics related to the host.
+    /// host info.
     Host,
 
-    /// Metrics related to memory utilize.
+    /// memory utilize.
     Memory,
 
-    /// Metrics related to network utilize.
+    /// network utilize.
     Network,
 
-    /// Metrics related to TCP connections.
+    /// TCP connections.
     TCP,
 }
 
@@ -81,14 +79,10 @@ pub enum Collector {
 #[configurable_component]
 #[derive(Clone, Debug, Default)]
 struct FilterList {
-    /// Any patterns which should be included.
-    ///
-    /// The patterns are matched using globbing.
+    /// 允许的模式
     includes: Option<Vec<PatternWrapper>>,
 
-    /// Any patterns which should be excluded.
-    ///
-    /// The patterns are matched using globbing.
+    /// 排除的模式.
     excludes: Option<Vec<PatternWrapper>>,
 }
 
@@ -142,6 +136,14 @@ pub struct HostMetricsConfig {
     pub process: process::ProcessConfig,
 }
 
+/* cgroup相关的子config
+    cgroups:
+      base: "/system.slice"
+      levels: 2
+      groups:
+        includes: ["*.service"]
+        excludes: ["user.slice*"]
+ */
 /// Options for the cgroups (controller groups) metrics collector.
 ///
 /// This collector is only available on Linux systems, and only supports either version 2 or hybrid cgroups.
@@ -177,6 +179,7 @@ pub struct CGroupsConfig {
     base_dir: Option<PathBuf>,
 }
 
+/* 默认收集间隔 */
 const fn default_scrape_interval() -> Duration {
     Duration::from_secs(15)
 }
@@ -185,6 +188,7 @@ pub fn default_namespace() -> Option<String> {
     Some(String::from("host"))
 }
 
+/* 默认的启用的collector */
 const fn example_collectors() -> [&'static str; 9] {
     [
         "cgroups",
@@ -248,7 +252,7 @@ fn default_all_processes() -> FilterList {
 const fn default_levels() -> usize {
     100
 }
-
+/* cgroup的默认过滤器 */
 fn example_cgroups() -> FilterList {
     FilterList {
         includes: Some(vec!["user.slice/*".try_into().unwrap()]),
@@ -266,11 +270,11 @@ fn default_cgroups_config() -> Option<CGroupsConfig> {
 
 impl_generate_config_from_default!(HostMetricsConfig);
 
+/* 每一个source都要实现SourceConfig接口, 提供outputs, sources等 */
 #[async_trait::async_trait]
 #[typetag::serde(name = "host_metrics")]
 impl SourceConfig for HostMetricsConfig {
     /* source ctx包含了各种东西 */
-    /* 构建一些文件系统相关, 运行config的run异步函数 */
     async fn build(&self, cx: SourceContext) -> crate::Result<super::Source> {
         init_roots();
         #[cfg(not(target_os = "linux"))]
@@ -587,22 +591,8 @@ impl FilterList {
     }
 }
 
-/// A compiled Unix shell-style pattern.
-///
-/// - `?` matches any single character.
-/// - `*` matches any (possibly empty) sequence of characters.
-/// - `**` matches the current directory and arbitrary subdirectories. This sequence must form a single path component,
-///   so both `**a` and `b**` are invalid and will result in an error. A sequence of more than two consecutive `*`
-///   characters is also invalid.
-/// - `[...]` matches any character inside the brackets. Character sequences can also specify ranges of characters, as
-///   ordered by Unicode, so e.g. `[0-9]` specifies any character between 0 and 9 inclusive. An unclosed bracket is
-///   invalid.
-/// - `[!...]` is the negation of `[...]`, i.e. it matches any characters not in the brackets.
-///
-/// The metacharacters `?`, `*`, `[`, `]` can be matched by using brackets (e.g. `[?]`). When a `]` occurs immediately
-/// following `[` or `[!` then it is interpreted as being part of, rather then ending, the character set, so `]` and NOT
-/// `]` can be matched by `[]]` and `[!]]` respectively. The `-` character can be specified inside a character sequence
-/// pattern by placing it at the start or the end, e.g. `[abc-]`.
+/* 表示host metric filter list的一个模式 */
+/// compiled Unix shell-style pattern.
 #[configurable_component]
 #[derive(Clone, Debug)]
 #[serde(try_from = "String", into = "String")]

@@ -278,6 +278,7 @@ impl EventContainer for EventArray {
         }
     }
 
+    /* 转为对应的迭代器 */
     fn into_events(self) -> Self::IntoIter {
         match self {
             Self::Logs(a) => EventArrayIntoIter::Logs(a.into_iter()),

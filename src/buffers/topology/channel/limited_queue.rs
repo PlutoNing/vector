@@ -72,6 +72,8 @@ impl<T> Clone for Inner<T> {
     }
 }
 
+/* 作为Output的sender成员,  用于发送事件
+核心是个tx */
 #[derive(Debug)]
 pub struct LimitedSender<T> {
     inner: Inner<T>,
@@ -92,6 +94,7 @@ impl<T: InMemoryBufferable> LimitedSender<T> {
         self.inner.limiter.available_permits()
     }
 
+    /* 把事件加入内部的 */
     /// Sends an item into the channel.
     ///
     /// # Errors

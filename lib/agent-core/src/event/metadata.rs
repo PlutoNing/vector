@@ -55,6 +55,7 @@ pub(super) struct Inner {
     /// in a source, and there is currently no use-case for reading the value in a sink.
     pub(crate) upstream_id: Option<Arc<OutputId>>,
 
+    /* 这里记录的是发送这个事件的Output的self.log_definition */
     /// An identifier for a globally registered schema definition which provides information about
     /// the event shape (type information, and semantic meaning of fields).
     /// This definition is only currently valid for logs, and shouldn't be used for other event types.
@@ -146,6 +147,8 @@ impl EventMetadata {
         self.get_mut().source_type = Some(source_type.into());
     }
 
+    /* 设置event的meta的upstream id (也就是source id)
+    输出事件的时候会记录 */
     /// Sets the `upstream_id` in the metadata to the provided value.
     pub fn set_upstream_id(&mut self, upstream_id: Arc<OutputId>) {
         self.get_mut().upstream_id = Some(upstream_id);
