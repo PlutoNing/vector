@@ -1,8 +1,4 @@
 use heim::memory::os::linux::MemoryExt;
-#[cfg(target_os = "macos")]
-use heim::memory::os::macos::MemoryExt;
-#[cfg(not(windows))]
-use heim::memory::os::SwapExt;
 use heim::units::information::byte;
 use agent_lib::event::MetricTags;
 
@@ -56,44 +52,6 @@ impl HostMetrics {
             }
             Err(error) => {
                 error!("Failed to load memory info: {}", error);
-            }
-        }
-    }
-
-    pub async fn swap_metrics(&self, output: &mut super::MetricsBuffer) {
-        output.name = "memory";
-        match heim::memory::swap().await {
-            Ok(swap) => {
-                output.gauge(
-                    "memory_swap_free_bytes",
-                    swap.free().get::<byte>() as f64,
-                    MetricTags::default(),
-                );
-                output.gauge(
-                    "memory_swap_total_bytes",
-                    swap.total().get::<byte>() as f64,
-                    MetricTags::default(),
-                );
-                output.gauge(
-                    "memory_swap_used_bytes",
-                    swap.used().get::<byte>() as f64,
-                    MetricTags::default(),
-                );
-                #[cfg(not(windows))]
-                output.counter(
-                    "memory_swapped_in_bytes_total",
-                    swap.sin().map(|swap| swap.get::<byte>()).unwrap_or(0) as f64,
-                    MetricTags::default(),
-                );
-                #[cfg(not(windows))]
-                output.counter(
-                    "memory_swapped_out_bytes_total",
-                    swap.sout().map(|swap| swap.get::<byte>()).unwrap_or(0) as f64,
-                    MetricTags::default(),
-                );
-            }
-            Err(error) => {
-                error!("Failed to load swap info: {}", error);
             }
         }
     }

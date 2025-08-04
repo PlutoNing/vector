@@ -274,7 +274,6 @@ impl HostMetrics {
         }
         if self.config.has_collector(Collector::Memory) {
             self.memory_metrics(&mut buffer).await;
-            self.swap_metrics(&mut buffer).await;
         }
         if self.config.has_collector(Collector::Network) {
             self.network_metrics(&mut buffer).await;
