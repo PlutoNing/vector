@@ -250,7 +250,6 @@ fn parse_softirq_content(content: &str) -> Result<Vec<CpuSoftirqBreakdown>, Proc
     if lines.is_empty() {
         return Ok(Vec::new());
     }
-
     // 第一行是表头，格式: "                CPU0       CPU1       CPU2 ..."
     let header_line = lines[0];
     let cpu_count = header_line.split_whitespace().count();
@@ -258,16 +257,13 @@ fn parse_softirq_content(content: &str) -> Result<Vec<CpuSoftirqBreakdown>, Proc
     if cpu_count == 0 {
         return Ok(Vec::new());
     }
-
     let mut softirq_data = vec![CpuSoftirqBreakdown::default(); cpu_count];
-
     // 解析每种软中断类型
     for line in &lines[1..] {
         let parts: Vec<&str> = line.split_whitespace().collect();
         if parts.len() < cpu_count + 1 {
             continue;
         }
-
         let irq_type = parts[0];
         let values: Vec<u64> = parts[1..=cpu_count]
             .iter()
@@ -342,7 +338,6 @@ impl HostMetrics {
                 tags.insert(cpu_key, value.to_string());
                 total += value;
             }
-            
 
             // 输出该软中断类型的指标，包含per-CPU计数
             output.counter(&metric_name, total as f64, tags);
