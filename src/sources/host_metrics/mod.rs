@@ -16,7 +16,6 @@ use glob::{Pattern, PatternError};
 use heim::units::ratio::ratio;
 use heim::units::time::second;
 use serde_with::serde_as;
-use sysinfo::System;
 use tokio::time;
 use tokio_stream::wrappers::IntervalStream;
 
@@ -33,7 +32,6 @@ mod cpu;
 mod disk;
 mod memory;
 mod network;
-mod process;
 mod tcp;
 
 /// Collector types.
@@ -47,9 +45,6 @@ pub enum Collector {
 
     /// CPU utilize.
     Cpu,
-
-    /// Process utilize.
-    Process,
 
     /// disk I/O utilize.
     Disk,
@@ -125,10 +120,6 @@ pub struct HostMetricsConfig {
     #[configurable(derived)]
     #[serde(default)]
     pub network: network::NetworkConfig,
-
-    #[configurable(derived)]
-    #[serde(default)]
-    pub process: process::ProcessConfig,
 }
 
 /* cgroup相关的子config
@@ -205,7 +196,6 @@ fn default_collectors() -> Option<Vec<Collector>> {
         Collector::Host,
         Collector::Memory,
         Collector::Network,
-        Collector::Process,
     ];
 
     collectors.push(Collector::CGroups);
@@ -228,19 +218,7 @@ fn default_all_devices() -> FilterList {
     }
 }
 
-fn example_processes() -> FilterList {
-    FilterList {
-        includes: Some(vec!["docker".try_into().unwrap()]),
-        excludes: None,
-    }
-}
 
-fn default_all_processes() -> FilterList {
-    FilterList {
-        includes: Some(vec!["*".try_into().unwrap()]),
-        excludes: None,
-    }
-}
 
 const fn default_levels() -> usize {
     100
@@ -328,14 +306,12 @@ pub struct MetricsFilter {
     pub memory: Option<Vec<String>>,
     pub network: Option<Vec<String>>,
     pub disk: Option<Vec<String>>,
-    pub process: Option<Vec<String>>,
 }
 
 /* 代表一个HostMetrics的获取器
 HostMetrics config的run函数定时调用, 用来获取metrics */
 pub struct HostMetrics {
     config: HostMetricsConfig,
-    system: System,
     root_cgroup: Option<cgroups::CGroupRoot>,
     events_received: Registered<EventsReceived>,
     metrics_filter: MetricsFilter,
@@ -356,11 +332,9 @@ impl HostMetrics {
             memory: None, // 后续扩展
             network: None,
             disk: None,
-            process: None,
         };
         Self {
             config,
-            system: System::new(),
             root_cgroup,
             events_received: register!(EventsReceived),
             metrics_filter,
@@ -379,9 +353,6 @@ impl HostMetrics {
         }
         if self.config.has_collector(Collector::Cpu) {
             self.cpu_metrics(&mut buffer).await;
-        }
-        if self.config.has_collector(Collector::Process) {
-            self.process_metrics(&mut buffer).await;
         }
         if self.config.has_collector(Collector::Disk) {
             self.disk_metrics(&mut buffer).await;
