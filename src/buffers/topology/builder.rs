@@ -53,6 +53,8 @@ pub enum TopologyError {
     StackedAcks,
 }
 
+/* 里面包裹一个buffer(实现了into buffer接口, 目前存在内存buffer)
+用于加入buffer topology的stages成员 */
 struct TopologyStage<T: Bufferable> {
     untransformed: Box<dyn IntoBuffer<T>>,
     when_full: WhenFull,
@@ -60,29 +62,12 @@ struct TopologyStage<T: Bufferable> {
 
 /// Builder for constructing buffer topologies.
 pub struct TopologyBuilder<T: Bufferable> {
-    stages: Vec<TopologyStage<T>>, /* 里面可能是一堆mem buffer */
+    /* 所使用的buffer type, 目前仅实现内存buffer */
+    stages: Vec<TopologyStage<T>>,
 }
 
 impl<T: Bufferable> TopologyBuilder<T> {
-    /// Adds a new stage to the buffer topology.
-    ///
-    /// The "when full" behavior can be optionally configured here.  If no behavior is specified,
-    /// and an overflow buffer is _not_ added to the topology after this, then the "when full"
-    /// behavior will use a default value of "block".  If a "when full" behavior is specified, and
-    /// an overflow buffer is added to the topology after this, then the specified "when full"
-    /// behavior will be ignored and will be set to "overflow" mode.
-    ///
-    /// Callers can configure what to do when a buffer is full by setting `when_full`.  Three modes
-    /// are available -- block, drop newest, and overflow -- which are documented in more detail by
-    /// [`BufferSender`].
-    ///
-    /// Two notes about what modes are not valid in certain scenarios:
-    /// - the innermost stage (the last stage given to the builder) cannot be set to "overflow" mode,
-    ///   as there is no other stage to overflow to
-    /// - a stage cannot use the "block" or "drop newest" mode when there is a subsequent stage, and
-    ///   must user the "overflow" mode
-    ///Any occurrence of either of these scenarios will result in an error during build.
-    /// stage可能是个mem buffer
+    /// 把stage这个buffer加入buffer topology.
     pub fn stage<S>(&mut self, stage: S, when_full: WhenFull) -> &mut Self
     where
         S: IntoBuffer<T> + 'static,
@@ -94,12 +79,7 @@ impl<T: Bufferable> TopologyBuilder<T> {
         self
     }
 
-    /// Consumes this builder, returning the sender and receiver that can be used by components.
-    ///
-    /// # Errors
-    ///fd213dff344
-    /// If there was a configuration error with one of the stages, an error variant will be returned
-    /// explaining the issue. /* 总体上像是构造了buffer的sender和receiver (builder的stages里面有buffer) */
+    /// 构建stages里的buffer拓扑
     pub async fn build(
         self,
         buffer_id: String,
@@ -108,7 +88,7 @@ impl<T: Bufferable> TopologyBuilder<T> {
         // We pop stages off in reverse order to build from the inside out.
         let mut buffer_usage = BufferUsage::from_span(span.clone());
         let mut current_stage = None; /* 里面是buffer的sender和receiver */
-            /* 遍历builder的buffers */
+
         for (stage_idx, stage) in self.stages.into_iter().enumerate().rev() {
             // Make sure the stage is valid for our current builder state.
             match stage.when_full {
@@ -138,7 +118,7 @@ impl<T: Bufferable> TopologyBuilder<T> {
                 .into_buffer_parts(usage_handle.clone())
                 .await
                 .context(FailedToBuildStageSnafu { stage_idx })?;
-            /* buffer还有sender和receiver? */
+
             let (mut sender, mut receiver) = match current_stage.take() {
                 None => (
                     BufferSender::new(sender, stage.when_full),

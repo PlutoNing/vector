@@ -453,6 +453,7 @@ impl<'a> Builder<'a> {
             };
             /* buffer的tx rx */
             let (tx, rx) = if let Some(buffer) = self.buffers.remove(key) {
+                /* 返回key对应的buffer(由tx和rx组成) */
                 buffer
             } else {
                 let buffer_type = match sink.buffer.stages().first().expect("cant ever be empty") {

@@ -209,12 +209,7 @@ impl BufferType {
         }
     }
 
-    /// Adds this buffer type as a stage to an existing [`TopologyBuilder`].
-    ///
-    /// # Errors
-    ///
-    /// If a required parameter is missing, or if there is an error building the topology itself, an
-    /// error variant will be returned describing the error
+    /// 把自己这个类型的buffer,创建一个,加入topology builder
     pub fn add_to_builder<T>(
         &self,
         builder: &mut TopologyBuilder<T>,
@@ -237,24 +232,7 @@ impl BufferType {
     }
 }
 
-/// Buffer configuration.
-///
-/// Buffers are compromised of stages(*) that form a buffer _topology_, with input items being
-/// subject to configurable behavior when each stage reaches configured limits.  Buffers are
-/// configured for sinks, where backpressure from the sink can be handled by the buffer.  This
-/// allows absorbing temporary load, or potentially adding write-ahead-log behavior to a sink to
-/// increase the durability of a given Vector pipeline.
-///
-/// While we use the term "buffer topology" here, a buffer topology is referred to by the more
-/// common "buffer" or "buffers" shorthand.  This is related to buffers originally being a single
-/// component, where you could only choose which buffer type to use.  As we expand buffer
-/// functionality to allow chaining buffers together, you'll see "buffer topology" used in internal
-/// documentation to correctly reflect the internal structure.
-///
-// TODO: We need to limit chained buffers to only allowing a single copy of each buffer type to be
-// defined, otherwise, for example, two instances of the same disk buffer type in a single chained
-// buffer topology would try to both open the same buffer files on disk, which wouldn't work or
-// would go horribly wrong.
+/// agent中用于配置缓冲区（buffer）行为的枚举类型，定义数据在sink组件中的缓冲方式
 #[configurable_component]
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[serde(untagged)]
@@ -273,6 +251,7 @@ pub enum BufferConfig {
     Chained(Vec<BufferType>),
 }
 
+/* 默认是基于内存的 */
 impl Default for BufferConfig {
     fn default() -> Self {
         Self::Single(BufferType::Memory {
@@ -283,7 +262,7 @@ impl Default for BufferConfig {
 }
 
 impl BufferConfig {
-    /// Gets all of the configured stages for this buffer.
+    /// 返回内部的buffer type
     pub fn stages(&self) -> &[BufferType] {
         match self {
             Self::Single(stage) => slice::from_ref(stage),/* file sink这里 */
@@ -312,15 +291,14 @@ impl BufferConfig {
     ) -> Result<(BufferSender<T>, BufferReceiver<T>), BufferBuildError>
     where
         T: Bufferable + Clone + Finalizable,
-    {/* 构建sink的时候构建一个buffer */
+    {
         let mut builder = TopologyBuilder::default();
-        /* stage是个buffer type的指针 */
-        for stage in self.stages() { /* 把自己新建一个,塞到builder的stage里面 */
+        for stage in self.stages() {
             stage.add_to_builder(&mut builder, data_dir.clone(), buffer_id.clone())?;
         }
 
         builder
-            .build(buffer_id, span) /* 是fd213dff344那个函数 */
+            .build(buffer_id, span)
             .await
             .context(FailedToBuildTopologySnafu)
     }
