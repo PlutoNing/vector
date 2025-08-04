@@ -1,5 +1,5 @@
 use std::{
-    path::{Path, PathBuf},
+    path::{Path},
     time::Duration,
 };
 
@@ -26,7 +26,6 @@ use crate::{
     register, SourceSender,
 };
 
-mod cgroups;
 mod cpu;
 mod disk;
 mod memory;
@@ -101,11 +100,6 @@ pub struct HostMetricsConfig {
     pub namespace: Option<String>,
 
     #[configurable(derived)]
-    #[derivative(Default(value = "default_cgroups_config()"))]
-    #[serde(default = "default_cgroups_config")]
-    pub cgroups: Option<CGroupsConfig>,
-
-    #[configurable(derived)]
     #[serde(default)]
     pub disk: disk::DiskConfig,
     #[configurable(derived)]
@@ -115,49 +109,6 @@ pub struct HostMetricsConfig {
     #[configurable(derived)]
     #[serde(default)]
     pub network: network::NetworkConfig,
-}
-
-/* cgroup相关的子config
-   cgroups:
-     base: "/system.slice"
-     levels: 2
-     groups:
-       includes: ["*.service"]
-       excludes: ["user.slice*"]
-*/
-/// Options for the cgroups (controller groups) metrics collector.
-///
-/// This collector is only available on Linux systems, and only supports either version 2 or hybrid cgroups.
-#[configurable_component]
-#[derive(Clone, Debug, Derivative)]
-#[derivative(Default)]
-#[serde(default)]
-pub struct CGroupsConfig {
-    /// The number of levels of the cgroups hierarchy for which to report metrics.
-    ///
-    /// A value of `1` means the root or named cgroup.
-    #[derivative(Default(value = "default_levels()"))]
-    #[serde(default = "default_levels")]
-    #[configurable(metadata(docs::examples = 1))]
-    #[configurable(metadata(docs::examples = 3))]
-    levels: usize,
-
-    /// The base cgroup name to provide metrics for.
-    #[configurable(metadata(docs::examples = "/"))]
-    #[configurable(metadata(docs::examples = "system.slice/snapd.service"))]
-    pub(super) base: Option<PathBuf>,
-
-    /// Lists of cgroup name patterns to include or exclude in gathering
-    /// usage metrics.
-    #[configurable(metadata(docs::examples = "example_cgroups()"))]
-    #[serde(default = "default_all_devices")]
-    groups: FilterList,
-
-    /// Base cgroup directory, for testing use only
-    #[serde(skip_serializing)]
-    #[configurable(metadata(docs::hidden))]
-    #[configurable(metadata(docs::human_name = "Base Directory"))]
-    base_dir: Option<PathBuf>,
 }
 
 /* 默认收集间隔 */
@@ -203,25 +154,6 @@ fn default_all_devices() -> FilterList {
         includes: Some(vec!["*".try_into().unwrap()]),
         excludes: None,
     }
-}
-
-const fn default_levels() -> usize {
-    100
-}
-/* cgroup的默认过滤器 */
-fn example_cgroups() -> FilterList {
-    FilterList {
-        includes: Some(vec!["user.slice/*".try_into().unwrap()]),
-        excludes: Some(vec!["*.service".try_into().unwrap()]),
-    }
-}
-
-fn default_cgroups_config() -> Option<CGroupsConfig> {
-    // Check env variable to allow generating docs on non-linux systems.
-    if std::env::var("VECTOR_GENERATE_SCHEMA").is_ok() {
-        return Some(CGroupsConfig::default());
-    }
-    Some(CGroupsConfig::default())
 }
 
 impl_generate_config_from_default!(HostMetricsConfig);
@@ -297,7 +229,6 @@ pub struct MetricsFilter {
 HostMetrics config的run函数定时调用, 用来获取metrics */
 pub struct HostMetrics {
     config: HostMetricsConfig,
-    root_cgroup: Option<cgroups::CGroupRoot>,
     events_received: Registered<EventsReceived>,
     metrics_filter: MetricsFilter,
 }
@@ -310,8 +241,6 @@ impl HostMetrics {
         }
     }
     pub fn new(config: HostMetricsConfig) -> Self {
-        let cgroups = config.cgroups.clone().unwrap_or_default();
-        let root_cgroup = cgroups::CGroupRoot::new(&cgroups);
         let metrics_filter = MetricsFilter {
             cpu: config.cpu.metrics.clone(),
             memory: None, // 后续扩展
@@ -320,7 +249,6 @@ impl HostMetrics {
         };
         Self {
             config,
-            root_cgroup,
             events_received: register!(EventsReceived),
             metrics_filter,
         }
@@ -332,10 +260,6 @@ impl HostMetrics {
     /* 获取系统的指标 */
     async fn capture_metrics(&mut self) -> Vec<Metric> {
         let mut buffer = self.buffer();
-
-        if self.config.has_collector(Collector::CGroups) {
-            self.cgroups_metrics(&mut buffer).await;
-        }
         if self.config.has_collector(Collector::Cpu) {
             self.cpu_metrics(&mut buffer).await;
         }
