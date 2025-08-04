@@ -173,10 +173,6 @@ environment:
 environment-prepare: ## Prepare the Vector dev shell using $CONTAINER_TOOL.
 	${ENVIRONMENT_PREPARE}
 
-.PHONY: environment-clean
-environment-clean: ## Clean the Vector dev shell using $CONTAINER_TOOL.
-	@$(CONTAINER_TOOL) volume rm -f vector-target vector-cargo-cache vector-rustup-cache
-	@$(CONTAINER_TOOL) rmi $(ENVIRONMENT_UPSTREAM) || true
 
 .PHONY: environment-push
 environment-push: environment-prepare ## Publish a new version of the container image.
@@ -187,12 +183,12 @@ environment-push: environment-prepare ## Publish a new version of the container 
 build: check-build-tools
 build: export CFLAGS += -g0 -O3
 build: ## Build the project in release mode (Supports `ENVIRONMENT=true`)
-	${MAYBE_ENVIRONMENT_EXEC} cargo build --release --no-default-features --features ${FEATURES}
+	${MAYBE_ENVIRONMENT_EXEC} cargo build --release --no-default-features --features ${FEATURES} --bins
 	${MAYBE_ENVIRONMENT_COPY_ARTIFACTS}
 
 .PHONY: build-dev
 build-dev: ## Build the project in development mode (Supports `ENVIRONMENT=true`)
-	${MAYBE_ENVIRONMENT_EXEC} cargo build --no-default-features --features ${FEATURES}
+	${MAYBE_ENVIRONMENT_EXEC} cargo build --no-default-features --features ${FEATURES} --bins
 
 .PHONY: build-x86_64-unknown-linux-gnu
 build-x86_64-unknown-linux-gnu: target/x86_64-unknown-linux-gnu/release/vector ## Build a release binary for the x86_64-unknown-linux-gnu triple.
@@ -429,7 +425,7 @@ sha256sum: ## Generate SHA256 checksums of CI artifacts
 ##@ Utility
 
 .PHONY: clean
-clean: environment-clean ## Clean everything
+clean: ## Clean build artifacts
 	cargo clean
 
 .PHONY: fmt

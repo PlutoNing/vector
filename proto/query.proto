@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package query;
+
+service QueryService {
+    // 查询事件数据
+    rpc QueryEvents(QueryRequest) returns (QueryResponse);
+    // 获取事件类型列表
+    rpc GetEventTypes(EmptyRequest) returns (EventTypesResponse);
+}
+
+message QueryRequest {
+    int32 limit = 1;
+    int32 offset = 2;
+    string event_type_filter = 3;
+    string source_filter = 4;
+    TimeRange time_range = 5;
+    repeated string fields = 6;
+}
+
+message TimeRange {
+    string start_time = 1;
+    string end_time = 2;
+}
+
+message QueryResponse {
+    repeated EventData events = 1;
+    int32 total_count = 2;
+    bool has_more = 3;
+    QueryMetadata metadata = 4;
+}
+
+message EventData {
+    int64 id = 1;
+    string timestamp = 2;
+    string data = 3;
+    string event_type = 4;
+    string source = 5;
+}
+
+message QueryMetadata {
+    int32 returned_count = 1;
+    double query_time_ms = 2;
+}
+
+message EmptyRequest {}
+
+message EventTypesResponse {
+    repeated string event_types = 1;
+}

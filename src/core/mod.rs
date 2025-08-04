@@ -7,3 +7,6 @@ pub use fanout::{ControlChannel,ControlMessage,Fanout};
 /// doc
 pub mod sink;
 pub mod global_options;
+
+pub mod rpc_cli;
+pub mod rpc_server;
