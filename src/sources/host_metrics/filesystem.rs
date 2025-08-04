@@ -1,10 +1,10 @@
+use super::{default_all_devices, example_devices, filter_result, FilterList, HostMetrics};
+use agent_lib::configurable::configurable_component;
+use agent_lib::metric_tags;
 use futures::StreamExt;
 use heim::units::information::byte;
 #[cfg(not(windows))]
 use heim::units::ratio::ratio;
-use agent_lib::configurable::configurable_component;
-use agent_lib::metric_tags;
-use super::{default_all_devices, example_devices, filter_result, FilterList, HostMetrics};
 
 /// Options for the filesystem metrics collector.
 #[configurable_component]
@@ -85,10 +85,10 @@ impl HostMetrics {
                             .await
                             .map_err(|error| {
                                 error!(
-    "Failed to load partitions info for mount point {}: {}", 
-    partition.mount_point().to_str().unwrap_or("unknown"),
-    error
-);
+                                    "Failed to load partitions info for mount point {}: {}",
+                                    partition.mount_point().to_str().unwrap_or("unknown"),
+                                    error
+                                );
                             })
                             .map(|usage| (partition, usage))
                             .ok()

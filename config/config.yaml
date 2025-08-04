@@ -1,10 +1,10 @@
 sinks:
-  out:
-    inputs:
-      - "my_source_id"
-    type: "console"
-    encoding:
-      codec: "text"
+  # out:
+  #   inputs:
+  #     - "my_source_id"
+  #   type: "console"
+  #   encoding:
+  #     codec: "text"
   my_sink_id:
     type: file
     inputs:
@@ -28,6 +28,7 @@ sinks:
 sources:
   my_source_id:
     type: host_metrics
+    scrape_interval_secs: 2
     cpu:
       metrics:
         - "cpu_softirq_all"

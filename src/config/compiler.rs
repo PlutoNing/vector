@@ -31,7 +31,7 @@ pub fn compile(mut builder: ConfigBuilder) -> Result<(Config, Vec<String>), Vec<
                 .filter_map(|(key, table)| table.as_sink(key)),
         )
         .collect::<IndexMap<_, _>>();
-    info!("all_sinks sinks: {:?}", all_sinks);
+    // info!("all_sinks sinks: {:?}", all_sinks);
     let sources_and_table_sources = sources
         .clone()
         .into_iter()

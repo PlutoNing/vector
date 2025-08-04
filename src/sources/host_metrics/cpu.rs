@@ -516,11 +516,11 @@ impl HostMetrics {
                     MetricTags::default(),
                 );
 
-                info!(
-                    "成功采集自定义CPU指标: {}个CPU核心, {}个软中断类型",
-                    proc_stat.cpu_times.len().saturating_sub(1),
-                    10
-                );
+                // info!(
+                //     "成功采集自定义CPU指标: {}个CPU核心, {}个软中断类型",
+                //     proc_stat.cpu_times.len().saturating_sub(1),
+                //     10
+                // );
             }
             Err(e) => {
                 error!("自定义CPU指标采集失败: {}", e);

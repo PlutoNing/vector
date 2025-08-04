@@ -10,3 +10,4 @@ pub mod global_options;
 
 pub mod rpc_cli;
 pub mod rpc_server;
+pub mod rpc_service;
