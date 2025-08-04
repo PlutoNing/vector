@@ -31,7 +31,6 @@ use crate::{
 mod cgroups;
 mod cpu;
 mod disk;
-mod filesystem;
 mod memory;
 mod network;
 mod process;
@@ -54,9 +53,6 @@ pub enum Collector {
 
     /// disk I/O utilize.
     Disk,
-
-    /// filesystem space utilize.
-    Filesystem,
 
     /// system load average.
     Load,
@@ -128,10 +124,6 @@ pub struct HostMetricsConfig {
 
     #[configurable(derived)]
     #[serde(default)]
-    pub filesystem: filesystem::FilesystemConfig,
-
-    #[configurable(derived)]
-    #[serde(default)]
     pub network: network::NetworkConfig,
 
     #[configurable(derived)]
@@ -192,12 +184,11 @@ pub fn default_namespace() -> Option<String> {
 }
 
 /* 默认的启用的collector */
-const fn example_collectors() -> [&'static str; 9] {
+const fn example_collectors() -> [&'static str; 8] {
     [
         "cgroups",
         "cpu",
         "disk",
-        "filesystem",
         "load",
         "host",
         "memory",
@@ -210,7 +201,6 @@ fn default_collectors() -> Option<Vec<Collector>> {
     let mut collectors = vec![
         Collector::Cpu,
         Collector::Disk,
-        Collector::Filesystem,
         Collector::Load,
         Collector::Host,
         Collector::Memory,
@@ -338,7 +328,6 @@ pub struct MetricsFilter {
     pub memory: Option<Vec<String>>,
     pub network: Option<Vec<String>>,
     pub disk: Option<Vec<String>>,
-    pub filesystem: Option<Vec<String>>,
     pub process: Option<Vec<String>>,
 }
 
@@ -367,7 +356,6 @@ impl HostMetrics {
             memory: None, // 后续扩展
             network: None,
             disk: None,
-            filesystem: None,
             process: None,
         };
         Self {
@@ -397,9 +385,6 @@ impl HostMetrics {
         }
         if self.config.has_collector(Collector::Disk) {
             self.disk_metrics(&mut buffer).await;
-        }
-        if self.config.has_collector(Collector::Filesystem) {
-            self.filesystem_metrics(&mut buffer).await;
         }
         if self.config.has_collector(Collector::Load) {
             self.loadavg_metrics(&mut buffer).await;
