@@ -12,7 +12,6 @@ use agent_lib::EstimatedJsonEncodedSizeOf;
 use chrono::{DateTime, Utc};
 use futures::StreamExt;
 use glob::{Pattern, PatternError};
-#[cfg(not(windows))]
 use heim::units::ratio::ratio;
 use heim::units::time::second;
 use serde_with::serde_as;
@@ -32,7 +31,6 @@ mod cpu;
 mod disk;
 mod memory;
 mod network;
-mod tcp;
 
 /// Collector types.
 #[serde_as]
@@ -60,9 +58,6 @@ pub enum Collector {
 
     /// network utilize.
     Network,
-
-    /// TCP connections.
-    TCP,
 }
 
 /// Filtering configuration.
@@ -175,16 +170,9 @@ pub fn default_namespace() -> Option<String> {
 }
 
 /* 默认的启用的collector */
-const fn example_collectors() -> [&'static str; 8] {
+const fn example_collectors() -> [&'static str; 7] {
     [
-        "cgroups",
-        "cpu",
-        "disk",
-        "load",
-        "host",
-        "memory",
-        "network",
-        "tcp",
+        "cgroups", "cpu", "disk", "load", "host", "memory", "network",
     ]
 }
 
@@ -199,7 +187,6 @@ fn default_collectors() -> Option<Vec<Collector>> {
     ];
 
     collectors.push(Collector::CGroups);
-    collectors.push(Collector::TCP);
 
     Some(collectors)
 }
@@ -217,8 +204,6 @@ fn default_all_devices() -> FilterList {
         excludes: None,
     }
 }
-
-
 
 const fn default_levels() -> usize {
     100
@@ -267,7 +252,7 @@ impl HostMetricsConfig {
     /* 定时运行, 获取指标, 发送出去 */
     async fn run(self, mut out: SourceSender, shutdown: ShutdownSignal) -> Result<(), ()> {
         let duration = self.scrape_interval_secs;
-        /* 创建一&#x4E2A;__&#x54;okio定时器__，每隔`duration`时间触发一次 */
+        /* 创建定时器，每隔`duration`时间触发一次 */
         let mut interval = IntervalStream::new(time::interval(duration)).take_until(shutdown);
 
         let mut generator = HostMetrics::new(self);
@@ -319,11 +304,11 @@ pub struct HostMetrics {
 
 impl HostMetrics {
     fn should_collect_metric(&self, metric_name: &str) -> bool {
-    match &self.metrics_filter.cpu {
-        None => true, // 如果没有指定，采集所有指标
-        Some(metrics) => metrics.contains(&metric_name.to_string()),
+        match &self.metrics_filter.cpu {
+            None => true, // 如果没有指定，采集所有指标
+            Some(metrics) => metrics.contains(&metric_name.to_string()),
+        }
     }
-}
     pub fn new(config: HostMetricsConfig) -> Self {
         let cgroups = config.cgroups.clone().unwrap_or_default();
         let root_cgroup = cgroups::CGroupRoot::new(&cgroups);
@@ -369,9 +354,6 @@ impl HostMetrics {
         }
         if self.config.has_collector(Collector::Network) {
             self.network_metrics(&mut buffer).await;
-        }
-        if self.config.has_collector(Collector::TCP) {
-            self.tcp_metrics(&mut buffer).await;
         }
 
         let metrics = buffer.metrics;
