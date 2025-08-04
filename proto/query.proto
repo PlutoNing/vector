@@ -1,6 +1,8 @@
 syntax = "proto3";
 
 package query;
+import "google/protobuf/timestamp.proto";
+
 
 service QueryService {
     // 查询事件数据

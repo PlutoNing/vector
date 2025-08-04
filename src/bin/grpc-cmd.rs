@@ -1,18 +1,17 @@
-use chrono::{DateTime, Utc};
-use clap::{Args, Parser, Subcommand, ValueEnum};
+use clap::Parser;
 use std::path::Path;
 use tonic::transport::{Channel, Endpoint, Uri};
 use tower::service_fn;
-pub mod calc {
-    tonic::include_proto!("calc");
-}
-use scx_agent::core::rpc_cli::{QueryCli, QueryGetArgs, QuerySubCommands};
-use calc::{calculator_client::CalculatorClient, AddRequest};
+use serde_json;
+
+use scx_agent::core::rpc_cli::{QueryCli, QueryGetArgs, QueryOutputFormat, QuerySubCommands};
 pub mod query {
     tonic::include_proto!("query");
 }
 
 use query::{query_service_client::QueryServiceClient, QueryRequest, QueryResponse};
+
+use crate::query::TimeRange;
 
 async fn handle_get_command(
     mut client: QueryServiceClient<Channel>,
@@ -32,9 +31,82 @@ async fn handle_get_command(
 
     Ok(())
 }
+fn format_output(
+    response: QueryResponse,
+    format: &QueryOutputFormat,
+) -> Result<(), Box<dyn std::error::Error>> {
+    match format {
+        QueryOutputFormat::Table => {
+            // 表格格式输出
+            println!("查询结果:");
+            println!("总记录数: {}, 返回记录数: {}, 是否有更多: {}", 
+                response.total_count, 
+                response.metadata.as_ref().map(|m| m.returned_count).unwrap_or(0),
+                response.has_more
+            );
+            
+            if let Some(metadata) = &response.metadata {
+                println!("查询耗时: {:.2}ms", metadata.query_time_ms);
+            }
+            
+            println!();
+            println!("{:<5} {:<20} {:<15} {:<15} {}", "ID", "时间", "类型", "来源", "数据");
+            println!("{:-<5} {:-<20} {:-<15} {:-<15} {}", "", "", "", "", "");
+            
+            for event in response.events {
+                println!("{:<5} {:<20} {:<15} {:<15} {}", 
+                    event.id, 
+                    event.timestamp, 
+                    event.event_type, 
+                    event.source, 
+                    event.data
+                );
+            }
+        }
+        QueryOutputFormat::Json => {
+            // 手动构建 JSON 输出
+            let json_data = serde_json::json!({
+                "total_count": response.total_count,
+                "has_more": response.has_more,
+                "events": response.events.iter().map(|e| {
+                    serde_json::json!({
+                        "id": e.id,
+                        "timestamp": e.timestamp,
+                        "event_type": e.event_type,
+                        "source": e.source,
+                        "data": e.data
+                    })
+                }).collect::<Vec<_>>(),
+                "metadata": response.metadata.as_ref().map(|m| {
+                    serde_json::json!({
+                        "returned_count": m.returned_count,
+                        "query_time_ms": m.query_time_ms
+                    })
+                })
+            });
+            println!("{}", serde_json::to_string_pretty(&json_data)?);
+        }
+        QueryOutputFormat::Csv => {
+            // CSV格式输出
+            println!("id,timestamp,event_type,source,data");
+            for event in response.events {
+                println!("{},{},{},{},{}", 
+                    event.id, 
+                    event.timestamp, 
+                    event.event_type, 
+                    event.source, 
+                    event.data.replace('"', "\"\"")
+                );
+            }
+        }
+        QueryOutputFormat::Yaml => todo!("not implemented"),
+    }
+    
+    Ok(())
+}
 
 fn parse_time_range(
-    args: &GetArgs,
+    args: &QueryGetArgs,
 ) -> Result<(Option<String>, Option<String>), Box<dyn std::error::Error>> {
     let now = chrono::Utc::now();
 
@@ -75,12 +147,11 @@ fn parse_duration(duration_str: &str) -> Result<chrono::Duration, Box<dyn std::e
     }
 }
 fn build_query_request(
-    args: &GetArgs,
+    args: &QueryGetArgs,
     start_time: Option<String>,
     end_time: Option<String>,
 ) -> Result<QueryRequest, Box<dyn std::error::Error>> {
     let mut request = QueryRequest {
-        query_type: QueryType::Simple as i32,
         limit: args.limit as i32,
         offset: args.offset as i32,
         event_type_filter: args.event_type.clone().unwrap_or_default(),
@@ -109,8 +180,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     match cli.command {
         QuerySubCommands::Get(args) => handle_get_command(client, args).await?,
-        QuerySubCommands::Stats(args) => handle_stats_command(client, args).await?,
-        QuerySubCommands::Search(args) => handle_search_command(client, args).await?,
+        QuerySubCommands::Stats(_args) => todo!("Stats command not implemented"),
+        QuerySubCommands::Search(_args) => todo!("Stats command not implemented"),
     }
 
     Ok(())

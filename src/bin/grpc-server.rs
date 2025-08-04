@@ -1,18 +1,9 @@
-use chrono::{DateTime, Utc};
-use scx_agent::sinks::util::sqlite_service::{SqliteConnection, SqliteService};
+use scx_agent::sinks::util::sqlite_service::SqliteService;
 use std::path::Path;
 use std::time::Instant;
 use tokio::net::UnixListener;
 use tokio_stream::wrappers::UnixListenerStream;
 use tonic::{transport::Server, Request, Response, Status};
-pub mod calc {
-    tonic::include_proto!("calc");
-}
-
-use calc::{
-    calculator_server::{Calculator, CalculatorServer},
-    AddRequest, AddResponse,
-};
 pub mod query {
     tonic::include_proto!("query");
 }
@@ -41,27 +32,28 @@ impl QueryService for QueryServiceImpl {
     ) -> Result<Response<QueryResponse>, Status> {
         let start_time = Instant::now();
         let req = request.into_inner();
-        
+
         // 参数验证
         if req.limit < 0 || req.limit > 10000 {
             return Err(Status::invalid_argument("limit必须在0-10000之间"));
         }
-        
+
         // 构建查询条件
         let event_type_filter = if req.event_type_filter.is_empty() {
             None
         } else {
             Some(req.event_type_filter.as_str())
         };
-        
+
         let source_filter = if req.source_filter.is_empty() {
             None
         } else {
             Some(req.source_filter.as_str())
         };
-        
+
         // 执行查询
-        let events = self.sqlite_service
+        let events = self
+            .sqlite_service
             .query_events(
                 Some(req.limit as usize),
                 Some(req.offset as usize),
@@ -70,16 +62,17 @@ impl QueryService for QueryServiceImpl {
             )
             .await
             .map_err(|e| Status::internal(format!("数据库查询失败: {}", e)))?;
-        
+
         // 获取总数
-        let total_count = self.sqlite_service
+        let total_count = self
+            .sqlite_service
             .get_stats()
             .await
             .map_err(|e| Status::internal(format!("获取统计信息失败: {}", e)))?
             .0;
-        
-        // 转换数据格式
-        let event_data: Vec<EventData> = events.into_iter()
+
+        let event_data: Vec<EventData> = events
+            .into_iter()
             .map(|(id, timestamp, data, event_type, source)| EventData {
                 id,
                 timestamp,
@@ -88,77 +81,38 @@ impl QueryService for QueryServiceImpl {
                 source: source.unwrap_or_default(),
             })
             .collect();
-        
+
+        let returned_count = event_data.len() as i32; // 先保存长度
+
         let response = QueryResponse {
             events: event_data,
             total_count: total_count as i32,
             has_more: (req.offset + req.limit) < total_count as i32,
-            metadata: QueryMetadata {
-                returned_count: event_data.len() as i32,
+            metadata: Some(QueryMetadata {
+                returned_count,
                 query_time_ms: start_time.elapsed().as_millis() as f64,
-            },
+            }),
         };
-        
+
         Ok(Response::new(response))
     }
-    
+
     async fn get_event_types(
         &self,
         _request: Request<EmptyRequest>,
     ) -> Result<Response<EventTypesResponse>, Status> {
-        let stats = self.sqlite_service
+        let stats = self
+            .sqlite_service
             .get_event_type_stats()
             .await
             .map_err(|e| Status::internal(format!("获取事件类型失败: {}", e)))?;
-        
-        let event_types: Vec<String> = stats.into_iter()
+
+        let event_types: Vec<String> = stats
+            .into_iter()
             .map(|(event_type, _)| event_type)
             .collect();
-        
+
         Ok(Response::new(EventTypesResponse { event_types }))
-    }
-}
-
-#[derive(Debug)]
-pub struct CalculatorService {
-    sqlite_service: SqliteService,
-}
-// 替换Default实现, 初始化sqlite_service
-impl CalculatorService {
-    async fn new() -> Result<Self, Box<dyn std::error::Error>> {
-        let sqlite_service = SqliteService::new("/tmp/scx_agent-2025-08-04.db", "events").await?;
-        Ok(Self { sqlite_service })
-    }
-}
-#[tonic::async_trait]
-impl Calculator for CalculatorService {
-    async fn add(&self, request: Request<AddRequest>) -> Result<Response<AddResponse>, Status> {
-        let req = request.into_inner();
-        let result = req.val1 + req.val2;
-
-        println!("计算: {} + {} = {}", req.val1, req.val2, result);
-
-        // 获取采集数据
-        match self
-            .sqlite_service
-            .query_events(Some(5), None, None, None)
-            .await
-        {
-            Ok(events) => {
-                println!("采集到的数据:");
-                for (id, timestamp, data, event_type, source) in events {
-                    println!(
-                        "  ID: {}, 时间: {}, 类型: {:?}, 来源: {:?}, 数据: {}",
-                        id, timestamp, event_type, source, data
-                    );
-                }
-            }
-            Err(e) => {
-                println!("查询数据失败: {}", e);
-            }
-        }
-
-        Ok(Response::new(AddResponse { result }))
     }
 }
 
@@ -177,15 +131,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("gRPC服务器启动，监听: {}", socket_path);
     println!("可用服务: Calculator, QueryService");
 
-    let calculator_service = CalculatorService::new().await?;
     let query_service = QueryServiceImpl::new().await?;
 
     Server::builder()
-        .add_service(CalculatorServer::new(calculator_service))
         .add_service(QueryServiceServer::new(query_service))
         .serve_with_incoming(uds_stream)
         .await?;
 
     Ok(())
 }
-

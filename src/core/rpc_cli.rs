@@ -24,39 +24,39 @@ pub enum QuerySubCommands {
 pub struct QueryGetArgs {
     /// 返回记录数量限制
     #[arg(short, long, default_value = "100")]
-    limit: usize,
+    pub limit: usize,
     
     /// 结果偏移量（分页）
     #[arg(short, long, default_value = "0")]
-    offset: usize,
+    pub offset: usize,
     
     /// 事件类型过滤
     #[arg(short, long)]
-    event_type: Option<String>,
+    pub event_type: Option<String>,
     
     /// 数据来源过滤
     #[arg(short, long)]
-    source: Option<String>,
+    pub source: Option<String>,
     
     /// 相对时间范围
     #[arg(long)]
-    since: Option<String>,
+    pub since: Option<String>,
     
     /// 绝对开始时间
     #[arg(long)]
-    start_time: Option<String>,
+    pub start_time: Option<String>,
     
     /// 绝对结束时间
     #[arg(long)]
-    end_time: Option<String>,
+    pub end_time: Option<String>,
     
     /// 输出格式选择
     #[arg(long, value_enum, default_value = "table")]
-    format: QueryOutputFormat,
+    pub format: QueryOutputFormat,
     
     /// 指定返回字段
     #[arg(long, value_delimiter = ',')]
-    fields: Option<Vec<String>>,
+    pub fields: Option<Vec<String>>,
 }
 #[derive(Args)]
 pub struct QueryStatsArgs {

@@ -764,7 +764,6 @@ pub async fn load_configs(
     .map_err(handle_config_errors)?;
     /* 刚刚处理了config */
 
-    /* log schema是什么 */
     config::init_log_schema(config.global.log_schema.clone(), true); /* 这里是初始化这两个字段 */
 
     config.graceful_shutdown_duration = graceful_shutdown_duration;
@@ -775,12 +774,11 @@ pub async fn load_configs(
 pub fn init_logging(_color: bool, log_level: &str, _rate: u64) {
     let level = get_log_levels(log_level);
     use tracing_subscriber::{fmt, EnvFilter};
-    
 
     let filter = EnvFilter::new(log_level);
-    
+
     fmt().with_env_filter(filter).init();
-    
+
     info!("日志系统已初始化");
     info!(message = "Log level is enabled.", level = ?level);
 }
