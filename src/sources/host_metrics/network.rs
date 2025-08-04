@@ -26,9 +26,6 @@ impl HostMetrics {
                     .filter_map(|result| {
                         filter_result(result, "Failed to load/parse network data.")
                     })
-                    // The following pair should be possible to do in one
-                    // .filter_map, but it results in a strange "one type is
-                    // more general than the other" error.
                     .map(|counter| {
                         self.config
                             .network
