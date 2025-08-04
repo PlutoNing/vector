@@ -457,7 +457,7 @@ impl ApplicationConfig {
         config_paths: Vec<ConfigPath>, /* 配置文件路径 */
         config: Config,                /* 读取,解析好的config结构体 */
     ) -> Result<Self, ExitCode> {
-        /* 解析好的config下一步来到这， 看来是生成什么拓扑(包含source, sink等的东西) */
+        /* 解析好的config下一步来到这， 生成拓扑(包含source, sink等的东西) */
         let (topology, graceful_crash_receiver) = RunningTopology::start_init_validated(config)
             .await
             .ok_or(exitcode::CONFIG)?;

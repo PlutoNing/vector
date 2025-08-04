@@ -46,7 +46,7 @@ where
                 // Error is handled by `Encoder`.
                 finalizers.update_status(EventStatus::Errored);
             })?;
-/* write_all是什么 */
+/* */
             match self.output.write_all(&bytes).await {
                 Err(error) => {
                     // Error when writing to stdout/stderr is likely irrecoverable,
