@@ -1,7 +1,7 @@
-use futures::StreamExt;
-use heim::units::information::byte;
 use agent_lib::configurable::configurable_component;
 use agent_lib::metric_tags;
+use futures::StreamExt;
+use heim::units::information::byte;
 
 use super::{default_all_devices, example_devices, filter_result, FilterList, HostMetrics};
 
@@ -31,11 +31,19 @@ impl HostMetrics {
                         filter_result(result, "Failed to load/parse disk I/O data.")
                     })
                     .map(|counter| {
-                        self.config
-                            .disk
-                            .devices
-                            .contains_path(Some(counter.device_name().as_ref()))
-                            .then_some(counter)
+                        
+                        let device_name = counter.device_name();
+                        let device_str = device_name.to_string_lossy();
+                        // 忽略ram和loop设备
+                        if device_str.starts_with("ram") || device_str.starts_with("loop") {
+                            None
+                        } else {
+                            self.config
+                                .disk
+                                .devices
+                                .contains_path(Some(device_name.as_ref()))
+                                .then_some(counter)
+                        }
                     })
                     .filter_map(|counter| async { counter })
                     .collect::<Vec<_>>()
