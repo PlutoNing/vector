@@ -1,13 +1,10 @@
 use agent_config::configurable_component;
 use agent_lib::{event::MetricTags, metric_tags};
-use futures::StreamExt;
-use heim::cpu::os::linux::CpuTimeExt;
-use heim::units::time::second;
 use std::io;
 use std::num::ParseIntError;
 use tokio::fs;
 
-use super::{filter_result, HostMetrics};
+use super::{ HostMetrics};
 
 /// Options for the CPU metrics collector.
 #[configurable_component]
@@ -22,10 +19,6 @@ pub struct CpuConfig {
     pub metrics: Option<Vec<String>>,
 }
 
-const MODE: &str = "mode";
-const CPU_SECS_TOTAL: &str = "cpu_seconds_total";
-const LOGICAL_CPUS: &str = "logical_cpus";
-const PHYSICAL_CPUS: &str = "physical_cpus";
 #[allow(dead_code)]
 #[derive(Debug, Default, Clone)]
 pub struct ProcStat {
@@ -399,89 +392,53 @@ impl HostMetrics {
         // 使用counter类型，值为总软中断数，所有分类作为标签
         output.counter("cpu_softirq_all", total_softirq as f64, softirq_tags);
     }
+    /// 采集CPU时间指标（每个模式一条记录，per-CPU值存储在标签中）
+    pub fn collect_cpu_time_metrics(
+        &self,
+        proc_stat: &ProcStat,
+        output: &mut super::MetricsBuffer,
+    ) {
+        let modes = ["user", "nice", "system", "idle", "iowait", "irq", "softirq"];
+
+        for mode in modes {
+            let mut tags = MetricTags::default();
+            let mut total = 0.0;
+
+            // 收集每个CPU的该模式值
+            for cpu_time in &proc_stat.cpu_times {
+                if cpu_time.cpu_id == "cpu" {
+                    continue;
+                }
+
+                let cpu_index = cpu_time.cpu_id.trim_start_matches("cpu");
+                let value = match mode {
+                    "user" => cpu_time.user as f64,
+                    "nice" => cpu_time.nice as f64,
+                    "system" => cpu_time.system as f64,
+                    "idle" => cpu_time.idle as f64,
+                    "iowait" => cpu_time.iowait as f64,
+                    "irq" => cpu_time.irq as f64,
+                    "softirq" => cpu_time.softirq as f64,
+                    _ => 0.0,
+                };
+
+                tags.insert(format!("cpu{}", cpu_index), value.to_string());
+                total += value;
+            }
+
+            // 设置指标名称包含模式
+            let metric_name = format!("cpu_{}_seconds_total", mode);
+            output.counter(&metric_name, total, tags);
+        }
+    }
 
     pub async fn cpu_metrics(&self, output: &mut super::MetricsBuffer) {
-        // adds the metrics from cpu time for each cpu
-        match heim::cpu::times().await {
-            Ok(times) => {
-                let times: Vec<_> = times
-                    .filter_map(|result| filter_result(result, "Failed to load/parse CPU time."))
-                    .collect()
-                    .await;
-                output.name = "cpu";
-                for (index, times) in times.into_iter().enumerate() {
-                    let tags = |name: &str| metric_tags!(MODE => name, "cpu" => index.to_string());
-                    output.counter(CPU_SECS_TOTAL, times.idle().get::<second>(), tags("idle"));
-
-                    output.counter(
-                        CPU_SECS_TOTAL,
-                        times.io_wait().get::<second>(),
-                        tags("io_wait"),
-                    );
-
-                    output.counter(CPU_SECS_TOTAL, times.nice().get::<second>(), tags("nice"));
-                    output.counter(
-                        CPU_SECS_TOTAL,
-                        times.system().get::<second>(),
-                        tags("system"),
-                    );
-                    output.counter(CPU_SECS_TOTAL, times.user().get::<second>(), tags("user"));
-                }
-            }
-            Err(error) => {
-                error!("Failed to load CPU times: {}", error);
-            }
-        }
-        // adds the logical cpu count gauge
-        match heim::cpu::logical_count().await {
-            Ok(count) => output.gauge(LOGICAL_CPUS, count as f64, MetricTags::default()),
-            Err(error) => {
-                error!("Failed to load logical CPU count: {}", error);
-            }
-        }
-        // adds the physical cpu count gauge
-        match heim::cpu::physical_count().await {
-            Ok(Some(count)) => output.gauge(PHYSICAL_CPUS, count as f64, MetricTags::default()),
-            Ok(None) => {
-                error!("Unable to determine physical CPU count");
-            }
-            Err(error) => {
-                error!("Failed to load physical CPU count: {}", error);
-            }
-        }
         // 添加对自定义指标的采集
         match ProcStat::new().await {
             Ok(proc_stat) => {
                 output.name = "cpu";
 
-                // 1. CPU时间指标（每个CPU核心，每种模式一个指标）
-                for cpu_time in &proc_stat.cpu_times {
-                    if cpu_time.cpu_id == "cpu" {
-                        continue; // 跳过总CPU行
-                    }
-
-                    let cpu_index = cpu_time.cpu_id.trim_start_matches("cpu");
-
-                    // 为每个CPU核心生成7种模式的指标
-                    let modes = [
-                        ("user", cpu_time.user),
-                        ("nice", cpu_time.nice),
-                        ("system", cpu_time.system),
-                        ("idle", cpu_time.idle),
-                        ("iowait", cpu_time.iowait),
-                        ("irq", cpu_time.irq),
-                        ("softirq", cpu_time.softirq),
-                    ];
-
-                    for (mode, value) in modes {
-                        let tags = metric_tags!(
-                            "cpu" => cpu_index,
-                            "mode" => mode
-                        );
-                        output.counter("cpu_seconds_total", value as f64, tags);
-                    }
-                }
-
+                self.collect_cpu_time_metrics(&proc_stat, output);
                 self.cpu_softirq_per_cpu(&proc_stat, output);
                 self.cpu_softirq_all(&proc_stat, output);
                 // 3. 系统级指标
