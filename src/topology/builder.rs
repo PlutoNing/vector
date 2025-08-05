@@ -3,7 +3,7 @@ use std::{
     future::ready,
     sync::{Arc, LazyLock, Mutex},
 };
-
+use crate::buffers::BufferReceiver;
 use futures::{StreamExt, TryStreamExt};
 use futures_util::stream::FuturesUnordered;
 
@@ -13,8 +13,11 @@ use tokio::{
     sync::{mpsc::UnboundedSender, oneshot},
 };
 use tracing::Instrument;
-
-use crate::internal_event::{CountByteSize, InternalEventHandle as _};
+use crate::buffers::BufferSender;
+use crate::{
+    internal_event::{CountByteSize, InternalEventHandle as _},
+    sources::limited,
+};
 
 use super::{
     // fanout::{self, Fanout},
@@ -23,15 +26,13 @@ use super::{
     BuiltBuffer,
     ConfigDiff,
 };
-use crate::buffers::{topology::channel::BufferSender, BufferType};
+use crate::common::Inputs;
 use crate::core::fanout::{self, Fanout};
 use crate::internal_event::EventsReceived;
-use crate::common::Inputs;
 use crate::{
     common::SourceShutdownCoordinator,
     config::{
-        ComponentKey, Config, DataType, EnrichmentTableConfig, OutputId,
-        SinkContext, SourceContext,
+        ComponentKey, Config, DataType, EnrichmentTableConfig, OutputId, SinkContext, SourceContext,
     },
     event::{EventArray, EventContainer},
     register,
@@ -41,7 +42,7 @@ use crate::{
     topology::task::TaskError,
     SourceSender,
 };
-use agent_lib::EstimatedJsonEncodedSizeOf;
+use agent_lib::{config::WhenFull, EstimatedJsonEncodedSizeOf};
 
 static ENRICHMENT_TABLES: LazyLock<crate::enrichment_tables::enrichment::TableRegistry> =
     LazyLock::new(crate::enrichment_tables::enrichment::TableRegistry::default);
@@ -56,6 +57,19 @@ static TRANSFORM_CONCURRENCY_LIMIT: LazyLock<usize> = LazyLock::new(|| {
 });
 
 const INTERNAL_SOURCES: [&str; 2] = ["internal_logs", "internal_metrics"];
+
+use std::num::NonZeroUsize;
+
+#[allow(dead_code)]
+pub struct MemoryBuffer {
+    capacity: NonZeroUsize,
+}
+/* 新建一个mem buffer */
+impl MemoryBuffer {
+    pub fn new(capacity: NonZeroUsize) -> Self {
+        MemoryBuffer { capacity }
+    }
+}
 
 struct Builder<'a> {
     config: &'a super::Config,                       /* 现在的新config */
@@ -456,25 +470,11 @@ impl<'a> Builder<'a> {
                 /* 返回key对应的buffer(由tx和rx组成) */
                 buffer
             } else {
-                let buffer_type = match sink.buffer.stages().first().expect("cant ever be empty") {
-                    BufferType::Memory { .. } => "memory",
-                };
-                let buffer_span = error_span!("sink", buffer_type);
-                let buffer = sink
-                    .buffer
-                    .build(
-                        self.config.global.data_dir.clone(),
-                        key.to_string(),
-                        buffer_span,
-                    )
-                    .await; /* 返回的是buffer的tx和rx */
-                match buffer {
-                    Err(error) => {
-                        self.errors.push(format!("Sink \"{}\": {}", key, error));
-                        continue;
-                    } /* buffer的tx rx */
-                    Ok((tx, rx)) => (tx, Arc::new(Mutex::new(Some(rx.into_stream())))),
-                }
+                let capacity = std::num::NonZeroUsize::new(500).unwrap();
+                let (tx, rx) = limited(capacity.get());
+                let sender = BufferSender::new(tx.into(), WhenFull::Block);
+                let receiver = BufferReceiver::new(rx.into());
+                (sender, Arc::new(Mutex::new(Some(receiver.into_stream()))))
             };
 
             let cx = SinkContext {

@@ -1,22 +1,19 @@
-use std::cell::RefCell;
-use async_trait::async_trait;
-use dyn_clone::DynClone;
-use serde::Serialize;
-use std::path::PathBuf;
-use crate::buffers::{BufferConfig, BufferType};
+use crate::common::Inputs;
+use crate::core::global_options::GlobalOptions;
+use crate::core::sink::VectorSink;
+use agent_lib::config::Input;
 use agent_lib::configurable::attributes::CustomAttribute;
 use agent_lib::configurable::schema::{SchemaGenerator, SchemaObject};
 use agent_lib::configurable::{
     configurable_component, Configurable, GenerateError, Metadata, NamedComponent,
 };
-use agent_lib::{
-    config::{Input},
-};
-use crate::common::Inputs;
-use crate::core::global_options::GlobalOptions;
-use crate::core::sink::VectorSink;
+use async_trait::async_trait;
+use dyn_clone::DynClone;
+use serde::Serialize;
+use std::cell::RefCell;
+use std::path::PathBuf;
 
-use super::{dot_graph::GraphConfig, schema, ComponentKey,  Resource};
+use super::{dot_graph::GraphConfig, schema, ComponentKey, Resource};
 pub type BoxedSink = Box<dyn SinkConfig>;
 
 impl Configurable for BoxedSink {
@@ -58,10 +55,6 @@ where
     #[configurable(derived)]
     pub inputs: Inputs<T>,
 
-    #[configurable(derived)]
-    #[serde(default, skip_serializing_if = "agent_lib::config::is_default")]
-    pub buffer: BufferConfig,
-
     #[serde(flatten)]
     #[configurable(metadata(docs::hidden))]
     pub inner: BoxedSink, /* 比如可能是个file sink config */
@@ -78,7 +71,6 @@ where
     {
         SinkOuter {
             inputs: Inputs::from_iter(inputs),
-            buffer: Default::default(),
             inner: inner.into(),
             graph: Default::default(),
         }
@@ -86,11 +78,6 @@ where
 
     pub fn resources(&self, _id: &ComponentKey) -> Vec<Resource> {
         let resources = self.inner.resources();
-        for stage in self.buffer.stages() {
-            match stage {
-                BufferType::Memory { .. } => {}
-            }
-        }
         resources
     }
 
@@ -110,7 +97,6 @@ where
         SinkOuter {
             inputs: Inputs::from_iter(inputs),
             inner: self.inner,
-            buffer: self.buffer,
             graph: self.graph,
         }
     }
@@ -179,5 +165,4 @@ impl SinkContext {
     pub const fn globals(&self) -> &GlobalOptions {
         &self.globals
     }
-
 }

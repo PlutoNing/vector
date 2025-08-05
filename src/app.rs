@@ -552,7 +552,7 @@ impl Application {
 
         info!("Agent has started.");
         handle.spawn(heartbeat());
-        let db_path = "/tmp/scx_agent-2025-08-04.db";
+        let db_path = "/tmp/scx_agent-2025-08-05.db";
         let socket_path = "/tmp/scx_agent/agent_rpc.sock";
 
         handle.spawn(async move {

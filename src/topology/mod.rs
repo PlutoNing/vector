@@ -16,7 +16,7 @@ mod ready_arrays;
 mod running;
 mod task;
 
-
+use crate::buffers::BufferReceiverStream;
 use std::{
     panic::AssertUnwindSafe,
     sync::{Arc, Mutex},
@@ -24,7 +24,7 @@ use std::{
 
 use futures::{Future, FutureExt};
 use tokio::sync::mpsc;
-use crate::buffers::topology::channel::{BufferReceiverStream, BufferSender};
+
 
 pub use self::builder::TopologyPieces;
 pub use self::controller::{ReloadOutcome, SharedTopologyController, TopologyController};
@@ -32,9 +32,7 @@ pub use self::running::{RunningTopology, ShutdownErrorReceiver};
 
 use self::task::{TaskError, TaskResult};
 use crate::{
-    config::{Config, ConfigDiff},
-    event::EventArray,
-    app::ShutdownError,
+    app::ShutdownError, buffers::BufferSender, config::{Config, ConfigDiff}, event::EventArray
 };
 
 type TaskHandle = tokio::task::JoinHandle<TaskResult>;

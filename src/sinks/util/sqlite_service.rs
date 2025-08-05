@@ -453,7 +453,7 @@ mod tests {
 
 #[tokio::test]
 async fn test_query_existing_database() {
-    let db_path = "/tmp/scx_agent-2025-08-04.db";
+    let db_path = "/tmp/scx_agent-2025-08-05.db";
     
     // 创建服务连接到现有数据库
     let service = SqliteService::new(db_path, "events").await.unwrap();

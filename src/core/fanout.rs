@@ -5,8 +5,9 @@ use futures_util::{pending, poll};
 use indexmap::IndexMap;
 use tokio::sync::mpsc;
 use tokio_util::sync::ReusableBoxFuture;
-use crate::buffers::topology::channel::{BufferSender};
 use agent_lib::{config::ComponentKey, event::EventArray};
+
+use crate::buffers::BufferSender;
 /// doc
 pub enum ControlMessage {
     /// Adds a new sink to the fanout.
@@ -448,9 +449,8 @@ impl Sender {
     }
 
     async fn flush(&mut self) -> crate::Result<()> {
-        let send_reference = self.send_reference.take();
         if let Some(input) = self.input.take() {
-            self.inner.send(input, send_reference).await?;
+            self.inner.send(input).await?;
             self.inner.flush().await?;
         }
 

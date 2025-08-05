@@ -10,11 +10,9 @@ use tokio::select;
 use tokio_util::sync::ReusableBoxFuture;
 
 
-use super::limited_queue::LimitedReceiver;
-use crate::buffers::{
-    buffer_usage_data::BufferUsageHandle,
-};
 use agent_lib::config::Bufferable;
+
+use crate::sources::LimitedReceiver;
 /// Adapter for papering over various receiver backends.
 #[derive(Debug)]
 pub enum ReceiverAdapter<T: Bufferable> {
@@ -51,7 +49,6 @@ where
 pub struct BufferReceiver<T: Bufferable> {
     base: ReceiverAdapter<T>,
     overflow: Option<Box<BufferReceiver<T>>>,
-    instrumentation: Option<BufferUsageHandle>,
 }
 
 impl<T: Bufferable> BufferReceiver<T> {
@@ -60,7 +57,6 @@ impl<T: Bufferable> BufferReceiver<T> {
         Self {
             base,
             overflow: None,
-            instrumentation: None,
         }
     }
 
@@ -69,13 +65,7 @@ impl<T: Bufferable> BufferReceiver<T> {
         Self {
             base,
             overflow: Some(Box::new(overflow)),
-            instrumentation: None,
         }
-    }
-
-    /// Configures this receiver to instrument the items passing through it.
-    pub fn with_usage_instrumentation(&mut self, handle: BufferUsageHandle) {
-        self.instrumentation = Some(handle);
     }
 
     #[async_recursion]
@@ -90,7 +80,7 @@ impl<T: Bufferable> BufferReceiver<T> {
         // attached to the base receiver.
         let overflow = self.overflow.as_mut().map(Pin::new);
 
-        let (item, from_base) = match overflow {
+        let (item, _from_base) = match overflow {
             None => match self.base.next().await {
                 Some(item) => (item, true),
                 None => return None,
@@ -103,17 +93,6 @@ impl<T: Bufferable> BufferReceiver<T> {
                 }
             }
         };
-
-        // If instrumentation is enabled, and we got the item from the base receiver, then and only
-        // then do we track sending the event out.
-        if let Some(handle) = self.instrumentation.as_ref() {
-            if from_base {
-                handle.increment_sent_event_count_and_byte_size(
-                    item.event_count() as u64,
-                    item.size_of() as u64,
-                );
-            }
-        }
 
         Some(item)
     }

@@ -9,11 +9,11 @@ use futures::{future::BoxFuture, FutureExt};
 use pin_project::pin_project;
 use snafu::Snafu;
 use tokio::task::JoinError;
-use crate::buffers::topology::channel::BufferReceiverStream;
+
 use agent_lib::event::EventArray;
-
+use crate::buffers::BufferReceiverStream;
 use crate::{config::ComponentKey};
-
+#[allow(dead_code)]
 #[allow(clippy::large_enum_variant)]
 pub(crate) enum TaskOutput {
     Source,

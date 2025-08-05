@@ -61,7 +61,6 @@ where
                 SinkOuter {
                     graph: self.graph.clone(),
                     inputs: self.inputs.clone(),
-                    buffer: Default::default(),
                     inner: sink,
                 },
             )
