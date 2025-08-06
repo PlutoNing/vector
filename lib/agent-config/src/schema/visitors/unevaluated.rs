@@ -284,7 +284,7 @@ fn build_closed_schema_flatten_eligibility_mappings(
                 .entry(child_referent.referent.as_ref().to_string())
                 .or_insert_with(HashSet::new);
 
-            // Transform the child referent into a parent referent, which preserves the "would
+            // transform the child referent into a parent referent, which preserves the "would
             // unmark" value but now points to the parent instead, and add it to the list of
             // _referrers_ for the child.
             entry.insert(child_referent.with_new_referent(parent_schema_ref.clone()));

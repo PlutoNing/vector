@@ -27,7 +27,7 @@ impl Transform {
 ///
 /// # Invariants
 ///
-/// * It is an illegal invariant to implement `FunctionTransform` for a
+/// * It is an illegal invariant to implement `functionTransform` for a
 ///   `TaskTransform` or vice versa.
 pub trait FunctionTransform: Send + dyn_clone::DynClone + Sync {
     fn transform(&mut self, output: &mut OutputBuffer, event: Event);

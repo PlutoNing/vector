@@ -67,7 +67,6 @@ impl ConfigDiff {/* initial是在最开始产生config之后, 基于空的和这
             || self.enrichment_tables.contains(key)
     }
 }
-/* 感觉像是描述config的组件的变化. 比如sources: Difference::new(&old.sources, &new.sources, &components_to_reload), */
 #[derive(Debug)]
 pub struct Difference {
     pub to_remove: HashSet<ComponentKey>,
@@ -75,7 +74,7 @@ pub struct Difference {
     pub to_add: HashSet<ComponentKey>,
 }
 
-impl Difference {/* 基于新旧组件求出并补差什么的 */
+impl Difference {
     fn new<C>(
         old: &IndexMap<ComponentKey, C>,
         new: &IndexMap<ComponentKey, C>,

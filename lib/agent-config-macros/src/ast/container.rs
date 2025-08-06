@@ -231,7 +231,7 @@ impl<'a> Container<'a> {
 
                 // All containers must have a description: no ifs, ands, or buts.
                 //
-                // The compile-time errors are a bit too inscrutable otherwise, and inscrutable errors are not very
+                // The Compile-time errors are a bit too inscrutable otherwise, and inscrutable errors are not very
                 // helpful when using procedural macros.
                 if attrs.description.is_none() {
                     accumulator

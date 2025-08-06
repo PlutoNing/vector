@@ -18,7 +18,6 @@ use agent_lib::{
 };
 use crate::common::Inputs;
 use crate::core::global_options::GlobalOptions;
-use super::dot_graph::GraphConfig;
 use super::schema::Options as SchemaOptions;
 use super::ComponentKey;
 use super::OutputId;
@@ -57,9 +56,7 @@ pub struct TransformOuter<T>
 where
     T: Configurable + Serialize + 'static,
 {
-    #[configurable(derived)]
-    #[serde(default, skip_serializing_if = "agent_lib::config::is_default")]
-    pub graph: GraphConfig,
+
 
     #[configurable(derived)]
     pub inputs: Inputs<T>,
@@ -83,7 +80,6 @@ where
         TransformOuter {
             inputs,
             inner,
-            graph: Default::default(),
         }
     }
 
@@ -103,7 +99,6 @@ where
         TransformOuter {
             inputs: Inputs::from_iter(inputs),
             inner: self.inner,
-            graph: self.graph,
         }
     }
 }

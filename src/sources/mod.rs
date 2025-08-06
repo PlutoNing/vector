@@ -30,12 +30,6 @@ enum BuildError {
 use std::{collections::HashMap, time::Instant};
 use crate::config::{ComponentKey, OutputId};
 use crate::schema::Definition;
-use crate::{
-    internal_event::{
-        self, CountByteSize, EventsSent, InternalEventHandle as _, Registered, DEFAULT_OUTPUT,
-    },
-    register,
-};
 use agent_lib::config::EventCount;
 use agent_lib::event::array::EventArrayIntoIter;
 #[cfg(any(test))]
@@ -58,7 +52,7 @@ pub const CHUNK_SIZE: usize = 1000;
 
 #[cfg(any(test))]
 const TEST_BUFFER_SIZE: usize = 100;
-
+pub const DEFAULT_OUTPUT: &str = "_default";
 const LAG_TIME_NAME: &str = "source_lag_time_seconds";
 #[derive(Clone, Debug)]
 pub struct ClosedError;
@@ -327,14 +321,14 @@ impl SourceSender {
 
     /// 发送一个事件到默认输出( self.default_output)
     ///
-    /// This internally handles emitting [EventsSent]  events.
+    /// This internally handles emitting [eventsSent]  events.
     pub async fn send_event(&mut self, event: impl Into<EventArray>) -> Result<(), ClosedError> {
         self.default_output_mut().send_event(event).await
     }
 
     /// 发送stream事件到默认输出
     /// 使用的是Output的能力
-    /// This internally handles emitting [EventsSent] events.
+    /// This internally handles emitting [eventsSent] events.
     pub async fn send_event_stream<S, E>(&mut self, events: S) -> Result<(), ClosedError>
     where
         S: Stream<Item = E> + Unpin,
@@ -346,7 +340,7 @@ impl SourceSender {
     /// Send a batch of events to the default output.
     /// 发送指标出去
     /// 比如HostMetrics的capture_metrics获取的host metrics
-    /// This internally handles emitting [EventsSent] events.
+    /// This internally handles emitting [eventsSent] events.
     pub async fn send_batch<I, E>(&mut self, events: I) -> Result<(), ClosedError>
     where
         E: Into<Event> + ByteSizeOf,
@@ -359,7 +353,7 @@ impl SourceSender {
 
     /// Send a batch of events event to a named output.
     ///
-    /// This internally handles emitting [EventsSent] events.
+    /// This internally handles emitting [eventsSent] events.
     pub async fn send_batch_named<I, E>(&mut self, name: &str, events: I) -> Result<(), ClosedError>
     where
         E: Into<Event> + ByteSizeOf,
@@ -653,7 +647,6 @@ impl<T> Drop for LimitedSender<T> {
 struct Output {
     sender: LimitedSender<SourceSenderItem>, /* 是tx channel */
     lag_time: Option<Histogram>,
-    events_sent: Registered<EventsSent>,
     /// The schema definition that will be attached to Log events sent through here
     log_definition: Option<Arc<Definition>>,
     /// The OutputId related to this source sender. This is set as the `upstream_id` in
@@ -675,7 +668,7 @@ impl Output {
     /* 新建一个output, 制定了buffer大小 */
     fn new_with_buffer(
         n: usize, /* buffer大小 */
-        output: String,
+        _output: String,
         lag_time: Option<Histogram>,
         log_definition: Option<Arc<Definition>>,
         output_id: OutputId,
@@ -685,9 +678,6 @@ impl Output {
             Self {
                 sender: tx,
                 lag_time,
-                events_sent: register!(EventsSent::from(internal_event::Output(Some(
-                    output.into()
-                )))),
                 log_definition,
                 output_id: Arc::new(output_id),
             },
@@ -720,7 +710,7 @@ impl Output {
                 .set_upstream_id(Arc::clone(&self.output_id));
         });
 
-        let byte_size = events.estimated_json_encoded_size_of();
+
         let count = events.len();
         /* 调用Output的tx channel来发送出去
         先加入sender的inner array */
@@ -731,8 +721,6 @@ impl Output {
             })
             .await
             .map_err(|_| ClosedError)?;
-        /* 记录一个trace */
-        self.events_sent.emit(CountByteSize(count, byte_size));
         unsent_event_count.decr(count);
         Ok(())
     }

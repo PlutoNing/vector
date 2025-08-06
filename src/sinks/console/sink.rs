@@ -4,16 +4,7 @@ use futures::{stream::BoxStream, StreamExt};
 use tokio::{io, io::AsyncWriteExt};
 use tokio_util::codec::Encoder as _;
 use crate::codecs::Framer;
-use agent_lib::{
-    // internal_event::{
-        // ByteSize, BytesSent, CountByteSize, EventsSent, InternalEventHandle as _, Output, Protocol,
-    // },
-    EstimatedJsonEncodedSizeOf,
-};
-use crate::internal_event::{ ByteSize, BytesSent, CountByteSize, EventsSent, InternalEventHandle as _, Output, Protocol,};
 use crate::{
-    register,
-    // registered_event,
     codecs::{Encoder, Transformer},
     event::{Event, EventStatus, Finalizable},
     sinks::util::StreamSink,
@@ -32,10 +23,7 @@ where
 {
     /*  */
     async fn run(mut self: Box<Self>, mut input: BoxStream<'_, Event>) -> Result<(), ()> {
-        let bytes_sent = register!(BytesSent::from(Protocol("console".into(),)));
-        let events_sent = register!(EventsSent::from(Output(None)));
         while let Some(mut event) = input.next().await {
-            let event_byte_size = event.estimated_json_encoded_size_of();
             /* 转换读取的event? */
             self.transformer.transform(&mut event);
 
@@ -57,9 +45,6 @@ where
                 }
                 Ok(()) => {
                     finalizers.update_status(EventStatus::Delivered);
-
-                    events_sent.emit(CountByteSize(1, event_byte_size));
-                    bytes_sent.emit(ByteSize(bytes.len()));
                 }
             }
         }

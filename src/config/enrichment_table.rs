@@ -6,7 +6,7 @@ use agent_lib::config::ComponentKey;
 use crate::common::Inputs;
 use crate::enrichment_tables::EnrichmentTables;
 
-use super::dot_graph::GraphConfig;
+
 use super::{SinkConfig, SinkOuter, SourceConfig, SourceOuter};
 
 /// Fully resolved enrichment table component.
@@ -18,9 +18,7 @@ where
 {
     #[serde(flatten)]
     pub inner: EnrichmentTables,
-    #[configurable(derived)]
-    #[serde(default, skip_serializing_if = "agent_lib::config::is_default")]
-    pub graph: GraphConfig,
+
     #[configurable(derived)]
     #[serde(
         default = "Inputs::<T>::default",
@@ -40,7 +38,6 @@ where
     {
         Self {
             inner: inner.into(),
-            graph: Default::default(),
             inputs: Inputs::from_iter(inputs),
         }
     }
@@ -59,7 +56,6 @@ where
             (
                 key,
                 SinkOuter {
-                    graph: self.graph.clone(),
                     inputs: self.inputs.clone(),
                     inner: sink,
                 },
@@ -72,7 +68,6 @@ where
             (
                 key,
                 SourceOuter {
-                    graph: self.graph.clone(),
                     inner: source,
                 },
             )
@@ -95,7 +90,6 @@ where
         EnrichmentTableOuter {
             inputs: Inputs::from_iter(inputs),
             inner: self.inner,
-            graph: self.graph,
         }
     }
 }

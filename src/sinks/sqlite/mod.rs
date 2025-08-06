@@ -2,15 +2,15 @@ use std::convert::TryFrom;
 use std::time::Duration;
 
 use crate::codecs::{Framer, FramingConfig, TextSerializerConfig};
-use crate::internal_event::{
-    CountByteSize, EventsSent, InternalEventHandle as _, Output, Registered,
-};
+
+
+
 use crate::{
     codecs::{Encoder, EncodingConfigWithFraming, SinkType, Transformer},
     config::{GenerateConfig, Input, SinkConfig, SinkContext},
     core::sink::VectorSink,
     event::{Event, EventStatus},
-    register,
+
     sinks::util::{timezone_to_offset, StreamSink},
     template::Template,
 };
@@ -96,7 +96,6 @@ pub struct SqliteSink {
     encoder: Encoder<Framer>,
     /* 每个文件每个表对应一个sqlite service */
     services: std::collections::HashMap<String, SqliteService>,
-    events_sent: Registered<EventsSent>,
 }
 
 impl SqliteSink {
@@ -116,7 +115,6 @@ impl SqliteSink {
             transformer,
             encoder,
             services: std::collections::HashMap::new(),
-            events_sent: register!(EventsSent::from(Output(None))),
         })
     }
 
@@ -199,7 +197,6 @@ impl SqliteSink {
         match self.get_or_create_service(&path, &table).await {
             Ok(service) => match service.write_event(&data, event_type.as_deref(), source.as_deref()).await {
                 Ok(rows) => {
-                    self.events_sent.emit(CountByteSize(1, buffer.len().into()));
                     debug!("Wrote {} rows to SQLite table {} in {}", rows, table, path);
                     event.metadata().update_status(EventStatus::Delivered);
                 }

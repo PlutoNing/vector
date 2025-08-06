@@ -19,7 +19,6 @@ pub use agent_lib::{
 };
 
 pub use crate::{
-    internal_event::CountByteSize,
     codecs::{Encoder, EncodingConfig, Transformer},
     config::{DataType, GenerateConfig, SinkConfig, SinkContext},
     event::{Event, LogEvent},

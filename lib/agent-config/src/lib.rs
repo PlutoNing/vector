@@ -49,7 +49,7 @@ where
     //
     // We simply check the given metadata for any numeric validation bounds, and ensure they do not exceed the
     // mechanical limits of the given numeric type `N`.  If they do, we panic, which is not as friendly as a contextual
-    // compile-time error emitted from the `Configurable` derive macro... but we're working with what we've got here.
+    // Compile-time error emitted from the `Configurable` derive macro... but we're working with what we've got here.
     let mechanical_min_bound = N::get_enforced_min_bound();
     let mechanical_max_bound = N::get_enforced_max_bound();
 

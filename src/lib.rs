@@ -56,7 +56,6 @@ pub mod template;
 pub mod topology;
 #[allow(unreachable_pub)]
 pub mod transforms;
-pub mod internal_event;
 pub use sources::SourceSender;
 pub use agent_lib::{event, schema};
 pub use agent_lib::{Error, Result};

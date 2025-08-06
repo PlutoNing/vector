@@ -150,12 +150,6 @@ impl TypedComponent {
 
 #[derive(Debug)]
 struct Options {
-    /* 虽然 `#[configurable_component]` 宏暗示任何被注解的项都是组件，但在拓扑中
-        什么可以是组件与配置中允许作为可配置"组件"之间做了区分。
-
-    - __拓扑组件__：实际在 agent 数据流中运行的组件（Source、Transform、Sink 等）
-    - __配置组件__：配置文件中可以定义的任何可配置项（包括全局选项、提供程序等）
-     */
     /// Component type details, if specified.
     typed_component: Option<TypedComponent>,
 

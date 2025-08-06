@@ -98,11 +98,9 @@ impl Input {
         self
     }
 }
-/* 表示什么 */
 #[derive(Debug, Clone, PartialEq)]
 pub struct SourceOutput {
     pub port: Option<String>,
-    /* 源的类型, metric, log还是trace */
     pub ty: DataType,
 
     // NOTE: schema definitions are only implemented/supported for log-type events. There is no

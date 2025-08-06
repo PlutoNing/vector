@@ -56,7 +56,6 @@ where
         }
     }
 }
-/* file sink config的成员. 应该是负责encode的, 还带有frame功能 */
 /// Encoding configuration.
 #[configurable_component]
 #[derive(Clone, Debug)]

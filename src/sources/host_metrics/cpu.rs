@@ -246,7 +246,6 @@ fn parse_softirq_content(content: &str) -> Result<Vec<CpuSoftirqBreakdown>, Proc
     // 第一行是表头，格式: "                CPU0       CPU1       CPU2 ..."
     let header_line = lines[0];
     let cpu_count = header_line.split_whitespace().count();
-
     if cpu_count == 0 {
         return Ok(Vec::new());
     }
@@ -284,7 +283,6 @@ fn parse_softirq_content(content: &str) -> Result<Vec<CpuSoftirqBreakdown>, Proc
             }
         }
     }
-
     Ok(softirq_data)
 }
 
@@ -295,7 +293,6 @@ impl HostMetrics {
             return;
         }
 
-        // 使用match表达式代替闭包数组，避免类型不匹配问题
         let softirq_names = [
             "hi", "timer", "net_tx", "net_rx", "block", "irq_poll", "tasklet", "sched", "hrtimer",
             "rcu",
@@ -309,10 +306,8 @@ impl HostMetrics {
             }
             let mut tags = MetricTags::default();
 
-            // 计算该软中断类型的总值
             let mut total = 0u64;
 
-            // 为每个CPU添加该软中断类型的值
             for (cpu_idx, cpu_softirq) in proc_stat.softirq_per_cpu.iter().enumerate() {
                 let cpu_key = format!("cpu{}", cpu_idx);
                 let value = match type_idx {
@@ -332,14 +327,11 @@ impl HostMetrics {
                 total += value;
             }
 
-            // 输出该软中断类型的指标，包含per-CPU计数
+            // 包含per-CPU计数
             output.counter(&metric_name, total as f64, tags);
         }
     }
     /// 采集全局软中断指标
-    ///
-    /// 生成单个指标 `cpu_softirq_all`，值为所有软中断类型的总和，
-    /// 每个软中断类型的全局总值作为标签
     pub fn cpu_softirq_all(&self, proc_stat: &ProcStat, output: &mut super::MetricsBuffer) {
         if !self.should_collect_metric("cpu_softirq_all") {
             return;
@@ -348,7 +340,6 @@ impl HostMetrics {
             return;
         }
 
-        // 计算全局软中断值（从所有CPU求和）
         let mut global_softirq = CpuSoftirqBreakdown::default();
         for cpu_softirq in &proc_stat.softirq_per_cpu {
             global_softirq.hi += cpu_softirq.hi;
@@ -363,7 +354,6 @@ impl HostMetrics {
             global_softirq.rcu += cpu_softirq.rcu;
         }
 
-        // 计算总软中断数
         let total_softirq = global_softirq.hi
             + global_softirq.timer
             + global_softirq.net_tx
@@ -375,7 +365,6 @@ impl HostMetrics {
             + global_softirq.hrtimer
             + global_softirq.rcu;
 
-        // 构建标签：每个软中断类型的全局总值
         let softirq_tags = metric_tags!(
             "hi" => global_softirq.hi.to_string(),
             "timer" => global_softirq.timer.to_string(),

@@ -316,49 +316,6 @@ pub struct RootOpts {
     #[arg(id = "config", short, long, env = "agent_config", value_delimiter(','))]
     pub config_paths: Vec<PathBuf>,
 
-    /// Read configuration from files in one or more directories.
-    /// File format is detected from the file name.
-    ///
-    /// Files not ending in .toml, .json, .yaml, or .yml will be ignored.
-    #[arg(
-        id = "config-dir",
-        short = 'C',
-        long,
-        env = "VECTOR_CONFIG_DIR",
-        value_delimiter(',')
-    )]
-    pub config_dirs: Vec<PathBuf>,
-
-    /// Read configuration from one or more files. Wildcard paths are supported.
-    /// TOML file format is expected.
-    #[arg(
-        id = "config-toml",
-        long,
-        env = "VECTOR_CONFIG_TOML",
-        value_delimiter(',')
-    )]
-    pub config_paths_toml: Vec<PathBuf>,
-
-    /// Read configuration from one or more files. Wildcard paths are supported.
-    /// JSON file format is expected.
-    #[arg(
-        id = "config-json",
-        long,
-        env = "VECTOR_CONFIG_JSON",
-        value_delimiter(',')
-    )]
-    pub config_paths_json: Vec<PathBuf>,
-
-    /// Read configuration from one or more files. Wildcard paths are supported.
-    /// YAML file format is expected.
-    #[arg(
-        id = "config-yaml",
-        long,
-        env = "VECTOR_CONFIG_YAML",
-        value_delimiter(',')
-    )]
-    pub config_paths_yaml: Vec<PathBuf>,
-
     /// 线程数量
     #[arg(short, long, env = "VECTOR_THREADS")]
     pub threads: Option<usize>,
@@ -413,17 +370,9 @@ impl RootOpts {
     /// Return a list of config paths with the associated formats.
     pub fn config_paths_with_formats(&self) -> Vec<config::ConfigPath> {
         config::merge_path_lists(vec![
-            (&self.config_paths, None),
-            (&self.config_paths_toml, Some(config::Format::Toml)),
-            (&self.config_paths_json, Some(config::Format::Json)),
-            (&self.config_paths_yaml, Some(config::Format::Yaml)),
+            (&self.config_paths, None)
         ])
         .map(|(path, hint)| config::ConfigPath::File(path, hint))
-        .chain(
-            self.config_dirs
-                .iter()
-                .map(|dir| config::ConfigPath::Dir(dir.to_path_buf())),
-        )
         .collect()
     }
 }
@@ -435,13 +384,14 @@ impl ApplicationConfig {
         opts: &RootOpts,
         signal_handler: &mut SignalHandler,
     ) -> Result<Self, ExitCode> {
-        /* 从prepare_from_opts来到这里 */
+
+        /* 获取命令行指定的配置文件路径列表 */
         let config_paths = opts.config_paths_with_formats();
 
         let graceful_shutdown_duration = (!opts.no_graceful_shutdown_limit)
             .then(|| Duration::from_secs(u64::from(opts.graceful_shutdown_limit_secs)));
 
-        /* 加载配置 20250717152148 */
+
         let config = load_configs(
             &config_paths,
             opts.allow_empty_config,
@@ -751,23 +701,13 @@ pub fn build_runtime(threads: Option<usize>, thread_name: &str) -> Result<Runtim
 }
 /*运行后来到这里, 加载配置  20250717152203, 读取配置文件, 解析, 存入config结构体 */
 pub async fn load_configs(
-    config_paths: &[ConfigPath], /* 里面是搜索的可能的conf路径? */
+    config_paths: &[ConfigPath],
     allow_empty_config: bool,
     graceful_shutdown_duration: Option<Duration>,
     signal_handler: &mut SignalHandler,
 ) -> Result<Config, ExitCode> {
     let config_paths = config::process_paths(config_paths).ok_or(exitcode::CONFIG)?;
-    /* config_paths是搜索的配置文件路径列表 */
-    let watched_paths = config_paths
-        .iter()
-        .map(<&PathBuf>::from)
-        .collect::<Vec<_>>();
 
-    info!(
-        message = "Loading configs.",
-        paths = ?watched_paths
-    );
-    /* 20250717153620  secrets是什么? */
     let mut config = config::load_from_paths_with_provider_and_secrets(
         &config_paths,
         signal_handler,
@@ -775,9 +715,8 @@ pub async fn load_configs(
     )
     .await
     .map_err(handle_config_errors)?;
-    /* 刚刚处理了config */
 
-    config::init_log_schema(config.global.log_schema.clone(), true); /* 这里是初始化这两个字段 */
+    config::init_log_schema(config.global.log_schema.clone(), true);
 
     config.graceful_shutdown_duration = graceful_shutdown_duration;
 

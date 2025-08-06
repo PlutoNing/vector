@@ -3,12 +3,9 @@ use std::{
     time::Duration,
 };
 
-use crate::internal_event::{
-    ByteSize, BytesReceived, CountByteSize, InternalEventHandle as _, Protocol, Registered,
-};
+
 use agent_lib::config::LogNamespace;
 use agent_lib::configurable::configurable_component;
-use agent_lib::EstimatedJsonEncodedSizeOf;
 use chrono::{DateTime, Utc};
 use futures::StreamExt;
 use glob::{Pattern, PatternError};
@@ -19,11 +16,10 @@ use tokio::time;
 use tokio_stream::wrappers::IntervalStream;
 
 use crate::common::ShutdownSignal;
-use crate::internal_event::EventsReceived;
 use crate::{
     config::{SourceConfig, SourceContext, SourceOutput},
     event::metric::{Metric, MetricKind, MetricTags, MetricValue},
-    register, SourceSender,
+SourceSender,
 };
 
 mod cpu;
@@ -188,11 +184,7 @@ impl HostMetricsConfig {
         let mut interval = IntervalStream::new(time::interval(duration)).take_until(shutdown);
 
         let mut generator = HostMetrics::new(self);
-
-        let bytes_received = register!(BytesReceived::from(Protocol::NONE));
-
         while interval.next().await.is_some() {
-            bytes_received.emit(ByteSize(0));
             /* 获取指标 */
             let metrics = generator.capture_metrics().await;
             let count = metrics.len();
@@ -229,7 +221,6 @@ pub struct MetricsFilter {
 HostMetrics config的run函数定时调用, 用来获取metrics */
 pub struct HostMetrics {
     config: HostMetricsConfig,
-    events_received: Registered<EventsReceived>,
     metrics_filter: MetricsFilter,
 }
 
@@ -249,7 +240,6 @@ impl HostMetrics {
         };
         Self {
             config,
-            events_received: register!(EventsReceived),
             metrics_filter,
         }
     }
@@ -279,13 +269,7 @@ impl HostMetrics {
             self.network_metrics(&mut buffer).await;
         }
 
-        let metrics = buffer.metrics;
-        /* 统计trace metric */
-        self.events_received.emit(CountByteSize(
-            metrics.len(),
-            metrics.estimated_json_encoded_size_of(),
-        ));
-        metrics
+        buffer.metrics
     }
 
     /* 获取系统的load */

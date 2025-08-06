@@ -2,23 +2,22 @@ use std::convert::TryFrom;
 use std::time::{Duration, Instant};
 
 use crate::codecs::{Framer, FramingConfig, TextSerializerConfig};
-use crate::internal_event::{
-    CountByteSize, EventsSent, InternalEventHandle as _, Output, Registered,
-};
+
+
+
 use crate::{
     codecs::{Encoder, EncodingConfigWithFraming, SinkType, Transformer},
     config::{GenerateConfig, Input, SinkConfig, SinkContext},
     core::sink::VectorSink,
     event::{Event, EventStatus, Finalizable},
-    register,
+
     sinks::util::{expiring_hash_map::ExpiringHashMap, timezone_to_offset, StreamSink},
     template::Template,
 };
 pub use agent_lib::config::is_default;
 use agent_lib::configurable::configurable_component;
 use agent_lib::{
-    // internal_event::{CountByteSize, EventsSent, InternalEventHandle as _, Output, Registered},
-    EstimatedJsonEncodedSizeOf,
+
     TimeZone,
 };
 use async_compression::tokio::write::GzipEncoder;
@@ -209,8 +208,7 @@ pub struct FileSink {
     files: ExpiringHashMap<Bytes, OutFile>,
     /// 压缩方式（None/Gzip），决定文件写入方式
     compression: Compression,
-    /// 内部指标：记录发送的事件数量和字节数
-    events_sent: Registered<EventsSent>,
+
 }
 
 impl FileSink {
@@ -232,7 +230,6 @@ impl FileSink {
             idle_timeout: config.idle_timeout,
             files: ExpiringHashMap::default(),
             compression: config.compression,
-            events_sent: register!(EventsSent::from(Output(None))),
         })
     }
 
@@ -374,13 +371,11 @@ impl FileSink {
 
         /* 现在把event写入刚刚获取的file */
         trace!(message = "Writing an event to file.", path = ?path);
-        let event_size = event.estimated_json_encoded_size_of();
         let finalizers = event.take_finalizers();
         /* 写出到outfile */
         match write_event_to_file(file, event, &self.transformer, &mut self.encoder).await {
             Ok(byte_size) => {
                 finalizers.update_status(EventStatus::Delivered);
-                self.events_sent.emit(CountByteSize(1, event_size));
                 debug!(
                     "Sent {} bytes to file: {}",
                     byte_size,

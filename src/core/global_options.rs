@@ -48,7 +48,7 @@ pub fn is_default<E: Default + PartialEq>(e: &E) -> bool {
 }
 /// Global configuration options.
 //
-// If this is modified, make sure those changes are reflected in the `ConfigBuilder::append`
+// If this is modified, make sure those changes are reflected in the `configBuilder::append`
 // function!
 #[configurable_component(global_option("global_option"))]
 #[derive(Clone, Debug, Default, PartialEq)]

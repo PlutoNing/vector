@@ -1,32 +1,51 @@
-mod config_builder;
 mod loader;
-mod source;
 
+
+use loader::process::Process;
+pub use loader::*;
 use std::{
     collections::HashMap,
     fmt::Debug,
-    fs::{File, ReadDir},
+    fs::File,
     path::{Path, PathBuf},
-    sync::Mutex,
 };
-
-use config_builder::ConfigBuilderLoader;
-use glob::glob;
-use loader::process::Process;
-pub use loader::*;
-pub use source::*;
-
-use super::{
-    builder::ConfigBuilder, format, vars, Config, ConfigPath, Format, FormatHint,
-};
+use toml::Table;
 
 
-pub static CONFIG_PATHS: Mutex<Vec<ConfigPath>> = Mutex::new(Vec::new());
 
-pub(super) fn read_dir<P: AsRef<Path> + Debug>(path: P) -> Result<ReadDir, Vec<String>> {
-    path.as_ref()
-        .read_dir()
-        .map_err(|err| vec![format!("Could not read config dir: {:?}, {}.", path, err)])
+use super::{builder::ConfigBuilder, format, Config, ConfigPath, Format, FormatHint};
+use std::io::Read;
+
+pub struct ConfigBuilderLoader {
+    builder: ConfigBuilder,
+}
+
+impl ConfigBuilderLoader {
+    pub fn new() -> Self {
+        Self {
+            builder: ConfigBuilder::default(),
+        }
+    }
+}
+
+impl Process for ConfigBuilderLoader {
+    /// 解析配置文件内容, 替换掉环境变量
+    fn prepare<R: Read>(&mut self, input: R) -> Result<String, Vec<String>> {
+        let prepared_input = prepare_input(input)?; /* prepared_input:替换掉环境变量的配置文件内容 */
+        Ok(prepared_input)
+    }
+    /// Merge a TOML `Table` with a `configBuilder`. Component types extend specific keys.
+    fn merge(&mut self, table: Table) -> Result<(), Vec<String>> {
+        self.builder.append(deserialize_table(table)?)?;
+        Ok(())
+    }
+}
+
+impl loader::Loader<ConfigBuilder> for ConfigBuilderLoader {
+    /// Returns the resulting `configBuilder`.
+    fn take(self) -> ConfigBuilder {
+        self.builder
+    }
 }
 
 pub(super) fn component_name<P: AsRef<Path> + Debug>(path: P) -> Result<String, Vec<String>> {
@@ -62,74 +81,25 @@ pub fn merge_path_lists(
         .flat_map(|(paths, format)| paths.iter().cloned().map(move |path| (path, format)))
 }
 
-/// Expand a list of paths (potentially containing glob patterns) into real
-/// config paths, replacing it with the default paths when empty.
+/// 简单处理配置文件路径
 pub fn process_paths(config_paths: &[ConfigPath]) -> Option<Vec<ConfigPath>> {
     let starting_paths = if !config_paths.is_empty() {
         config_paths.to_owned()
     } else {
-        default_config_paths() /* 不额外指定的话,走这里 */
+        default_config_paths()
     };
-
-    let mut paths = Vec::new();
-
-    for config_path in &starting_paths {
-        let config_pattern: &PathBuf = config_path.into(); /* config_pattern可以看见路径了 */
-
-        let matches: Vec<PathBuf> = match glob(config_pattern.to_str().expect("No ability to glob"))
-        {
-            Ok(glob_paths) => glob_paths.filter_map(Result::ok).collect(),
-            Err(err) => {
-                error!(message = "Failed to read glob pattern.", path = ?config_pattern, error = ?err);
-                return None;
-            }
-        };
-
-        if matches.is_empty() {
-            error!(message = "Config file not found in path.", path = ?config_pattern);
-            std::process::exit(exitcode::CONFIG);
-        }
-
-        match config_path {
-            ConfigPath::File(_, format) => {
-                for path in matches {
-                    paths.push(ConfigPath::File(path, *format));
-                }
-            }
-            ConfigPath::Dir(_) => {
-                for path in matches {
-                    paths.push(ConfigPath::Dir(path))
-                }
-            }
-        }
+    let config_path = starting_paths.first()?;
+    let path: &PathBuf = config_path.into();
+    if !path.exists() {
+        error!(message = "Config file not found.", path = ?path);
+        std::process::exit(exitcode::CONFIG);
     }
+    let paths = vec![config_path.clone()];
 
-    paths.sort();
-    paths.dedup();
-    // Ignore poison error and let the current main thread continue running to do the cleanup.
-    drop(
-        CONFIG_PATHS
-            .lock()
-            .map(|mut guard| guard.clone_from(&paths)),
-    );
-/* paths里面就是找到的配置文件路径, 比如/etc/scx_agent/config.yaml */
     Some(paths)
 }
 
-pub fn load_from_paths(config_paths: &[ConfigPath]) -> Result<Config, Vec<String>> {
-    let builder = load_builder_from_paths(config_paths)?;
-    let (config, build_warnings) = builder.build_with_warnings()?;
-
-    for warning in build_warnings {
-        warn!("{}", warning);
-    }
-
-    Ok(config)
-}
-
-/// Loads a configuration from paths. Handle secret replacement and if a provider is present
-/// in the builder, the config is used as bootstrapping for a remote source. Otherwise,
-/// provider instantiation is skipped.
+/// 从配置文件路径加载配置
 pub async fn load_from_paths_with_provider_and_secrets(
     config_paths: &[ConfigPath], /* 配置文件列表 */
     signal_handler: &mut crate::app::SignalHandler,
@@ -150,8 +120,8 @@ pub async fn load_from_paths_with_provider_and_secrets(
 
     Ok(new_config)
 }
-/* loader一个解析内容的loader?  config_paths配置文件路径  */
-/// Iterators over `ConfigPaths`, and processes a file/dir according to a provided `Loader`.
+
+/// 处理配置文件
 fn loader_from_paths<T, L>(mut loader: L, config_paths: &[ConfigPath]) -> Result<T, Vec<String>>
 where
     T: serde::de::DeserializeOwned,
@@ -160,23 +130,13 @@ where
     let mut errors = Vec::new();
 
     for config_path in config_paths {
-        match config_path {
-            ConfigPath::File(path, format_hint) => { /* 一般都是文件, 都是这个路径 */
-                match loader.load_from_file( /* 取出配置文件内容,解析,反序列化,读取配置项,吸收进来 */
-                    path,
-                    format_hint
-                        .or_else(move || Format::from_path(&path).ok())
-                        .unwrap_or_default(),
-                ) {/* 这里是解析的结果 */
-                    Ok(()) => {}
-                    Err(errs) => errors.extend(errs),
-                };
-            }
-            ConfigPath::Dir(path) => {
-                match loader.load_from_dir(path) {
-                    Ok(()) => {}
-                    Err(errs) => errors.extend(errs),
-                };
+        if let ConfigPath::File(path, format_hint) = config_path {
+            let format = format_hint
+                .or_else(|| Format::from_path(path).ok())
+                .unwrap_or_default();
+
+            if let Err(errs) = loader.load_from_file(path, format) {
+                errors.extend(errs);
             }
         }
     }
@@ -187,51 +147,79 @@ where
         Err(errors)
     }
 }
-/* 应该是加载配置文件内容了, 最终把每个选项分类加载到config里面 */
-/// Uses `ConfigBuilderLoader` to process `ConfigPaths`, deserializing to a `ConfigBuilder`.
+/// Uses `configBuilderLoader` to process `ConfigPaths`, deserializing to a `configBuilder`.
 pub fn load_builder_from_paths(config_paths: &[ConfigPath]) -> Result<ConfigBuilder, Vec<String>> {
     loader_from_paths(ConfigBuilderLoader::new(), config_paths)
 }
 
-/// Uses `SourceLoader` to process `ConfigPaths`, deserializing to a toml `SourceMap`.
-pub fn load_source_from_paths(
-    config_paths: &[ConfigPath],
-) -> Result<toml::value::Table, Vec<String>> {
-    loader_from_paths(SourceLoader::new(), config_paths)
-}
+use std::sync::LazyLock;
 
+use regex::{Captures, Regex};
 
-pub fn load_from_str(input: &str, format: Format) -> Result<Config, Vec<String>> {
-    let builder = load_from_inputs(std::iter::once((input.as_bytes(), format)))?;
-    let (config, build_warnings) = builder.build_with_warnings()?;
-
-    for warning in build_warnings {
-        warn!("{}", warning);
-    }
-
-    Ok(config)
-}
-
-fn load_from_inputs(
-    inputs: impl IntoIterator<Item = (impl std::io::Read, Format)>,
-) -> Result<ConfigBuilder, Vec<String>> {
-    let mut config = Config::builder();
+pub static ENVIRONMENT_VARIABLE_INTERPOLATION_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"(?x)
+        \$\$|
+        \$([[:word:].]+)|
+        \$\{([[:word:].]+)(?:(:?-|:?\?)([^}]*))?\}",
+    )
+    .unwrap()
+});
+/* str是配置文件内容 ,在给定的字符串中替换环境变量占位符*/
+/// Result<interpolated config, errors>
+pub fn interpolate(input: &str, vars: &HashMap<String, String>) -> Result<String, Vec<String>> {
     let mut errors = Vec::new();
 
-    for (input, format) in inputs {
-        if let Err(errs) = load(input, format).and_then(|n| config.append(n)) {
-            // TODO: add back paths
-            errors.extend(errs.iter().map(|e| e.to_string()));
-        }
-    }
+    let interpolated = ENVIRONMENT_VARIABLE_INTERPOLATION_REGEX
+        .replace_all(input, |caps: &Captures<'_>| {
+            let flags = caps.get(3).map(|m| m.as_str()).unwrap_or_default();
+            let def_or_err = caps.get(4).map(|m| m.as_str()).unwrap_or_default();
+            caps.get(1)
+                .or_else(|| caps.get(2))
+                .map(|m| m.as_str())
+                .map(|name| {
+                    let val = vars.get(name).map(|v| v.as_str());
+                    match flags {
+                        ":-" => match val {
+                            Some(v) if !v.is_empty() => v,
+                            _ => def_or_err,
+                        },
+                        "-" => val.unwrap_or(def_or_err),
+                        ":?" => match val {
+                            Some(v) if !v.is_empty() => v,
+                            _ => {
+                                errors.push(format!(
+                                    "Non-empty environment variable required in config. name = {name:?}, error = {def_or_err:?}",
+                                ));
+                                ""
+                            },
+                        }
+                        "?" => val.unwrap_or_else(|| {
+                            errors.push(format!(
+                                "Missing environment variable required in config. name = {name:?}, error = {def_or_err:?}",
+                            ));
+                            ""
+                        }),
+                        _ => val.unwrap_or_else(|| {
+                            errors.push(format!(
+                                "Missing environment variable in config. name = {name:?}",
+                            ));
+                            ""
+                        }),
+                    }
+                })
+                .unwrap_or("$")
+                .to_string()
+        })
+        .into_owned();
 
     if errors.is_empty() {
-        Ok(config)
+        Ok(interpolated)
     } else {
         Err(errors)
     }
 }
-/* 20250717155121 ,返回替换掉环境变量的配置文件内容字符串  */
+
 pub fn prepare_input<R: std::io::Read>(mut input: R) -> Result<String, Vec<String>> {
     let mut source_string = String::new();
     input
@@ -244,7 +232,7 @@ pub fn prepare_input<R: std::io::Read>(mut input: R) -> Result<String, Vec<Strin
             vars.insert("HOSTNAME".into(), hostname);
         }
     }
-    vars::interpolate(&source_string, &vars)
+    interpolate(&source_string, &vars)
 }
 
 pub fn load<R: std::io::Read, T>(input: R, format: Format) -> Result<T, Vec<String>>

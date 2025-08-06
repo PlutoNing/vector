@@ -217,7 +217,7 @@ impl Validation {
             // logically applied to is a signed or unsigned integer, while we're clearly limiting both the minimum and
             // maximum to -2^53 and 2^53, respectively.  Such bounds make no sense for an unsigned integer, clearly. We add
             // additional logic in the generated code that handles that enforcement, as it is not trivial to do so at
-            // compile-time, even though the error becomes a little more delayed to surface to the developer.
+            // Compile-time, even though the error becomes a little more delayed to surface to the developer.
             let min_bound = NUMERIC_ENFORCED_LOWER_BOUND;
             let max_bound = NUMERIC_ENFORCED_UPPER_BOUND;
 

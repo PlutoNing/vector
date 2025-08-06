@@ -866,7 +866,7 @@ fn generate_enum_variant_schema(
             Style::Newtype => {
                 // We have to delegate viability to `serde`, essentially, because using internal tagging for a newtype
                 // variant is only possible when the inner field is a struct or map, and we can't access that type of
-                // information here, which is why `serde` does it at compile-time.
+                // information here, which is why `serde` does it at Compile-time.
 
                 // As such, we generate the schema for the single field, like we would normally do for a newtype
                 // variant, and then we follow the struct flattening logic where we layer on our tag field schema on the

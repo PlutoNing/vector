@@ -13,7 +13,7 @@ use serde::Serialize;
 use std::cell::RefCell;
 use std::path::PathBuf;
 
-use super::{dot_graph::GraphConfig, schema, ComponentKey, Resource};
+use super::{schema, ComponentKey, Resource};
 pub type BoxedSink = Box<dyn SinkConfig>;
 
 impl Configurable for BoxedSink {
@@ -48,9 +48,7 @@ pub struct SinkOuter<T>
 where
     T: Configurable + Serialize + 'static,
 {
-    #[configurable(derived)]
-    #[serde(default, skip_serializing_if = "agent_lib::config::is_default")]
-    pub graph: GraphConfig,
+
 
     #[configurable(derived)]
     pub inputs: Inputs<T>,
@@ -72,7 +70,6 @@ where
         SinkOuter {
             inputs: Inputs::from_iter(inputs),
             inner: inner.into(),
-            graph: Default::default(),
         }
     }
 
@@ -97,7 +94,6 @@ where
         SinkOuter {
             inputs: Inputs::from_iter(inputs),
             inner: self.inner,
-            graph: self.graph,
         }
     }
 }

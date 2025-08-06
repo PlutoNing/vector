@@ -212,7 +212,7 @@ impl PartialEq for Variant<'_> {
         // tuple vs unit -- and the fields therein.
 
         // It's suboptimal to be allocating strings for the field names here but we need the
-        // deserialized name as `serde` observes it, and this only runs at compile-time.
+        // deserialized name as `serde` observes it, and this only runs at Compile-time.
         let self_fields = self
             .fields
             .iter()

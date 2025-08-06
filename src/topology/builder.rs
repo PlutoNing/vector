@@ -15,7 +15,6 @@ use tokio::{
 use tracing::Instrument;
 use crate::buffers::BufferSender;
 use crate::{
-    internal_event::{CountByteSize, InternalEventHandle as _},
     sources::limited,
 };
 
@@ -28,21 +27,19 @@ use super::{
 };
 use crate::common::Inputs;
 use crate::core::fanout::{self, Fanout};
-use crate::internal_event::EventsReceived;
 use crate::{
     common::SourceShutdownCoordinator,
     config::{
         ComponentKey, Config, DataType, EnrichmentTableConfig, OutputId, SinkContext, SourceContext,
     },
-    event::{EventArray, EventContainer},
-    register,
+    event::{EventArray},
     sources::SourceSenderItem,
     sources::CHUNK_SIZE,
     spawn_named,
     topology::task::TaskError,
     SourceSender,
 };
-use agent_lib::{config::WhenFull, EstimatedJsonEncodedSizeOf};
+use agent_lib::{config::WhenFull};
 
 static ENRICHMENT_TABLES: LazyLock<crate::enrichment_tables::enrichment::TableRegistry> =
     LazyLock::new(crate::enrichment_tables::enrichment::TableRegistry::default);
@@ -106,7 +103,7 @@ impl<'a> Builder<'a> {
     async fn build(mut self) -> Result<TopologyPieces, Vec<String>> {
         let enrichment_tables = self.load_enrichment_tables().await; /* 一般是空的 */
         let source_tasks = self.build_sources(enrichment_tables).await; /* 构建source */
-        self.build_transforms(enrichment_tables).await; /* 好像一般也是空的 */
+        self.build_transforms(enrichment_tables).await;
         self.build_sinks(enrichment_tables).await; /* 构建sink */
 
         // We should have all the data for the enrichment tables loaded now, so switch them over to
@@ -513,16 +510,9 @@ impl<'a> Builder<'a> {
 
                 let mut rx = rx;
 
-                let events_received = register!(EventsReceived);
                 sink.run(
                     rx.by_ref()
                         .filter(|events: &EventArray| ready(filter_events_type(events, input_type)))
-                        .inspect(|events| {
-                            events_received.emit(CountByteSize(
-                                events.len(),
-                                events.estimated_json_encoded_size_of(),
-                            ))
-                        })
                         .take_until_if(tripwire),
                 )
                 .await

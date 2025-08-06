@@ -2,7 +2,6 @@
 use std::{
     collections::{HashMap, HashSet},
     fmt::{self, Display, Formatter},
-    fs,
     hash::Hash,
     net::SocketAddr,
     path::PathBuf,
@@ -25,67 +24,35 @@ mod builder;
 mod cmd;
 mod compiler;
 mod diff;
-pub mod dot_graph;
 mod enrichment_table;
 pub mod format;
-mod graph;
 mod loading;
-pub mod provider;
 pub mod schema;
 mod sink;
 mod source;
 mod transform;
-mod vars;
-pub mod watcher;
 
 pub use builder::ConfigBuilder;
-pub use cmd::{cmd, Opts};
+pub use cmd::{Opts};
 pub use diff::ConfigDiff;
 pub use enrichment_table::{EnrichmentTableConfig, EnrichmentTableOuter};
 pub use format::{Format, FormatHint};
 pub use loading::{
-    load, load_builder_from_paths, load_from_paths, load_from_paths_with_provider_and_secrets,
-    load_from_str, load_source_from_paths, merge_path_lists, process_paths,
-    CONFIG_PATHS,
+    load, load_builder_from_paths, load_from_paths_with_provider_and_secrets,
+    merge_path_lists, process_paths,
 };
 pub use sink::{BoxedSink, SinkConfig, SinkContext, SinkOuter};
 pub use source::{BoxedSource, SourceConfig, SourceContext, SourceOuter};
 pub use transform::{
     get_transform_output_ids, BoxedTransform, TransformConfig, TransformContext, TransformOuter,
 };
-pub use vars::{interpolate, ENVIRONMENT_VARIABLE_INTERPOLATION_REGEX};
 pub use agent_lib::{
     config::{
         init_log_schema, log_schema, ComponentKey,
         LogSchema, OutputId,
     },
 };
-#[derive(Debug, Clone, Ord, PartialOrd, Eq, PartialEq)]
-pub struct ComponentConfig {
-    pub config_paths: Vec<PathBuf>,
-    pub component_key: ComponentKey,
-}
 
-impl ComponentConfig {
-    pub fn new(config_paths: Vec<PathBuf>, component_key: ComponentKey) -> Self {
-        let canonicalized_paths = config_paths
-            .into_iter()
-            .filter_map(|p| fs::canonicalize(p).ok())
-            .collect();
-
-        Self {
-            config_paths: canonicalized_paths,
-            component_key,
-        }
-    }
-
-    pub fn contains(&self, config_paths: &[PathBuf]) -> Option<ComponentKey> {
-        if config_paths.iter().any(|p| self.config_paths.contains(p)) {
-            return Some(self.component_key.clone());
-        }
-        None
-    }
-}
 /* 表示一个配置文件的路径 */
 #[derive(Debug, Clone, Ord, PartialOrd, Eq, PartialEq)]
 pub enum ConfigPath {
@@ -110,7 +77,6 @@ impl ConfigPath {
         }
     }
 }
-/* 最终构建的config? */
 #[derive(Debug, Default, Serialize)]
 pub struct Config {
     pub schema: schema::Options,
