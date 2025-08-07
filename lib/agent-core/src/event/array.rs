@@ -10,8 +10,7 @@ use futures::{stream, Stream};
 
 use super::{Event, EventMutRef, EventRef, LogEvent, Metric, TraceEvent};
 
-/// The type alias for an array of `LogEvent` elements.
-pub type LogArray = Vec<LogEvent>;
+
 
 /// The type alias for an array of `TraceEvent` elements.
 pub type TraceArray = Vec<TraceEvent>;
@@ -96,17 +95,6 @@ impl EventContainer for Metric {
     }
 }
 
-impl EventContainer for LogArray {
-    type IntoIter = iter::Map<vec::IntoIter<LogEvent>, fn(LogEvent) -> Event>;
-
-    fn len(&self) -> usize {
-        self.len()
-    }
-
-    fn into_events(self) -> Self::IntoIter {
-        self.into_iter().map(Into::into)
-    }
-}
 
 impl EventContainer for MetricArray {
     type IntoIter = iter::Map<vec::IntoIter<Metric>, fn(Metric) -> Event>;
@@ -123,8 +111,6 @@ impl EventContainer for MetricArray {
 /// An array of one of the `Event` variants exclusively.
 #[derive(Clone, Debug, PartialEq)]
 pub enum EventArray {
-    /// An array of type `LogEvent`
-    Logs(LogArray),
     /// An array of type `Metric`
     Metrics(MetricArray),
     /// An array of type `TraceEvent`
@@ -135,11 +121,6 @@ impl EventArray {
     /// Sets the `OutputId` in the metadata for all the events in this array.
     pub fn set_output_id(&mut self, output_id: &Arc<ComponentKey>) {
         match self {
-            EventArray::Logs(logs) => {
-                for log in logs {
-                    log.metadata_mut().set_source_id(Arc::clone(output_id));
-                }
-            }
             EventArray::Metrics(metrics) => {
                 for metric in metrics {
                     metric.metadata_mut().set_source_id(Arc::clone(output_id));
@@ -165,7 +146,6 @@ impl EventArray {
     /// Iterate over references to this array's events.
     pub fn iter_events(&self) -> impl Iterator<Item = EventRef> {
         match self {
-            Self::Logs(array) => EventArrayIter::Logs(array.iter()),
             Self::Metrics(array) => EventArrayIter::Metrics(array.iter()),
             Self::Traces(_) => EventArrayIter::Metrics([].iter()), // 返回空迭代器
         }
@@ -174,7 +154,6 @@ impl EventArray {
     /// Iterate over mutable references to this array's events.
     pub fn iter_events_mut(&mut self) -> impl Iterator<Item = EventMutRef> {
         match self {
-            Self::Logs(array) => EventArrayIterMut::Logs(array.iter_mut()),
             Self::Metrics(array) => EventArrayIterMut::Metrics(array.iter_mut()),
             Self::Traces(_) => EventArrayIterMut::Metrics([].iter_mut()), // 返回空迭代器
         }
@@ -183,7 +162,6 @@ impl EventArray {
     /// Iterate over references to the logs in this array.
     pub fn iter_logs_mut(&mut self) -> impl Iterator<Item = &mut LogEvent> {
         match self {
-            Self::Logs(array) => TypedArrayIterMut(Some(array.iter_mut())),
             _ => TypedArrayIterMut(None),
         }
     }
@@ -192,7 +170,7 @@ impl EventArray {
 impl From<Event> for EventArray {
     fn from(event: Event) -> Self {
         match event {
-            Event::Log(log) => Self::Logs(vec![log]),
+            Event::Log(_log) => panic!("Log events are not supported"), 
             Event::Metric(metric) => Self::Metrics(vec![metric]),
             Event::Trace(trace) => Self::Traces(vec![trace]),
         }
@@ -217,11 +195,7 @@ impl From<TraceEvent> for EventArray {
     }
 }
 
-impl From<LogArray> for EventArray {
-    fn from(array: LogArray) -> Self {
-        Self::Logs(array)
-    }
-}
+
 
 impl From<MetricArray> for EventArray {
     fn from(array: MetricArray) -> Self {
@@ -232,7 +206,6 @@ impl From<MetricArray> for EventArray {
 impl EventCount for EventArray {
     fn event_count(&self) -> usize {
         match self {
-            Self::Logs(a) => a.len(),
             Self::Metrics(a) => a.len(),
             Self::Traces(a) => a.len(),
         }
@@ -244,7 +217,6 @@ impl EventContainer for EventArray {
 
     fn len(&self) -> usize {
         match self {
-            Self::Logs(a) => a.len(),
             Self::Metrics(a) => a.len(),
             Self::Traces(a) => a.len(),
         }
@@ -253,7 +225,6 @@ impl EventContainer for EventArray {
     /* 转为对应的迭代器 */
     fn into_events(self) -> Self::IntoIter {
         match self {
-            Self::Logs(a) => EventArrayIntoIter::Logs(a.into_iter()),
             Self::Metrics(a) => EventArrayIntoIter::Metrics(a.into_iter()),
             Self::Traces(a) => EventArrayIntoIter::Traces(a.into_iter()),
         }
@@ -351,10 +322,6 @@ impl EventArrayBuffer {
     #[must_use]
     fn push(&mut self, event: Event) -> Option<EventArray> {
         match (event, &mut self.buffer) {
-            (Event::Log(event), Some(EventArray::Logs(array))) if array.len() < self.max_size => {
-                array.push(event);
-                None
-            }
             (Event::Metric(event), Some(EventArray::Metrics(array)))
                 if array.len() < self.max_size =>
             {

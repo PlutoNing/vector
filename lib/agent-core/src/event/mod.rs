@@ -2,7 +2,7 @@ use std::{convert::TryInto, fmt::Debug, sync::Arc};
 
 use crate::buffer::EventCount;
 use crate::componentkey::ComponentKey;
-pub use array::{into_event_stream, EventArray, EventContainer, LogArray, MetricArray, TraceArray};
+pub use array::{into_event_stream, EventArray, EventContainer, MetricArray, TraceArray};
 pub use log_event::LogEvent;
 pub use metadata::{EventMetadata, WithMetadata};
 pub use metric::{Metric, MetricKind, MetricTags, MetricValue, StatisticKind};

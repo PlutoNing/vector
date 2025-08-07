@@ -575,7 +575,6 @@ impl TopologyPieces {
 
 const fn filter_events_type(events: &EventArray, data_type: DataType) -> bool {
     match events {
-        EventArray::Logs(_) => data_type.contains(DataType::Log),
         EventArray::Metrics(_) => data_type.contains(DataType::Metric),
         EventArray::Traces(_) => data_type.contains(DataType::Trace),
     }
