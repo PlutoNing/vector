@@ -1,7 +1,7 @@
 use std::convert::TryFrom;
 use std::time::{Duration, Instant};
 
-use crate::codecs::{Framer, FramingConfig, TextSerializerConfig};
+use crate::codecs::{Framer, FramingConfig, JsonSerializerConfig};
 
 use crate::{
     codecs::{Encoder, EncodingConfigWithFraming, SinkType, Transformer},
@@ -102,7 +102,7 @@ impl GenerateConfig for FileSinkConfig {
         toml::Value::try_from(Self {
             path: Template::try_from("/tmp/vector-%Y-%m-%d.log").unwrap(),
             idle_timeout: default_idle_timeout(),
-            encoding: (None::<FramingConfig>, TextSerializerConfig::default()).into(),
+            encoding: (None::<FramingConfig>, JsonSerializerConfig::default()).into(),
             compression: Default::default(),
             timezone: Default::default(),
             max_file_size_bytes: default_max_file_size_bytes(),
@@ -442,7 +442,7 @@ mod tests {
         let config = FileSinkConfig {
             path: template.clone().try_into().unwrap(),
             idle_timeout: default_idle_timeout(),
-            encoding: (None::<FramingConfig>, TextSerializerConfig::default()).into(),
+            encoding: (None::<FramingConfig>, JsonSerializerConfig::default()).into(),
             compression: Compression::None,
             timezone: Default::default(),
             max_file_size_bytes: default_max_file_size_bytes(),
@@ -470,7 +470,7 @@ mod tests {
         let config = FileSinkConfig {
             path: template.try_into().unwrap(),
             idle_timeout: default_idle_timeout(),
-            encoding: (None::<FramingConfig>, TextSerializerConfig::default()).into(),
+            encoding: (None::<FramingConfig>, JsonSerializerConfig::default()).into(),
             compression: Compression::None,
             timezone: Default::default(),
             max_file_size_bytes: default_max_file_size_bytes(),

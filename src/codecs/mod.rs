@@ -11,7 +11,7 @@ pub use encoding::{
     get_serializer_schema_requirement,
     Encoder, EncodingConfig, EncodingConfigWithFraming, SinkType,
      TimestampFormat, Transformer,JsonSerializer,JsonSerializerConfig,
-    NewlineDelimitedEncoder,TextSerializerConfig,
+    NewlineDelimitedEncoder,
     Framer,FramingConfig,Serializer,SerializerConfig
 };
 pub use ready_frames::ReadyFrames;

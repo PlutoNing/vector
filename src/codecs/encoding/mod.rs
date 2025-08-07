@@ -10,19 +10,16 @@ mod framing;
 
 use std::fmt::Debug;
 
-use bytes::BytesMut;
-pub use format::{
-    get_serializer_schema_requirement,
-    JsonSerializer, JsonSerializerConfig,
-    TextSerializerConfig,TextSerializer
-};
-pub use framing::{
-    BoxedFramer, BoxedFramingError, CharacterDelimitedEncoder,
-    CharacterDelimitedEncoderConfig,
-    NewlineDelimitedEncoder, NewlineDelimitedEncoderConfig,
-};
 use agent_config::configurable_component;
 use agent_lib::{config::DataType, event::Event, schema};
+use bytes::BytesMut;
+pub use format::{
+    get_serializer_schema_requirement, JsonSerializer, JsonSerializerConfig,
+};
+pub use framing::{
+    BoxedFramer, BoxedFramingError, CharacterDelimitedEncoder, CharacterDelimitedEncoderConfig,
+    NewlineDelimitedEncoder, NewlineDelimitedEncoderConfig,
+};
 
 /// An error that occurred while building an encoder.
 // pub type BuildError = Box<dyn std::error::Error + Send + Sync + 'static>;
@@ -140,15 +137,6 @@ pub enum SerializerConfig {
     ///
     /// [json]: https://www.json.org/
     Json(JsonSerializerConfig),
-    /// Plain text encoding.
-    ///
-    /// This encoding uses the `message` field of a log event. For metrics, it uses an
-    /// encoding that resembles the Prometheus export format.
-    ///
-    /// Be careful if you are modifying your log events (for example, by using a `remap`
-    /// transform) and removing the message field while doing additional parsing on it, as this
-    /// could lead to the encoding emitting empty strings for the given event.
-    Text(TextSerializerConfig),
 }
 
 impl From<JsonSerializerConfig> for SerializerConfig {
@@ -157,34 +145,25 @@ impl From<JsonSerializerConfig> for SerializerConfig {
     }
 }
 
-impl From<TextSerializerConfig> for SerializerConfig {
-    fn from(config: TextSerializerConfig) -> Self {
-        Self::Text(config)
-    }
-}
-
 impl SerializerConfig {
     /// Build the `Serializer` from this configuration.
     pub fn build(&self) -> Result<Serializer, Box<dyn std::error::Error + Send + Sync + 'static>> {
         match self {
             SerializerConfig::Json(config) => Ok(Serializer::Json(config.build())),
-            SerializerConfig::Text(config) => Ok(Serializer::Text(config.build())),
         }
     }
 
     /// Return an appropriate default framer for the given serializer.
     pub fn default_stream_framing(&self) -> FramingConfig {
         match self {
-            SerializerConfig::Json(_)
-            | SerializerConfig::Text(_) => FramingConfig::NewlineDelimited
+            SerializerConfig::Json(_) => FramingConfig::NewlineDelimited,
         }
     }
 
     /// The data type of events that are accepted by this `Serializer`.
     pub fn input_type(&self) -> DataType {
         match self {
-            SerializerConfig::Json(config) => config.input_type(),/* host to file sink */
-            SerializerConfig::Text(config) => config.input_type(),
+            SerializerConfig::Json(config) => config.input_type(), /* host to file sink */
         }
     }
 
@@ -192,7 +171,6 @@ impl SerializerConfig {
     pub fn schema_requirement(&self) -> schema::Requirement {
         match self {
             SerializerConfig::Json(config) => config.schema_requirement(),
-            SerializerConfig::Text(config) => config.schema_requirement(),
         }
     }
 }
@@ -202,8 +180,6 @@ impl SerializerConfig {
 pub enum Serializer {
     /// Uses a `JsonSerializer` for serialization.
     Json(JsonSerializer),
-    /// Uses a `TextSerializer` for serialization.
-    Text(TextSerializer),
 }
 
 impl Serializer {
@@ -211,7 +187,6 @@ impl Serializer {
     pub fn supports_json(&self) -> bool {
         match self {
             Serializer::Json(_) => true,
-            Serializer::Text(_) => false,
         }
     }
 
@@ -224,9 +199,7 @@ impl Serializer {
     pub fn to_json_value(&self, event: Event) -> Result<serde_json::Value, agent_lib::Error> {
         match self {
             Serializer::Json(serializer) => serializer.to_json_value(event),
-            Serializer::Text(_) => {
-                panic!("Serializer does not support JSON")
-            }
+
         }
     }
 }
@@ -237,20 +210,12 @@ impl From<JsonSerializer> for Serializer {
     }
 }
 
-
-impl From<TextSerializer> for Serializer {
-    fn from(serializer: TextSerializer) -> Self {
-        Self::Text(serializer)
-    }
-}
-
 impl tokio_util::codec::Encoder<Event> for Serializer {
     type Error = agent_lib::Error;
 
     fn encode(&mut self, event: Event, buffer: &mut BytesMut) -> Result<(), Self::Error> {
         match self {
             Serializer::Json(serializer) => serializer.encode(event, buffer),
-            Serializer::Text(serializer) => serializer.encode(event, buffer),
         }
     }
 }

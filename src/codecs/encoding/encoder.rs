@@ -1,8 +1,7 @@
 use bytes::BytesMut;
 use tokio_util::codec::Encoder as _;
 use crate::codecs::{
-    encoding::{Error, Framer, Serializer},
-    NewlineDelimitedEncoder, TextSerializerConfig,
+    encoding::{Error, Framer, Serializer}, JsonSerializerConfig, NewlineDelimitedEncoder
 };
 use crate::codecs::encoding::CharacterDelimitedEncoder;
 use crate::{
@@ -23,7 +22,7 @@ impl Default for Encoder<Framer> {
     fn default() -> Self {
         Self {
             framer: NewlineDelimitedEncoder::default().into(),
-            serializer: TextSerializerConfig::default().build().into(),
+            serializer: JsonSerializerConfig::default().build().into(),
         }
     }
 }
@@ -32,7 +31,7 @@ impl Default for Encoder<()> {
     fn default() -> Self {
         Self {
             framer: (),
-            serializer: TextSerializerConfig::default().build().into(),
+            serializer: JsonSerializerConfig::default().build().into(),
         }
     }
 }
@@ -114,7 +113,7 @@ impl Encoder<Framer> {
             ) => "application/json",
             (
                 Serializer::Json(_)
-                | Serializer::Text(_),
+                ,
                 _,
             ) => "text/plain",
         }

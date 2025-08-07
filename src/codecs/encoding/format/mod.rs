@@ -5,12 +5,10 @@
 
 pub mod common;
 mod json;
-mod text;
 use std::fmt::Debug;
 
 use dyn_clone::DynClone;
 pub use json::{JsonSerializer, JsonSerializerConfig};
-pub use text::{TextSerializer, TextSerializerConfig};
 pub use common::get_serializer_schema_requirement;
 use agent_lib::event::Event;
 

@@ -1,7 +1,7 @@
 use std::convert::TryFrom;
 use std::time::Duration;
 
-use crate::codecs::{Framer, FramingConfig, TextSerializerConfig};
+use crate::codecs::{Framer, FramingConfig, JsonSerializerConfig};
 
 
 
@@ -65,7 +65,7 @@ impl GenerateConfig for SqliteSinkConfig {
             path: Template::try_from("/tmp/events.db").unwrap(),
             table: Template::try_from("events").unwrap(),
             idle_timeout: default_idle_timeout(),
-            encoding: (None::<FramingConfig>, TextSerializerConfig::default()).into(),
+            encoding: (None::<FramingConfig>, JsonSerializerConfig::default()).into(),
             timezone: Default::default(),
         })
         .unwrap()
@@ -269,7 +269,7 @@ mod tests {
             path: Template::try_from(db_path.to_str().unwrap()).unwrap(),
             table: Template::try_from("events").unwrap(),
             idle_timeout: default_idle_timeout(),
-            encoding: (None::<FramingConfig>, TextSerializerConfig::default()).into(),
+            encoding: (None::<FramingConfig>, JsonSerializerConfig::default()).into(),
             timezone: Default::default(),
         };
         println!("SqliteSinkConfig initialized");
@@ -294,7 +294,7 @@ mod tests {
             path: template.try_into().unwrap(),
             table: Template::try_from("events").unwrap(),
             idle_timeout: default_idle_timeout(),
-            encoding: (None::<FramingConfig>, TextSerializerConfig::default()).into(),
+            encoding: (None::<FramingConfig>, JsonSerializerConfig::default()).into(),
             timezone: Default::default(),
         };
 

@@ -106,9 +106,6 @@ impl EncodingConfigWithFraming {
                 SinkType::StreamBased => NewlineDelimitedEncoder::default().into(),
                 SinkType::MessageBased => CharacterDelimitedEncoder::new(b',').into(),
             },
-            (
-                None,Serializer::Text(_), /* host metric到Console是这个路径 */
-            ) => NewlineDelimitedEncoder::default().into(),
         };
 
         Ok((framer, serializer))
