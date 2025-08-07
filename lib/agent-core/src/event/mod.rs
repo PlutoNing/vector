@@ -1,7 +1,7 @@
 use std::{convert::TryInto, fmt::Debug, sync::Arc};
 
 use crate::buffer::EventCount;
-use agent_common::config::ComponentKey;
+use crate::componentkey::ComponentKey;
 pub use array::{into_event_stream, EventArray, EventContainer, LogArray, MetricArray, TraceArray};
 pub use log_event::LogEvent;
 pub use metadata::{EventMetadata, WithMetadata};

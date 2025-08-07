@@ -2,7 +2,7 @@
 
 use std::{borrow::Cow, collections::BTreeMap, fmt, sync::Arc};
 
-use agent_common::{config::ComponentKey};
+use crate::componentkey::ComponentKey;
 use derivative::Derivative;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -12,7 +12,7 @@ use vrl::{
     value::{KeyString, Kind, Value},
 };
 
-use super::{ObjectMap};
+use super::ObjectMap;
 use crate::{
     config::{LogNamespace, OutputId},
     schema,
@@ -220,7 +220,7 @@ fn default_schema_definition() -> Arc<schema::Definition> {
 }
 
 impl EventMetadata {
- /// Replace the schema definition with the given one.
+    /// Replace the schema definition with the given one.
     #[must_use]
     pub fn with_schema_definition(mut self, schema_definition: &Arc<schema::Definition>) -> Self {
         self.get_mut().schema_definition = Arc::clone(schema_definition);

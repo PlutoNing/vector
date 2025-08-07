@@ -1,4 +1,4 @@
-pub use agent_common::{btreemap, conversion, encode_logfmt, Error, Result, TimeZone};
+pub use agent_core::{ conversion, Error, Result, TimeZone};
 pub use agent_config as configurable;
 pub use agent_config::impl_generate_config_from_default;
 pub use agent_core::{buckets, emit, event, metric_tags, quantiles, samples, schema, transform};
@@ -6,7 +6,7 @@ pub use agent_core::{buckets, emit, event, metric_tags, quantiles, samples, sche
 pub use vrl;
 
 pub mod config {
-    pub use agent_common::config::ComponentKey;
+    pub use agent_core::componentkey::ComponentKey;
     pub use agent_core::buffer::{Bufferable, Encodable, EventCount, InMemoryBufferable, WhenFull};
     pub use agent_core::config::{
         clone_input_definitions, init_log_schema, log_schema, DataType, Input, LegacyKey,

@@ -74,7 +74,7 @@ impl JsonSerializer {
     }
 
     /// Encode event and represent it as JSON value.
-    pub fn to_json_value(&self, event: Event) -> Result<serde_json::Value, agent_common::Error> {
+    pub fn to_json_value(&self, event: Event) -> Result<serde_json::Value, agent_lib::Error> {
         match event {
             Event::Log(log) => serde_json::to_value(&log),
             Event::Metric(metric) => serde_json::to_value(&metric),
@@ -85,7 +85,7 @@ impl JsonSerializer {
 }
 
 impl Encoder<Event> for JsonSerializer {
-    type Error = agent_common::Error;
+    type Error = agent_lib::Error;
 
     fn encode(&mut self, event: Event, buffer: &mut BytesMut) -> Result<(), Self::Error> {
         let writer = buffer.writer();

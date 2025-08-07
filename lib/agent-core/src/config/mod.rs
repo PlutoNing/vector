@@ -9,7 +9,7 @@ mod log_schema;
 pub mod output_id;
 
 use crate::event::LogEvent;
-pub use agent_common::config::ComponentKey;
+pub use crate::componentkey::ComponentKey;
 use agent_config::configurable_component;
 pub use log_schema::{init_log_schema, log_schema, LogSchema};
 pub use output_id::OutputId;

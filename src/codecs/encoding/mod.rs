@@ -33,7 +33,7 @@ pub enum Error {
     /// The error occurred while encoding the byte frame boundaries.
     FramingError(BoxedFramingError),
     /// The error occurred while serializing a structured event into bytes.
-    SerializingError(agent_common::Error),
+    SerializingError(agent_lib::Error),
 }
 
 impl std::fmt::Display for Error {
@@ -221,7 +221,7 @@ impl Serializer {
     ///
     /// Panics if the serializer does not support encoding to JSON. Call `Serializer::supports_json`
     /// if you need to determine the capability to encode to JSON at runtime.
-    pub fn to_json_value(&self, event: Event) -> Result<serde_json::Value, agent_common::Error> {
+    pub fn to_json_value(&self, event: Event) -> Result<serde_json::Value, agent_lib::Error> {
         match self {
             Serializer::Json(serializer) => serializer.to_json_value(event),
             Serializer::Text(_) => {
@@ -245,7 +245,7 @@ impl From<TextSerializer> for Serializer {
 }
 
 impl tokio_util::codec::Encoder<Event> for Serializer {
-    type Error = agent_common::Error;
+    type Error = agent_lib::Error;
 
     fn encode(&mut self, event: Event, buffer: &mut BytesMut) -> Result<(), Self::Error> {
         match self {

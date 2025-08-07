@@ -273,7 +273,7 @@ mod tests {
             timezone: Default::default(),
         };
         println!("SqliteSinkConfig initialized");
-        let (input, _events) = random_metrics_with_stream(10, None, None);
+        let (input, _events) = random_metrics_with_stream(10, None);
         println!("random_metrics_with_stream initialized");
         run_assert_sqlite_sink(&config, input.clone().into_iter()).await;
         println!("run_assert_sqlite_sink initialized");
@@ -304,7 +304,6 @@ mod tests {
 
         let (input, _events) = random_metrics_with_stream_timestamp(
             metric_count,
-            None,
             None,
             timestamp,
             timestamp_offset,

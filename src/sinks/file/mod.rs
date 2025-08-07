@@ -448,7 +448,7 @@ mod tests {
             max_file_size_bytes: default_max_file_size_bytes(),
         };
 
-        let (input, _events) = random_metrics_with_stream(100, None, None);
+        let (input, _events) = random_metrics_with_stream(100, None);
 
         run_sink_test(&config, input.clone().into_iter()).await;
 
@@ -482,7 +482,6 @@ mod tests {
 
         let (input, _events) = random_metrics_with_stream_timestamp(
             metric_count,
-            None,
             None,
             timestamp,
             timestamp_offset,

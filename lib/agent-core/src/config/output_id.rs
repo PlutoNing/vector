@@ -1,6 +1,6 @@
 use std::fmt;
 
-use agent_common::config::ComponentKey;
+use crate::componentkey::ComponentKey;
 
 use super::configurable_component;
 use crate::schema;

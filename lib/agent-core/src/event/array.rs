@@ -5,15 +5,10 @@
 use std::{iter, slice, sync::Arc, vec};
 
 use crate::buffer::EventCount;
-use agent_common::{
-    config::ComponentKey,
-};
+use crate::componentkey::ComponentKey;
 use futures::{stream, Stream};
 
-use super::{
-    Event, EventMutRef, EventRef, LogEvent, Metric,
-    TraceEvent,
-};
+use super::{Event, EventMutRef, EventRef, LogEvent, Metric, TraceEvent};
 
 /// The type alias for an array of `LogEvent` elements.
 pub type LogArray = Vec<LogEvent>;
@@ -28,7 +23,7 @@ pub type MetricArray = Vec<Metric>;
 /// of events. This is effectively the same as the standard
 /// `IntoIterator<Item = Event>` implementations, but that would
 /// conflict with the base implementation for the type aliases below.
-pub trait EventContainer{
+pub trait EventContainer {
     /// The type of `Iterator` used to turn this container into events.
     type IntoIter: Iterator<Item = Event>;
 

@@ -20,15 +20,29 @@
 #![allow(clippy::unnested_or_patterns)] // nightly-only feature as of 1.51.0
 #![allow(clippy::type_complexity)] // long-types happen, especially in async code
 
+
+pub use vrl::compiler::TimeZone;
+
+pub mod conversion {
+    pub use vrl::compiler::conversion::*;
+}
+
+pub type Error = Box<dyn std::error::Error + Send + Sync + 'static>;
+
+pub type Result<T> = std::result::Result<T, Error>;
+
+
+
+
 pub mod buffer;
 pub mod config;
 pub mod event;
 pub mod schema;
 pub mod transform;
-
+pub mod componentkey;
 use float_eq::FloatEq;
 
-pub(crate) use agent_common::{Error, Result};
+// pub(crate) use crate::{Error, Result};
 
 pub(crate) fn float_eq(l_value: f64, r_value: f64) -> bool {
     (l_value.is_nan() && r_value.is_nan()) || l_value.eq_ulps(&r_value, &1)

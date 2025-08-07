@@ -48,8 +48,6 @@ use tokio::sync::mpsc;
 
 pub const CHUNK_SIZE: usize = 1000;
 
-#[cfg(any(test))]
-const TEST_BUFFER_SIZE: usize = 100;
 pub const DEFAULT_OUTPUT: &str = "_default";
 const LAG_TIME_NAME: &str = "source_lag_time_seconds";
 #[derive(Clone, Debug)]

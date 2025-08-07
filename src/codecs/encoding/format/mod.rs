@@ -16,14 +16,14 @@ use agent_lib::event::Event;
 
 /// Serialize a structured event into a byte frame.
 pub trait Serializer:
-    tokio_util::codec::Encoder<Event, Error = agent_common::Error> + DynClone + Debug + Send + Sync
+    tokio_util::codec::Encoder<Event, Error =agent_lib::Error> + DynClone + Debug + Send + Sync
 {
 }
 
 /// Default implementation for `Serializer`s that implement
 /// `tokio_util::codec::Encoder`.
 impl<Encoder> Serializer for Encoder where
-    Encoder: tokio_util::codec::Encoder<Event, Error = agent_common::Error>
+    Encoder: tokio_util::codec::Encoder<Event, Error =agent_lib::Error>
         + Clone
         + Debug
         + Send
