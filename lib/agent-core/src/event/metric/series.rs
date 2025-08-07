@@ -1,6 +1,6 @@
 use core::fmt;
 
-use agent_common::byte_size_of::ByteSizeOf;
+
 use agent_config::configurable_component;
 
 use super::{write_list, write_word, MetricTags, TagValue};
@@ -71,11 +71,7 @@ impl MetricSeries {
     }
 }
 
-impl ByteSizeOf for MetricSeries {
-    fn allocated_bytes(&self) -> usize {
-        self.name.allocated_bytes() + self.tags.allocated_bytes()
-    }
-}
+
 
 /// Metric name.
 #[configurable_component]
@@ -144,8 +140,4 @@ impl fmt::Display for MetricSeries {
     }
 }
 
-impl ByteSizeOf for MetricName {
-    fn allocated_bytes(&self) -> usize {
-        self.name.allocated_bytes() + self.namespace.allocated_bytes()
-    }
-}
+

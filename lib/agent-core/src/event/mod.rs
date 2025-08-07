@@ -1,9 +1,7 @@
 use std::{convert::TryInto, fmt::Debug, sync::Arc};
 
 use crate::buffer::EventCount;
-use agent_common::{
-    byte_size_of::ByteSizeOf, config::ComponentKey,
-};
+use agent_common::config::ComponentKey;
 pub use array::{into_event_stream, EventArray, EventContainer, LogArray, MetricArray, TraceArray};
 pub use log_event::LogEvent;
 pub use metadata::{EventMetadata, WithMetadata};
@@ -34,16 +32,6 @@ pub enum Event {
     Log(LogEvent),
     Metric(Metric),
     Trace(TraceEvent),
-}
-
-impl ByteSizeOf for Event {
-    fn allocated_bytes(&self) -> usize {
-        match self {
-            Event::Log(log_event) => log_event.allocated_bytes(),
-            Event::Metric(metric_event) => metric_event.allocated_bytes(),
-            Event::Trace(trace_event) => trace_event.allocated_bytes(),
-        }
-    }
 }
 
 impl EventCount for Event {

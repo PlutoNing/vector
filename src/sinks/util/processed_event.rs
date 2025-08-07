@@ -1,7 +1,6 @@
 use serde::Serialize;
 use agent_lib::{
     event::{ LogEvent, MaybeAsLogMut},
-    ByteSizeOf,
 };
 
 
@@ -19,15 +18,5 @@ where
 {
     fn maybe_as_log_mut(&mut self) -> Option<&mut LogEvent> {
         self.event.maybe_as_log_mut()
-    }
-}
-
-impl<E, M> ByteSizeOf for ProcessedEvent<E, M>
-where
-    E: ByteSizeOf,
-    M: ByteSizeOf,
-{
-    fn allocated_bytes(&self) -> usize {
-        self.event.allocated_bytes() + self.metadata.allocated_bytes()
     }
 }

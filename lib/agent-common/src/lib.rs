@@ -13,10 +13,6 @@
 #[cfg(feature = "btreemap")]
 pub use vrl::btreemap;
 
-pub mod byte_size_of;
-
-pub mod json_size;
-
 pub mod config;
 
 #[cfg(feature = "conversion")]

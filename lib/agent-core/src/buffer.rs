@@ -5,7 +5,6 @@ use agent_config::configurable_component;
 
 use std::fmt::Debug;
 
-use agent_common::byte_size_of::ByteSizeOf;
 /// Event handling behavior when a buffer is full.
 #[configurable_component]
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -44,13 +43,13 @@ pub enum WhenFull {
 /// It is a relaxed version of `Bufferable` that allows for items that are not `encodable` (e.g., `Instant`),
 /// which is an unnecessary constraint for memory buffers.
 pub trait InMemoryBufferable:
-    ByteSizeOf + EventCount + Debug + Send + Sync + Unpin + Sized + 'static
+    EventCount + Debug + Send + Sync + Unpin + Sized + 'static
 {
 }
 
 // Blanket implementation for anything that is already in-memory bufferable.
 impl<T> InMemoryBufferable for T where
-    T: ByteSizeOf + EventCount + Debug + Send + Sync + Unpin + Sized + 'static
+    T: EventCount + Debug + Send + Sync + Unpin + Sized + 'static
 {
 }
 

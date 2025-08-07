@@ -10,7 +10,7 @@ use std::{
     num::NonZeroU32,
 };
 
-use agent_common::byte_size_of::ByteSizeOf;
+
 use agent_config::configurable_component;
 use chrono::{DateTime, Utc};
 
@@ -403,14 +403,7 @@ impl Display for Metric {
     }
 }
 
-impl ByteSizeOf for Metric {
-    /* 有调用 */
-    fn allocated_bytes(&self) -> usize {
-        self.series.allocated_bytes()
-            + self.data.allocated_bytes()
-            + self.metadata.allocated_bytes()
-    }
-}
+
 
 /// 指标可以是绝对值或增量值
 #[configurable_component]

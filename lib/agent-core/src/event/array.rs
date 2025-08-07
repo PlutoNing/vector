@@ -6,7 +6,6 @@ use std::{iter, slice, sync::Arc, vec};
 
 use crate::buffer::EventCount;
 use agent_common::{
-    byte_size_of::ByteSizeOf,
     config::ComponentKey,
 };
 use futures::{stream, Stream};
@@ -29,7 +28,7 @@ pub type MetricArray = Vec<Metric>;
 /// of events. This is effectively the same as the standard
 /// `IntoIterator<Item = Event>` implementations, but that would
 /// conflict with the base implementation for the type aliases below.
-pub trait EventContainer: ByteSizeOf{
+pub trait EventContainer{
     /// The type of `Iterator` used to turn this container into events.
     type IntoIter: Iterator<Item = Event>;
 
@@ -232,16 +231,6 @@ impl From<LogArray> for EventArray {
 impl From<MetricArray> for EventArray {
     fn from(array: MetricArray) -> Self {
         Self::Metrics(array)
-    }
-}
-
-impl ByteSizeOf for EventArray {
-    fn allocated_bytes(&self) -> usize {
-        match self {
-            Self::Logs(a) => a.allocated_bytes(),
-            Self::Metrics(a) => a.allocated_bytes(),
-            Self::Traces(a) => a.allocated_bytes(),
-        }
     }
 }
 

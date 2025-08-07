@@ -3,7 +3,6 @@ use std::{
     convert::{TryFrom, TryInto},
     fmt::Debug,
     iter::FromIterator,
-    mem::size_of,
     num::NonZeroUsize,
     sync::{Arc, LazyLock},
 };
@@ -11,11 +10,6 @@ use std::{
 use crate::event::util::log::all_fields_skip_array_elements;
 use bytes::Bytes;
 use chrono::Utc;
-
-use agent_common::{
-    byte_size_of::ByteSizeOf,
-    json_size::NonZeroJsonSize,
-};
 use crossbeam_utils::atomic::AtomicCell;
 use serde::{Deserialize, Serialize, Serializer};
 use vrl::metadata_path;
@@ -44,41 +38,15 @@ struct Inner {
 
     #[serde(skip)]
     size_cache: AtomicCell<Option<NonZeroUsize>>,
-
-    #[serde(skip)]
-    json_encoded_size_cache: AtomicCell<Option<NonZeroJsonSize>>,
 }
 
 impl Inner {
     fn invalidate(&self) {
         self.size_cache.store(None);
-        self.json_encoded_size_cache.store(None);
     }
 
     fn as_value(&self) -> &Value {
         &self.fields
-    }
-}
-
-impl ByteSizeOf for Inner {
-    fn size_of(&self) -> usize {
-        self.size_cache
-            .load()
-            .unwrap_or_else(|| {
-                let size = size_of::<Self>() + self.allocated_bytes();
-                // The size of self will always be non-zero, and
-                // adding the allocated bytes cannot make it overflow
-                // since `usize` has a range the same as pointer
-                // space. Hence, the expect below cannot fail.
-                let size = NonZeroUsize::new(size).expect("Size cannot be zero");
-                self.size_cache.store(Some(size));
-                size
-            })
-            .into()
-    }
-
-    fn allocated_bytes(&self) -> usize {
-        self.fields.allocated_bytes()
     }
 }
 
@@ -90,11 +58,6 @@ impl Clone for Inner {
             // `Arc::make_mut`, so don't bother fetching the size
             // cache to copy it since it will be invalidated anyways.
             size_cache: None.into(),
-
-            // This clone is only ever used in combination with
-            // `Arc::make_mut`, so don't bother fetching the size
-            // cache to copy it since it will be invalidated anyways.
-            json_encoded_size_cache: None.into(),
         }
     }
 }
@@ -105,7 +68,6 @@ impl Default for Inner {
             // **IMPORTANT:** Due to numerous legacy reasons this **must** be a Map variant.
             fields: Value::Object(Default::default()),
             size_cache: Default::default(),
-            json_encoded_size_cache: Default::default(),
         }
     }
 }
@@ -115,7 +77,6 @@ impl From<Value> for Inner {
         Self {
             fields,
             size_cache: Default::default(),
-            json_encoded_size_cache: Default::default(),
         }
     }
 }
@@ -182,12 +143,6 @@ impl LogEvent {
         } else {
             LogNamespace::Legacy
         }
-    }
-}
-
-impl ByteSizeOf for LogEvent {
-    fn allocated_bytes(&self) -> usize {
-        self.inner.size_of() + self.metadata.allocated_bytes()
     }
 }
 

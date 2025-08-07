@@ -1,14 +1,7 @@
-pub use agent_common::{
-    btreemap, byte_size_of, byte_size_of::ByteSizeOf, conversion,
-    encode_logfmt,json_size, Error,
-    Result, TimeZone,
-};
+pub use agent_common::{btreemap, conversion, encode_logfmt, Error, Result, TimeZone};
 pub use agent_config as configurable;
 pub use agent_config::impl_generate_config_from_default;
-pub use agent_core::{
-    buckets, emit, event, metric_tags,
-    quantiles, samples, schema, transform,
-};
+pub use agent_core::{buckets, emit, event, metric_tags, quantiles, samples, schema, transform};
 #[cfg(feature = "vrl")]
 pub use vrl;
 
@@ -20,6 +13,6 @@ pub mod config {
         LogNamespace, LogSchema, OutputId, SourceOutput, TransformOutput,
     };
     pub use agent_core::event::Event;
-    pub use agent_core::schema::Requirement;
     pub use agent_core::is_default;
+    pub use agent_core::schema::Requirement;
 }

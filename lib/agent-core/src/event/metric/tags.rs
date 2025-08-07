@@ -4,7 +4,7 @@ use std::fmt::Display;
 use std::hash::{Hash, Hasher};
 use std::{cmp::Ordering, mem};
 
-use agent_common::byte_size_of::ByteSizeOf;
+
 use agent_config::{configurable_component, Configurable};
 use indexmap::IndexSet;
 use serde::{ser::SerializeSeq, Deserialize, Deserializer, Serialize, Serializer};
@@ -47,14 +47,6 @@ impl From<Cow<'_, str>> for TagValue {
     }
 }
 
-impl ByteSizeOf for TagValue {
-    fn allocated_bytes(&self) -> usize {
-        match self {
-            Self::Bare => 0,
-            Self::Value(value) => value.allocated_bytes(),
-        }
-    }
-}
 
 impl TagValue {
     pub fn as_option(&self) -> Option<&str> {
@@ -390,15 +382,7 @@ impl<'a> Iterator for TagValueRefIter<'a> {
     }
 }
 
-impl ByteSizeOf for TagValueSet {
-    fn allocated_bytes(&self) -> usize {
-        match self {
-            Self::Empty => 0,
-            Self::Single(tag) => tag.allocated_bytes(),
-            Self::Set(set) => set.allocated_bytes(),
-        }
-    }
-}
+
 
 impl<'de> Deserialize<'de> for TagValueSet {
     fn deserialize<D: Deserializer<'de>>(de: D) -> Result<Self, D::Error> {
@@ -584,8 +568,4 @@ impl FromIterator<(String, TagValue)> for MetricTags {
     }
 }
 
-impl ByteSizeOf for MetricTags {
-    fn allocated_bytes(&self) -> usize {
-        self.0.allocated_bytes()
-    }
-}
+

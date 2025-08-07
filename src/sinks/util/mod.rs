@@ -32,7 +32,7 @@ pub use service::Concurrency;
 pub use sink::StreamSink;
 use snafu::Snafu;
 
-use agent_lib::{event::Event, json_size::JsonSize, TimeZone};
+use agent_lib::{event::Event, TimeZone};
 
 use crate::{
     config::{SinkConfig, SinkContext},
@@ -123,50 +123,6 @@ pub async fn run_sink_test<C>(
             .expect("run sink")
     })
     .await;
-}
-
-#[derive(Debug)]
-pub struct EncodedEvent<I> {
-    pub item: I,
-    pub byte_size: usize,
-    pub json_byte_size: JsonSize,
-}
-
-impl<I> EncodedEvent<I> {
-    /// Create a trivial input with no metadata. This method will be
-    /// removed when all sinks are converted.
-    pub fn new(item: I, byte_size: usize, json_byte_size: JsonSize) -> Self {
-        Self {
-            item,
-            byte_size,
-            json_byte_size,
-        }
-    }
-
-    // This should be:
-    // ```impl<F, I: From<F>> From<EncodedEvent<F>> for EncodedEvent<I>```
-    // however, the compiler rejects that due to conflicting
-    // implementations of `From` due to the generic
-    // ```impl<T> From<T> for T```
-    pub fn from<F>(that: EncodedEvent<F>) -> Self
-    where
-        I: From<F>,
-    {
-        Self {
-            item: I::from(that.item),
-            byte_size: that.byte_size,
-            json_byte_size: that.json_byte_size,
-        }
-    }
-
-    /// Remap the item using an adapter
-    pub fn map<T>(self, doit: impl Fn(I) -> T) -> EncodedEvent<T> {
-        EncodedEvent {
-            item: doit(self.item),
-            byte_size: self.byte_size,
-            json_byte_size: self.json_byte_size,
-        }
-    }
 }
 
 /// Joins namespace with name via delimiter if namespace is present.

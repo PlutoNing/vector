@@ -36,7 +36,6 @@ use agent_lib::event::{into_event_stream};
 use agent_lib::{
     config::{log_schema, SourceOutput},
     event::{array, Event, EventArray, EventContainer, EventRef},
-    ByteSizeOf,
 };
 use chrono::Utc;
 use futures::{Stream, StreamExt};
@@ -96,11 +95,6 @@ pub struct SourceSenderItem {
     pub send_reference: Instant,
 }
 
-impl ByteSizeOf for SourceSenderItem {
-    fn allocated_bytes(&self) -> usize {
-        self.events.allocated_bytes()
-    }
-}
 
 impl EventCount for SourceSenderItem {
     fn event_count(&self) -> usize {
@@ -233,7 +227,7 @@ impl SourceSender {
     pub async fn send_event_stream<S, E>(&mut self, events: S) -> Result<(), ClosedError>
     where
         S: Stream<Item = E> + Unpin,
-        E: Into<Event> + ByteSizeOf,
+        E: Into<Event>,
     {
         self.default_output_mut().send_event_stream(events).await
     }
@@ -244,7 +238,7 @@ impl SourceSender {
     /// This internally handles emitting [eventsSent] events.
     pub async fn send_batch<I, E>(&mut self, events: I) -> Result<(), ClosedError>
     where
-        E: Into<Event> + ByteSizeOf,
+        E: Into<Event>,
         I: IntoIterator<Item = E>,
         <I as IntoIterator>::IntoIter: ExactSizeIterator,
     {
@@ -257,7 +251,7 @@ impl SourceSender {
     /// This internally handles emitting [eventsSent] events.
     pub async fn send_batch_named<I, E>(&mut self, name: &str, events: I) -> Result<(), ClosedError>
     where
-        E: Into<Event> + ByteSizeOf,
+        E: Into<Event> ,
         I: IntoIterator<Item = E>,
         <I as IntoIterator>::IntoIter: ExactSizeIterator,
     {
@@ -638,7 +632,7 @@ impl Output {
     async fn send_event_stream<S, E>(&mut self, events: S) -> Result<(), ClosedError>
     where
         S: Stream<Item = E> + Unpin,
-        E: Into<Event> + ByteSizeOf,
+        E: Into<Event>,
     {
         let mut stream = events.ready_chunks(CHUNK_SIZE);
         while let Some(events) = stream.next().await {
@@ -649,7 +643,7 @@ impl Output {
     /*  */
     async fn send_batch<I, E>(&mut self, events: I) -> Result<(), ClosedError>
     where
-        E: Into<Event> + ByteSizeOf,
+        E: Into<Event>,
         I: IntoIterator<Item = E>,
         <I as IntoIterator>::IntoIter: ExactSizeIterator,
     {

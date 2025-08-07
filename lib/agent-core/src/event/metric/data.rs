@@ -1,6 +1,5 @@
 use std::num::NonZeroU32;
 
-use agent_common::byte_size_of::ByteSizeOf;
 use agent_config::configurable_component;
 use chrono::{DateTime, Utc};
 
@@ -163,8 +162,3 @@ impl PartialOrd for MetricData {
     }
 }
 
-impl ByteSizeOf for MetricData {
-    fn allocated_bytes(&self) -> usize {
-        self.value.allocated_bytes()
-    }
-}

@@ -3,7 +3,7 @@ use std::collections::BTreeSet;
 
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 
-use agent_common::byte_size_of::ByteSizeOf;
+
 use agent_config::configurable_component;
 
 use crate::float_eq;
@@ -290,17 +290,7 @@ impl MetricValue {
     }
 }
 
-impl ByteSizeOf for MetricValue {
-    fn allocated_bytes(&self) -> usize {
-        match self {
-            Self::Counter { .. } | Self::Gauge { .. } => 0,
-            Self::Set { values } => values.allocated_bytes(),
-            Self::Distribution { samples, .. } => samples.allocated_bytes(),
-            Self::AggregatedHistogram { buckets, .. } => buckets.allocated_bytes(),
-            Self::AggregatedSummary { quantiles, .. } => quantiles.allocated_bytes(),
-        }
-    }
-}
+
 
 impl PartialEq for MetricValue {
     fn eq(&self, other: &Self) -> bool {
@@ -435,11 +425,7 @@ impl PartialEq for Sample {
     }
 }
 
-impl ByteSizeOf for Sample {
-    fn allocated_bytes(&self) -> usize {
-        0
-    }
-}
+
 
 /// Custom serialization function which converts special `f64` values to strings.
 /// Non-special values are serialized as numbers.
@@ -509,11 +495,7 @@ impl PartialEq for Bucket {
     }
 }
 
-impl ByteSizeOf for Bucket {
-    fn allocated_bytes(&self) -> usize {
-        0
-    }
-}
+
 
 /// A single quantile observation.
 ///
@@ -578,8 +560,4 @@ impl Quantile {
     }
 }
 
-impl ByteSizeOf for Quantile {
-    fn allocated_bytes(&self) -> usize {
-        0
-    }
-}
+

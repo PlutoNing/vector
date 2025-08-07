@@ -2,7 +2,7 @@
 
 use std::{borrow::Cow, collections::BTreeMap, fmt, sync::Arc};
 
-use agent_common::{byte_size_of::ByteSizeOf, config::ComponentKey};
+use agent_common::{config::ComponentKey};
 use derivative::Derivative;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -217,12 +217,6 @@ fn default_schema_definition() -> Arc<schema::Definition> {
         Kind::any(),
         [LogNamespace::Legacy, LogNamespace::Vector],
     ))
-}
-
-impl ByteSizeOf for EventMetadata {
-    fn allocated_bytes(&self) -> usize {
-        0
-    }
 }
 
 impl EventMetadata {

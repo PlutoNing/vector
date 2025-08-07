@@ -1,5 +1,4 @@
 use crate::event::{Event, EventArray, EventContainer, EventRef};
-use agent_common::{byte_size_of::ByteSizeOf};
 
 /// Transforms come in two variants. Functions, or tasks.
 ///
@@ -102,11 +101,6 @@ impl OutputBuffer {
     }
 }
 
-impl ByteSizeOf for OutputBuffer {
-    fn allocated_bytes(&self) -> usize {
-        self.0.iter().map(ByteSizeOf::size_of).sum()
-    }
-}
 impl From<Vec<Event>> for OutputBuffer {
     fn from(events: Vec<Event>) -> Self {
         let mut result = Self::default();

@@ -4,7 +4,6 @@ use derivative::Derivative;
 
 use snafu::Snafu;
 
-use agent_lib::json_size::JsonSize;
 
 // * Provide sensible sink default 10 MB with 1s timeout. Don't allow chaining builder methods on
 //   that.
@@ -160,5 +159,4 @@ pub struct EncodedBatch<I> {
     pub items: I,
     pub count: usize,
     pub byte_size: usize,
-    pub json_byte_size: JsonSize,
 }
