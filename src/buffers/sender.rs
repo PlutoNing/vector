@@ -1,7 +1,8 @@
 use async_recursion::async_recursion;
 use derivative::Derivative;
 
-use agent_lib::config::{Bufferable, WhenFull};
+use crate::core::{Bufferable, WhenFull};
+
 
 use crate::sources::LimitedSender;
 

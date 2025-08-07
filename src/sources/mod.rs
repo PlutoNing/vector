@@ -18,8 +18,6 @@ use async_stream::stream;
 use crossbeam_queue::ArrayQueue;
 use tokio::sync::{Notify, OwnedSemaphorePermit, Semaphore, TryAcquireError};
 
-use agent_lib::config::InMemoryBufferable;
-
 #[allow(dead_code)] // Easier than listing out all the features that use this
 /// Common build errors
 #[derive(Debug, Snafu)]
@@ -27,7 +25,7 @@ enum BuildError {
     #[snafu(display("URI parse error: {}", source))]
     UriParseError { source: ::http::uri::InvalidUri },
 }
-use crate::config::{ComponentKey, OutputId};
+use crate::{config::{ComponentKey, OutputId}, core::InMemoryBufferable};
 use crate::schema::Definition;
 use agent_lib::config::EventCount;
 use agent_lib::event::array::EventArrayIntoIter;

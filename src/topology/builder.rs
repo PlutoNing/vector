@@ -3,7 +3,7 @@ use std::{
     future::ready,
     sync::{Arc, LazyLock, Mutex},
 };
-use crate::buffers::BufferReceiver;
+use crate::{buffers::BufferReceiver, core::WhenFull};
 use futures::{StreamExt, TryStreamExt};
 use futures_util::stream::FuturesUnordered;
 
@@ -39,7 +39,6 @@ use crate::{
     topology::task::TaskError,
     SourceSender,
 };
-use agent_lib::{config::WhenFull};
 
 static ENRICHMENT_TABLES: LazyLock<crate::enrichment_tables::enrichment::TableRegistry> =
     LazyLock::new(crate::enrichment_tables::enrichment::TableRegistry::default);

@@ -9,10 +9,7 @@ use futures::Stream;
 use tokio::select;
 use tokio_util::sync::ReusableBoxFuture;
 
-
-use agent_lib::config::Bufferable;
-
-use crate::sources::LimitedReceiver;
+use crate::{core::Bufferable, sources::LimitedReceiver};
 /// Adapter for papering over various receiver backends.
 #[derive(Debug)]
 pub enum ReceiverAdapter<T: Bufferable> {

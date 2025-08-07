@@ -7,7 +7,7 @@ pub use vrl;
 
 pub mod config {
     pub use agent_core::componentkey::ComponentKey;
-    pub use agent_core::buffer::{Bufferable, EventCount, InMemoryBufferable, WhenFull};
+    pub use agent_core::buffer::{EventCount};
     pub use agent_core::config::{
         clone_input_definitions, init_log_schema, log_schema, DataType, Input, LegacyKey,
         LogNamespace, LogSchema, OutputId, SourceOutput, TransformOutput,
