@@ -103,10 +103,6 @@ impl From<OwnedTargetPath> for OptionalTargetPath {
     }
 }
 
-/* 日志模式定义了agent处理日志事件的标准字段映射。它包含五个核心字段：message_key存储原始日志内容，
-timestamp_key记录事件时间，host_key标识来源主机，source_type_key标记创建事件的源类型，
-metadata_key保存agent生成的元数据。这些字段名称可配置，默认使用标准名称。系统支持全局模式设置和
-配置合并，确保所有组件以统一方式处理日志事件。 */
 /// Log schema.
 #[configurable_component]
 #[derive(Clone, Debug, Eq, PartialEq)]

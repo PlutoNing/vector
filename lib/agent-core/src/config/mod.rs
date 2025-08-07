@@ -2,21 +2,15 @@ use std::sync::Arc;
 use std::{collections::HashMap, fmt};
 
 use bitmask_enum::bitmask;
-use bytes::Bytes;
-use chrono::{DateTime, Utc};
 
 mod log_schema;
 pub mod output_id;
 
-use crate::event::LogEvent;
 pub use crate::componentkey::ComponentKey;
 use agent_config::configurable_component;
 pub use log_schema::{init_log_schema, log_schema, LogSchema};
 pub use output_id::OutputId;
 use serde::{Deserialize, Serialize};
-use vrl::path;
-use vrl::path::{PathPrefix, ValuePath};
-use vrl::value::Value;
 
 use crate::schema;
 
@@ -89,13 +83,6 @@ impl Input {
             ty: DataType::all_bits(),
             log_schema_requirement: schema::Requirement::empty(),
         }
-    }
-
-    /// Set the schema requirement for this output.
-    #[must_use]
-    pub fn with_schema_requirement(mut self, schema_requirement: schema::Requirement) -> Self {
-        self.log_schema_requirement = schema_requirement;
-        self
     }
 }
 #[derive(Debug, Clone, PartialEq)]
@@ -319,128 +306,6 @@ pub enum LegacyKey<T> {
 }
 
 impl LogNamespace {
-    /// Vector: This is added to "event metadata", nested under the source name.
-    ///
-    /// Legacy: This is stored on the event root, only if a field with that name doesn't already exist.
-    pub fn insert_source_metadata<'a>(
-        &self,
-        source_name: &'a str,
-        log: &mut LogEvent,
-        legacy_key: Option<LegacyKey<impl ValuePath<'a>>>,
-        metadata_key: impl ValuePath<'a>,
-        value: impl Into<Value>,
-    ) {
-        match self {
-            LogNamespace::Vector => {
-                log.metadata_mut()
-                    .value_mut()
-                    .insert(path!(source_name).concat(metadata_key), value);
-            }
-            LogNamespace::Legacy => match legacy_key {
-                None => { /* don't insert */ }
-                Some(LegacyKey::Overwrite(key)) => {
-                    log.insert((PathPrefix::Event, key), value);
-                }
-                Some(LegacyKey::InsertIfEmpty(key)) => {
-                    log.try_insert((PathPrefix::Event, key), value);
-                }
-            },
-        }
-    }
-
-    /// Vector: This is retrieved from the "event metadata", nested under the source name.
-    ///
-    /// Legacy: This is retrieved from the event.
-    pub fn get_source_metadata<'a, 'b>(
-        &self,
-        source_name: &'a str,
-        log: &'b LogEvent,
-        legacy_key: impl ValuePath<'a>,
-        metadata_key: impl ValuePath<'a>,
-    ) -> Option<&'b Value> {
-        match self {
-            LogNamespace::Vector => log
-                .metadata()
-                .value()
-                .get(path!(source_name).concat(metadata_key)),
-            LogNamespace::Legacy => log.get((PathPrefix::Event, legacy_key)),
-        }
-    }
-
-    /// Vector: The `ingest_timestamp`, and `source_type` fields are added to "event metadata", nested
-    /// under the name "vector". This data will be marked as read-only in VRL.
-    ///
-    /// Legacy: The values of `source_type_key`, and `timestamp_key` are stored as keys on the event root,
-    /// only if a field with that name doesn't already exist.
-    pub fn insert_standard_vector_source_metadata(
-        &self,
-        log: &mut LogEvent,
-        source_name: &'static str,
-        now: DateTime<Utc>,
-    ) {
-        self.insert_vector_metadata(
-            log,
-            log_schema().source_type_key(),
-            path!("source_type"),
-            Bytes::from_static(source_name.as_bytes()),
-        );
-        self.insert_vector_metadata(
-            log,
-            log_schema().timestamp_key(),
-            path!("ingest_timestamp"),
-            now,
-        );
-    }
-
-    /// Vector: This is added to the "event metadata", nested under the name "vector". This data
-    /// will be marked as read-only in VRL.
-    ///
-    /// Legacy: This is stored on the event root, only if a field with that name doesn't already exist.
-    pub fn insert_vector_metadata<'a>(
-        &self,
-        log: &mut LogEvent,
-        legacy_key: Option<impl ValuePath<'a>>,
-        metadata_key: impl ValuePath<'a>,
-        value: impl Into<Value>,
-    ) {
-        match self {
-            LogNamespace::Vector => {
-                log.metadata_mut()
-                    .value_mut()
-                    .insert(path!("vector").concat(metadata_key), value);
-            }
-            LogNamespace::Legacy => {
-                if let Some(legacy_key) = legacy_key {
-                    log.try_insert((PathPrefix::Event, legacy_key), value);
-                }
-            }
-        }
-    }
-
-    /// Vector: This is retrieved from the "event metadata", nested under the name "vector".
-    ///
-    /// Legacy: This is retrieved from the event.
-    pub fn get_vector_metadata<'a, 'b>(
-        &self,
-        log: &'b LogEvent,
-        legacy_key: impl ValuePath<'a>,
-        metadata_key: impl ValuePath<'a>,
-    ) -> Option<&'b Value> {
-        match self {
-            LogNamespace::Vector => log
-                .metadata()
-                .value()
-                .get(path!("vector").concat(metadata_key)),
-            LogNamespace::Legacy => log.get((PathPrefix::Event, legacy_key)),
-        }
-    }
-
-    pub fn new_log_from_data(&self, value: impl Into<Value>) -> LogEvent {
-        match self {
-            LogNamespace::Vector | LogNamespace::Legacy => LogEvent::from(value.into()),
-        }
-    }
-
     // combine a global (self) and local value to get the actual namespace
     #[must_use]
     pub fn merge(&self, override_value: Option<impl Into<LogNamespace>>) -> LogNamespace {
