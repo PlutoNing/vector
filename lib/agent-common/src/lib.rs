@@ -31,9 +31,6 @@ pub mod conversion {
     pub use vrl::compiler::conversion::*;
 }
 
-pub mod event_data_eq;
-pub use event_data_eq::EventDataEq;
-
 pub mod finalization;
 
 #[macro_use]

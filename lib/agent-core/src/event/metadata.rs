@@ -2,7 +2,7 @@
 
 use std::{borrow::Cow, collections::BTreeMap, fmt, sync::Arc};
 
-use agent_common::{byte_size_of::ByteSizeOf, config::ComponentKey, EventDataEq};
+use agent_common::{byte_size_of::ByteSizeOf, config::ComponentKey};
 use derivative::Derivative;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -361,13 +361,6 @@ impl EventMetadata {
     pub fn add_schema_meaning(&mut self, target_path: OwnedTargetPath, meaning: &str) {
         let schema = Arc::make_mut(&mut self.get_mut().schema_definition);
         schema.add_meaning(target_path, meaning);
-    }
-}
-
-impl EventDataEq for EventMetadata {
-    fn event_data_eq(&self, _other: &Self) -> bool {
-        // Don't compare the metadata, it is not "event data".
-        true
     }
 }
 

@@ -15,7 +15,6 @@ use chrono::Utc;
 use agent_common::{
     byte_size_of::ByteSizeOf,
     json_size::{JsonSize, NonZeroJsonSize},
-    EventDataEq,
 };
 use crossbeam_utils::atomic::AtomicCell;
 use serde::{Deserialize, Serialize, Serializer};
@@ -209,12 +208,6 @@ impl LogEvent {
 impl ByteSizeOf for LogEvent {
     fn allocated_bytes(&self) -> usize {
         self.inner.size_of() + self.metadata.allocated_bytes()
-    }
-}
-
-impl Finalizable for LogEvent {
-    fn take_finalizers(&mut self) -> EventFinalizers {
-        self.metadata.take_finalizers()
     }
 }
 
@@ -592,12 +585,6 @@ impl LogEvent {
 impl MaybeAsLogMut for LogEvent {
     fn maybe_as_log_mut(&mut self) -> Option<&mut LogEvent> {
         Some(self)
-    }
-}
-
-impl EventDataEq for LogEvent {
-    fn event_data_eq(&self, other: &Self) -> bool {
-        self.inner.fields == other.inner.fields && self.metadata.event_data_eq(&other.metadata)
     }
 }
 

@@ -10,7 +10,7 @@ use std::{
     num::NonZeroU32,
 };
 
-use agent_common::{byte_size_of::ByteSizeOf, json_size::JsonSize, EventDataEq};
+use agent_common::{byte_size_of::ByteSizeOf, json_size::JsonSize};
 use agent_config::configurable_component;
 use chrono::{DateTime, Utc};
 
@@ -424,14 +424,6 @@ impl Display for Metric {
         self.data.value.fmt(fmt)
     }
 }
-/* 没有 */
-impl EventDataEq for Metric {
-    fn event_data_eq(&self, other: &Self) -> bool {
-        self.series == other.series
-            && self.data == other.data
-            && self.metadata.event_data_eq(&other.metadata)
-    }
-}
 
 impl ByteSizeOf for Metric {
     /* 有调用 */
@@ -450,12 +442,7 @@ impl EstimatedJsonEncodedSizeOf for Metric {
         self.size_of().into()
     }
 }
-/* 事件被输出之前, 会被take finalizer */
-impl Finalizable for Metric {
-    fn take_finalizers(&mut self) -> EventFinalizers {
-        self.metadata.take_finalizers()
-    }
-}
+
 
 /// 指标可以是绝对值或增量值
 #[configurable_component]

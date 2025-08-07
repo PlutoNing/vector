@@ -1,5 +1,5 @@
 use crate::event::{EstimatedJsonEncodedSizeOf, Event, EventArray, EventContainer, EventRef};
-use agent_common::{byte_size_of::ByteSizeOf, json_size::JsonSize, EventDataEq};
+use agent_common::{byte_size_of::ByteSizeOf, json_size::JsonSize};
 
 /// Transforms come in two variants. Functions, or tasks.
 ///
@@ -97,10 +97,6 @@ impl OutputBuffer {
         self.0.drain(..).flat_map(EventArray::into_events)
     }
 
-    fn iter_events(&self) -> impl Iterator<Item = EventRef> {
-        self.0.iter().flat_map(EventArray::iter_events)
-    }
-
     pub fn into_events(self) -> impl Iterator<Item = Event> {
         self.0.into_iter().flat_map(EventArray::into_events)
     }
@@ -112,19 +108,6 @@ impl ByteSizeOf for OutputBuffer {
     }
 }
 
-impl EventDataEq<Vec<Event>> for OutputBuffer {
-    fn event_data_eq(&self, other: &Vec<Event>) -> bool {
-        struct Comparator<'a>(EventRef<'a>);
-
-        impl PartialEq<&Event> for Comparator<'_> {
-            fn eq(&self, that: &&Event) -> bool {
-                self.0.event_data_eq(that)
-            }
-        }
-
-        self.iter_events().map(Comparator).eq(other.iter())
-    }
-}
 
 impl EstimatedJsonEncodedSizeOf for OutputBuffer {
     fn estimated_json_encoded_size_of(&self) -> JsonSize {

@@ -104,11 +104,6 @@ impl std::iter::FromIterator<EventFinalizers> for EventFinalizers {
         Self(iter.into_iter().flat_map(|f| f.0.into_iter()).collect())
     }
 }
-/*
-事件生命周期管&#x7406;__&#x7684;机制
-用于跟踪事件的处理状态（成功、失败、丢弃等）
-通常与处理通知器__（BatchNotifier）配合使用
- */
 /// An event finalizer is the shared data required to handle tracking the status of an event, and updating the status of
 /// a batch with that when the event is dropped.
 #[derive(Debug)]

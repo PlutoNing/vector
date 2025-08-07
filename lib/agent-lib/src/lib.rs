@@ -1,6 +1,6 @@
 pub use agent_common::{
-    assert_event_data_eq, btreemap, byte_size_of, byte_size_of::ByteSizeOf, conversion,
-    encode_logfmt, finalization, impl_event_data_eq, json_size, Error,
+    btreemap, byte_size_of, byte_size_of::ByteSizeOf, conversion,
+    encode_logfmt, finalization, json_size, Error,
     Result, TimeZone,
 };
 pub use agent_config as configurable;

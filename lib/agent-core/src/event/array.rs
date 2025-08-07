@@ -14,7 +14,7 @@ use agent_common::{
 use futures::{stream, Stream};
 
 use super::{
-    EstimatedJsonEncodedSizeOf, Event, EventDataEq, EventMutRef, EventRef, LogEvent, Metric,
+    EstimatedJsonEncodedSizeOf, Event, EventMutRef, EventRef, LogEvent, Metric,
     TraceEvent,
 };
 
@@ -284,27 +284,6 @@ impl EventContainer for EventArray {
             Self::Logs(a) => EventArrayIntoIter::Logs(a.into_iter()),
             Self::Metrics(a) => EventArrayIntoIter::Metrics(a.into_iter()),
             Self::Traces(a) => EventArrayIntoIter::Traces(a.into_iter()),
-        }
-    }
-}
-
-impl EventDataEq for EventArray {
-    fn event_data_eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (Self::Logs(a), Self::Logs(b)) => a.event_data_eq(b),
-            (Self::Metrics(a), Self::Metrics(b)) => a.event_data_eq(b),
-            (Self::Traces(a), Self::Traces(b)) => a.event_data_eq(b),
-            _ => false,
-        }
-    }
-}
-
-impl Finalizable for EventArray {
-    fn take_finalizers(&mut self) -> EventFinalizers {
-        match self {
-            Self::Logs(a) => a.iter_mut().map(Finalizable::take_finalizers).collect(),
-            Self::Metrics(a) => a.iter_mut().map(Finalizable::take_finalizers).collect(),
-            Self::Traces(a) => a.iter_mut().map(Finalizable::take_finalizers).collect(),
         }
     }
 }

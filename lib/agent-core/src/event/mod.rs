@@ -2,7 +2,7 @@ use std::{convert::TryInto, fmt::Debug, sync::Arc};
 
 use crate::buffer::EventCount;
 use agent_common::{
-    byte_size_of::ByteSizeOf, config::ComponentKey, finalization, json_size::JsonSize, EventDataEq,
+    byte_size_of::ByteSizeOf, config::ComponentKey, finalization, json_size::JsonSize,
 };
 pub use array::{into_event_stream, EventArray, EventContainer, LogArray, MetricArray, TraceArray};
 pub use estimated_json_encoded_size_of::EstimatedJsonEncodedSizeOf;
@@ -65,16 +65,6 @@ impl EstimatedJsonEncodedSizeOf for Event {
 impl EventCount for Event {
     fn event_count(&self) -> usize {
         1
-    }
-}
-
-impl Finalizable for Event {
-    fn take_finalizers(&mut self) -> EventFinalizers {
-        match self {
-            Event::Log(log_event) => log_event.take_finalizers(),
-            Event::Metric(metric) => metric.take_finalizers(),
-            Event::Trace(trace_event) => trace_event.take_finalizers(),
-        }
     }
 }
 
@@ -334,17 +324,6 @@ impl Event {
                     "Attempted to convert non-Object JSON into an Event.",
                 )),
             },
-        }
-    }
-}
-
-impl EventDataEq for Event {
-    fn event_data_eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (Self::Log(a), Self::Log(b)) => a.event_data_eq(b),
-            (Self::Metric(a), Self::Metric(b)) => a.event_data_eq(b),
-            (Self::Trace(a), Self::Trace(b)) => a.event_data_eq(b),
-            _ => false,
         }
     }
 }

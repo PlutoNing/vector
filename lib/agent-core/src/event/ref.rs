@@ -1,7 +1,4 @@
 #![deny(missing_docs)]
-
-use agent_common::EventDataEq;
-
 use super::{Event, EventMetadata, LogEvent, Metric, TraceEvent};
 
 /// A wrapper for references to inner event types, where reconstituting
@@ -91,17 +88,6 @@ impl<'a> From<&'a Metric> for EventRef<'a> {
 impl<'a> From<&'a TraceEvent> for EventRef<'a> {
     fn from(trace: &'a TraceEvent) -> Self {
         Self::Trace(trace)
-    }
-}
-
-impl EventDataEq<Event> for EventRef<'_> {
-    fn event_data_eq(&self, that: &Event) -> bool {
-        match (self, that) {
-            (Self::Log(a), Event::Log(b)) => a.event_data_eq(b),
-            (Self::Metric(a), Event::Metric(b)) => a.event_data_eq(b),
-            (Self::Trace(a), Event::Trace(b)) => a.event_data_eq(b),
-            _ => false,
-        }
     }
 }
 

@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 
 use crate::buffer::EventCount;
-use agent_common::{byte_size_of::ByteSizeOf, json_size::JsonSize, EventDataEq};
+use agent_common::{byte_size_of::ByteSizeOf, json_size::JsonSize};
 use serde::{Deserialize, Serialize};
 use vrl::path::PathParseError;
 use vrl::path::TargetPath;
@@ -142,18 +142,6 @@ impl EstimatedJsonEncodedSizeOf for TraceEvent {
 impl EventCount for TraceEvent {
     fn event_count(&self) -> usize {
         1
-    }
-}
-
-impl EventDataEq for TraceEvent {
-    fn event_data_eq(&self, other: &Self) -> bool {
-        self.0.event_data_eq(&other.0)
-    }
-}
-
-impl Finalizable for TraceEvent {
-    fn take_finalizers(&mut self) -> EventFinalizers {
-        self.0.take_finalizers()
     }
 }
 
