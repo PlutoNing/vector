@@ -19,7 +19,6 @@ mod log_event;
 mod metadata;
 pub mod metric;
 mod r#ref;
-mod ser;
 mod trace;
 pub mod util;
 
