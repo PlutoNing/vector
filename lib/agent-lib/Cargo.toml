@@ -5,7 +5,6 @@ edition = "2021"
 
 
 [dependencies]
-agent-common = { path = "../agent-common" }
 agent-config = { path = "../agent-config" }
 agent-core = { path = "../agent-core", default-features = false }
 vrl = { workspace = true, optional = true }
