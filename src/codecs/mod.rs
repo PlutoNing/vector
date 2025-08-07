@@ -8,7 +8,6 @@ mod encoding;
 mod ready_frames;
 
 pub use encoding::{
-    get_serializer_schema_requirement,
     Encoder, EncodingConfig, EncodingConfigWithFraming, SinkType,
      TimestampFormat, Transformer,JsonSerializer,JsonSerializerConfig,
     NewlineDelimitedEncoder,

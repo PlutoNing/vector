@@ -3,13 +3,11 @@
 
 #![deny(missing_docs)]
 
-pub mod common;
 mod json;
 use std::fmt::Debug;
 
 use dyn_clone::DynClone;
 pub use json::{JsonSerializer, JsonSerializerConfig};
-pub use common::get_serializer_schema_requirement;
 use agent_lib::event::Event;
 
 /// Serialize a structured event into a byte frame.

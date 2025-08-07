@@ -14,7 +14,7 @@ use agent_config::configurable_component;
 use agent_lib::{config::DataType, event::Event, schema};
 use bytes::BytesMut;
 pub use format::{
-    get_serializer_schema_requirement, JsonSerializer, JsonSerializerConfig,
+    JsonSerializer, JsonSerializerConfig,
 };
 pub use framing::{
     BoxedFramer, BoxedFramingError, CharacterDelimitedEncoder, CharacterDelimitedEncoderConfig,
