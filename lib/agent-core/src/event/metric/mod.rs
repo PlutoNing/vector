@@ -10,13 +10,11 @@ use std::{
     num::NonZeroU32,
 };
 
-use agent_common::{byte_size_of::ByteSizeOf, json_size::JsonSize};
+use agent_common::byte_size_of::ByteSizeOf;
 use agent_config::configurable_component;
 use chrono::{DateTime, Utc};
 
-use super::{
-    estimated_json_encoded_size_of::EstimatedJsonEncodedSizeOf, EventMetadata,
-};
+use super::EventMetadata;
 
 mod data;
 pub use self::data::*;
@@ -411,15 +409,6 @@ impl ByteSizeOf for Metric {
         self.series.allocated_bytes()
             + self.data.allocated_bytes()
             + self.metadata.allocated_bytes()
-    }
-}
-
-impl EstimatedJsonEncodedSizeOf for Metric {
-    /* 有调用 */
-    fn estimated_json_encoded_size_of(&self) -> JsonSize {
-        // TODO: For now we're using the in-memory representation of the metric, but we'll convert
-        // this to actually calculate the JSON encoded size in the near future.
-        self.size_of().into()
     }
 }
 

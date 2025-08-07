@@ -8,12 +8,11 @@ use crate::buffer::EventCount;
 use agent_common::{
     byte_size_of::ByteSizeOf,
     config::ComponentKey,
-    json_size::JsonSize,
 };
 use futures::{stream, Stream};
 
 use super::{
-    EstimatedJsonEncodedSizeOf, Event, EventMutRef, EventRef, LogEvent, Metric,
+    Event, EventMutRef, EventRef, LogEvent, Metric,
     TraceEvent,
 };
 
@@ -30,7 +29,7 @@ pub type MetricArray = Vec<Metric>;
 /// of events. This is effectively the same as the standard
 /// `IntoIterator<Item = Event>` implementations, but that would
 /// conflict with the base implementation for the type aliases below.
-pub trait EventContainer: ByteSizeOf + EstimatedJsonEncodedSizeOf {
+pub trait EventContainer: ByteSizeOf{
     /// The type of `Iterator` used to turn this container into events.
     type IntoIter: Iterator<Item = Event>;
 
@@ -242,16 +241,6 @@ impl ByteSizeOf for EventArray {
             Self::Logs(a) => a.allocated_bytes(),
             Self::Metrics(a) => a.allocated_bytes(),
             Self::Traces(a) => a.allocated_bytes(),
-        }
-    }
-}
-
-impl EstimatedJsonEncodedSizeOf for EventArray {
-    fn estimated_json_encoded_size_of(&self) -> JsonSize {
-        match self {
-            Self::Logs(v) => v.estimated_json_encoded_size_of(),
-            Self::Traces(v) => v.estimated_json_encoded_size_of(),
-            Self::Metrics(v) => v.estimated_json_encoded_size_of(),
         }
     }
 }

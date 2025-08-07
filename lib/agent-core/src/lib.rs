@@ -28,9 +28,6 @@ pub mod transform;
 
 use float_eq::FloatEq;
 
-
-pub use event::EstimatedJsonEncodedSizeOf;
-
 pub(crate) use agent_common::{Error, Result};
 
 pub(crate) fn float_eq(l_value: f64, r_value: f64) -> bool {

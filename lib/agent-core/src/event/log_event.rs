@@ -14,7 +14,7 @@ use chrono::Utc;
 
 use agent_common::{
     byte_size_of::ByteSizeOf,
-    json_size::{JsonSize, NonZeroJsonSize},
+    json_size::NonZeroJsonSize,
 };
 use crossbeam_utils::atomic::AtomicCell;
 use serde::{Deserialize, Serialize, Serializer};
@@ -24,12 +24,7 @@ use vrl::path::{parse_target_path, OwnedTargetPath, PathParseError};
 use vrl::path::{PathPrefix, TargetPath};
 use vrl::{event_path, owned_value_path};
 
-use super::{
-    estimated_json_encoded_size_of::EstimatedJsonEncodedSizeOf,
-
-    metadata::EventMetadata,
-    util,KeyString, ObjectMap, Value,
-};
+use super::{metadata::EventMetadata, util, KeyString, ObjectMap, Value};
 use crate::config::log_schema;
 use crate::config::LogNamespace;
 use crate::event::util::log::{all_fields, all_metadata_fields};
@@ -84,21 +79,6 @@ impl ByteSizeOf for Inner {
 
     fn allocated_bytes(&self) -> usize {
         self.fields.allocated_bytes()
-    }
-}
-
-impl EstimatedJsonEncodedSizeOf for Inner {
-    fn estimated_json_encoded_size_of(&self) -> JsonSize {
-        self.json_encoded_size_cache
-            .load()
-            .unwrap_or_else(|| {
-                let size = self.fields.estimated_json_encoded_size_of();
-                let size = NonZeroJsonSize::new(size).expect("Size cannot be zero");
-
-                self.json_encoded_size_cache.store(Some(size));
-                size
-            })
-            .into()
     }
 }
 
@@ -211,12 +191,6 @@ impl ByteSizeOf for LogEvent {
     }
 }
 
-impl EstimatedJsonEncodedSizeOf for LogEvent {
-    fn estimated_json_encoded_size_of(&self) -> JsonSize {
-        self.inner.estimated_json_encoded_size_of()
-    }
-}
-
 impl LogEvent {
     #[must_use]
     pub fn new_with_metadata(metadata: EventMetadata) -> Self {
@@ -251,7 +225,7 @@ impl LogEvent {
         (value, metadata)
     }
 
- /// Parse the specified `path` and if there are no parsing errors, attempt to get a reference to a value.
+    /// Parse the specified `path` and if there are no parsing errors, attempt to get a reference to a value.
     /// # Errors
     /// Will return an error if path parsing failed.
     pub fn parse_path_and_get_value(

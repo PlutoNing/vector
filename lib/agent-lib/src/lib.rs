@@ -7,7 +7,7 @@ pub use agent_config as configurable;
 pub use agent_config::impl_generate_config_from_default;
 pub use agent_core::{
     buckets, emit, event, metric_tags,
-    quantiles, samples, schema, transform, EstimatedJsonEncodedSizeOf,
+    quantiles, samples, schema, transform,
 };
 #[cfg(feature = "vrl")]
 pub use vrl;

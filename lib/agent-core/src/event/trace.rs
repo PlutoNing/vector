@@ -1,13 +1,13 @@
 use std::fmt::Debug;
 
 use crate::buffer::EventCount;
-use agent_common::{byte_size_of::ByteSizeOf, json_size::JsonSize};
+use agent_common::{byte_size_of::ByteSizeOf};
 use serde::{Deserialize, Serialize};
 use vrl::path::PathParseError;
 use vrl::path::TargetPath;
 
 use super::{
-   EstimatedJsonEncodedSizeOf,  EventMetadata,
+    EventMetadata,
     LogEvent, ObjectMap, Value,
 };
 
@@ -116,12 +116,6 @@ impl From<ObjectMap> for TraceEvent {
 impl ByteSizeOf for TraceEvent {
     fn allocated_bytes(&self) -> usize {
         self.0.allocated_bytes()
-    }
-}
-
-impl EstimatedJsonEncodedSizeOf for TraceEvent {
-    fn estimated_json_encoded_size_of(&self) -> JsonSize {
-        self.0.estimated_json_encoded_size_of()
     }
 }
 

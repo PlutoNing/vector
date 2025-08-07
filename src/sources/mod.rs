@@ -33,11 +33,10 @@ use agent_lib::config::EventCount;
 use agent_lib::event::array::EventArrayIntoIter;
 #[cfg(any(test))]
 use agent_lib::event::{into_event_stream};
-use agent_lib::json_size::JsonSize;
 use agent_lib::{
     config::{log_schema, SourceOutput},
     event::{array, Event, EventArray, EventContainer, EventRef},
-    ByteSizeOf, EstimatedJsonEncodedSizeOf,
+    ByteSizeOf,
 };
 use chrono::Utc;
 use futures::{Stream, StreamExt};
@@ -106,12 +105,6 @@ impl ByteSizeOf for SourceSenderItem {
 impl EventCount for SourceSenderItem {
     fn event_count(&self) -> usize {
         self.events.event_count()
-    }
-}
-
-impl EstimatedJsonEncodedSizeOf for SourceSenderItem {
-    fn estimated_json_encoded_size_of(&self) -> JsonSize {
-        self.events.estimated_json_encoded_size_of()
     }
 }
 

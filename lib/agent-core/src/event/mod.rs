@@ -2,10 +2,9 @@ use std::{convert::TryInto, fmt::Debug, sync::Arc};
 
 use crate::buffer::EventCount;
 use agent_common::{
-    byte_size_of::ByteSizeOf, config::ComponentKey, json_size::JsonSize,
+    byte_size_of::ByteSizeOf, config::ComponentKey,
 };
 pub use array::{into_event_stream, EventArray, EventContainer, LogArray, MetricArray, TraceArray};
-pub use estimated_json_encoded_size_of::EstimatedJsonEncodedSizeOf;
 pub use log_event::LogEvent;
 pub use metadata::{EventMetadata, WithMetadata};
 pub use metric::{Metric, MetricKind, MetricTags, MetricValue, StatisticKind};
@@ -18,7 +17,6 @@ use crate::config::LogNamespace;
 use crate::config::OutputId;
 
 pub mod array;
-mod estimated_json_encoded_size_of;
 mod log_event;
 mod metadata;
 pub mod metric;
@@ -44,16 +42,6 @@ impl ByteSizeOf for Event {
             Event::Log(log_event) => log_event.allocated_bytes(),
             Event::Metric(metric_event) => metric_event.allocated_bytes(),
             Event::Trace(trace_event) => trace_event.allocated_bytes(),
-        }
-    }
-}
-
-impl EstimatedJsonEncodedSizeOf for Event {
-    fn estimated_json_encoded_size_of(&self) -> JsonSize {
-        match self {
-            Event::Log(log_event) => log_event.estimated_json_encoded_size_of(),
-            Event::Metric(metric_event) => metric_event.estimated_json_encoded_size_of(),
-            Event::Trace(trace_event) => trace_event.estimated_json_encoded_size_of(),
         }
     }
 }

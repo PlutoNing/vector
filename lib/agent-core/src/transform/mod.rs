@@ -1,5 +1,5 @@
-use crate::event::{EstimatedJsonEncodedSizeOf, Event, EventArray, EventContainer, EventRef};
-use agent_common::{byte_size_of::ByteSizeOf, json_size::JsonSize};
+use crate::event::{Event, EventArray, EventContainer, EventRef};
+use agent_common::{byte_size_of::ByteSizeOf};
 
 /// Transforms come in two variants. Functions, or tasks.
 ///
@@ -107,17 +107,6 @@ impl ByteSizeOf for OutputBuffer {
         self.0.iter().map(ByteSizeOf::size_of).sum()
     }
 }
-
-
-impl EstimatedJsonEncodedSizeOf for OutputBuffer {
-    fn estimated_json_encoded_size_of(&self) -> JsonSize {
-        self.0
-            .iter()
-            .map(EstimatedJsonEncodedSizeOf::estimated_json_encoded_size_of)
-            .sum()
-    }
-}
-
 impl From<Vec<Event>> for OutputBuffer {
     fn from(events: Vec<Event>) -> Self {
         let mut result = Self::default();
