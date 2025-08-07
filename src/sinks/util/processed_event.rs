@@ -1,6 +1,6 @@
 use serde::Serialize;
 use agent_lib::{
-    event::{EventFinalizers, Finalizable, LogEvent, MaybeAsLogMut},
+    event::{ LogEvent, MaybeAsLogMut},
     ByteSizeOf, EstimatedJsonEncodedSizeOf,
 };
 use agent_lib::{
@@ -21,15 +21,6 @@ where
 {
     fn maybe_as_log_mut(&mut self) -> Option<&mut LogEvent> {
         self.event.maybe_as_log_mut()
-    }
-}
-
-impl<E, M> Finalizable for ProcessedEvent<E, M>
-where
-    E: Finalizable,
-{
-    fn take_finalizers(&mut self) -> EventFinalizers {
-        self.event.take_finalizers()
     }
 }
 

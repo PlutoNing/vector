@@ -15,10 +15,8 @@ use agent_config::configurable_component;
 use chrono::{DateTime, Utc};
 
 use super::{
-    estimated_json_encoded_size_of::EstimatedJsonEncodedSizeOf, BatchNotifier, EventFinalizer,
-    EventFinalizers, EventMetadata, Finalizable,
+    estimated_json_encoded_size_of::EstimatedJsonEncodedSizeOf, EventMetadata,
 };
-
 
 mod data;
 pub use self::data::*;
@@ -123,24 +121,6 @@ impl Metric {
     #[must_use]
     pub fn with_interval_ms(mut self, interval_ms: Option<NonZeroU32>) -> Self {
         self.data.time.interval_ms = interval_ms;
-        self
-    }
-
-    pub fn add_finalizer(&mut self, finalizer: EventFinalizer) {
-        self.metadata.add_finalizer(finalizer);
-    }
-
-    /// Consumes this metric, returning it with an updated set of event finalizers attached to `batch`.
-    #[must_use]
-    pub fn with_batch_notifier(mut self, batch: &BatchNotifier) -> Self {
-        self.metadata = self.metadata.with_batch_notifier(batch);
-        self
-    }
-
-    /// Consumes this metric, returning it with an optionally updated set of event finalizers attached to `batch`.
-    #[must_use]
-    pub fn with_batch_notifier_option(mut self, batch: &Option<BatchNotifier>) -> Self {
-        self.metadata = self.metadata.with_batch_notifier_option(batch);
         self
     }
 
@@ -442,7 +422,6 @@ impl EstimatedJsonEncodedSizeOf for Metric {
         self.size_of().into()
     }
 }
-
 
 /// 指标可以是绝对值或增量值
 #[configurable_component]

@@ -8,7 +8,6 @@ use crate::buffer::EventCount;
 use agent_common::{
     byte_size_of::ByteSizeOf,
     config::ComponentKey,
-    finalization::{EventFinalizers, Finalizable},
     json_size::JsonSize,
 };
 use futures::{stream, Stream};

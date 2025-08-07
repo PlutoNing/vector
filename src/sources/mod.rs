@@ -27,13 +27,12 @@ enum BuildError {
     #[snafu(display("URI parse error: {}", source))]
     UriParseError { source: ::http::uri::InvalidUri },
 }
-use std::{collections::HashMap, time::Instant};
 use crate::config::{ComponentKey, OutputId};
 use crate::schema::Definition;
 use agent_lib::config::EventCount;
 use agent_lib::event::array::EventArrayIntoIter;
 #[cfg(any(test))]
-use agent_lib::event::{into_event_stream, EventStatus};
+use agent_lib::event::{into_event_stream};
 use agent_lib::json_size::JsonSize;
 use agent_lib::{
     config::{log_schema, SourceOutput},
@@ -43,6 +42,7 @@ use agent_lib::{
 use chrono::Utc;
 use futures::{Stream, StreamExt};
 use metrics::{histogram, Histogram};
+use std::{collections::HashMap, time::Instant};
 use tracing::Span;
 use vrl::value::Value;
 
@@ -221,98 +221,6 @@ impl SourceSender {
         Builder::default()
     }
 
-    #[cfg(any(test))]
-    pub fn new_test_sender_with_buffer(n: usize) -> (Self, LimitedReceiver<SourceSenderItem>) {
-        let lag_time = Some(histogram!(LAG_TIME_NAME));
-        let output_id = OutputId {
-            component: "test".to_string().into(),
-            port: None,
-        };
-        let (default_output, rx) =
-            Output::new_with_buffer(n, DEFAULT_OUTPUT.to_owned(), lag_time, None, output_id);
-        (
-            Self {
-                default_output: Some(default_output),
-                named_outputs: Default::default(),
-            },
-            rx,
-        )
-    }
-
-    #[cfg(any(test))]
-    pub fn new_test() -> (Self, impl Stream<Item = Event> + Unpin) {
-        let (pipe, recv) = Self::new_test_sender_with_buffer(TEST_BUFFER_SIZE);
-        let recv = recv.into_stream().flat_map(into_event_stream);
-        (pipe, recv)
-    }
-
-    #[cfg(any(test))]
-    pub fn new_test_finalize(status: EventStatus) -> (Self, impl Stream<Item = Event> + Unpin) {
-        let (pipe, recv) = Self::new_test_sender_with_buffer(TEST_BUFFER_SIZE);
-        // In a source test pipeline, there is no sink to acknowledge
-        // events, so we have to add a map to the receiver to handle the
-        // finalization.
-        let recv = recv.into_stream().flat_map(move |mut item| {
-            item.events.iter_events_mut().for_each(|mut event| {
-                let metadata = event.metadata_mut();
-                metadata.update_status(status);
-                metadata.update_sources();
-            });
-            into_event_stream(item)
-        });
-        (pipe, recv)
-    }
-
-    #[cfg(any(test))]
-    pub fn new_test_errors(
-        error_at: impl Fn(usize) -> bool,
-    ) -> (Self, impl Stream<Item = Event> + Unpin) {
-        let (pipe, recv) = Self::new_test_sender_with_buffer(TEST_BUFFER_SIZE);
-        // In a source test pipeline, there is no sink to acknowledge
-        // events, so we have to add a map to the receiver to handle the
-        // finalization.
-        let mut count: usize = 0;
-        let recv = recv.into_stream().flat_map(move |mut item| {
-            let status = if error_at(count) {
-                EventStatus::Errored
-            } else {
-                EventStatus::Delivered
-            };
-            count += 1;
-            item.events.iter_events_mut().for_each(|mut event| {
-                let metadata = event.metadata_mut();
-                metadata.update_status(status);
-                metadata.update_sources();
-            });
-            into_event_stream(item)
-        });
-        (pipe, recv)
-    }
-
-    #[cfg(any(test))]
-    pub fn add_outputs(
-        &mut self,
-        status: EventStatus,
-        name: String,
-    ) -> impl Stream<Item = SourceSenderItem> + Unpin {
-        // The lag_time parameter here will need to be filled in if this function is ever used for
-        // non-test situations.
-        let output_id = OutputId {
-            component: "test".to_string().into(),
-            port: Some(name.clone()),
-        };
-        let (output, recv) = Output::new_with_buffer(100, name.clone(), None, None, output_id);
-        let recv = recv.into_stream().map(move |mut item| {
-            item.events.iter_events_mut().for_each(|mut event| {
-                let metadata = event.metadata_mut();
-                metadata.update_status(status);
-                metadata.update_sources();
-            });
-            item
-        });
-        self.named_outputs.insert(name, output);
-        recv
-    }
     /* 发送到buffer的tx */
     /// Get a mutable reference to the default output, panicking if none exists.
     const fn default_output_mut(&mut self) -> &mut Output {
@@ -709,7 +617,6 @@ impl Output {
                 .metadata_mut()
                 .set_upstream_id(Arc::clone(&self.output_id));
         });
-
 
         let count = events.len();
         /* 调用Output的tx channel来发送出去

@@ -7,8 +7,8 @@ use vrl::path::PathParseError;
 use vrl::path::TargetPath;
 
 use super::{
-    BatchNotifier, EstimatedJsonEncodedSizeOf, EventFinalizer, EventFinalizers, EventMetadata,
-    Finalizable, LogEvent, ObjectMap, Value,
+   EstimatedJsonEncodedSizeOf,  EventMetadata,
+    LogEvent, ObjectMap, Value,
 };
 
 /// Traces are a newtype of `LogEvent`
@@ -44,20 +44,6 @@ impl TraceEvent {
 
     pub fn metadata_mut(&mut self) -> &mut EventMetadata {
         self.0.metadata_mut()
-    }
-
-    pub fn add_finalizer(&mut self, finalizer: EventFinalizer) {
-        self.0.add_finalizer(finalizer);
-    }
-
-    #[must_use]
-    pub fn with_batch_notifier(self, batch: &BatchNotifier) -> Self {
-        Self(self.0.with_batch_notifier(batch))
-    }
-
-    #[must_use]
-    pub fn with_batch_notifier_option(self, batch: &Option<BatchNotifier>) -> Self {
-        Self(self.0.with_batch_notifier_option(batch))
     }
 
     /// Convert a `TraceEvent` into an `ObjectMap` of it's fields

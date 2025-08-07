@@ -2,14 +2,10 @@ use std::{convert::TryInto, fmt::Debug, sync::Arc};
 
 use crate::buffer::EventCount;
 use agent_common::{
-    byte_size_of::ByteSizeOf, config::ComponentKey, finalization, json_size::JsonSize,
+    byte_size_of::ByteSizeOf, config::ComponentKey, json_size::JsonSize,
 };
 pub use array::{into_event_stream, EventArray, EventContainer, LogArray, MetricArray, TraceArray};
 pub use estimated_json_encoded_size_of::EstimatedJsonEncodedSizeOf;
-pub use finalization::{
-    BatchNotifier, BatchStatus, BatchStatusReceiver, EventFinalizer, EventFinalizers, EventStatus,
-    Finalizable,
-};
 pub use log_event::LogEvent;
 pub use metadata::{EventMetadata, WithMetadata};
 pub use metric::{Metric, MetricKind, MetricTags, MetricValue, StatisticKind};
@@ -239,24 +235,6 @@ impl Event {
             Self::Log(log) => log.into_parts().1,
             Self::Metric(metric) => metric.into_parts().2,
             Self::Trace(trace) => trace.into_parts().1,
-        }
-    }
-
-    #[must_use]
-    pub fn with_batch_notifier(self, batch: &BatchNotifier) -> Self {
-        match self {
-            Self::Log(log) => log.with_batch_notifier(batch).into(),
-            Self::Metric(metric) => metric.with_batch_notifier(batch).into(),
-            Self::Trace(trace) => trace.with_batch_notifier(batch).into(),
-        }
-    }
-
-    #[must_use]
-    pub fn with_batch_notifier_option(self, batch: &Option<BatchNotifier>) -> Self {
-        match self {
-            Self::Log(log) => log.with_batch_notifier_option(batch).into(),
-            Self::Metric(metric) => metric.with_batch_notifier_option(batch).into(),
-            Self::Trace(trace) => trace.with_batch_notifier_option(batch).into(),
         }
     }
 

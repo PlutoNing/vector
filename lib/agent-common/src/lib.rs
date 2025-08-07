@@ -31,11 +31,6 @@ pub mod conversion {
     pub use vrl::compiler::conversion::*;
 }
 
-pub mod finalization;
-
-#[macro_use]
-extern crate tracing;
-
 pub type Error = Box<dyn std::error::Error + Send + Sync + 'static>;
 
 pub type Result<T> = std::result::Result<T, Error>;

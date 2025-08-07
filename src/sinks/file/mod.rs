@@ -3,23 +3,17 @@ use std::time::{Duration, Instant};
 
 use crate::codecs::{Framer, FramingConfig, TextSerializerConfig};
 
-
-
 use crate::{
     codecs::{Encoder, EncodingConfigWithFraming, SinkType, Transformer},
     config::{GenerateConfig, Input, SinkConfig, SinkContext},
     core::sink::VectorSink,
-    event::{Event, EventStatus, Finalizable},
-
+    event::{Event},
     sinks::util::{expiring_hash_map::ExpiringHashMap, timezone_to_offset, StreamSink},
     template::Template,
 };
 pub use agent_lib::config::is_default;
 use agent_lib::configurable::configurable_component;
-use agent_lib::{
-
-    TimeZone,
-};
+use agent_lib::TimeZone;
 use async_compression::tokio::write::GzipEncoder;
 use async_trait::async_trait;
 use bytes::{Bytes, BytesMut};
@@ -208,7 +202,6 @@ pub struct FileSink {
     files: ExpiringHashMap<Bytes, OutFile>,
     /// 压缩方式（None/Gzip），决定文件写入方式
     compression: Compression,
-
 }
 
 impl FileSink {
@@ -320,7 +313,7 @@ impl FileSink {
     }
 
     /* 处理从input读取的event */
-    async fn process_event(&mut self, mut event: Event) {
+    async fn process_event(&mut self, event: Event) {
         /* 要输出到的文件路径 */
         let path = match self.partition_event(&event) {
             Some(path) => path,
@@ -329,13 +322,11 @@ impl FileSink {
                 // file.
                 // The error is already handled at `Partition_event`, so
                 // here we just skip the event.
-                event.metadata().update_status(EventStatus::Errored);
                 return;
             }
         };
 
         let next_deadline = self.deadline_at();
-        trace!(message = "Computed next deadline.", next_deadline = ?next_deadline, path = ?path);
 
         let file = if let Some(file) = self.files.reset_at(&path, next_deadline) {
             /* 如果文件已经存在了 */
@@ -351,7 +342,6 @@ impl FileSink {
                     // Maybe other events will work though! Just log
                     // the error and skip this event.
                     error!("Failed to open file: {:?}, error: {}", path, error);
-                    event.metadata().update_status(EventStatus::Errored);
                     return;
                 }
             };
@@ -371,11 +361,10 @@ impl FileSink {
 
         /* 现在把event写入刚刚获取的file */
         trace!(message = "Writing an event to file.", path = ?path);
-        let finalizers = event.take_finalizers();
+
         /* 写出到outfile */
         match write_event_to_file(file, event, &self.transformer, &mut self.encoder).await {
             Ok(byte_size) => {
-                finalizers.update_status(EventStatus::Delivered);
                 debug!(
                     "Sent {} bytes to file: {}",
                     byte_size,
@@ -383,7 +372,6 @@ impl FileSink {
                 );
             }
             Err(error) => {
-                finalizers.update_status(EventStatus::Errored);
                 error!("Failed to write file: {:?}, error: {}", path, error);
             }
         }

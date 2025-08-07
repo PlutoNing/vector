@@ -9,7 +9,7 @@ use crate::{
     codecs::{Encoder, EncodingConfigWithFraming, SinkType, Transformer},
     config::{GenerateConfig, Input, SinkConfig, SinkContext},
     core::sink::VectorSink,
-    event::{Event, EventStatus},
+    event::{Event},
 
     sinks::util::{timezone_to_offset, StreamSink},
     template::Template,
@@ -175,7 +175,7 @@ impl SqliteSink {
         let (path, table) = match self.partition_event(&event) {
             Some(parts) => parts,
             None => {
-                event.metadata().update_status(EventStatus::Errored);
+
                 return;
             }
         };
@@ -185,7 +185,7 @@ impl SqliteSink {
         let mut buffer = BytesMut::new();
         if let Err(error) = self.encoder.encode(event.clone(), &mut buffer) {
             error!("Failed to encode event: {}", error);
-            event.metadata().update_status(EventStatus::Errored);
+
             return;
         }
 
@@ -198,17 +198,16 @@ impl SqliteSink {
             Ok(service) => match service.write_event(&data, event_type.as_deref(), source.as_deref()).await {
                 Ok(rows) => {
                     debug!("Wrote {} rows to SQLite table {} in {}", rows, table, path);
-                    event.metadata().update_status(EventStatus::Delivered);
+
                 }
                 Err(error) => {
                     error!("Failed to write to SQLite: {}", error);
-                    event.metadata().update_status(EventStatus::Errored);
+           
                 }
             },
             Err(error) => {
                 println!("Failed to get SQLite service: {}", error);
                 error!("Failed to get SQLite service: {}", error);
-                event.metadata().update_status(EventStatus::Errored);
             }
         }
     }

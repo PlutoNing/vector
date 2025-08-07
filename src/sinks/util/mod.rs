@@ -37,7 +37,6 @@ use agent_lib::{event::Event, json_size::JsonSize, TimeZone};
 use crate::{
     config::{SinkConfig, SinkContext},
     core::sink::VectorSink,
-    event::EventFinalizers,
     sinks::{file::{FileSink, FileSinkConfig}, SqliteSink, SqliteSinkConfig},
 };
 use chrono::{FixedOffset, Offset, Utc};
@@ -129,7 +128,6 @@ pub async fn run_sink_test<C>(
 #[derive(Debug)]
 pub struct EncodedEvent<I> {
     pub item: I,
-    pub finalizers: EventFinalizers,
     pub byte_size: usize,
     pub json_byte_size: JsonSize,
 }
@@ -140,7 +138,6 @@ impl<I> EncodedEvent<I> {
     pub fn new(item: I, byte_size: usize, json_byte_size: JsonSize) -> Self {
         Self {
             item,
-            finalizers: Default::default(),
             byte_size,
             json_byte_size,
         }
@@ -157,7 +154,6 @@ impl<I> EncodedEvent<I> {
     {
         Self {
             item: I::from(that.item),
-            finalizers: that.finalizers,
             byte_size: that.byte_size,
             json_byte_size: that.json_byte_size,
         }
@@ -167,7 +163,6 @@ impl<I> EncodedEvent<I> {
     pub fn map<T>(self, doit: impl Fn(I) -> T) -> EncodedEvent<T> {
         EncodedEvent {
             item: doit(self.item),
-            finalizers: self.finalizers,
             byte_size: self.byte_size,
             json_byte_size: self.json_byte_size,
         }

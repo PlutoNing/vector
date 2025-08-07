@@ -12,7 +12,7 @@ use vrl::{
     value::{KeyString, Kind, Value},
 };
 
-use super::{BatchNotifier, EventFinalizer, EventFinalizers, EventStatus, ObjectMap};
+use super::{ObjectMap};
 use crate::{
     config::{LogNamespace, OutputId},
     schema,
@@ -39,9 +39,6 @@ pub(super) struct Inner {
     /// Storage for secrets
     #[serde(default)]
     pub(crate) secrets: Secrets,
-
-    #[serde(default, skip)]
-    finalizers: EventFinalizers,
 
     /// The id of the source
     pub(crate) source_id: Option<Arc<ComponentKey>>,
@@ -198,7 +195,7 @@ impl Default for Inner {
         Self {
             value: Value::Object(ObjectMap::new()),
             secrets: Secrets::new(),
-            finalizers: Default::default(),
+
             schema_definition: default_schema_definition(),
             source_id: None,
             source_type: None,
@@ -224,44 +221,12 @@ fn default_schema_definition() -> Arc<schema::Definition> {
 
 impl ByteSizeOf for EventMetadata {
     fn allocated_bytes(&self) -> usize {
-        // NOTE we don't count the `str` here because it's allocated somewhere
-        // else. We're just moving around the pointer, which is already captured
-        // by `ByteSizeOf::size_of`.
-        self.0.finalizers.allocated_bytes()
+        0
     }
 }
 
 impl EventMetadata {
-    /// Replaces the existing event finalizers with the given one.
-    #[must_use]
-    pub fn with_finalizer(mut self, finalizer: EventFinalizer) -> Self {
-        self.get_mut().finalizers = EventFinalizers::new(finalizer);
-        self
-    }
-
-    /// Replaces the existing event finalizers with the given ones.
-    #[must_use]
-    pub fn with_finalizers(mut self, finalizers: EventFinalizers) -> Self {
-        self.get_mut().finalizers = finalizers;
-        self
-    }
-
-    /// Replace the finalizer with a new one created from the given batch notifier.
-    #[must_use]
-    pub fn with_batch_notifier(self, batch: &BatchNotifier) -> Self {
-        self.with_finalizer(EventFinalizer::new(batch.clone()))
-    }
-
-    /// Replace the finalizer with a new one created from the given optional batch notifier.
-    #[must_use]
-    pub fn with_batch_notifier_option(self, batch: &Option<BatchNotifier>) -> Self {
-        match batch {
-            Some(batch) => self.with_finalizer(EventFinalizer::new(batch.clone())),
-            None => self,
-        }
-    }
-
-    /// Replace the schema definition with the given one.
+ /// Replace the schema definition with the given one.
     #[must_use]
     pub fn with_schema_definition(mut self, schema_definition: &Arc<schema::Definition>) -> Self {
         self.get_mut().schema_definition = Arc::clone(schema_definition);
@@ -288,7 +253,6 @@ impl EventMetadata {
     pub fn merge(&mut self, other: Self) {
         let inner = self.get_mut();
         let other = other.into_owned();
-        inner.finalizers.merge(other.finalizers);
         inner.secrets.merge(other.secrets);
 
         // Update `source_event_id` if necessary.
@@ -302,37 +266,6 @@ impl EventMetadata {
             _ => {} // Keep the existing value.
         }
     }
-
-    /// Update the finalizer(s) status.
-    pub fn update_status(&self, status: EventStatus) {
-        self.0.finalizers.update_status(status);
-    }
-
-    /// Update the finalizers' sources.
-    pub fn update_sources(&mut self) {
-        self.get_mut().finalizers.update_sources();
-    }
-
-    /// Gets a reference to the event finalizers.
-    pub fn finalizers(&self) -> &EventFinalizers {
-        &self.0.finalizers
-    }
-
-    /// Add a new event finalizer to the existing list of event finalizers.
-    pub fn add_finalizer(&mut self, finalizer: EventFinalizer) {
-        self.get_mut().finalizers.add(finalizer);
-    }
-
-    /// Consumes all event finalizers and returns them, leaving the list of event finalizers empty.
-    pub fn take_finalizers(&mut self) -> EventFinalizers {
-        std::mem::take(&mut self.get_mut().finalizers)
-    }
-
-    /// Merges the given event finalizers into the existing list of event finalizers.
-    pub fn merge_finalizers(&mut self, finalizers: EventFinalizers) {
-        self.get_mut().finalizers.merge(finalizers);
-    }
-
     /// Get the schema definition.
     pub fn schema_definition(&self) -> &Arc<schema::Definition> {
         &self.0.schema_definition

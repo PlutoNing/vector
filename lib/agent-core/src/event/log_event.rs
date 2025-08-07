@@ -26,9 +26,9 @@ use vrl::{event_path, owned_value_path};
 
 use super::{
     estimated_json_encoded_size_of::EstimatedJsonEncodedSizeOf,
-    finalization::{BatchNotifier, EventFinalizer},
+
     metadata::EventMetadata,
-    util, EventFinalizers, Finalizable, KeyString, ObjectMap, Value,
+    util,KeyString, ObjectMap, Value,
 };
 use crate::config::log_schema;
 use crate::config::LogNamespace;
@@ -251,23 +251,7 @@ impl LogEvent {
         (value, metadata)
     }
 
-    #[must_use]
-    pub fn with_batch_notifier(mut self, batch: &BatchNotifier) -> Self {
-        self.metadata = self.metadata.with_batch_notifier(batch);
-        self
-    }
-
-    #[must_use]
-    pub fn with_batch_notifier_option(mut self, batch: &Option<BatchNotifier>) -> Self {
-        self.metadata = self.metadata.with_batch_notifier_option(batch);
-        self
-    }
-
-    pub fn add_finalizer(&mut self, finalizer: EventFinalizer) {
-        self.metadata.add_finalizer(finalizer);
-    }
-
-    /// Parse the specified `path` and if there are no parsing errors, attempt to get a reference to a value.
+ /// Parse the specified `path` and if there are no parsing errors, attempt to get a reference to a value.
     /// # Errors
     /// Will return an error if path parsing failed.
     pub fn parse_path_and_get_value(
