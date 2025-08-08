@@ -1,4 +1,3 @@
-pub mod console;
 pub mod file;
 pub mod sqlite;
 pub mod util;
@@ -7,12 +6,11 @@ use agent_lib::event::{
      Event, EventArray, Metric, MetricKind, MetricTags, MetricValue,
 };
 use chrono::{DateTime, SubsecRound, Utc};
-pub use console::*;
 use futures::stream::StreamExt;
 use futures::{stream, Stream};
 use rand::{rng, Rng};
 pub use sqlite::*;
-pub use util::*; // ← 新增 StreamExt
+pub use util::*;
 
 pub fn random_metrics_with_stream_timestamp(
     count: usize,

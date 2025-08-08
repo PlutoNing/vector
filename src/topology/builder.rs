@@ -1,29 +1,25 @@
+use crate::{buffers::BufferReceiver, core::WhenFull};
+use futures::{StreamExt, TryStreamExt};
+use futures_util::stream::FuturesUnordered;
 use std::{
     collections::HashMap,
     future::ready,
     sync::{Arc, LazyLock, Mutex},
 };
-use crate::{buffers::BufferReceiver, core::WhenFull};
-use futures::{StreamExt, TryStreamExt};
-use futures_util::stream::FuturesUnordered;
 
+use crate::buffers::BufferSender;
+use crate::sources::limited;
 use stream_cancel::{StreamExt as StreamCancelExt, Trigger, Tripwire};
 use tokio::{
     select,
     sync::{mpsc::UnboundedSender, oneshot},
 };
 use tracing::Instrument;
-use crate::buffers::BufferSender;
-use crate::{
-    sources::limited,
-};
 
 use super::{
-    // fanout::{self, Fanout},
     schema,
     task::{Task, TaskOutput},
-    BuiltBuffer,
-    ConfigDiff,
+    BuiltBuffer, ConfigDiff,
 };
 use crate::common::Inputs;
 use crate::core::fanout::{self, Fanout};
@@ -32,7 +28,7 @@ use crate::{
     config::{
         ComponentKey, Config, DataType, EnrichmentTableConfig, OutputId, SinkContext, SourceContext,
     },
-    event::{EventArray},
+    event::EventArray,
     sources::SourceSenderItem,
     sources::CHUNK_SIZE,
     spawn_named,
@@ -100,8 +96,8 @@ impl<'a> Builder<'a> {
     /* 构建一个拓扑,（config, diff已经初始化在了self） */
     /// Builds the new pieces of the topology found in `self.diff`.
     async fn build(mut self) -> Result<TopologyPieces, Vec<String>> {
-        let enrichment_tables = self.load_enrichment_tables().await; /* 一般是空的 */
-        let source_tasks = self.build_sources(enrichment_tables).await; /* 构建source */
+        let enrichment_tables = self.load_enrichment_tables().await;
+        let source_tasks = self.build_sources(enrichment_tables).await;
         self.build_transforms(enrichment_tables).await;
         self.build_sinks(enrichment_tables).await; /* 构建sink */
 

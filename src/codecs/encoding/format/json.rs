@@ -1,21 +1,11 @@
-use bytes::{BufMut, BytesMut};
-use tokio_util::codec::Encoder;
 use agent_config_macros::configurable_component;
 use agent_lib::{config::DataType, event::Event, schema};
-
-use crate::codecs::MetricTagValues;
-
+use bytes::{BufMut, BytesMut};
+use tokio_util::codec::Encoder;
 /// Config used to build a `JsonSerializer`.
 #[configurable_component]
 #[derive(Debug, Clone, Default)]
 pub struct JsonSerializerConfig {
-    /// Controls how metric tag values are encoded.
-    ///
-    /// When set to `single`, only the last non-bare value of tags are displayed with the
-    /// metric.  When set to `full`, all metric tags are exposed as separate assignments.
-    #[serde(default, skip_serializing_if = "agent_lib::config::is_default")]
-    pub metric_tag_values: MetricTagValues,
-
     /// Options for the JsonSerializer.
     #[serde(default, rename = "json")]
     pub options: JsonSerializerOptions,
@@ -32,16 +22,13 @@ pub struct JsonSerializerOptions {
 
 impl JsonSerializerConfig {
     /// Creates a new `JsonSerializerConfig`.
-    pub const fn new(metric_tag_values: MetricTagValues, options: JsonSerializerOptions) -> Self {
-        Self {
-            metric_tag_values,
-            options,
-        }
+    pub const fn new(options: JsonSerializerOptions) -> Self {
+        Self { options }
     }
 
     /// Build the `JsonSerializer` from this configuration.
     pub fn build(&self) -> JsonSerializer {
-        JsonSerializer::new(self.metric_tag_values, self.options.clone())
+        JsonSerializer::new(self.options.clone())
     }
 
     /// The data type of events that are accepted by `JsonSerializer`.
@@ -60,17 +47,13 @@ impl JsonSerializerConfig {
 /// Serializer that converts an `Event` to bytes using the JSON format.
 #[derive(Debug, Clone)]
 pub struct JsonSerializer {
-    metric_tag_values: MetricTagValues,
     options: JsonSerializerOptions,
 }
 
 impl JsonSerializer {
     /// Creates a new `JsonSerializer`.
-    pub const fn new(metric_tag_values: MetricTagValues, options: JsonSerializerOptions) -> Self {
-        Self {
-            metric_tag_values,
-            options,
-        }
+    pub const fn new(options: JsonSerializerOptions) -> Self {
+        Self { options }
     }
 
     /// Encode event and represent it as JSON value.
@@ -93,9 +76,8 @@ impl Encoder<Event> for JsonSerializer {
             match event {
                 Event::Log(log) => serde_json::to_writer_pretty(writer, &log),
                 Event::Metric(mut metric) => {
-                    if self.metric_tag_values == MetricTagValues::Single {
-                        metric.reduce_tags_to_single();
-                    }
+                    metric.reduce_tags_to_single();
+
                     serde_json::to_writer_pretty(writer, &metric)
                 }
                 Event::Trace(trace) => serde_json::to_writer_pretty(writer, &trace),
@@ -104,9 +86,8 @@ impl Encoder<Event> for JsonSerializer {
             match event {
                 Event::Log(log) => serde_json::to_writer(writer, &log),
                 Event::Metric(mut metric) => {
-                    if self.metric_tag_values == MetricTagValues::Single {
-                        metric.reduce_tags_to_single();
-                    }
+                    metric.reduce_tags_to_single();
+
                     serde_json::to_writer(writer, &metric)
                 }
                 Event::Trace(trace) => serde_json::to_writer(writer, &trace),

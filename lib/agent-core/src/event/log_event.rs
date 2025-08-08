@@ -86,7 +86,7 @@ impl PartialEq for Inner {
         self.fields.eq(&other.fields)
     }
 }
-/* 都没有 */
+
 #[derive(Clone, Debug, Default, Deserialize, PartialEq)]
 pub struct LogEvent {
     #[serde(flatten)]

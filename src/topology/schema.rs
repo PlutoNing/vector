@@ -204,7 +204,7 @@ pub(super) fn expanded_definitions(
     Ok(definitions)
 }
 
-/// Checks if any of the definitions in the list contain `Kind::never()`. This
+/// Checks if any of the definitions in the list contain `kind::never()`. This
 /// implies the definition cannot contain any output and thus we should stop
 /// processing further.
 fn contains_never(transform_definitions: &[(OutputId, Definition)]) -> bool {

@@ -1,5 +1,4 @@
-use std::path::{Path};
-
+use std::path::Path;
 
 use toml::value::{Table, Value};
 
@@ -24,14 +23,14 @@ pub(super) mod process {
         /// Prepares input for serialization. This can be a useful step to Interpolate
         /// environment variables or perform some other pre-processing on the input.
         fn prepare<R: Read>(&mut self, input: R) -> Result<String, Vec<String>>;
-/* 加载配置文件内容 */
+        /* 加载配置文件内容 */
         /// Calls into the `prepare` method, and deserializes a `Read` to a `T`.
         fn load<R: std::io::Read, T>(&mut self, input: R, format: Format) -> Result<T, Vec<String>>
         where
             T: serde::de::DeserializeOwned,
         {
             let value = self.prepare(input)?;
-/* value是配置文件内容, 调用对应格式的反序列化器? */
+            /* value是配置文件内容, 调用对应格式的反序列化器? */
             format::deserialize(&value, format)
         }
 
@@ -39,7 +38,7 @@ pub(super) mod process {
         /// Loads and deserializes a file into a TOML `Table`.
         fn load_file(
             &mut self,
-            path: &Path, /* 文件路径 */
+            path: &Path,    /* 文件路径 */
             format: Format, /* 比如说YAML */
         ) -> Result<Option<(String, Table)>, Vec<String>> {
             if let (Ok(name), Some(file)) = (component_name(path), open_file(path)) {
@@ -68,17 +67,15 @@ where
     /// Deserializes a file with the provided format, and makes the result available via `take`.
     /// Returns a vector of non-fatal warnings on success, or a vector of error strings on failure.
     fn load_from_file(&mut self, path: &Path, format: Format) -> Result<(), Vec<String>> {
-        if let Some((_, table)) = self.load_file(path, format)? {/* table里面为解析好反序列好的内容 */
-            self.merge(table)?; /* 把配置项吸收到self里面 */
+        if let Some((_, table)) = self.load_file(path, format)? {
+            /* table里面为解析好反序列好的内容 */
+            self.merge(table)?;
             Ok(())
         } else {
             Ok(())
         }
     }
-
-
 }
-
 
 /// Deserialize a TOML `Table` into a `T`.
 pub(super) fn deserialize_table<T: serde::de::DeserializeOwned>(

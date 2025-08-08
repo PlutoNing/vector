@@ -1,10 +1,8 @@
 mod config;
 mod encoder;
-mod transformer;
 
 pub use config::{EncodingConfig, EncodingConfigWithFraming, SinkType};
 pub use encoder::Encoder;
-pub use transformer::{TimestampFormat, Transformer};
 mod format;
 mod framing;
 
@@ -91,7 +89,7 @@ impl FramingConfig {
 pub enum Framer {
     /// Uses a `CharacterDelimitedEncoder` for framing.
     CharacterDelimited(CharacterDelimitedEncoder),
-    /// Uses a `NewlineDelimitedEncoder` for framing.
+    /// Uses a `newlineDelimitedEncoder` for framing.
     NewlineDelimited(NewlineDelimitedEncoder),
     /// Uses an opaque `Encoder` implementation for framing.
     Boxed(BoxedFramer),

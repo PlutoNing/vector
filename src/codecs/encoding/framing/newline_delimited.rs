@@ -4,7 +4,7 @@ use tokio_util::codec::Encoder;
 
 use super::{BoxedFramingError, CharacterDelimitedEncoder};
 
-/// Config used to build a `NewlineDelimitedEncoder`.
+/// Config used to build a `newlineDelimitedEncoder`.
 #[derive(Debug, Clone, Default, Deserialize, Serialize, PartialEq, Eq)]
 pub struct NewlineDelimitedEncoderConfig;
 
@@ -14,7 +14,7 @@ impl NewlineDelimitedEncoderConfig {
         Default::default()
     }
 
-    /// Build the `NewlineDelimitedEncoder` from this configuration.
+    /// Build the `newlineDelimitedEncoder` from this configuration.
     pub fn build(&self) -> NewlineDelimitedEncoder {
         NewlineDelimitedEncoder::default()
     }

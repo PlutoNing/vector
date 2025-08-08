@@ -1,4 +1,3 @@
-use crate::codecs::Transformer;
 use crate::codecs::{
     NewlineDelimitedEncoder,
     encoding::{Framer, FramingConfig, Serializer, SerializerConfig},
@@ -15,23 +14,14 @@ use agent_lib::configurable::configurable_component;
 pub struct EncodingConfig { /* 分别负责序列化和转换 */
     #[serde(flatten)]
     encoding: SerializerConfig,
-
-    #[serde(flatten)]
-    transformer: Transformer,
 }
 
 impl EncodingConfig {
-    /// Creates a new `EncodingConfig` with the provided `SerializerConfig` and `Transformer`.
-    pub const fn new(encoding: SerializerConfig, transformer: Transformer) -> Self {
+    /// Creates a new `EncodingConfig` with the provided `SerializerConfig` and `transformer`.
+    pub const fn new(encoding: SerializerConfig) -> Self {
         Self {
             encoding,
-            transformer,
         }
-    }
-
-    /// Build a `Transformer` that applies the encoding rules to an event before serialization.
-    pub fn transformer(&self) -> Transformer {
-        self.transformer.clone()
     }
 
     /// Get the encoding configuration.
@@ -52,7 +42,6 @@ where
     fn from(encoding: T) -> Self {
         Self {
             encoding: encoding.into(),
-            transformer: Default::default(),
         }
     }
 }
@@ -70,35 +59,29 @@ pub struct EncodingConfigWithFraming {/* 里面有framer和encoder */
 
 impl EncodingConfigWithFraming {
     /// Creates a new `EncodingConfigWithFraming` with the provided `FramingConfig`,
-    /// `SerializerConfig` and `Transformer`.
+    /// `SerializerConfig` and `transformer`.
     pub const fn new(
         framing: Option<FramingConfig>,
         encoding: SerializerConfig,
-        transformer: Transformer,
     ) -> Self {
         Self {
             framing,
             encoding: EncodingConfig {
                 encoding,
-                transformer,
             },
         }
     }
-    /* 获取transform */
-    /// Build a `Transformer` that applies the encoding rules to an event before serialization.
-    pub fn transformer(&self) -> Transformer {
-        self.encoding.transformer.clone()
-    }
+
 
     /// Get the encoding configuration.
     pub const fn config(&self) -> (&Option<FramingConfig>, &SerializerConfig) {
         (&self.framing, &self.encoding.encoding)
     }
-/* encoding的build   Result<(Framer, Serializer)可能分别是字符分割编码器,和文本序列化器 */
-    /// Build the `Framer` and `Serializer` for this config.
+
+    /// doc
     pub fn build(&self, sink_type: SinkType) -> crate::Result<(Framer, Serializer)> {
         let framer = self.framing.as_ref().map(|framing| framing.build());
-        let serializer = self.encoding.build()?; /* 根据类型新建一个序列化器, 比如文本的 */
+        let serializer = self.encoding.build()?;
 
         let framer = match (framer, &serializer) {
             (Some(framer), _) => framer,

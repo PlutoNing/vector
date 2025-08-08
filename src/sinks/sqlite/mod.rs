@@ -6,7 +6,7 @@ use crate::codecs::{Framer, FramingConfig, JsonSerializerConfig};
 
 
 use crate::{
-    codecs::{Encoder, EncodingConfigWithFraming, SinkType, Transformer},
+    codecs::{Encoder, EncodingConfigWithFraming, SinkType},
     config::{GenerateConfig, Input, SinkConfig, SinkContext},
     core::sink::VectorSink,
     event::{Event},
@@ -92,7 +92,6 @@ impl SinkConfig for SqliteSinkConfig {
 pub struct SqliteSink {
     path: Template,
     table: Template,
-    transformer: Transformer,
     encoder: Encoder<Framer>,
     /* 每个文件每个表对应一个sqlite service */
     services: std::collections::HashMap<String, SqliteService>,
@@ -100,7 +99,7 @@ pub struct SqliteSink {
 
 impl SqliteSink {
     pub fn new(config: &SqliteSinkConfig, cx: SinkContext) -> crate::Result<Self> {
-        let transformer = config.encoding.transformer();
+
         let (framer, serializer) = config.encoding.build(SinkType::StreamBased)?;
         let encoder = Encoder::<Framer>::new(framer, serializer);
 
@@ -112,7 +111,6 @@ impl SqliteSink {
         Ok(Self {
             path: config.path.clone().with_tz_offset(offset),
             table: config.table.clone().with_tz_offset(offset),
-            transformer,
             encoder,
             services: std::collections::HashMap::new(),
         })
@@ -171,7 +169,7 @@ impl SqliteSink {
         Ok(self.services.get_mut(&key).unwrap())
     }
 
-    async fn process_event(&mut self, mut event: Event) {
+    async fn process_event(&mut self, event: Event) {
         let (path, table) = match self.partition_event(&event) {
             Some(parts) => parts,
             None => {
@@ -179,8 +177,6 @@ impl SqliteSink {
                 return;
             }
         };
-        // println!("event sink to table {}:{}", path, table);
-        self.transformer.transform(&mut event);
 
         let mut buffer = BytesMut::new();
         if let Err(error) = self.encoder.encode(event.clone(), &mut buffer) {

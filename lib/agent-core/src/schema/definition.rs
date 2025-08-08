@@ -5,10 +5,7 @@ use vrl::value::{kind::Collection, Kind};
 
 use crate::config::{LogNamespace};
 
-/// The definition of a schema.
-///
-/// This struct contains all the information needed to inspect the schema of an event emitted by
-/// a source/transform.
+/// 用于描述和验证事件的结构。
 #[derive(Clone, Debug, PartialEq, PartialOrd)]
 pub struct Definition {
     /// The type of the event

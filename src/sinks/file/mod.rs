@@ -4,7 +4,7 @@ use std::time::{Duration, Instant};
 use crate::codecs::{Framer, FramingConfig, JsonSerializerConfig};
 
 use crate::{
-    codecs::{Encoder, EncodingConfigWithFraming, SinkType, Transformer},
+    codecs::{Encoder, EncodingConfigWithFraming, SinkType},
     config::{GenerateConfig, Input, SinkConfig, SinkContext},
     core::sink::VectorSink,
     event::{Event},
@@ -192,8 +192,6 @@ impl SinkConfig for FileSinkConfig {
 pub struct FileSink {
     /// 文件路径模板,定义了输出文件的模式,如%Y-%m-%d和{{field}}
     path: Template,
-    /// 事件转换器，用于在写入前修改事件数据
-    transformer: Transformer,
     /// 编码器，将事件序列化为字节流（支持JSON、文本等格式）
     encoder: Encoder<Framer>,
     /// 文件空闲超时时间，超过此时间未收到事件则关闭文件?
@@ -207,7 +205,6 @@ pub struct FileSink {
 impl FileSink {
     /* 根据config新建一个file sink, 定义内部的encoder, transformer之类的成员 */
     pub fn new(config: &FileSinkConfig, cx: SinkContext) -> crate::Result<Self> {
-        let transformer = config.encoding.transformer();
         let (framer, serializer) = config.encoding.build(SinkType::StreamBased)?;
         let encoder = Encoder::<Framer>::new(framer, serializer);
 
@@ -218,7 +215,6 @@ impl FileSink {
 
         Ok(Self {
             path: config.path.clone().with_tz_offset(offset),
-            transformer,
             encoder,
             idle_timeout: config.idle_timeout,
             files: ExpiringHashMap::default(),
@@ -363,7 +359,7 @@ impl FileSink {
         trace!(message = "Writing an event to file.", path = ?path);
 
         /* 写出到outfile */
-        match write_event_to_file(file, event, &self.transformer, &mut self.encoder).await {
+        match write_event_to_file(file, event,&mut self.encoder).await {
             Ok(byte_size) => {
                 debug!(
                     "Sent {} bytes to file: {}",
@@ -399,11 +395,9 @@ async fn open_file(path: impl AsRef<std::path::Path>) -> std::io::Result<File> {
 先transform, 然后encoder */
 async fn write_event_to_file(
     file: &mut OutFile,
-    mut event: Event,
-    transformer: &Transformer,
+    event: Event,
     encoder: &mut Encoder<Framer>,
 ) -> Result<usize, std::io::Error> {
-    transformer.transform(&mut event);
     /* 转换 */
     let mut buffer = BytesMut::new();
     /* 编码 */

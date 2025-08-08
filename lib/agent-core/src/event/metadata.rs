@@ -28,7 +28,7 @@ const SPLUNK_HEC_TOKEN: &str = "splunk_hec_token";
 pub struct EventMetadata(pub(super) Arc<Inner>);
 
 /// The actual metadata structure contained by both `struct Metric`
-/// and `struct LogEvent` types.
+/// and `struct logEvent` types.
 #[derive(Clone, Debug, Derivative, Deserialize, Serialize)]
 #[derivative(PartialEq)]
 pub(super) struct Inner {
